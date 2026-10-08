@@ -38,7 +38,8 @@ the CLI to manage the server's lifecycle when no persistent server exists.
 
 **Centralized**: User configures a server address in `cli.yml` (ADR-021). CLI commands connect to
 that address via the generated HTTP client (REC-151). No process management. This is the Kubernetes
-/ Docker / long-lived deployment model.
+/ Docker / long-lived deployment model. The Docker image sets `RECYCLARR_SERVER_URL` to its own
+server, so `docker exec` CLI commands never start an ephemeral server.
 
 **Ephemeral (attached)**: No server configured. The CLI spawns the server binary as a child process,
 uses it for the duration of the command, and the server dies with the CLI. The flow:
@@ -77,10 +78,10 @@ var gate). `Console.IsInputRedirected` was rejected as unreliable: false positiv
 ### Why not embedded (option 1)
 
 Embedding the server as a library (`Recyclarr.Server` as a lib referenced by the CLI) creates a
-build-time dependency from CLI to Server. The CLI project would need `FrameworkReference
-Include="Microsoft.AspNetCore.App"` or a wrapper abstraction to hide ASP.NET Core types. This
-dependency gets removed in Phase 3 anyway when the CLI becomes a pure HTTP client. Separate exes
-from day one avoids both the temporary coupling and the later decoupling work.
+build-time dependency from CLI to Server. The CLI project would need
+`FrameworkReference Include="Microsoft.AspNetCore.App"` or a wrapper abstraction to hide ASP.NET
+Core types. This dependency gets removed in Phase 3 anyway when the CLI becomes a pure HTTP client.
+Separate exes from day one avoids both the temporary coupling and the later decoupling work.
 
 ### Why not detached with idle timeout (option 3)
 

@@ -42,7 +42,7 @@ ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_CONFIG_DIR=/config \
     ASPNETCORE_URLS=http://0.0.0.0:7982 \
     ASPNETCORE_HTTP_PORTS= \
-    RECYCLARR_SERVER_URL=http://localhost:7982 \
+    RECYCLARR_SERVER_URL=http://127.0.0.1:7982 \
     COMPlus_EnableDiagnostics=0
 
 RUN set -ex; \
