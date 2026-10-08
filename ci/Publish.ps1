@@ -25,6 +25,7 @@ if (-not $NoSingleFile) {
     $extraArgs += @(
         "--self-contained=true"
         "-p:PublishSingleFile=true"
+        "-p:IncludeNativeLibrariesForSelfExtract=true"
     )
 }
 else {
