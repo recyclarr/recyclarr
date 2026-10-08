@@ -122,15 +122,19 @@ jobs:
           p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
           p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
+      # macOS publishes are single-file, so every executable in the directory is a shipped binary.
       - name: Code Sign
         env:
           CODESIGN_IDENTITY: ${{ secrets.MAC_CODESIGN_IDENTITY }}
         run: |
-          codesign --timestamp --no-strict --force \
-            --options=runtime \
-            --entitlements ci/codesign/entitlements.plist \
-            --sign "$CODESIGN_IDENTITY" \
-            publish/recyclarr-server
+          for binary in publish/*; do
+            [[ -f "$binary" && -x "$binary" ]] || continue
+            codesign --timestamp --no-strict --force \
+              --options=runtime \
+              --entitlements ci/codesign/entitlements.plist \
+              --sign "$CODESIGN_IDENTITY" \
+              "$binary"
+          done
 
       - name: Notarize
         run: >-
@@ -143,7 +147,7 @@ jobs:
       # Cannot staple directly to a binary:
       # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow?language=objc#3087720
       # - name: Staple
-      #   run: xcrun stapler staple -v publish/recyclarr-server
+      #   run: xcrun stapler staple -v publish/<binary>
 
       - name: Upload Artifacts
         uses: $/.github/actions/upload-tar
