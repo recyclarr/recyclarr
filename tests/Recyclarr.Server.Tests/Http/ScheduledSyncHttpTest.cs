@@ -22,7 +22,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     private static readonly DateTimeOffset Start = new(2025, 1, 1, 12, 0, 0, TimeSpan.Zero);
     private static readonly DateTimeOffset Midnight = new(2025, 1, 2, 0, 0, 0, TimeSpan.Zero);
 
-    private readonly FakeTimeProvider _time = new(Start);
+    private readonly WaitObservingTimeProvider _time = new(Start);
     private ServerMode _mode = ServerMode.Persistent;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
@@ -91,6 +91,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         var api = RestService.For<ISyncApi>(client);
         (await GetSchedule(client)).NextOccurrence.Should().Be(Midnight);
 
+        await _time.SchedulerWaiting;
         _time.SetUtcNow(Midnight);
         var job = await WaitForScheduledJob(client);
         var finished = await WaitForTerminal(api, job.Id);
@@ -111,6 +112,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
             .GetRequiredService<ISyncJobStore>()
             .Create(new ServerSyncSettings(null, [], Preview: false), ["movies"]);
 
+        await _time.SchedulerWaiting;
         _time.SetUtcNow(Midnight);
         var skipped = await WaitForScheduledJob(client);
         var job = await RestService.For<ISyncApi>(client).JobsGet(skipped.Id);
@@ -126,6 +128,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         AddInstance();
         using var client = CreateClient();
 
+        await _time.SchedulerWaiting;
         _time.Advance(TimeSpan.FromDays(3));
         await WaitForScheduledJob(client);
         await Task.Delay(TimeSpan.FromMilliseconds(500));
@@ -213,6 +216,33 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
             }
 
             await Task.Delay(50, timeout.Token);
+        }
+    }
+
+    /// <summary>
+    /// Signals when the scheduler starts waiting on fake time. Since .NET 10, BackgroundService runs
+    /// ExecuteAsync on a background thread, so a test can move the clock before the scheduler reads
+    /// it. The scheduler then sizes its wait from the moved clock and misses the occurrence. Tests
+    /// that move the clock to fire an occurrence must await <see cref="SchedulerWaiting"/> first.
+    /// </summary>
+    private sealed class WaitObservingTimeProvider(DateTimeOffset start) : FakeTimeProvider(start)
+    {
+        private readonly TaskCompletionSource _waiting = new(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+
+        public Task SchedulerWaiting => _waiting.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        public override ITimer CreateTimer(
+            TimerCallback callback,
+            object? state,
+            TimeSpan dueTime,
+            TimeSpan period
+        )
+        {
+            var timer = base.CreateTimer(callback, state, dueTime, period);
+            _waiting.TrySetResult();
+            return timer;
         }
     }
 }
