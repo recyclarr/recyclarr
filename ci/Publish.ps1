@@ -48,13 +48,22 @@ if (-not $OutputDir) {
 
 "Extra Args: $extraArgs"
 
-"> Publishing: src\Recyclarr.Server"
-dotnet publish "src\Recyclarr.Server" `
-    --output $OutputDir `
-    --configuration $Configuration `
-    --runtime $Runtime `
-    @extraArgs
+# Every executable shipped in a release. All publish into the same directory, which downstream steps
+# (smoke test, signing, archiving) treat as the release unit for this runtime.
+$projects = @(
+    "src\Recyclarr.Cli"
+    "src\Recyclarr.Server"
+)
 
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed for src\Recyclarr.Server"
+foreach ($project in $projects) {
+    "> Publishing: $project"
+    dotnet publish $project `
+        --output $OutputDir `
+        --configuration $Configuration `
+        --runtime $Runtime `
+        @extraArgs
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet publish failed for $project"
+    }
 }
