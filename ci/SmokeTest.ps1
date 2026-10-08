@@ -1,18 +1,29 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $true)]
-    [string] $PathToServer
+    [string] $PublishDir
 )
 
 $ErrorActionPreference = "Stop"
 
+# Windows binaries carry an .exe suffix; Unix binaries have none.
+$suffix = if ($IsWindows) { ".exe" } else { "" }
+$pathToCli = Join-Path $PublishDir "recyclarr$suffix"
+$pathToServer = Join-Path $PublishDir "recyclarr-server$suffix"
+
 if (Get-Command chmod -errorAction SilentlyContinue) {
     "The chmod command was found. Setting read + execute permission."
-    & chmod +rx $PathToServer
+    & chmod +rx $pathToCli $pathToServer
 }
 
+$version = & $pathToCli --version
+if ($LASTEXITCODE -ne 0) {
+    throw "Recyclarr CLI failed to report its version"
+}
+"Recyclarr CLI started successfully: $version"
+
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
-$startInfo.FileName = $PathToServer
+$startInfo.FileName = $pathToServer
 $startInfo.ArgumentList.Add("--urls=http://127.0.0.1:0")
 $startInfo.RedirectStandardOutput = $true
 $startInfo.RedirectStandardError = $true
