@@ -40,4 +40,9 @@
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Build-time input for Recyclarr.Client; the server never reads it at runtime. -->
+    <Content Update="Recyclarr.Server.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>
