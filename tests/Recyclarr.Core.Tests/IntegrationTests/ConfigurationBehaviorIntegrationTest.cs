@@ -39,7 +39,7 @@ internal sealed class ConfigurationBehaviorIntegrationTest : CoreIntegrationTest
         config.ApiKey.Should().Be("asdf");
         config.InstanceName.Should().Be("instance1");
         config.YamlPath.Should().NotBeNull();
-        config.YamlPath?.FullName.Should().Be("/manual.yml");
+        config.YamlPath?.FullName.Should().Be(Fs.CurrentDirectory().File("manual.yml").FullName);
     }
 
     [Test]
