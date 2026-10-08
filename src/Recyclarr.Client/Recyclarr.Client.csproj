@@ -14,10 +14,12 @@
     <PackageReference Include="Refitter.MSBuild" />
   </ItemGroup>
 
-  <!-- Build-order dependency: ensures the server's spec generation completes before Refitter reads it. -->
+  <!-- Build-order dependency: ensures the server's spec generation completes before Refitter reads it.
+       Publishing uses the committed spec. RuntimeIdentifier alone cannot exclude publishes: the SDK
+       strips it from RID-agnostic library references, so this project never sees it. -->
   <ItemGroup>
     <ProjectReference Include="../Recyclarr.Server/Recyclarr.Server.csproj"
-                      Condition="'$(RuntimeIdentifier)' == ''"
+                      Condition="'$(RuntimeIdentifier)' == '' AND '$(_IsPublishing)' != 'true'"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
