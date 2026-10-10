@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AwesomeAssertions;
@@ -310,12 +309,10 @@ internal sealed class RecyclarrSyncTests
 
         var created = ContentOf(await sync.JobsPost(new CreateSyncJobRequest(), ct));
 
-        // The job resource answers 202 while the sync runs and 200 once it is terminal.
         while (true)
         {
             using var job = await sync.JobsGet(created.Id, ct);
-            ContentOf(job);
-            if (job.StatusCode == HttpStatusCode.OK)
+            if (ContentOf(job).Status is not ("Pending" or "Running"))
             {
                 break;
             }

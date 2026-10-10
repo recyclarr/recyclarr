@@ -16,12 +16,7 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         // opt-out is explicit until API key auth lands (REC-153).
         AllowAnonymous();
 
-        Description(b =>
-            b.Produces<GetSyncJobResponse>()
-                .Produces<GetSyncJobResponse>(202)
-                .ProducesProblems(404)
-                .WithTags("Sync")
-        );
+        Description(b => b.Produces<GetSyncJobResponse>().ProducesProblems(404).WithTags("Sync"));
     }
 
     public override async Task HandleAsync(GetSyncJobRequest req, CancellationToken ct)
@@ -34,17 +29,13 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
             return;
         }
 
-        Response = ToResponse(job);
-
-        // 202 while the job runs, 200 once it is terminal (ADR-011).
-        if (job.Status.IsTerminal())
+        // The job status in the body tells clients whether to keep polling (ADR-016).
+        if (!job.Status.IsTerminal())
         {
-            await Send.OkAsync(Response, ct);
-            return;
+            HttpContext.Response.Headers.RetryAfter = "1";
         }
 
-        HttpContext.Response.Headers.RetryAfter = "1";
-        await Send.ResponseAsync(Response, 202, ct);
+        await Send.OkAsync(ToResponse(job), ct);
     }
 
     private static GetSyncJobResponse ToResponse(SyncJob job)
