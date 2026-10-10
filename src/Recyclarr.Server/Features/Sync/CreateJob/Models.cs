@@ -7,20 +7,46 @@ namespace Recyclarr.Server.Features.Sync.CreateJob;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CreateSyncJobRequest
 {
+    /// <summary>
+    /// Sync only instances of this service: `radarr` or `sonarr`. When omitted, instances of
+    /// both services are eligible.
+    /// </summary>
     public SupportedServices? Service { get; init; }
+
+    /// <summary>
+    /// Names of the configured instances to sync; matching ignores case. When omitted or empty,
+    /// every instance of the selected service syncs.
+    /// </summary>
     public IReadOnlyCollection<string>? Instances { get; init; }
+
+    /// <summary>
+    /// When true, the job computes the changes without applying them to Sonarr or Radarr.
+    /// </summary>
     public bool Preview { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record CreateSyncJobResponse(Guid Id, string Status, DateTimeOffset CreatedAt);
+internal sealed record CreateSyncJobResponse
+{
+    public required Guid Id { get; init; }
 
-// The single 400 schema for job creation. Request validation failures fill only the standard
-// fields; a selection naming unknown instances also lists the unknown and the available names.
+    /// <summary>The job status when it was created; see the job resource for the values.</summary>
+    public required string Status { get; init; }
+
+    public required DateTimeOffset CreatedAt { get; init; }
+}
+
+/// <summary>
+/// Problem Details for a rejected sync request. A request that names unknown instances also
+/// lists the unknown and the available instance names.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed class CreateSyncJobProblemDetails : HttpValidationProblemDetails
 {
+    /// <summary>Requested instance names that no configured instance has.</summary>
     public IReadOnlyList<string>? UnknownInstances { get; init; }
+
+    /// <summary>Names of every configured instance.</summary>
     public IReadOnlyList<string>? AvailableInstances { get; init; }
 }
 

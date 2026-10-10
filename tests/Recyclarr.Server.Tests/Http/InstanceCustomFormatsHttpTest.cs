@@ -49,7 +49,9 @@ internal sealed class InstanceCustomFormatsHttpTest : ServerHttpFixture
             new Uri("/api/v1/instances/MOVIES/custom-formats", UriKind.Relative)
         );
 
-        response!.Items.Should().Equal(new InstanceCustomFormatSummaryResponse(7, "HDR"));
+        response!
+            .Items.Should()
+            .Equal(new InstanceCustomFormatSummaryResponse { Id = 7, Name = "HDR" });
     }
 
     [Test]

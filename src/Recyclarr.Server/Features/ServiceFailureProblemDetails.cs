@@ -7,6 +7,9 @@ namespace Recyclarr.Server.Features;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed class ServiceFailureProblemDetails : HttpValidationProblemDetails
 {
+    public const string ResponseDescription =
+        "The Sonarr or Radarr instance could not complete the call. `failure` tells why.";
+
     public InstanceFailureCategory Failure { get; init; }
 
     public static IResult Create(HttpContext context, OperationalFailure failure)

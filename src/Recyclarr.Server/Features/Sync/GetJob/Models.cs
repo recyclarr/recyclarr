@@ -7,6 +7,7 @@ namespace Recyclarr.Server.Features.Sync.GetJob;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobRequest
 {
+    /// <summary>The job ID from the create response or the job list.</summary>
     public Guid Id { get; init; }
 }
 
@@ -38,29 +39,63 @@ internal enum InstanceProgressStatusResponse
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record InstanceSnapshotResponse(string Name, InstanceProgressStatusResponse Status);
 
-// Why a scheduled occurrence did not run: the job that was active at the time.
+/// <summary>
+/// Why a scheduled job did not run: another job was active at its scheduled time.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SkippedBecauseResponse(Guid JobId);
+internal sealed record SkippedBecauseResponse
+{
+    /// <summary>The ID of the job that was active.</summary>
+    public required Guid JobId { get; init; }
+}
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobResponse
 {
     public required Guid Id { get; init; }
+
+    /// <summary>
+    /// `Pending` (queued) and `Running` are active; poll until the status changes. The final
+    /// statuses are `Succeeded`, `Partial` (some changes were not applied), `Failed`,
+    /// `Interrupted` (the server stopped before the job finished), and `Skipped` (a scheduled
+    /// job that never ran because another job was active).
+    /// </summary>
     public required string Status { get; init; }
+
+    /// <summary>
+    /// `Manual` for a job created through the API or CLI, `Scheduled` for a job the built-in
+    /// schedule created.
+    /// </summary>
     public required string Trigger { get; init; }
+
     public required DateTimeOffset CreatedAt { get; init; }
+
+    /// <summary>When the job started to run; absent until then.</summary>
     public DateTimeOffset? StartedAt { get; init; }
+
+    /// <summary>When the job reached a final status; absent until then.</summary>
     public DateTimeOffset? FinishedAt { get; init; }
 
-    // The schedule occurrence a scheduled job was created for.
+    /// <summary>
+    /// The schedule time a scheduled job was created for; absent for manual jobs.
+    /// </summary>
     public DateTimeOffset? ScheduledFor { get; init; }
 
+    /// <summary>Present only when the status is `Skipped`.</summary>
     public SkippedBecauseResponse? SkippedBecause { get; init; }
 
+    /// <summary>The requested service filter; absent when the request had none.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public SupportedServices? Service { get; init; }
 
+    /// <summary>The requested instance names; empty when the request selected all.</summary>
     public required IReadOnlyCollection<string> Instances { get; init; }
+
+    /// <summary>True when the job computes changes without applying them.</summary>
     public required bool Preview { get; init; }
+
+    /// <summary>
+    /// One entry for each instance the job selected, updated as the job runs.
+    /// </summary>
     public required IReadOnlyList<InstanceSnapshotResponse> Progress { get; init; }
 }

@@ -62,6 +62,12 @@ builder
         o.Version = "v1";
         o.ShortSchemaNames = true;
         o.EnableJWTBearerAuth = false;
+        o.TagDescriptions = t =>
+        {
+            t["Guide"] = "Read-only TRaSH Guides data, scoped to one service.";
+            t["Instances"] = "Direct calls to a configured Sonarr or Radarr instance.";
+            t["Sync"] = "Sync jobs, their progress and results, and the built-in sync schedule.";
+        };
 
         // Endpoints tag themselves explicitly; path-segment tagging would add a redundant "Api"
         // tag derived from the /api/v1 route prefix.
@@ -70,6 +76,16 @@ builder
         {
             options.CreateSchemaReferenceId = PolymorphicSchemaIds.Wrap(
                 options.CreateSchemaReferenceId
+            );
+            // Conceptual prose (overview, job lifecycle, authentication) lives in the wiki.
+            options.AddDocumentTransformer(
+                (document, _, _) =>
+                {
+                    document.Info.Description =
+                        "HTTP API of the Recyclarr server, which syncs TRaSH Guides to Sonarr "
+                        + "and Radarr.";
+                    return Task.CompletedTask;
+                }
             );
             options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
             options.AddSchemaTransformer<EnumDescriptionSchemaTransformer>();

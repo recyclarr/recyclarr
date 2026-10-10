@@ -1,10 +1,13 @@
 namespace Recyclarr.Server.Features.Instances.CustomFormats.Delete;
 
-// Id is the custom format's id in Sonarr or Radarr, as listed by the instance custom formats
-// collection.
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record DeleteInstanceCustomFormatRequest
 {
+    /// <summary>The instance name from configuration; matching ignores case.</summary>
     public string Name { get; init; } = "";
+
+    /// <summary>
+    /// The custom format's ID in Sonarr or Radarr, as the instance custom format list returns it.
+    /// </summary>
     public int Id { get; init; }
 }
