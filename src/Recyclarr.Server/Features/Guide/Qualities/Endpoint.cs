@@ -16,6 +16,14 @@ internal sealed class Endpoint(QualitySizeResourceQuery qualities)
         AllowAnonymous();
 
         Description(b => b.Produces<ListGuideQualitiesResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "List guide quality size types";
+            s.Description =
+                "Lists the names of the guide's quality size sets for one service, sorted by name.";
+            s.Responses[200] = "The quality size types.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     public override async Task HandleAsync(GuideRequest req, CancellationToken ct)
@@ -25,7 +33,7 @@ internal sealed class Endpoint(QualitySizeResourceQuery qualities)
             .Select(q => q.Type)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
-            .Select(type => new GuideQualitySummaryResponse(type))
+            .Select(type => new GuideQualitySummaryResponse { Type = type })
             .ToList();
 
         await Send.OkAsync(new ListGuideQualitiesResponse(items), ct);

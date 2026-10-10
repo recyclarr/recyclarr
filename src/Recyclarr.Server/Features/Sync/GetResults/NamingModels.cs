@@ -15,6 +15,7 @@ internal enum RadarrNamingField
     MovieFolderFormat,
 }
 
+/// <summary>A configured naming key that matches no guide format for the field.</summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record NamingReferenceMismatchResponse<TField>(TField Field, string ConfiguredKey);
 
@@ -53,6 +54,8 @@ internal sealed record SonarrNamingPipelineResponse
     public required PipelineStatus Status { get; init; }
     public required SonarrNamingOutcomesResponse Outcomes { get; init; }
     public required IReadOnlyList<SonarrNamingUpdateResponse> Updates { get; init; }
+
+    /// <summary>Present only when the status is `blocked`.</summary>
     public BlockingPipeline? BlockedBy { get; init; }
 }
 
@@ -62,5 +65,7 @@ internal sealed record RadarrNamingPipelineResponse
     public required PipelineStatus Status { get; init; }
     public required RadarrNamingOutcomesResponse Outcomes { get; init; }
     public required IReadOnlyList<RadarrNamingUpdateResponse> Updates { get; init; }
+
+    /// <summary>Present only when the status is `blocked`.</summary>
     public BlockingPipeline? BlockedBy { get; init; }
 }

@@ -47,8 +47,17 @@ internal sealed class GuideCustomFormatsHttpTest : GuideHttpFixture
         response!
             .Items.Should()
             .BeEquivalentTo([
-                new GuideCustomFormatSummaryResponse("cf-other", "Not In Collection", null),
-                new GuideCustomFormatSummaryResponse("cf-atmos", "TrueHD ATMOS", "Audio Formats"),
+                new GuideCustomFormatSummaryResponse
+                {
+                    TrashId = "cf-other",
+                    Name = "Not In Collection",
+                },
+                new GuideCustomFormatSummaryResponse
+                {
+                    TrashId = "cf-atmos",
+                    Name = "TrueHD ATMOS",
+                    Category = "Audio Formats",
+                },
             ]);
     }
 
@@ -100,26 +109,30 @@ internal sealed class GuideCustomFormatsHttpTest : GuideHttpFixture
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
-                new GuideCustomFormatGroupSummaryResponse(
-                    "group-audio",
-                    "Audio",
-                    Default: true,
+                new GuideCustomFormatGroupSummaryResponse
+                {
+                    TrashId = "group-audio",
+                    Name = "Audio",
+                    Default = true,
+                    CustomFormats =
                     [
-                        new GuideCustomFormatGroupMemberResponse(
-                            "cf-dtsx",
-                            "DTS X",
-                            Required: false,
-                            Default: true
-                        ),
-                        new GuideCustomFormatGroupMemberResponse(
-                            "cf-atmos",
-                            "TrueHD ATMOS",
-                            Required: true,
-                            Default: false
-                        ),
+                        new GuideCustomFormatGroupMemberResponse
+                        {
+                            TrashId = "cf-dtsx",
+                            Name = "DTS X",
+                            Required = false,
+                            Default = true,
+                        },
+                        new GuideCustomFormatGroupMemberResponse
+                        {
+                            TrashId = "cf-atmos",
+                            Name = "TrueHD ATMOS",
+                            Required = true,
+                            Default = false,
+                        },
                     ],
-                    ["HD Bluray", "UHD Bluray"]
-                ),
+                    QualityProfiles = ["HD Bluray", "UHD Bluray"],
+                },
                 o => o.WithStrictOrdering()
             );
     }

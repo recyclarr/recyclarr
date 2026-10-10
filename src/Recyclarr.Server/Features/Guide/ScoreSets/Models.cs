@@ -5,6 +5,9 @@ internal sealed record ListGuideScoreSetsResponse(
     IReadOnlyList<GuideScoreSetSummaryResponse> Items
 );
 
-// A score set is a named column of custom format scores in the guide (for example "default").
+/// <summary>
+/// A named set of custom format scores in the guide (for example `default`). A quality profile
+/// selects one set for its scores.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideScoreSetSummaryResponse(string Name);

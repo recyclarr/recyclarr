@@ -16,17 +16,25 @@ internal sealed class Endpoint(CategorizedCustomFormatProvider customFormats)
         AllowAnonymous();
 
         Description(b => b.Produces<ListGuideCustomFormatsResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "List guide custom formats";
+            s.Description = "Lists the guide's custom formats for one service, sorted by name.";
+            s.Responses[200] = "The custom formats.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     public override async Task HandleAsync(GuideRequest req, CancellationToken ct)
     {
         var items = customFormats
             .Get(req.Service)
-            .Select(x => new GuideCustomFormatSummaryResponse(
-                x.Resource.TrashId,
-                x.Resource.Name,
-                x.Category
-            ))
+            .Select(x => new GuideCustomFormatSummaryResponse
+            {
+                TrashId = x.Resource.TrashId,
+                Name = x.Resource.Name,
+                Category = x.Category,
+            })
             .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 

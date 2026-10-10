@@ -2,6 +2,7 @@
   "openapi": "3.1.1",
   "info": {
     "title": "Recyclarr API",
+    "description": "HTTP API of the Recyclarr server, which syncs TRaSH Guides to Sonarr and Radarr.",
     "version": "v1"
   },
   "paths": {
@@ -10,11 +11,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "List guide custom format groups",
+        "description": "Lists the guide's custom format groups for one service, sorted by name. Each group lists its custom formats and the guide quality profiles it applies to.",
         "operationId": "GuideCustomFormatGroups",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -23,7 +27,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The custom format groups.",
             "content": {
               "application/json": {
                 "schema": {
@@ -33,7 +37,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -50,11 +54,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "List guide custom formats",
+        "description": "Lists the guide's custom formats for one service, sorted by name.",
         "operationId": "GuideCustomFormats",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -63,7 +70,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The custom formats.",
             "content": {
               "application/json": {
                 "schema": {
@@ -73,7 +80,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -90,11 +97,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "Get guide naming formats",
+        "description": "Returns the guide's file and folder naming formats for one service. The `service` property tells which set of format lists the response has.",
         "operationId": "GuideNaming",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -103,7 +113,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The naming formats.",
             "content": {
               "application/json": {
                 "schema": {
@@ -113,7 +123,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -130,11 +140,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "List guide quality size types",
+        "description": "Lists the names of the guide's quality size sets for one service, sorted by name.",
         "operationId": "GuideQualities",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -143,7 +156,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The quality size types.",
             "content": {
               "application/json": {
                 "schema": {
@@ -153,7 +166,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -170,11 +183,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "List guide quality profiles",
+        "description": "Lists the guide's quality profiles for one service, sorted by name.",
         "operationId": "GuideQualityProfiles",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -183,7 +199,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The quality profiles.",
             "content": {
               "application/json": {
                 "schema": {
@@ -193,7 +209,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -210,11 +226,14 @@
         "tags": [
           "Guide"
         ],
+        "summary": "List guide score sets",
+        "description": "Lists the names of the score sets that the guide's custom formats define for one service, sorted by name.",
         "operationId": "GuideScoreSets",
         "parameters": [
           {
             "name": "service",
             "in": "path",
+            "description": "The service whose guide data to return: `radarr` or `sonarr`.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SupportedServices"
@@ -223,7 +242,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The score sets.",
             "content": {
               "application/json": {
                 "schema": {
@@ -233,7 +252,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The service is not `radarr` or `sonarr`.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -250,11 +269,14 @@
         "tags": [
           "Instances"
         ],
+        "summary": "List instance custom formats",
+        "description": "Lists every custom format that exists in a configured Sonarr or Radarr instance, including formats that Recyclarr does not manage. The server reads them from the instance on each request. The server reads instance configuration at startup, so an instance added later is unknown until a restart.",
         "operationId": "InstancesCustomFormatsList",
         "parameters": [
           {
             "name": "name",
             "in": "path",
+            "description": "The instance name from configuration; matching ignores case.",
             "required": true,
             "schema": {
               "type": "string"
@@ -263,7 +285,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The custom formats in the instance.",
             "content": {
               "application/json": {
                 "schema": {
@@ -273,7 +295,7 @@
             }
           },
           "404": {
-            "description": "Not Found",
+            "description": "No configured instance has this name.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -283,7 +305,7 @@
             }
           },
           "502": {
-            "description": "Bad Gateway",
+            "description": "The Sonarr or Radarr instance could not complete the call. `failure` tells why.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -300,11 +322,14 @@
         "tags": [
           "Instances"
         ],
+        "summary": "Delete an instance custom format",
+        "description": "Deletes a custom format from a configured Sonarr or Radarr instance, whether or not Recyclarr manages it. The server reads instance configuration at startup, so an instance added later is unknown until a restart.",
         "operationId": "InstancesCustomFormatsDelete",
         "parameters": [
           {
             "name": "name",
             "in": "path",
+            "description": "The instance name from configuration; matching ignores case.",
             "required": true,
             "schema": {
               "type": "string"
@@ -313,6 +338,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The custom format's ID in Sonarr or Radarr, as the instance custom format list returns it.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -322,10 +348,20 @@
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The custom format was deleted."
+          },
+          "400": {
+            "description": "The ID is not an integer.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found",
+            "description": "No configured instance has this name, or the instance has no custom format with this ID.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -335,7 +371,7 @@
             }
           },
           "502": {
-            "description": "Bad Gateway",
+            "description": "The Sonarr or Radarr instance could not complete the call. `failure` tells why.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -352,11 +388,14 @@
         "tags": [
           "Sync"
         ],
+        "summary": "List sync jobs",
+        "description": "Lists the sync jobs the server keeps, oldest first. To check whether a sync is active, filter by status `Running` or `Pending`.",
         "operationId": "SyncListJobs",
         "parameters": [
           {
             "name": "status",
             "in": "query",
+            "description": "Return only jobs with this status: `Pending`, `Running`, `Succeeded`, `Partial`,\n            `Failed`, `Interrupted`, or `Skipped` (case-insensitive). When omitted, jobs of every\n            status are returned.",
             "schema": {
               "type": [
                 "null",
@@ -367,6 +406,7 @@
           {
             "name": "trigger",
             "in": "query",
+            "description": "Return only jobs with this trigger: `Manual` or `Scheduled` (case-insensitive). When\n            omitted, jobs of both triggers are returned.",
             "schema": {
               "type": [
                 "null",
@@ -377,7 +417,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The matching jobs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -387,7 +427,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "A filter value is not one of the listed values.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -402,12 +442,21 @@
         "tags": [
           "Sync"
         ],
+        "summary": "Start a sync job",
+        "description": "Creates a sync job for the selected instances and queues it. Jobs run one at a time, oldest first, so a new job stays `Pending` while another job runs. Poll the URL in the `Location` header to follow the job. The server reads instance configuration at startup, so configuration changes apply after a restart.",
         "operationId": "SyncCreateJob",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateSyncJobRequest"
+              },
+              "example": {
+                "service": "radarr",
+                "instances": [
+                  "radarr-4k"
+                ],
+                "preview": true
               }
             }
           },
@@ -415,7 +464,7 @@
         },
         "responses": {
           "202": {
-            "description": "Accepted",
+            "description": "The job was created and queued.",
             "content": {
               "application/json": {
                 "schema": {
@@ -425,7 +474,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "The request is not valid, names instances that are not configured, or selects no configured instance.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -435,7 +484,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "No instances are configured on the server.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -452,11 +501,14 @@
         "tags": [
           "Sync"
         ],
+        "summary": "Get a sync job",
+        "description": "Returns the job's status and the progress of each instance. While the job is `Pending` or `Running`, the response has a `Retry-After` header with the number of seconds to wait before the next poll. Progress accumulates, so a missed poll loses nothing.",
         "operationId": "SyncGetJob",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "The job ID from the create response or the job list.",
             "required": true,
             "schema": {
               "type": "string",
@@ -466,7 +518,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The job, in any status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -475,8 +527,18 @@
               }
             }
           },
+          "400": {
+            "description": "The ID is not a GUID.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Not Found",
+            "description": "No job has this ID.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -493,11 +555,14 @@
         "tags": [
           "Sync"
         ],
+        "summary": "Get sync job results",
+        "description": "Returns the changes and outcomes of a finished job for each instance that finished. For a preview job, the changes were computed but not applied.",
         "operationId": "SyncGetResults",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "The job ID from the create response or the job list.",
             "required": true,
             "schema": {
               "type": "string",
@@ -507,7 +572,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The job results.",
             "content": {
               "application/json": {
                 "schema": {
@@ -516,8 +581,18 @@
               }
             }
           },
+          "400": {
+            "description": "The ID is not a GUID.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Not Found",
+            "description": "No job has this ID.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -527,7 +602,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "The job is still active, or it was skipped and has no results.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -537,7 +612,7 @@
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "The server could not build the results. The server log has details.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -554,10 +629,12 @@
         "tags": [
           "Sync"
         ],
+        "summary": "Get the sync schedule",
+        "description": "Returns the built-in schedule that creates sync jobs for every configured instance. A scheduled job that comes due while another job is active is recorded as `Skipped`. Schedule changes apply after a server restart.",
         "operationId": "SyncGetSchedule",
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The schedule.",
             "content": {
               "application/json": {
                 "schema": {
@@ -637,7 +714,8 @@
           "errors": {
             "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
           }
-        }
+        },
+        "description": "Problem Details for a rejected sync request. A request that names unknown instances also\n            lists the unknown and the available instance names."
       },
       "CreateSyncJobRequest": {
         "type": "object",
@@ -648,6 +726,7 @@
                 "type": "null"
               },
               {
+                "description": "Sync only instances of this service: `radarr` or `sonarr`. When omitted, instances of\n            both services are eligible.",
                 "$ref": "#/components/schemas/SupportedServices"
               }
             ]
@@ -662,7 +741,8 @@
             }
           },
           "preview": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When true, the job computes the changes without applying them to Sonarr or Radarr."
           }
         }
       },
@@ -679,7 +759,8 @@
             "format": "uuid"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "The job status when it was created; see the job resource for the values."
           },
           "createdAt": {
             "type": "string",
@@ -724,39 +805,50 @@
           "default",
           "selected"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "Why a group member was included.\n\n- `none`: The format did not come from a group.\n- `required`: The group always includes the format.\n- `default`: The group includes the format by default.\n- `selected`: The configuration selects the format from the group."
       },
       "CustomFormatOutcomesResponse": {
         "type": "object",
         "properties": {
           "referenceMismatches": {
+            "description": "Configured trash IDs that match no guide custom format; they are not synced.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "groupReferenceMismatches": {
+            "description": "Configured custom format group trash IDs that match no guide group.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "incompatibleGroups": {
+            "description": "Groups that apply to none of the selected quality profiles.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           },
           "emptyGroups": {
+            "description": "Groups that contribute no custom formats.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           },
           "adopted": {
+            "description": "Custom formats that already existed in the service with the same name. Recyclarr now\n            manages them.",
             "$ref": "#/components/schemas/IReadOnlyListOfNamedIdentityResponse"
           },
           "ambiguousMatches": {
+            "description": "Custom formats whose name matches more than one service custom format; they are not synced.",
             "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatAmbiguousMatchResponse"
           },
           "stateConflicts": {
+            "description": "Stored sync state that maps a custom format to a service ID that another managed custom\n            format uses.",
             "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatStateConflictResponse"
           },
           "createRejected": {
+            "description": "Custom formats the service refused to create.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           },
           "updateRejected": {
+            "description": "Custom formats the service refused to update.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           },
           "deleteRejected": {
+            "description": "Custom formats the service refused to delete.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           }
         }
@@ -784,6 +876,7 @@
             "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatUpdateResponse"
           },
           "deletes": {
+            "description": "Managed custom formats removed from the configuration. Deletes happen only when\n            `delete_old_custom_formats` is enabled.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
           },
           "blockedBy": {
@@ -792,6 +885,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -822,7 +916,8 @@
           "profileNames": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "How the configuration selected a custom format."
       },
       "CustomFormatSource": {
         "enum": [
@@ -831,7 +926,8 @@
           "cfGroupImplicit",
           "cfGroupExplicit"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "Where in the configuration the custom format was selected.\n\n- `flatConfig`: The `custom_formats` list.\n- `profileFormatItems`: The format items of a guide quality profile.\n- `cfGroupImplicit`: A custom format group that a selected guide quality profile includes.\n- `cfGroupExplicit`: A group listed in `custom_format_groups.add`."
       },
       "CustomFormatStateConflictResponse": {
         "required": [
@@ -851,7 +947,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "description": "`identity` is the stale stored entry; `managedIdentity` is the custom format that uses\n            `serviceId` now."
       },
       "CustomFormatUpdateResponse": {
         "required": [
@@ -887,12 +984,15 @@
             ]
           },
           "specificationsAdded": {
+            "description": "Names of the conditions added to the custom format.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "specificationsChanged": {
+            "description": "Names of the conditions changed in the custom format.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "specificationsRemoved": {
+            "description": "Names of the conditions removed from the custom format.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         }
@@ -914,10 +1014,12 @@
             "format": "uuid"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "`Pending` (queued) and `Running` are active; poll until the status changes. The final\n            statuses are `Succeeded`, `Partial` (some changes were not applied), `Failed`,\n            `Interrupted` (the server stopped before the job finished), and `Skipped` (a scheduled\n            job that never ran because another job was active)."
           },
           "trigger": {
-            "type": "string"
+            "type": "string",
+            "description": "`Manual` for a job created through the API or CLI, `Scheduled` for a job the built-in\n            schedule created."
           },
           "createdAt": {
             "type": "string",
@@ -928,6 +1030,7 @@
               "null",
               "string"
             ],
+            "description": "When the job started to run; absent until then.",
             "format": "date-time"
           },
           "finishedAt": {
@@ -935,6 +1038,7 @@
               "null",
               "string"
             ],
+            "description": "When the job reached a final status; absent until then.",
             "format": "date-time"
           },
           "scheduledFor": {
@@ -942,6 +1046,7 @@
               "null",
               "string"
             ],
+            "description": "The schedule time a scheduled job was created for; absent for manual jobs.",
             "format": "date-time"
           },
           "skippedBecause": {
@@ -950,6 +1055,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `Skipped`.",
                 "$ref": "#/components/schemas/SkippedBecauseResponse"
               }
             ]
@@ -960,17 +1066,21 @@
                 "type": "null"
               },
               {
+                "description": "The requested service filter; absent when the request had none.",
                 "$ref": "#/components/schemas/SupportedServices"
               }
             ]
           },
           "instances": {
+            "description": "The requested instance names; empty when the request selected all.",
             "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
           },
           "preview": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the job computes changes without applying them."
           },
           "progress": {
+            "description": "One entry for each instance the job selected, updated as the job runs.",
             "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
           }
         }
@@ -991,10 +1101,12 @@
             "type": "string"
           },
           "required": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the custom format always syncs with its group."
           },
           "default": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the custom format is enabled unless the user excludes it."
           }
         }
       },
@@ -1015,21 +1127,24 @@
             "type": "string"
           },
           "default": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the group is enabled by default for the quality profiles it applies to."
           },
           "customFormats": {
+            "description": "The group's custom formats, sorted by name.",
             "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatGroupMemberResponse"
           },
           "qualityProfiles": {
+            "description": "Names of the guide quality profiles the group applies to.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "A guide custom format group: a set of custom formats that sync together."
       },
       "GuideCustomFormatSummaryResponse": {
         "required": [
           "trashId",
-          "name",
-          "category"
+          "name"
         ],
         "type": "object",
         "properties": {
@@ -1043,29 +1158,32 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The guide's category for the custom format; absent when it has none."
           }
         }
       },
       "GuideNamingFormatResponse": {
         "required": [
           "key",
-          "version",
           "format"
         ],
         "type": "object",
         "properties": {
           "key": {
-            "type": "string"
+            "type": "string",
+            "description": "The name that selects this format in configuration."
           },
           "version": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The major version of the service the format is for; absent when it applies to every\n            version."
           },
           "format": {
-            "type": "string"
+            "type": "string",
+            "description": "The naming format string, in the service's naming token syntax."
           }
         }
       },
@@ -1082,6 +1200,7 @@
             "$ref": "#/components/schemas/GuideNamingResponseSonarr"
           }
         ],
+        "description": "Guide naming formats. Sonarr and Radarr name different things, so the `service` property\n            selects which set of format lists is present.",
         "discriminator": {
           "propertyName": "service",
           "mapping": {
@@ -1141,16 +1260,16 @@
             "type": "string"
           },
           "items": {
+            "description": "The member qualities of a quality group; empty for a single quality.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "A quality or quality group in a guide quality profile."
       },
       "GuideQualityProfileSummaryResponse": {
         "required": [
           "trashId",
           "name",
-          "trashUrl",
-          "scoreSet",
           "allowedQualities",
           "customFormats"
         ],
@@ -1166,18 +1285,22 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "Link to the guide page for the profile; absent when the guide has none."
           },
           "scoreSet": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The score set the profile uses; absent when it uses the default set."
           },
           "allowedQualities": {
+            "description": "The qualities and quality groups the profile allows, in guide order.",
             "$ref": "#/components/schemas/IReadOnlyListOfGuideProfileQualityResponse"
           },
           "customFormats": {
+            "description": "Names of the custom formats the profile scores, sorted by name.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         }
@@ -1189,7 +1312,8 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "description": "The name of one set of guide quality sizes (for example `movie`). Use it as\n            `quality_definition.type` in configuration."
           }
         }
       },
@@ -1202,7 +1326,8 @@
           "name": {
             "type": "string"
           }
-        }
+        },
+        "description": "A named set of custom format scores in the guide (for example `default`). A quality profile\n            selects one set for its scores."
       },
       "HttpValidationProblemDetails": {
         "type": "object",
@@ -1258,6 +1383,7 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "The custom format's ID in Sonarr or Radarr. Use it to delete the format.",
             "format": "int32"
           },
           "name": {
@@ -1274,7 +1400,8 @@
           "serviceIncompatible",
           "syncStateUnavailable"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "- `serviceUnavailable`: The instance could not be reached or returned a server error (5xx).\n- `serviceUnauthenticated`: The instance rejected the API key (401).\n- `serviceUnauthorized`: The instance denied access (403).\n- `serviceRateLimited`: The instance is limiting requests (429).\n- `serviceIncompatible`: Recyclarr does not support the instance's version.\n- `syncStateUnavailable`: Recyclarr could not read or save its stored sync state for the instance."
       },
       "InstanceProgressStatusResponse": {
         "enum": [
@@ -1700,6 +1827,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -1747,7 +1875,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "description": "A resource in Sonarr or Radarr; `serviceId` is its ID there."
       },
       "NamingReferenceMismatchResponseOfRadarrNamingField": {
         "required": [
@@ -1762,7 +1891,8 @@
           "configuredKey": {
             "type": "string"
           }
-        }
+        },
+        "description": "A configured naming key that matches no guide format for the field."
       },
       "NamingReferenceMismatchResponseOfSonarrNamingField": {
         "required": [
@@ -1777,7 +1907,8 @@
           "configuredKey": {
             "type": "string"
           }
-        }
+        },
+        "description": "A configured naming key that matches no guide format for the field."
       },
       "PipelineStatus": {
         "enum": [
@@ -1786,7 +1917,8 @@
           "failed",
           "blocked"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "The result of one pipeline (for example custom formats) for one instance.\n\n- `succeeded`: Every item synced. A pipeline with nothing to change also succeeds.\n- `partial`: Some items synced and some did not. The outcomes tell why.\n- `failed`: No items synced. The outcomes tell why.\n- `blocked`: Did not run because a pipeline it depends on did not succeed. See `blockedBy`."
       },
       "PlanningOutcomeResponse": {
         "required": [
@@ -1825,6 +1957,7 @@
             "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded"
           }
         ],
+        "description": "A configuration problem found before the instance's pipelines ran. The `type` property names\n            the problem. Reference mismatches and ambiguous references block every pipeline of the\n            instance; the other types are warnings.",
         "discriminator": {
           "propertyName": "type",
           "mapping": {
@@ -1853,7 +1986,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Warning. A default group member was selected; the group includes it by default."
       },
       "PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch": {
         "required": [
@@ -1867,7 +2001,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Blocking. A custom format excluded from a group is not in that group."
       },
       "PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded": {
         "required": [
@@ -1881,7 +2016,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Warning. A non-default group member was excluded without selecting all optional members, so\n            the exclusion has no effect."
       },
       "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous": {
         "required": [
@@ -1899,7 +2035,8 @@
           "profileNames": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "Blocking. A quality profile trash ID that a group assigns scores to matches more than one\n            configured profile."
       },
       "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch": {
         "required": [
@@ -1913,7 +2050,8 @@
           "profileTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Blocking. A quality profile that a group assigns scores to does not exist in the guide."
       },
       "PlanningOutcomeResponseCustomFormatGroupReferenceMismatch": {
         "required": [
@@ -1923,7 +2061,8 @@
           "groupTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Blocking. The configured custom format group does not exist in the guide."
       },
       "PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded": {
         "required": [
@@ -1937,7 +2076,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Warning. A required group member was excluded; required members cannot be excluded."
       },
       "PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected": {
         "required": [
@@ -1951,7 +2091,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Warning. A required group member was selected; the group always includes it."
       },
       "PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch": {
         "required": [
@@ -1965,7 +2106,8 @@
           "customFormatTrashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "Blocking. A custom format selected from a group is not in that group."
       },
       "PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous": {
         "required": [
@@ -1979,7 +2121,8 @@
           "profileNames": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "Blocking. A quality profile trash ID that custom formats assign scores to matches more than one\n            configured profile."
       },
       "PropersAndRepacksModeResponse": {
         "enum": [
@@ -2075,7 +2218,8 @@
           "customFormatScores": {
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
           }
-        }
+        },
+        "description": "The profile fields Recyclarr sets when it creates a profile. A null field means neither the\n            configuration nor the guide gives a value."
       },
       "QualityProfileCreateResponse": {
         "required": [
@@ -2112,7 +2256,8 @@
           "guideBacked",
           "userDefined"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "Where a quality profile's definition comes from.\n\n- `guideBacked`: A guide quality profile; `trashId` is present.\n- `userDefined`: A profile defined only in the configuration."
       },
       "QualityProfileIdentityOutcomeResponse": {
         "required": [
@@ -2179,7 +2324,8 @@
               "type": "string"
             }
           }
-        }
+        },
+        "description": "A quality or quality group in a profile, in profile order."
       },
       "QualityProfileMinimumScoreResponse": {
         "required": [
@@ -2237,48 +2383,63 @@
         "type": "object",
         "properties": {
           "referenceMismatches": {
+            "description": "Configured trash IDs that match no guide quality profile.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "duplicateNames": {
+            "description": "Profile names configured more than once; none of them sync.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamedOutcomeResponse"
           },
           "scoreCollisions": {
+            "description": "Two custom formats in one profile that resolve to the same service custom format. The\n            `existing` score is kept and the `rejected` score is dropped.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreCollisionResponse"
           },
           "notFound": {
+            "description": "Profiles that only receive scores (Recyclarr does not create them) and do not exist in the\n            service.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
           },
           "adopted": {
+            "description": "Guide profiles that already existed in the service with the same name. Recyclarr now\n            manages them.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAdoptedResponse"
           },
           "minimumScoresUnsatisfied": {
+            "description": "Profiles whose minimum custom format score is higher than both the sum of positive scores\n            and the highest score, so no release could qualify.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileMinimumScoreResponse"
           },
           "invalidCutoffs": {
+            "description": "Profiles whose upgrade-until quality is a name the service does not have.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
           },
           "unavailableCutoffs": {
+            "description": "Profiles whose upgrade-until quality is not an allowed quality or group in the profile.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
           },
           "qualitiesRequired": {
+            "description": "New profiles that have no qualities; the service requires at least one.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
           },
           "qualityReferenceMismatches": {
+            "description": "Configured quality names that the service does not have.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamesResponse"
           },
           "resetScoreReferenceMismatches": {
+            "description": "`reset_unmatched_scores.except` names that are not in the profile, and except patterns\n            that match no custom format in the profile.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileResetReferencesResponse"
           },
           "renameBlocked": {
+            "description": "Profiles that could not be renamed because another service profile has the new name.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileRenameBlockedResponse"
           },
           "ambiguousMatches": {
+            "description": "Profiles whose name matches more than one service profile; they are not synced.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAmbiguousMatchResponse"
           },
           "createRejected": {
+            "description": "Profiles the service refused to create.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
           },
           "updateRejected": {
+            "description": "Profiles the service refused to update.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
           }
         }
@@ -2382,7 +2543,8 @@
           "set",
           "reset"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "Why a custom format score changed.\n\n- `set`: The configuration or guide sets the score.\n- `reset`: `reset_unmatched_scores` sets the score to 0 because the configuration does not score the custom format."
       },
       "QualityProfileScoreResponse": {
         "required": [
@@ -2495,7 +2657,8 @@
           "numeric",
           "unlimited"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "- `numeric`: A size limit; `value` is present.\n- `unlimited`: No size limit; `value` is absent."
       },
       "QualitySizeMaximumComparisonResponse": {
         "required": [
@@ -2539,24 +2702,31 @@
         "type": "object",
         "properties": {
           "definitionReferenceMismatches": {
+            "description": "A configured `quality_definition.type` that the guide does not have.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeTypeResponse"
           },
           "referenceMismatches": {
+            "description": "Configured quality overrides that are not in the guide's quality size set.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeReferenceResponse"
           },
           "serviceQualitiesNotFound": {
+            "description": "Guide qualities that the service does not have.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           },
           "preferredRatiosClamped": {
+            "description": "A configured preferred ratio outside 0 to 1: `current` is the configured value and\n            `desired` the value used.",
             "$ref": "#/components/schemas/IReadOnlyListOfValueChangeResponseOfDecimal"
           },
           "minimumGreaterThanPreferred": {
+            "description": "Qualities not synced because the minimum is larger than the preferred size.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMinimumComparisonResponse"
           },
           "unlimitedPreferredGreaterThanMaximum": {
+            "description": "Qualities not synced because the preferred size is unlimited but the maximum is not.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
           },
           "preferredGreaterThanMaximum": {
+            "description": "Qualities not synced because the preferred size is larger than the maximum.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
           }
         }
@@ -2584,6 +2754,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -2671,6 +2842,7 @@
               "null",
               "number"
             ],
+            "description": "The size in megabytes per minute of runtime.",
             "format": "double"
           }
         }
@@ -2716,6 +2888,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -2810,7 +2983,8 @@
               }
             ]
           }
-        }
+        },
+        "description": "One result for each pipeline. A pipeline is absent when the configuration does not use it or\n            the instance stopped before it ran."
       },
       "RadarrQualityProfileControlledStateResponse": {
         "required": [
@@ -2918,6 +3092,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -3068,9 +3243,11 @@
         "properties": {
           "jobId": {
             "type": "string",
+            "description": "The ID of the job that was active.",
             "format": "uuid"
           }
-        }
+        },
+        "description": "Why a scheduled job did not run: another job was active at its scheduled time."
       },
       "SonarrNamingField": {
         "enum": [
@@ -3116,6 +3293,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -3240,7 +3418,8 @@
               }
             ]
           }
-        }
+        },
+        "description": "One result for each pipeline. A pipeline is absent when the configuration does not use it or\n            the instance stopped before it ran."
       },
       "SonarrQualityProfilePipelineResponse": {
         "required": [
@@ -3269,6 +3448,7 @@
                 "type": "null"
               },
               {
+                "description": "Present only when the status is `blocked`.",
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
@@ -3294,7 +3474,8 @@
           "partial",
           "failed"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "The result of a job or of one instance.\n\n- `succeeded`: Every item synced.\n- `partial`: Some items synced and some did not.\n- `failed`: No items synced."
       },
       "SyncFaultResponse": {
         "required": [
@@ -3305,7 +3486,8 @@
           "reference": {
             "type": "string"
           }
-        }
+        },
+        "description": "An unexpected error. The server log has the details under the same reference."
       },
       "SyncInstanceResultsResponse": {
         "required": [
@@ -3320,6 +3502,7 @@
             "$ref": "#/components/schemas/SyncInstanceResultsResponseRadarr"
           }
         ],
+        "description": "The result of one instance. The `service` property selects the pipeline shape.",
         "discriminator": {
           "propertyName": "service",
           "mapping": {
@@ -3350,6 +3533,7 @@
                 "type": "null"
               },
               {
+                "description": "Present when a call to Sonarr or Radarr failed and stopped the instance. Pipelines that\n            finished before the failure keep their results.",
                 "$ref": "#/components/schemas/InstanceFailureCategory"
               }
             ]
@@ -3360,11 +3544,13 @@
                 "type": "null"
               },
               {
+                "description": "Present when an unexpected error stopped the instance.",
                 "$ref": "#/components/schemas/SyncFaultResponse"
               }
             ]
           },
           "planningOutcomes": {
+            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\n            pipeline of the instance.",
             "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
           }
         }
@@ -3391,6 +3577,7 @@
                 "type": "null"
               },
               {
+                "description": "Present when a call to Sonarr or Radarr failed and stopped the instance. Pipelines that\n            finished before the failure keep their results.",
                 "$ref": "#/components/schemas/InstanceFailureCategory"
               }
             ]
@@ -3401,11 +3588,13 @@
                 "type": "null"
               },
               {
+                "description": "Present when an unexpected error stopped the instance.",
                 "$ref": "#/components/schemas/SyncFaultResponse"
               }
             ]
           },
           "planningOutcomes": {
+            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\n            pipeline of the instance.",
             "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
           }
         }
@@ -3423,9 +3612,11 @@
             "format": "uuid"
           },
           "status": {
+            "description": "The overall result. An interrupted job reports `partial` when any instance succeeded or\n            partly succeeded, otherwise `failed`.",
             "$ref": "#/components/schemas/SyncCompletionStatus"
           },
           "instances": {
+            "description": "One entry for each instance that finished; instances that never ran are absent.",
             "$ref": "#/components/schemas/IReadOnlyListOfSyncInstanceResultsResponse"
           },
           "fault": {
@@ -3434,6 +3625,7 @@
                 "type": "null"
               },
               {
+                "description": "Present when an unexpected error stopped the job.",
                 "$ref": "#/components/schemas/SyncFaultResponse"
               }
             ]
@@ -3454,10 +3646,12 @@
             "format": "uuid"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "The job status; see the job resource for the values."
           },
           "trigger": {
-            "type": "string"
+            "type": "string",
+            "description": "`Manual` for a job created through the API or CLI, `Scheduled` for a job the built-in\n            schedule created."
           },
           "createdAt": {
             "type": "string",
@@ -3469,26 +3663,28 @@
         "required": [
           "enabled",
           "cron",
-          "timeZone",
-          "previousOccurrence",
-          "nextOccurrence"
+          "timeZone"
         ],
         "type": "object",
         "properties": {
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the schedule creates sync jobs."
           },
           "cron": {
-            "type": "string"
+            "type": "string",
+            "description": "The cron expression that sets when scheduled jobs are created."
           },
           "timeZone": {
-            "type": "string"
+            "type": "string",
+            "description": "The time zone the cron expression uses (for example `America/Chicago`)."
           },
           "previousOccurrence": {
             "type": [
               "null",
               "string"
             ],
+            "description": "The scheduled time of the most recent scheduled job the server still keeps, whether it ran\n            or was skipped; absent when there is none.",
             "format": "date-time"
           },
           "nextOccurrence": {
@@ -3496,10 +3692,11 @@
               "null",
               "string"
             ],
+            "description": "The next scheduled time; absent while the schedule is disabled.",
             "format": "date-time"
           }
         },
-        "description": "The built-in sync schedule. PreviousOccurrence is the most recent retained scheduled job\n            (run or skipped); NextOccurrence is absent while the schedule is disabled."
+        "description": "The built-in sync schedule."
       },
       "TrashIdNameResponse": {
         "required": [
@@ -3529,7 +3726,8 @@
           "desired": {
             "type": "boolean"
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfDecimal": {
         "required": [
@@ -3546,7 +3744,8 @@
             "type": "number",
             "format": "double"
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfInt32": {
         "required": [
@@ -3563,7 +3762,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
         "required": [
@@ -3590,7 +3790,8 @@
               "$ref": "#/components/schemas/QualityProfileLayoutResponse"
             }
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfNullableOfBoolean": {
         "required": [
@@ -3611,7 +3812,8 @@
               "boolean"
             ]
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfNullableOfInt32": {
         "required": [
@@ -3634,7 +3836,8 @@
             ],
             "format": "int32"
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse": {
         "required": [
@@ -3663,7 +3866,8 @@
               }
             ]
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfQualitySizeValueResponse": {
         "required": [
@@ -3692,7 +3896,8 @@
               }
             ]
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       },
       "ValueChangeResponseOfString": {
         "required": [
@@ -3713,8 +3918,23 @@
               "string"
             ]
           }
-        }
+        },
+        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Sync",
+      "description": "Sync jobs, their progress and results, and the built-in sync schedule."
+    },
+    {
+      "name": "Instances",
+      "description": "Direct calls to a configured Sonarr or Radarr instance."
+    },
+    {
+      "name": "Guide",
+      "description": "Read-only TRaSH Guides data, scoped to one service."
+    }
+  ]
 }

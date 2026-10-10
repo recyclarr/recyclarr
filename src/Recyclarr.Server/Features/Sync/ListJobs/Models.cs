@@ -7,17 +7,36 @@ namespace Recyclarr.Server.Features.Sync.ListJobs;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListSyncJobsRequest
 {
+    /// <summary>
+    /// Return only jobs with this status: `Pending`, `Running`, `Succeeded`, `Partial`,
+    /// `Failed`, `Interrupted`, or `Skipped` (case-insensitive). When omitted, jobs of every
+    /// status are returned.
+    /// </summary>
     public string? Status { get; init; }
+
+    /// <summary>
+    /// Return only jobs with this trigger: `Manual` or `Scheduled` (case-insensitive). When
+    /// omitted, jobs of both triggers are returned.
+    /// </summary>
     public string? Trigger { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SyncJobSummaryResponse(
-    Guid Id,
-    string Status,
-    string Trigger,
-    DateTimeOffset CreatedAt
-);
+internal sealed record SyncJobSummaryResponse
+{
+    public required Guid Id { get; init; }
+
+    /// <summary>The job status; see the job resource for the values.</summary>
+    public required string Status { get; init; }
+
+    /// <summary>
+    /// `Manual` for a job created through the API or CLI, `Scheduled` for a job the built-in
+    /// schedule created.
+    /// </summary>
+    public required string Trigger { get; init; }
+
+    public required DateTimeOffset CreatedAt { get; init; }
+}
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListSyncJobsResponse(IReadOnlyList<SyncJobSummaryResponse> Jobs);

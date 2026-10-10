@@ -16,7 +16,21 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         // opt-out is explicit until API key auth lands (REC-153).
         AllowAnonymous();
 
-        Description(b => b.Produces<GetSyncJobResponse>().ProducesProblems(404).WithTags("Sync"));
+        Description(b =>
+            b.Produces<GetSyncJobResponse>().ProducesProblems(400, 404).WithTags("Sync")
+        );
+        Summary(s =>
+        {
+            s.Summary = "Get a sync job";
+            s.Description =
+                "Returns the job's status and the progress of each instance. While the job is "
+                + "`Pending` or `Running`, the response has a `Retry-After` header with the "
+                + "number of seconds to wait before the next poll. Progress accumulates, so a "
+                + "missed poll loses nothing.";
+            s.Responses[200] = "The job, in any status.";
+            s.Responses[400] = "The ID is not a GUID.";
+            s.Responses[404] = "No job has this ID.";
+        });
     }
 
     public override async Task HandleAsync(GetSyncJobRequest req, CancellationToken ct)
@@ -50,7 +64,7 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
             FinishedAt = job.FinishedAt,
             ScheduledFor = job.ScheduledFor,
             SkippedBecause = job.SkippedBy is { } skippedBy
-                ? new SkippedBecauseResponse(skippedBy.Value)
+                ? new SkippedBecauseResponse { JobId = skippedBy.Value }
                 : null,
             Service = job.Request.Service,
             Instances = job.Request.Instances,

@@ -8,6 +8,9 @@ namespace Recyclarr.Server.Features.Guide;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideRequest
 {
+    public const string InvalidServiceResponse = "The service is not `radarr` or `sonarr`.";
+
+    /// <summary>The service whose guide data to return: `radarr` or `sonarr`.</summary>
     public SupportedServices Service { get; init; }
 }
 

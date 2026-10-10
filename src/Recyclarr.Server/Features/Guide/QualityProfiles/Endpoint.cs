@@ -16,6 +16,13 @@ internal sealed class Endpoint(QualityProfileResourceQuery profiles)
         AllowAnonymous();
 
         Description(b => b.Produces<ListGuideQualityProfilesResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "List guide quality profiles";
+            s.Description = "Lists the guide's quality profiles for one service, sorted by name.";
+            s.Responses[200] = "The quality profiles.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     public override async Task HandleAsync(GuideRequest req, CancellationToken ct)
@@ -30,18 +37,24 @@ internal sealed class Endpoint(QualityProfileResourceQuery profiles)
     }
 
     private static GuideQualityProfileSummaryResponse ToSummary(QualityProfileResource profile) =>
-        new(
-            profile.TrashId,
-            profile.Name,
-            NullIfEmpty(profile.TrashUrl),
-            NullIfEmpty(profile.TrashScoreSet),
+        new()
+        {
+            TrashId = profile.TrashId,
+            Name = profile.Name,
+            TrashUrl = NullIfEmpty(profile.TrashUrl),
+            ScoreSet = NullIfEmpty(profile.TrashScoreSet),
+            AllowedQualities =
             [
                 .. profile
                     .Items.Where(q => q.Allowed)
-                    .Select(q => new GuideProfileQualityResponse(q.Name, [.. q.Items])),
+                    .Select(q => new GuideProfileQualityResponse
+                    {
+                        Name = q.Name,
+                        Items = [.. q.Items],
+                    }),
             ],
-            [.. profile.FormatItems.Keys.Order(StringComparer.OrdinalIgnoreCase)]
-        );
+            CustomFormats = [.. profile.FormatItems.Keys.Order(StringComparer.OrdinalIgnoreCase)],
+        };
 
     private static string? NullIfEmpty(string value) => value.Length == 0 ? null : value;
 }

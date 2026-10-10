@@ -42,21 +42,30 @@ internal sealed class GuideQualityProfilesHttpTest : GuideHttpFixture
             .Items.Should()
             .BeEquivalentTo(
                 [
-                    new GuideQualityProfileSummaryResponse("qp-anime", "Anime", null, null, [], []),
-                    new GuideQualityProfileSummaryResponse(
-                        "qp-web",
-                        "WEB-1080p",
-                        "https://trash-guides.info/web-1080p",
-                        "sqp-1",
+                    new GuideQualityProfileSummaryResponse
+                    {
+                        TrashId = "qp-anime",
+                        Name = "Anime",
+                        AllowedQualities = [],
+                        CustomFormats = [],
+                    },
+                    new GuideQualityProfileSummaryResponse
+                    {
+                        TrashId = "qp-web",
+                        Name = "WEB-1080p",
+                        TrashUrl = "https://trash-guides.info/web-1080p",
+                        ScoreSet = "sqp-1",
+                        AllowedQualities =
                         [
-                            new GuideProfileQualityResponse(
-                                "WEB 1080p",
-                                ["WEBDL-1080p", "WEBRip-1080p"]
-                            ),
-                            new GuideProfileQualityResponse("Bluray-1080p", []),
+                            new GuideProfileQualityResponse
+                            {
+                                Name = "WEB 1080p",
+                                Items = ["WEBDL-1080p", "WEBRip-1080p"],
+                            },
+                            new GuideProfileQualityResponse { Name = "Bluray-1080p", Items = [] },
                         ],
-                        ["BR-DISK", "x265 (HD)"]
-                    ),
+                        CustomFormats = ["BR-DISK", "x265 (HD)"],
+                    },
                 ],
                 o => o.WithStrictOrdering()
             );
@@ -79,8 +88,8 @@ internal sealed class GuideQualityProfilesHttpTest : GuideHttpFixture
         response!
             .Items.Should()
             .Equal(
-                new GuideQualitySummaryResponse("movie"),
-                new GuideQualitySummaryResponse("sqp-streaming")
+                new GuideQualitySummaryResponse { Type = "movie" },
+                new GuideQualitySummaryResponse { Type = "sqp-streaming" }
             );
     }
 }

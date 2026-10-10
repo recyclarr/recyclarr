@@ -2,6 +2,11 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.Server.Features.Sync.GetResults;
 
+/// <summary>
+/// A configuration problem found before the instance's pipelines ran. The `type` property names
+/// the problem. Reference mismatches and ambiguous references block every pipeline of the
+/// instance; the other types are warnings.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(
@@ -46,35 +51,49 @@ namespace Recyclarr.Server.Features.Sync.GetResults;
 )]
 internal abstract record PlanningOutcomeResponse;
 
+/// <summary>Blocking. The configured custom format group does not exist in the guide.</summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupReferenceMismatchPlanningOutcomeResponse(
     string GroupTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>Blocking. A custom format selected from a group is not in that group.</summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse(
     string GroupTrashId,
     string CustomFormatTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>Blocking. A custom format excluded from a group is not in that group.</summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse(
     string GroupTrashId,
     string CustomFormatTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Blocking. A quality profile that a group assigns scores to does not exist in the guide.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse(
     string GroupTrashId,
     string ProfileTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Blocking. A quality profile trash ID that custom formats assign scores to matches more than one
+/// configured profile.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse(
     string ProfileTrashId,
     IReadOnlyList<string> ProfileNames
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Blocking. A quality profile trash ID that a group assigns scores to matches more than one
+/// configured profile.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse(
     string GroupTrashId,
@@ -82,24 +101,37 @@ internal sealed record CustomFormatGroupQualityProfileReferenceAmbiguousPlanning
     IReadOnlyList<string> ProfileNames
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Warning. A required group member was selected; the group always includes it.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse(
     string GroupTrashId,
     string CustomFormatTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Warning. A default group member was selected; the group includes it by default.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse(
     string GroupTrashId,
     string CustomFormatTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Warning. A required group member was excluded; required members cannot be excluded.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse(
     string GroupTrashId,
     string CustomFormatTrashId
 ) : PlanningOutcomeResponse;
 
+/// <summary>
+/// Warning. A non-default group member was excluded without selecting all optional members, so
+/// the exclusion has no effect.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse(
     string GroupTrashId,

@@ -17,6 +17,15 @@ internal sealed class Endpoint(MediaNamingResourceQuery naming)
         AllowAnonymous();
 
         Description(b => b.Produces<GuideNamingResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "Get guide naming formats";
+            s.Description =
+                "Returns the guide's file and folder naming formats for one service. The "
+                + "`service` property tells which set of format lists the response has.";
+            s.Responses[200] = "The naming formats.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     public override async Task HandleAsync(GuideRequest req, CancellationToken ct)
@@ -51,11 +60,12 @@ internal sealed class Endpoint(MediaNamingResourceQuery naming)
             .Select(x =>
             {
                 var parts = x.Key.Split(':', 2);
-                return new GuideNamingFormatResponse(
-                    parts[0],
-                    parts.Length > 1 ? parts[1] : null,
-                    x.Value
-                );
+                return new GuideNamingFormatResponse
+                {
+                    Key = parts[0],
+                    Version = parts.Length > 1 ? parts[1] : null,
+                    Format = x.Value,
+                };
             })
             .ToList();
 }

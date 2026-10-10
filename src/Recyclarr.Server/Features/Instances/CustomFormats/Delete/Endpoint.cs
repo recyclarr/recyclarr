@@ -20,10 +20,24 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
         Description(b =>
             b.ClearDefaultProduces()
                 .Produces(204)
-                .ProducesProblems(404)
+                .ProducesProblems(400, 404)
                 .Produces<ServiceFailureProblemDetails>(502, "application/problem+json")
                 .WithTags("Instances")
         );
+        Summary(s =>
+        {
+            s.Summary = "Delete an instance custom format";
+            s.Description =
+                "Deletes a custom format from a configured Sonarr or Radarr instance, whether or "
+                + "not Recyclarr manages it. The server reads instance configuration at startup, "
+                + "so an instance added later is unknown until a restart.";
+            s.Responses[204] = "The custom format was deleted.";
+            s.Responses[400] = "The ID is not an integer.";
+            s.Responses[404] =
+                "No configured instance has this name, or the instance has no custom format "
+                + "with this ID.";
+            s.Responses[502] = ServiceFailureProblemDetails.ResponseDescription;
+        });
     }
 
     public override async Task HandleAsync(

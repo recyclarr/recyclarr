@@ -2,7 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.Server.Features.Guide.Naming;
 
-// Sonarr and Radarr name different things, so each service has its own set of format lists.
+/// <summary>
+/// Guide naming formats. Sonarr and Radarr name different things, so the `service` property
+/// selects which set of format lists is present.
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "service")]
 [JsonDerivedType(typeof(RadarrGuideNamingResponse), "radarr")]
@@ -24,7 +27,18 @@ internal sealed record SonarrGuideNamingResponse(
     IReadOnlyList<GuideNamingFormatResponse> AnimeEpisode
 ) : GuideNamingResponse;
 
-// Key is the name used in configuration. Version is set when the format applies only to that
-// major version of the service; null means every version.
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record GuideNamingFormatResponse(string Key, string? Version, string Format);
+internal sealed record GuideNamingFormatResponse
+{
+    /// <summary>The name that selects this format in configuration.</summary>
+    public required string Key { get; init; }
+
+    /// <summary>
+    /// The major version of the service the format is for; absent when it applies to every
+    /// version.
+    /// </summary>
+    public string? Version { get; init; }
+
+    /// <summary>The naming format string, in the service's naming token syntax.</summary>
+    public required string Format { get; init; }
+}

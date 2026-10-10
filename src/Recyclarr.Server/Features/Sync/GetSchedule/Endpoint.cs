@@ -21,18 +21,28 @@ internal sealed class Endpoint(
         AllowAnonymous();
 
         Description(b => b.WithTags("Sync"));
+        Summary(s =>
+        {
+            s.Summary = "Get the sync schedule";
+            s.Description =
+                "Returns the built-in schedule that creates sync jobs for every configured "
+                + "instance. A scheduled job that comes due while another job is active is "
+                + "recorded as `Skipped`. Schedule changes apply after a server restart.";
+            s.Responses[200] = "The schedule.";
+        });
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
         var current = schedule.Value;
-        Response = new SyncScheduleResponse(
-            current.Enabled,
-            current.Cron,
-            current.TimeZone.Id,
-            jobStore.LatestScheduledOccurrence(),
-            current.NextOccurrence(time.GetUtcNow())
-        );
+        Response = new SyncScheduleResponse
+        {
+            Enabled = current.Enabled,
+            Cron = current.Cron,
+            TimeZone = current.TimeZone.Id,
+            PreviousOccurrence = jobStore.LatestScheduledOccurrence(),
+            NextOccurrence = current.NextOccurrence(time.GetUtcNow()),
+        };
         await Send.ResponseAsync(Response, 200, ct);
     }
 }
