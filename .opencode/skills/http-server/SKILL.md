@@ -1,17 +1,9 @@
 ---
 name: http-server
 description: >-
-  Use when writing, editing, or reviewing FastEndpoints endpoint classes,
-  request/response DTOs, endpoint versioning, OpenAPI spec generation or
-  build-time spec export, API versioning strategy, Kestrel server embedding,
-  or Recyclarr.Server project structure; designing or reviewing API routes,
-  URL structure, REST resources, or endpoint paths; editing httpyac `.http`
-  request files under `http/`. Triggers on phrases like
-  "add an endpoint", "FastEndpoints", "endpoint class", "API version",
-  "OpenAPI spec", "Kestrel server", "API endpoint", "API route", "REST
-  resource", "URL structure", "endpoint path", "HTTP server", "release
-  group", "serve command". Do NOT use for MVC controllers, Razor Pages, or
-  Minimal API lambda-style endpoints.
+  Use when working on Recyclarr.Server or its HTTP API: FastEndpoints endpoints and DTOs, routes
+  and REST resources, API versioning, OpenAPI spec generation and API reference text, Kestrel
+  hosting and the serve command, or httpyac files under `http/`.
 ---
 
 # HTTP Server
@@ -141,6 +133,16 @@ the input to Refitter, which generates the typed client (ADR-013).
 - `Recyclarr.Client` has a `ProjectReference` on Server for build ordering (not assembly reference)
 - One `.refitter` config per API version, scoped by `includePathMatches` into a version namespace
   (`Recyclarr.Client.V1`), so the version stays out of the call chain
+
+### API reference text
+
+The spec is the only source for the wiki API reference; write for API consumers.
+
+- Schemas, properties, path/query params: XML `<summary>` on the DTO member.
+- Operations: `Summary()` in `Configure()` (summary, description, per-status response text,
+  examples). Not endpoint-class XML docs.
+- Until FastEndpoints#1201 ships, XML summaries are one paragraph; multi-paragraph text goes in
+  `Summary()`.
 
 ## httpyac Requests
 
