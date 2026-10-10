@@ -137,8 +137,12 @@ the input to Refitter, which generates the typed client (ADR-013).
 
 ### API reference text
 
-The spec is the only source for the wiki API reference; write for API consumers.
+The spec owns reference text, written for API consumers. Conceptual prose (overview, job lifecycle,
+CLI and schedule relationship, authentication) lives in hand-written wiki pages, not
+`info.description` or tag descriptions.
 
+- Describe what a consumer cannot infer from the name and type: units, valid values, defaults,
+  absence meaning, status conditions. Leave self-explanatory members bare.
 - Schemas, properties, path/query params: XML `<summary>` on the DTO member.
 - Enum values: `[Description]` on each member; published as a Markdown list in the schema
   description, not `x-enumDescriptions`, which breaks Refitter (ADR-026).
