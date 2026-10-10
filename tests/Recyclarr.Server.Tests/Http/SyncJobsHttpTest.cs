@@ -55,8 +55,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var getResponse = await RestService.For<ISyncApi>(client).JobsGet(created.Id);
         var job = getResponse.Content;
 
-        // The job may still be queued or running (202) or already finished (200).
-        getResponse.IsSuccessStatusCode.Should().BeTrue();
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         job.Should().NotBeNull();
         job.Id.Should().Be(created.Id);
         job.Instances.Should().Equal("real-instance");
@@ -157,19 +156,19 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     }
 
     [Test]
-    public async Task Running_job_answers_accepted_with_retry_after()
+    public async Task Running_job_answers_ok_with_running_status_and_retry_after()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
         var job = store.Create(new ServerSyncSettings(null, [], Preview: false), ["running"]);
         store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
 
         using var client = CreateClient();
-        var response = await client.GetAsync(
-            new Uri($"/api/v1/sync/jobs/{job.Id.Value}", UriKind.Relative)
-        );
+        var response = await RestService.For<ISyncApi>(client).JobsGet(job.Id.Value);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
-        response.Headers.RetryAfter?.Delta.Should().Be(TimeSpan.FromSeconds(1));
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Headers?.RetryAfter?.Delta.Should().Be(TimeSpan.FromSeconds(1));
+        response.Content.Should().NotBeNull();
+        response.Content.Status.Should().Be("Running");
     }
 
     [Test]

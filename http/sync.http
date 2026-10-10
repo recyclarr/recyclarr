@@ -24,28 +24,22 @@ Content-Type: application/json
 
 {{response
   // Poll state lives in $global: exports from loop iterations do not reach later regions.
-  $global.poll = { response: { statusCode: 202 }, attempts: 0, deadline: Date.now() + 60_000 };
+  $global.poll = { status: "Pending", attempts: 0, deadline: Date.now() + 60_000 };
 }}
 
 ###
 
 # @name poll
-# @loop while $global.poll.response.statusCode === 202 && $global.poll.attempts < 60 && Date.now() < $global.poll.deadline
+# @loop while ["Pending", "Running"].includes($global.poll.status) && $global.poll.attempts < 60 && Date.now() < $global.poll.deadline
 # @sleep 1000
 GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
 
+?? status == 200
+
 {{response
-  const assert = require("assert");
-
   $global.poll.response = response;
+  $global.poll.status = response.parsedBody.status;
   $global.poll.attempts++;
-
-  test("poll status is accepted", () => {
-    assert.ok(
-      response.statusCode === 202 || response.statusCode === 200,
-      `expected 202 or 200; got ${response.statusCode}`
-    );
-  });
 }}
 
 ###
@@ -53,7 +47,10 @@ GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
 {{
   const assert = require("assert");
   const { response: last } = $global.poll;
-  assert.equal(last.statusCode, 200, "sync did not finish within 60 seconds");
+  assert.ok(
+    !["Pending", "Running"].includes($global.poll.status),
+    "sync did not finish within 60 seconds"
+  );
   assert.notEqual(last.parsedBody.status, "Failed", "sync job failed");
   assert.equal(last.parsedBody.trigger, "Manual");
   assert.ok(last.parsedBody.startedAt && last.parsedBody.finishedAt, "job timestamps missing");
