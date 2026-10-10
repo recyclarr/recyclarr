@@ -155,20 +155,23 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Test]
-    public async Task Running_job_answers_ok_with_running_status_and_retry_after()
+    [TestCase(SyncJobStatus.Pending)]
+    [TestCase(SyncJobStatus.Running)]
+    public async Task Active_job_answers_ok_with_its_status_and_retry_after(SyncJobStatus status)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), ["running"]);
-        store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
+        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), ["active"]);
+        store.Update(job.Id, current => current.Status = status);
 
         using var client = CreateClient();
         var response = await RestService.For<ISyncApi>(client).JobsGet(job.Id.Value);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Headers?.RetryAfter?.Delta.Should().Be(TimeSpan.FromSeconds(1));
+        response.Headers.Should().NotBeNull();
+        response.Headers.RetryAfter.Should().NotBeNull();
+        response.Headers.RetryAfter.Delta.Should().Be(TimeSpan.FromSeconds(1));
         response.Content.Should().NotBeNull();
-        response.Content.Status.Should().Be("Running");
+        response.Content.Status.Should().Be(status.ToString());
     }
 
     [Test]

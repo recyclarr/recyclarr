@@ -11,7 +11,7 @@ using Refit;
 namespace Recyclarr.Cli.Tests.Processors.Sync;
 
 /// <summary>
-/// The poller is what turns the server's 202/200 protocol into a stream of snapshots, so it is
+/// The poller is what turns the job resource's status into a stream of snapshots, so it is
 /// tested against the real job resource rather than a stand-in for it.
 /// </summary>
 internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
