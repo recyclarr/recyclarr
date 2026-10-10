@@ -73,10 +73,10 @@ internal sealed class SyncJobQueueHttpTest : ServerHttpFixture
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         while (true)
         {
-            var job = await api.JobsGet(id, timeout.Token);
-            if (job.StatusCode == HttpStatusCode.OK)
+            var status = (await api.JobsGet(id, timeout.Token)).Content?.Status;
+            if (status is not (nameof(SyncJobStatus.Pending) or nameof(SyncJobStatus.Running)))
             {
-                return job.Content?.Status;
+                return status;
             }
 
             await Task.Delay(50, timeout.Token);

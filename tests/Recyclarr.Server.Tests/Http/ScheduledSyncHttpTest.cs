@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Net;
 using System.Net.Http.Json;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
@@ -209,10 +208,14 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         while (true)
         {
-            var job = await api.JobsGet(id, timeout.Token);
-            if (job.StatusCode == HttpStatusCode.OK)
+            var job = (await api.JobsGet(id, timeout.Token)).Content;
+            if (
+                job is not null
+                && job.Status
+                    is not (nameof(SyncJobStatus.Pending) or nameof(SyncJobStatus.Running))
+            )
             {
-                return job.Content!;
+                return job;
             }
 
             await Task.Delay(50, timeout.Token);

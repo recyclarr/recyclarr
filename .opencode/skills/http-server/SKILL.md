@@ -42,7 +42,8 @@ Rationale and the full resource model live in ADR-011; config representation in 
 Model as job resources, never verb endpoints (ADR-011):
 
 - Trigger = create: `POST /api/v1/sync/jobs` returns 202 + `Location: /api/v1/sync/jobs/{id}`
-- `GET .../jobs/{id}` returns 200 (done) or 202 (running) + `Retry-After`
+- `GET .../jobs/{id}` always returns 200; the body `status` tells clients whether to keep polling,
+  and `Retry-After` is set while the job is active (ADR-016)
 - The snapshot is cumulative (per-instance, per-operation); a slow or skipped poll loses nothing
 - Polling only; no SSE
 - Large result payloads belong on a sub-resource (`GET .../jobs/{id}/results`), never on the polled

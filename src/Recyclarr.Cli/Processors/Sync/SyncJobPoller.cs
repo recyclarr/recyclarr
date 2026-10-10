@@ -1,4 +1,3 @@
-using System.Net;
 using System.Runtime.CompilerServices;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
@@ -7,8 +6,8 @@ namespace Recyclarr.Cli.Processors.Sync;
 
 /// <summary>
 /// Polls a sync job until it finishes, yielding every snapshot along the way so callers can render
-/// progress as it happens. The job resource answers 202 while the sync is running and 200 once it
-/// has reached a terminal state (ADR-011).
+/// progress as it happens. The job resource always answers 200; its status tells whether the job
+/// is still pending or running (ADR-016).
 /// </summary>
 internal static class SyncJobPoller
 {
@@ -27,9 +26,10 @@ internal static class SyncJobPoller
         while (true)
         {
             using var response = await api.JobsGet(jobId, ct);
-            yield return response.ContentOrThrow();
+            var job = response.ContentOrThrow();
+            yield return job;
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (job.Status is not ("Pending" or "Running"))
             {
                 yield break;
             }
