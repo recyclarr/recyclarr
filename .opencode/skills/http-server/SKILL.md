@@ -140,6 +140,8 @@ the input to Refitter, which generates the typed client (ADR-013).
 The spec is the only source for the wiki API reference; write for API consumers.
 
 - Schemas, properties, path/query params: XML `<summary>` on the DTO member.
+- Enum values: `[Description]` on each member; published as a Markdown list in the schema
+  description, not `x-enumDescriptions`, which breaks Refitter (ADR-026).
 - Operations: `Summary()` in `Configure()` (summary, description, per-status response text,
   examples). Not endpoint-class XML docs.
 - Until FastEndpoints#1201 ships, XML summaries are one paragraph; multi-paragraph text goes in
