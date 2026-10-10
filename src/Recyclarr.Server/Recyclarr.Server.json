@@ -1296,7 +1296,8 @@
           "interrupted",
           "notRun"
         ],
-        "type": "string"
+        "type": "string",
+        "description": "Sync progress of one instance in a job.\n\n- `pending`: The instance has not started yet.\n- `running`: The instance is syncing now.\n- `succeeded`: The instance finished and every change was applied.\n- `partial`: The instance finished, but some changes were not applied. See the job results.\n- `failed`: The instance finished without its changes. See the job results.\n- `interrupted`: The job stopped while this instance was syncing.\n- `notRun`: The job stopped before this instance started."
       },
       "InstanceSnapshotResponse": {
         "required": [
