@@ -72,6 +72,7 @@ builder
                 options.CreateSchemaReferenceId
             );
             options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
+            options.AddSchemaTransformer<EnumDescriptionSchemaTransformer>();
         };
     });
 

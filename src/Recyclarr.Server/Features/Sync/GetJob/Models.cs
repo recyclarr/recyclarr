@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Recyclarr.TrashGuide;
 
@@ -9,14 +10,28 @@ internal sealed record GetSyncJobRequest
     public Guid Id { get; init; }
 }
 
+/// <summary>Sync progress of one instance in a job.</summary>
 internal enum InstanceProgressStatusResponse
 {
+    [Description("The instance has not started yet.")]
     Pending,
+
+    [Description("The instance is syncing now.")]
     Running,
+
+    [Description("The instance finished and every change was applied.")]
     Succeeded,
+
+    [Description("The instance finished, but some changes were not applied. See the job results.")]
     Partial,
+
+    [Description("The instance finished without its changes. See the job results.")]
     Failed,
+
+    [Description("The job stopped while this instance was syncing.")]
     Interrupted,
+
+    [Description("The job stopped before this instance started.")]
     NotRun,
 }
 
