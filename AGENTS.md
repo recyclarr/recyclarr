@@ -262,9 +262,9 @@ log.Warning(message);
   when a clean rebuild is needed.
 - Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
 - Edit `*.csproj`, `*.props`, and `*.slnx` by hand, including package references. Use the dotnet CLI
-  to look up versions (`dotnet package search <id> --exact-match`), audit packages
-  (`dotnet list package --outdated`), and generate output: `dotnet new`, `dotnet tool`,
-  `dotnet ef migrations add`.
+  to look up versions (`dotnet package search <id> --exact-match`, plus `--prerelease` when the
+  current version is a prerelease), audit packages (`dotnet list package --outdated`), and generate
+  output: `dotnet new`, `dotnet tool`, `dotnet ef migrations add`.
 - Central package management: `Directory.Packages.props` contains versions only. Private packages
   MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
   synchronized when adding, renaming, removing, or changing package privacy.
