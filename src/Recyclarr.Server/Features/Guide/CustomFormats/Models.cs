@@ -5,10 +5,12 @@ internal sealed record ListGuideCustomFormatsResponse(
     IReadOnlyList<GuideCustomFormatSummaryResponse> Items
 );
 
-// Category is the guide's grouping for the custom format; null when the guide lists none.
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record GuideCustomFormatSummaryResponse(
-    string TrashId,
-    string Name,
-    string? Category
-);
+internal sealed record GuideCustomFormatSummaryResponse
+{
+    public required string TrashId { get; init; }
+    public required string Name { get; init; }
+
+    /// <summary>The guide's category for the custom format; absent when it has none.</summary>
+    public string? Category { get; init; }
+}

@@ -14,8 +14,23 @@ internal sealed class Endpoint(ILogger log, ISyncJobStore jobStore)
         AllowAnonymous();
 
         Description(b =>
-            b.Produces<SyncJobResultsResponse>().ProducesProblems(409, 404, 500).WithTags("Sync")
+            b.Produces<SyncJobResultsResponse>()
+                .ProducesProblems(400, 404, 409, 500)
+                .WithTags("Sync")
         );
+        Summary(s =>
+        {
+            s.Summary = "Get sync job results";
+            s.Description =
+                "Returns the changes and outcomes of a finished job for each instance that "
+                + "finished. For a preview job, the changes were computed but not applied.";
+            s.Responses[200] = "The job results.";
+            s.Responses[400] = "The ID is not a GUID.";
+            s.Responses[404] = "No job has this ID.";
+            s.Responses[409] = "The job is still active, or it was skipped and has no results.";
+            s.Responses[500] =
+                "The server could not build the results. The server log has details.";
+        });
     }
 
     public override async Task HandleAsync(GetSyncJobResultsRequest req, CancellationToken ct)

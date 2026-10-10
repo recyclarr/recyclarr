@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Recyclarr.Server.Sync;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Server.Features.Sync.CreateJob;
 
@@ -27,6 +28,27 @@ internal sealed class Endpoint(
                 .ProducesProblems(409)
                 .WithTags("Sync")
         );
+        Summary(s =>
+        {
+            s.Summary = "Start a sync job";
+            s.Description =
+                "Creates a sync job for the selected instances and queues it. Jobs run one at "
+                + "a time, oldest first, so a new job stays `Pending` while another job runs. "
+                + "Poll the URL in the `Location` header to follow the job. The server reads "
+                + "instance configuration at startup, so configuration changes apply after a "
+                + "restart.";
+            s.ExampleRequest = new CreateSyncJobRequest
+            {
+                Service = SupportedServices.Radarr,
+                Instances = ["radarr-4k"],
+                Preview = true,
+            };
+            s.Responses[202] = "The job was created and queued.";
+            s.Responses[400] =
+                "The request is not valid, names instances that are not configured, or selects "
+                + "no configured instance.";
+            s.Responses[409] = "No instances are configured on the server.";
+        });
     }
 
     public override async Task HandleAsync(CreateSyncJobRequest req, CancellationToken ct)
@@ -58,7 +80,12 @@ internal sealed class Endpoint(
         var job = store.Create(settings, [.. selected.Select(x => x.InstanceName)]);
         await launcher.Value.LaunchAsync(job.Id);
 
-        Response = new CreateSyncJobResponse(job.Id.Value, job.Status.ToString(), job.CreatedAt);
+        Response = new CreateSyncJobResponse
+        {
+            Id = job.Id.Value,
+            Status = job.Status.ToString(),
+            CreatedAt = job.CreatedAt,
+        };
         HttpContext.Response.Headers.Location = $"/api/v1/sync/jobs/{job.Id.Value}";
         await Send.ResponseAsync(Response, 202, ct);
     }

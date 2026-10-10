@@ -1,8 +1,13 @@
+using System.ComponentModel;
+
 namespace Recyclarr.Server.Features.Sync.GetResults;
 
 internal enum QualitySizeKind
 {
+    [Description("A size limit; `value` is present.")]
     Numeric,
+
+    [Description("No size limit; `value` is absent.")]
     Unlimited,
 }
 
@@ -10,6 +15,8 @@ internal enum QualitySizeKind
 internal sealed record QualitySizeValueResponse
 {
     public required QualitySizeKind Kind { get; init; }
+
+    /// <summary>The size in megabytes per minute of runtime.</summary>
     public decimal? Value { get; init; }
 }
 
@@ -45,14 +52,38 @@ internal sealed record QualitySizeMaximumComparisonResponse(
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeOutcomesResponse
 {
+    /// <summary>A configured `quality_definition.type` that the guide does not have.</summary>
     public IReadOnlyList<QualitySizeTypeResponse> DefinitionReferenceMismatches { get; init; } = [];
+
+    /// <summary>
+    /// Configured quality overrides that are not in the guide's quality size set.
+    /// </summary>
     public IReadOnlyList<QualitySizeReferenceResponse> ReferenceMismatches { get; init; } = [];
+
+    /// <summary>Guide qualities that the service does not have.</summary>
     public IReadOnlyList<string> ServiceQualitiesNotFound { get; init; } = [];
+
+    /// <summary>
+    /// A configured preferred ratio outside 0 to 1: `current` is the configured value and
+    /// `desired` the value used.
+    /// </summary>
     public IReadOnlyList<ValueChangeResponse<decimal>> PreferredRatiosClamped { get; init; } = [];
+
+    /// <summary>
+    /// Qualities not synced because the minimum is larger than the preferred size.
+    /// </summary>
     public IReadOnlyList<QualitySizeMinimumComparisonResponse> MinimumGreaterThanPreferred { get; init; } =
     [];
+
+    /// <summary>
+    /// Qualities not synced because the preferred size is unlimited but the maximum is not.
+    /// </summary>
     public IReadOnlyList<QualitySizeMaximumComparisonResponse> UnlimitedPreferredGreaterThanMaximum { get; init; } =
     [];
+
+    /// <summary>
+    /// Qualities not synced because the preferred size is larger than the maximum.
+    /// </summary>
     public IReadOnlyList<QualitySizeMaximumComparisonResponse> PreferredGreaterThanMaximum { get; init; } =
     [];
 }
@@ -63,5 +94,7 @@ internal sealed record QualitySizePipelineResponse
     public required PipelineStatus Status { get; init; }
     public required QualitySizeOutcomesResponse Outcomes { get; init; }
     public required IReadOnlyList<QualitySizeUpdateResponse> Updates { get; init; }
+
+    /// <summary>Present only when the status is `blocked`.</summary>
     public BlockingPipeline? BlockedBy { get; init; }
 }

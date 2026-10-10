@@ -16,6 +16,15 @@ internal sealed class Endpoint(CfGroupResourceQuery groups)
         AllowAnonymous();
 
         Description(b => b.Produces<ListGuideCustomFormatGroupsResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "List guide custom format groups";
+            s.Description =
+                "Lists the guide's custom format groups for one service, sorted by name. Each "
+                + "group lists its custom formats and the guide quality profiles it applies to.";
+            s.Responses[200] = "The custom format groups.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     public override async Task HandleAsync(GuideRequest req, CancellationToken ct)
@@ -30,20 +39,26 @@ internal sealed class Endpoint(CfGroupResourceQuery groups)
     }
 
     private static GuideCustomFormatGroupSummaryResponse ToSummary(CfGroupResource group) =>
-        new(
-            group.TrashId,
-            group.Name,
-            string.Equals(group.Default, "true", StringComparison.OrdinalIgnoreCase),
+        new()
+        {
+            TrashId = group.TrashId,
+            Name = group.Name,
+            Default = string.Equals(group.Default, "true", StringComparison.OrdinalIgnoreCase),
+            CustomFormats =
             [
                 .. group
                     .CustomFormats.OrderBy(cf => cf.Name, StringComparer.OrdinalIgnoreCase)
-                    .Select(cf => new GuideCustomFormatGroupMemberResponse(
-                        cf.TrashId,
-                        cf.Name,
-                        cf.Required,
-                        cf.Default
-                    )),
+                    .Select(cf => new GuideCustomFormatGroupMemberResponse
+                    {
+                        TrashId = cf.TrashId,
+                        Name = cf.Name,
+                        Required = cf.Required,
+                        Default = cf.Default,
+                    }),
             ],
-            [.. group.QualityProfiles.Include.Keys.Order(StringComparer.OrdinalIgnoreCase)]
-        );
+            QualityProfiles =
+            [
+                .. group.QualityProfiles.Include.Keys.Order(StringComparer.OrdinalIgnoreCase),
+            ],
+        };
 }

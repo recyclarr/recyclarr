@@ -16,6 +16,15 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         AllowAnonymous();
 
         Description(b => b.WithTags("Sync"));
+        Summary(s =>
+        {
+            s.Summary = "List sync jobs";
+            s.Description =
+                "Lists the sync jobs the server keeps, oldest first. To check whether a sync is "
+                + "active, filter by status `Running` or `Pending`.";
+            s.Responses[200] = "The matching jobs.";
+            s.Responses[400] = "A filter value is not one of the listed values.";
+        });
     }
 
     public override async Task HandleAsync(ListSyncJobsRequest req, CancellationToken ct)
@@ -30,12 +39,13 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
 
         var jobs = jobStore
             .GetAll(statusFilter, triggerFilter)
-            .Select(j => new SyncJobSummaryResponse(
-                j.Id.Value,
-                j.Status.ToString(),
-                j.Trigger.ToString(),
-                j.CreatedAt
-            ))
+            .Select(j => new SyncJobSummaryResponse
+            {
+                Id = j.Id.Value,
+                Status = j.Status.ToString(),
+                Trigger = j.Trigger.ToString(),
+                CreatedAt = j.CreatedAt,
+            })
             .ToList();
 
         Response = new ListSyncJobsResponse(jobs);

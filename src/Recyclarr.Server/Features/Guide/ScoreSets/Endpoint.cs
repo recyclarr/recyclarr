@@ -16,6 +16,15 @@ internal sealed class Endpoint(CustomFormatResourceQuery customFormats)
         AllowAnonymous();
 
         Description(b => b.Produces<ListGuideScoreSetsResponse>().WithTags("Guide"));
+        Summary(s =>
+        {
+            s.Summary = "List guide score sets";
+            s.Description =
+                "Lists the names of the score sets that the guide's custom formats define for "
+                + "one service, sorted by name.";
+            s.Responses[200] = "The score sets.";
+            s.Responses[400] = GuideRequest.InvalidServiceResponse;
+        });
     }
 
     // The guide has no score set list of its own; the sets are the score names custom formats use.
