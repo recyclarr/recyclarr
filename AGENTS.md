@@ -262,8 +262,10 @@ log.Warning(message);
 - Use `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
   when a clean rebuild is needed.
 - Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
-- You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
-  Prioritize the CLI for all project-specific modifications if possible.
+- Edit `*.csproj`, `*.props`, and `*.slnx` by hand, including package references. Use the dotnet CLI
+  to look up versions (`dotnet package search <id> --exact-match`), audit packages
+  (`dotnet list package --outdated`), and generate output: `dotnet new`, `dotnet tool`,
+  `dotnet ef migrations add`.
 - Central package management: `Directory.Packages.props` contains versions only. Private packages
   MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
   synchronized when adding, renaming, removing, or changing package privacy.
