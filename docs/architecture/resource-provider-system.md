@@ -27,7 +27,6 @@ Individual data element that Recyclarr processes:
 - **Custom Format** - Quality filtering rule
 - **Quality Size** - File size definition per quality level
 - **Media Naming** - File and folder naming scheme
-- **Config Template** - Reusable configuration snippet
 - **Config Include** - Shared configuration fragment
 
 ### Provider
@@ -45,7 +44,7 @@ Indicates the structure and content of the provider. Each type is implemented vi
 
 - **trash-guides**: Full TRaSH Guides structure with metadata.json (Custom Formats, Quality Sizes,
   Media Naming)
-- **config-templates**: Config Templates structure with metadata.json (Templates, Includes)
+- **config-templates**: Config Templates structure with includes.json (Includes)
 - **custom-formats**: Flat directory of Custom Format JSON files (no metadata.json required)
 
 ### Provider Location
@@ -161,7 +160,7 @@ Registry uses types as keys, enabling type-safe resource retrieval.
 
 All resource models follow the pattern: `{Service}{ResourceType}Resource`
 
-Examples: `RadarrQualitySizeResource`, `SonarrMediaNamingResource`, `RadarrConfigTemplateResource`
+Examples: `RadarrQualitySizeResource`, `SonarrMediaNamingResource`, `RadarrConfigIncludeResource`
 
 **Exception**: When structures differ per service (e.g., MediaNaming), separate classes are
 justified without base record.
@@ -189,15 +188,14 @@ without code duplication:
 
 - `ResourceRegistry<IFileInfo>` - For self-contained resources (CustomFormats, QualitySizes,
   MediaNaming, Categories). Metadata is the file itself.
-- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigTemplates,
-  ConfigIncludes). Metadata includes Id, TemplateFile, and Hidden flag.
+- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigIncludes). Metadata
+  includes Id and TemplateFile.
 
 **DI Registration**: Open generic registration (`RegisterGeneric(typeof(ResourceRegistry<>))`)
 allows unlimited metadata types without additional registrations.
 
-**Consequence**: Cannot reuse same type for different resources (e.g., using single `TemplatePath`
-type for both templates and includes violates this invariant - requires distinct
-`ConfigTemplateResource` and `ConfigIncludeResource` types).
+**Consequence**: Cannot reuse same type for different resources; each resource kind requires its
+own distinct resource type.
 
 ### Precedence Via Registration Order
 
@@ -253,7 +251,7 @@ resource_providers:
 - `name`: Globally unique identifier (required)
 - `type`: Provider type - `trash-guides`, `config-templates`, or `custom-formats` (required)
   - `trash-guides`: Requires `metadata.json` at root, follows TRaSH Guides structure
-  - `config-templates`: Requires `metadata.json` at root, follows Config Templates structure
+  - `config-templates`: Reads `includes.json` at root, follows Config Templates structure
   - `custom-formats`: Flat directory of JSON files, no `metadata.json` required, requires `service`
     property for local paths
 - `replace_default`: Boolean, replaces implicit official provider for this type (optional, default:
@@ -330,8 +328,7 @@ Understand provider organization and extract resource-specific file paths. Imple
 
 - `TrashGuidesStrategy`: Reads metadata.json, globs JSON files from configured paths, registers
   category markdown files
-- `ConfigTemplatesStrategy`: Reads templates.json and includes.json, registers template/include
-  files per service
+- `ConfigTemplatesStrategy`: Reads includes.json, registers include files per service
 - `CustomFormatsStrategy`: Treats root as flat directory of JSON files (service-specific)
 
 Strategies also determine which official providers to inject based on `replace_default` settings.
@@ -364,8 +361,8 @@ Two usage patterns:
 
 - `ResourceRegistry<IFileInfo>` - For self-contained resources (CustomFormats, QualitySizes,
   MediaNaming). Strategy registers file paths, query deserializes via `JsonResourceLoader`.
-- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigTemplates,
-  ConfigIncludes). Strategy parses external metadata files and registers structured metadata, query
+- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigIncludes). Strategy
+  parses external metadata files and registers structured metadata, query
   transforms to resource objects.
 
 Open generic DI registration (`RegisterGeneric(typeof(ResourceRegistry<>))`) creates registry
@@ -387,7 +384,7 @@ Two patterns based on metadata type:
 - **File-based** (CustomFormats, QualitySizes, MediaNaming): Retrieve files from
   `ResourceRegistry<IFileInfo>`, deserialize via `JsonResourceLoader`, apply post-processing
   (category assignment), deduplicate by TrashId (last wins).
-- **Index-based** (ConfigTemplates, ConfigIncludes): Retrieve metadata from
+- **Index-based** (ConfigIncludes): Retrieve metadata from
   `ResourceRegistry<TemplateMetadata>`, transform to resource objects, deduplicate by Id (last
   wins).
 

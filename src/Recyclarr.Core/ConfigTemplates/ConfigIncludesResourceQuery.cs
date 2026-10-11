@@ -28,12 +28,7 @@ public class ConfigIncludesResourceQuery(ResourceRegistry<TemplateMetadata> regi
         );
 
         var result = metadata
-            .Select(m => new TResource
-            {
-                Id = m.Id,
-                TemplateFile = m.TemplateFile,
-                Hidden = m.Hidden,
-            })
+            .Select(m => new TResource { Id = m.Id, TemplateFile = m.TemplateFile })
             .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.Last())
             .ToList();

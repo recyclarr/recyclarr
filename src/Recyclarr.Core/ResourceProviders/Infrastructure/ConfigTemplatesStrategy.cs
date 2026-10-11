@@ -33,31 +33,20 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
 
     public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath)
     {
-        var templatesFile = rootPath.File("templates.json");
-        if (templatesFile.Exists)
-        {
-            var templatesData = DeserializeTemplatesData(templatesFile);
-
-            registry.Register<RadarrConfigTemplateResource>(
-                templatesData.Radarr.Select(e => TemplateMetadata.From(e, rootPath))
-            );
-            registry.Register<SonarrConfigTemplateResource>(
-                templatesData.Sonarr.Select(e => TemplateMetadata.From(e, rootPath))
-            );
-        }
-
         var includesFile = rootPath.File("includes.json");
-        if (includesFile.Exists)
+        if (!includesFile.Exists)
         {
-            var includesData = DeserializeTemplatesData(includesFile);
-
-            registry.Register<RadarrConfigIncludeResource>(
-                includesData.Radarr.Select(e => TemplateMetadata.From(e, rootPath))
-            );
-            registry.Register<SonarrConfigIncludeResource>(
-                includesData.Sonarr.Select(e => TemplateMetadata.From(e, rootPath))
-            );
+            return;
         }
+
+        var includesData = DeserializeTemplatesData(includesFile);
+
+        registry.Register<RadarrConfigIncludeResource>(
+            includesData.Radarr.Select(e => TemplateMetadata.From(e, rootPath))
+        );
+        registry.Register<SonarrConfigIncludeResource>(
+            includesData.Sonarr.Select(e => TemplateMetadata.From(e, rootPath))
+        );
     }
 
     private static TemplatesData DeserializeTemplatesData(IFileInfo jsonFile)
