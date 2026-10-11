@@ -1,6 +1,6 @@
 namespace Recyclarr.ConfigTemplates;
 
-public record TemplateEntry(string Id, string Template, bool Hidden = false);
+public record TemplateEntry(string Id, string Template);
 
 public record TemplatesData
 {

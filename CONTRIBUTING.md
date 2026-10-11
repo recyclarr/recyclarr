@@ -174,7 +174,7 @@ To run Recyclarr inside a Docker container with your local code changes:
 ./scripts/Docker-Recyclarr.ps1 sync
 
 # Pass additional arguments to Recyclarr
-./scripts/Docker-Recyclarr.ps1 config create --template your-template-name
+./scripts/Docker-Recyclarr.ps1 sync radarr --preview
 ```
 
 This script:

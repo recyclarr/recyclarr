@@ -42,7 +42,6 @@ public class ResourceProviderAutofacModule : Module
         builder.RegisterType<CustomFormatResourceQuery>();
         builder.RegisterType<QualitySizeResourceQuery>();
         builder.RegisterType<MediaNamingResourceQuery>();
-        builder.RegisterType<ConfigTemplatesResourceQuery>();
         builder.RegisterType<ConfigIncludesResourceQuery>();
         builder.RegisterType<CfGroupResourceQuery>();
         builder.RegisterType<QualityProfileResourceQuery>();
