@@ -44,18 +44,14 @@ internal static class CompositionRoot
 
     // Overload for tests and other in-process hosts: default standalone logging.
     public static void Setup(ContainerBuilder builder) =>
-        Setup(
-            builder,
-            new ServerLogOptions(LogEventLevel.Information, UseParentProtocol: false),
-            ServerMode.Persistent
-        );
+        Setup(builder, LogEventLevel.Information, ServerMode.Persistent);
 
-    public static void Setup(ContainerBuilder builder, ServerLogOptions logOptions, ServerMode mode)
+    public static void Setup(ContainerBuilder builder, LogEventLevel logLevel, ServerMode mode)
     {
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
-        RegisterLogger(builder, logOptions);
+        RegisterLogger(builder, logLevel);
         RegisterPersistence(builder, mode);
         RegisterNotifications(builder);
 
@@ -160,10 +156,9 @@ internal static class CompositionRoot
             .SingleInstance();
     }
 
-    private static void RegisterLogger(ContainerBuilder builder, ServerLogOptions logOptions)
+    private static void RegisterLogger(ContainerBuilder builder, LogEventLevel logLevel)
     {
-        builder.RegisterInstance(logOptions);
-        builder.Register(_ => new LoggingLevelSwitch(logOptions.MinimumLevel)).SingleInstance();
+        builder.Register(_ => new LoggingLevelSwitch(logLevel)).SingleInstance();
         builder.RegisterType<ServerLogger>().SingleInstance();
         builder.RegisterType<ServerLogJanitor>();
     }

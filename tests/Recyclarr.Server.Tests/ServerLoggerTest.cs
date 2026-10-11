@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
+using Recyclarr.Server.Persistence;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -88,7 +89,7 @@ internal sealed class ServerLoggerTest
         var serverLogger = new ServerLogger(
             paths,
             new LoggingLevelSwitch(LogEventLevel.Fatal),
-            new ServerLogOptions(LogEventLevel.Fatal, UseParentProtocol: false)
+            ServerMode.Persistent
         );
 
         var config = new LoggerConfiguration();
