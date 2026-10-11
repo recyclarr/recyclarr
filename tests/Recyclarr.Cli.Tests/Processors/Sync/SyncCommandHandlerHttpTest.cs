@@ -27,6 +27,11 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 {
     private const string InstanceName = "real-instance";
 
+    /// <summary>
+    /// The ANSI "erase line" control sequence; the live display emits it to redraw its table.
+    /// </summary>
+    private const string EraseLine = "\u001b[2K";
+
     private static readonly SyncInstanceResult Succeeded = new(
         InstanceName,
         SupportedServices.Radarr,
@@ -95,6 +100,56 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         result.Should().Be(ExitStatus.Failed);
         (await TerminalStatusOfTheOnlyJob()).Should().Be("Failed");
+    }
+
+    [Test]
+    public async Task An_interactive_terminal_shows_live_instance_progress()
+    {
+        AddInstanceConfig(InstanceName);
+        CliConsole.Profile.Capabilities.Interactive = true;
+        CliConsole.EmitAnsiSequences = true;
+
+        var result = await RunSync();
+
+        result.Should().Be(ExitStatus.Succeeded);
+        ConsoleOutput.Should().Contain("Legend:").And.Contain(EraseLine);
+    }
+
+    /// <summary>
+    /// Live-display cursor operations can fail on a redirected stream (notably on Windows), so a
+    /// non-interactive console must reach the results without them.
+    /// </summary>
+    [Test]
+    public async Task A_non_interactive_console_shows_results_without_live_progress()
+    {
+        AddInstanceConfig(InstanceName);
+        CliConsole.EmitAnsiSequences = true;
+
+        var result = await RunSync();
+
+        result.Should().Be(ExitStatus.Succeeded);
+        ConsoleOutput
+            .Should()
+            .NotContain("Legend:")
+            .And.NotContain(EraseLine)
+            .And.Contain(InstanceName);
+    }
+
+    /// <summary>
+    /// Log mode (explicit or from redirected output) discards console output, but live-display
+    /// cursor operations bypass that writer, so the console must stop claiming to be interactive.
+    /// </summary>
+    [Test]
+    public async Task Log_mode_syncs_without_an_interactive_console()
+    {
+        AddInstanceConfig(InstanceName);
+        CliConsole.Profile.Capabilities.Interactive = true;
+
+        var exitCode = await RunCliAsync("sync", "--log");
+
+        exitCode.Should().Be((int)ExitStatus.Succeeded);
+        CliConsole.Profile.Capabilities.Interactive.Should().BeFalse();
+        LogOutput.Should().Contain("Instance real-instance finished with status Succeeded");
     }
 
     /// <summary>
