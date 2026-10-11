@@ -5,7 +5,8 @@ namespace Recyclarr.Server;
 /// <summary>
 /// Hosted service that monitors stdin for EOF and polls whether the parent process is still alive.
 /// Either condition triggers graceful application shutdown (belt-and-suspenders). Only registered
-/// when the server is launched with <c>--parent-pid={pid}</c> (ephemeral launch mode).
+/// when the server is launched with <c>--parent-pid={pid}</c>, by any CLI command that owns the
+/// server process (ephemeral launch and <c>recyclarr serve</c>).
 /// </summary>
 internal sealed class StdinLifelineMonitor(IHostApplicationLifetime lifetime, int parentPid)
     : BackgroundService
@@ -14,7 +15,10 @@ internal sealed class StdinLifelineMonitor(IHostApplicationLifetime lifetime, in
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var stdinTask = WatchStdinAsync(stoppingToken);
+        // Console reads block synchronously and ignore cancellation, so the stdin watch runs on
+        // its own thread and is abandoned at shutdown. Awaiting it would hold shutdown until the
+        // host timeout whenever the server stops (for example, on Ctrl+C) while stdin is open.
+        var stdinTask = Task.Run(WatchStdin, CancellationToken.None);
         var parentTask = PollParentAsync(stoppingToken);
 
         // Whichever lifeline breaks first triggers shutdown
@@ -22,29 +26,13 @@ internal sealed class StdinLifelineMonitor(IHostApplicationLifetime lifetime, in
         lifetime.StopApplication();
     }
 
-    /// <summary>Reads stdin; returns when EOF is received or the token is cancelled.</summary>
-    private static async Task WatchStdinAsync(CancellationToken ct)
+    /// <summary>Reads stdin; returns when EOF is received.</summary>
+    private static void WatchStdin()
     {
         var buffer = new char[1];
 
-        while (!ct.IsCancellationRequested)
-        {
-            int read;
-            try
-            {
-                read = await Console.In.ReadAsync(buffer, ct);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-
-            if (read == 0)
-            {
-                // EOF: parent closed its end of the stdin pipe
-                return;
-            }
-        }
+        // EOF (0): the parent closed its end of the stdin pipe
+        while (Console.In.Read(buffer, 0, 1) > 0) { }
     }
 
     /// <summary>

@@ -9,8 +9,9 @@ using Spectre.Console.Cli;
 namespace Recyclarr.Cli.Console.Commands;
 
 /// <summary>
-/// Starts the server in the foreground. The server reads its own bind address and port
-/// (settings.yml, or --urls/ASPNETCORE_URLS), so this command passes nothing to it.
+/// Starts a persistent server in the foreground. The server reads its own bind address and port
+/// (settings.yml, or --urls/ASPNETCORE_URLS); this command passes only its own pid, so the server
+/// stops when this process ends (ADR-010).
 /// </summary>
 [Description("Run the Recyclarr HTTP server in the foreground")]
 [UsedImplicitly]
@@ -44,8 +45,15 @@ internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
         // Registered before the server starts, so no Ctrl+C can end the CLI and leave it behind
         using var interrupt = PosixSignalRegistration.Create(PosixSignal.SIGINT, OnInterrupt);
 
+        // The redirected stdin is never written; it stays open as the lifeline. When this process
+        // ends for any reason, the OS closes it and the server shuts down instead of lingering.
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo(serverBinary.FullName) { UseShellExecute = false };
+        process.StartInfo = new ProcessStartInfo(serverBinary.FullName)
+        {
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            Arguments = $"--parent-pid={Environment.ProcessId}",
+        };
         process.Start();
 
         // Deliberately ignores ct: the server owns shutdown, and its exit code is the result
