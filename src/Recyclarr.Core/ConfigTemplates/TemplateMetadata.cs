@@ -3,13 +3,13 @@ using System.Text.RegularExpressions;
 
 namespace Recyclarr.ConfigTemplates;
 
-public partial record TemplateMetadata(string Id, IFileInfo TemplateFile, bool Hidden)
+public partial record TemplateMetadata(string Id, IFileInfo TemplateFile)
 {
     public static TemplateMetadata From(TemplateEntry entry, IDirectoryInfo rootPath)
     {
         ValidateManifestId(entry.Id);
         ValidateManifestPath(entry.Template);
-        return new TemplateMetadata(entry.Id, rootPath.File(entry.Template), entry.Hidden);
+        return new TemplateMetadata(entry.Id, rootPath.File(entry.Template));
     }
 
     private static void ValidateManifestId(string id)

@@ -6,7 +6,6 @@ public record ConfigIncludeResource
 {
     public string Id { get; init; } = "";
     public IFileInfo TemplateFile { get; init; } = null!;
-    public bool Hidden { get; init; }
 }
 
 public record RadarrConfigIncludeResource : ConfigIncludeResource;
