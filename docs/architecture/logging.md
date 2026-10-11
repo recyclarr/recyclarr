@@ -4,7 +4,7 @@ Only the HTTP server writes log files (ADR-022). The CLI logs to the console, an
 
 | Process | Output | Contents |
 | --- | --- | --- |
-| CLI | console, with `--log` | Command lifecycle, HTTP traffic, and forwarded server events |
+| CLI | console, with `--log` | Command lifecycle and HTTP traffic |
 | Server | `<data>/logs/server` | Hosting, requests, sync execution, and internal failures |
 
 Each server run writes a `debug` log (Debug and above) and a `verbose` log (Verbose events only) to
@@ -34,6 +34,6 @@ The process that understands a deprecation detects it. The server logs configura
 deprecations once, at startup; they are not part of any HTTP response (ADR-019). CLI-specific
 deprecations remain client-side.
 
-In ephemeral mode, the server also forwards log events over the child process stdout protocol.
-This provides live server detail in `--log` mode. The server log remains the authoritative record
-for the server process.
+The CLI does not forward server log events. In ephemeral mode, the server writes only error events
+to stderr so the CLI can explain a server that fails to start (ADR-010); the server log remains the
+authoritative record for the server process.

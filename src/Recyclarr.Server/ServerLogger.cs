@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Logging;
 using Recyclarr.Platform;
+using Recyclarr.Server.Persistence;
 using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
@@ -11,11 +12,7 @@ namespace Recyclarr.Server;
 /// <summary>
 /// Configures logging for the server host after its services are available.
 /// </summary>
-internal sealed class ServerLogger(
-    IAppPaths paths,
-    LoggingLevelSwitch levelSwitch,
-    ServerLogOptions options
-)
+internal sealed class ServerLogger(IAppPaths paths, LoggingLevelSwitch levelSwitch, ServerMode mode)
 {
     public IReadOnlyCollection<IFileInfo> ActiveLogFiles { get; private set; } = [];
 
@@ -43,14 +40,21 @@ internal sealed class ServerLogger(
                     .WriteTo.File(template, verboseLogFile.FullName)
             );
 
-        // Ephemeral mode uses one event per line so the parent can re-emit it at the right level.
-        // Standalone mode renders the same console format as the CLI logger.
-        var consoleTemplate = options.UseParentProtocol
-            ? $"{ServerLogOptions.StdoutPrefix}{{@l}}:" + LogSetup.BaseTemplate
-            : "[{@l:u3}] " + LogSetup.BaseTemplate;
-        var consoleTheme = options.UseParentProtocol ? null : TemplateTheme.Code;
+        if (mode == ServerMode.Ephemeral)
+        {
+            // An ephemeral server has no terminal, and its stdout carries only the READY handshake.
+            // Errors go to stderr so the launching CLI can explain a failed startup (ADR-019);
+            // everything else is in the log files.
+            config.WriteTo.Console(
+                new ExpressionTemplate(LogSetup.BaseTemplate),
+                restrictedToMinimumLevel: LogEventLevel.Error,
+                standardErrorFromLevel: LogEventLevel.Error
+            );
+            return;
+        }
+
         config.WriteTo.Console(
-            new ExpressionTemplate(consoleTemplate, theme: consoleTheme),
+            new ExpressionTemplate("[{@l:u3}] " + LogSetup.BaseTemplate, theme: TemplateTheme.Code),
             levelSwitch: levelSwitch
         );
     }
