@@ -20,16 +20,12 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 // A CLI that launches this process passes its own pid so the server stops when the CLI does
 // (ADR-010). Whether the server is ephemeral is a separate choice: `recyclarr serve` launches a
-// persistent server it still owns. An ephemeral server's parent also passes its log level and
-// reads this process's stdout for the READY handshake and forwarded log events.
+// persistent server it still owns.
 var parentPid = ParseParentPid(builder.Configuration["parent-pid"]);
 var mode = builder.Configuration.GetValue<bool>("ephemeral")
     ? ServerMode.Ephemeral
     : ServerMode.Persistent;
-var logOptions = new ServerLogOptions(
-    ParseLogLevel(builder.Configuration["log-level"]),
-    UseParentProtocol: mode == ServerMode.Ephemeral
-);
+var logLevel = ParseLogLevel(builder.Configuration["log-level"]);
 
 // Build-time OpenAPI generation runs this entry point and starts the host, including hosted
 // services, against a no-op server. Main cannot exit early (generation needs a built host), so
@@ -38,7 +34,7 @@ var logOptions = new ServerLogOptions(
 var isDocumentGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-builder.Host.ConfigureContainer<ContainerBuilder>(b => CompositionRoot.Setup(b, logOptions, mode));
+builder.Host.ConfigureContainer<ContainerBuilder>(b => CompositionRoot.Setup(b, logLevel, mode));
 builder.Services.AddSerilog(
     (services, config) => services.GetRequiredService<ServerLogger>().Configure(config)
 );

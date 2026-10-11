@@ -44,15 +44,18 @@ server, so `docker exec` CLI commands never start an ephemeral server.
 **Ephemeral (attached)**: No server configured. The CLI spawns the server binary as a child process,
 uses it for the duration of the command, and the server dies with the CLI. The flow:
 
-1. CLI starts `recyclarr-server --parent-pid={ownPid} --ephemeral=true` with redirected stdout
-   and stdin
+1. CLI starts `recyclarr-server --parent-pid={ownPid} --ephemeral=true` with redirected stdin,
+   stdout, and stderr
 2. Server binds `localhost:0` (OS assigns port), writes `READY:{port}` to stdout
 3. CLI reads the handshake line, stores the base address for the generated client
 4. CLI makes HTTP calls for the duration of the command
 5. CLI exits (or crashes) -- lifeline monitor detects it -- graceful shutdown
 
 The stdout handshake replaces health-check polling for readiness detection. The `READY` line means
-the server is listening; no HTTP round-trip needed.
+the server is listening; no HTTP round-trip needed. An ephemeral server writes nothing else to
+stdout and only error log events to stderr, so a server that exits before `READY` (for example,
+invalid configuration) can tell the CLI why. Its log files hold everything else; the CLI does not
+forward server logs.
 
 ### Lifeline and mode are separate flags
 

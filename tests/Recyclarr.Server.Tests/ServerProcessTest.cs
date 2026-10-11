@@ -106,16 +106,43 @@ internal sealed class ServerProcessTest
     }
 
     [Test]
-    public async Task An_ephemeral_server_keeps_no_database()
+    public async Task An_ephemeral_server_keeps_no_database_and_writes_only_readiness_to_stdout()
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        var errors = server.StandardError.ReadToEndAsync();
         await WaitForReadyAsync(server);
 
         server.StandardInput.Close();
-        await server.StandardOutput.ReadToEndAsync();
+        var remainingOutput = await server.StandardOutput.ReadToEndAsync();
         await WaitForExitAsync(server);
 
+        remainingOutput.Should().BeEmpty();
+        (await errors).Should().BeEmpty();
         StateDatabase.Exists.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task An_ephemeral_server_that_cannot_start_explains_why_on_stderr()
+    {
+        ConfigDirectory
+            .File("recyclarr.yml")
+            .WriteAllText(
+                """
+                radarr:
+                  movies:
+                    base_url: not a url
+                    api_key: abc
+                """
+            );
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().NotBe(0);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("base_url must start with 'http' or 'https'");
     }
 
     private IFileInfo StateDatabase => ConfigDirectory.SubDirectory("state").File("server.db");

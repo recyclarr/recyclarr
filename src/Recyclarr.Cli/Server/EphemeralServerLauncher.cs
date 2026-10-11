@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
-using Serilog.Core;
-using Serilog.Events;
 
 namespace Recyclarr.Cli.Server;
 
@@ -9,26 +7,22 @@ namespace Recyclarr.Cli.Server;
 /// Spawns <c>recyclarr-server</c> as a child process for the duration of a single command.
 /// </summary>
 /// <remarks>
-/// The child's stdout is a line protocol: <c>READY:{port}</c> announces the port the OS assigned,
-/// and <c>LOG:{Level}:{message}</c> carries log events. Forwarding those events into this
-/// process's logger is what keeps <c>--log</c> showing sync output now that the sync itself runs
-/// server-side; draining the pipe also stops the child from blocking on a full stdout buffer.
-/// The stdin pipe is held open as a lifeline: disposing this launcher closes stdin, which the
-/// server's <c>StdinLifelineMonitor</c> reads as EOF and shuts down on (ADR-010).
+/// The child's stdout carries only <c>READY:{port}</c>, which announces the port the OS assigned.
+/// Its stderr carries only error log events, which explain a server that exits before READY; the
+/// server's own log files hold everything else. Both pipes are drained for the child's lifetime so
+/// it never blocks on a full buffer. The stdin pipe is held open as a lifeline: disposing this
+/// launcher closes stdin, which the server's <c>StdinLifelineMonitor</c> reads as EOF and shuts
+/// down on (ADR-010).
 /// </remarks>
-internal sealed class EphemeralServerLauncher(
-    ILogger log,
-    IFileSystem fs,
-    LoggingLevelSwitch levelSwitch
-) : IAsyncDisposable
+internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
 {
     private const string ReadyPrefix = "READY:";
-    private const string LogPrefix = "LOG:";
     private const string LoopbackUrl = "http://127.0.0.1:0";
 
     private Process? _process;
     private StreamWriter? _stdinWriter;
-    private Task? _outputForwarding;
+    private Task? _outputDrain;
+    private Task<List<string>>? _errorCapture;
 
     /// <summary>
     /// Starts the server process and returns its base address once it reports readiness.
@@ -56,6 +50,7 @@ internal sealed class EphemeralServerLauncher(
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 // Port 0 lets the OS pick a free port, so concurrent CLI invocations and a
                 // separately running `recyclarr serve` never contend for one (ADR-010). The
                 // address must be a literal loopback IP: Kestrel rejects dynamic ports on the
@@ -64,16 +59,20 @@ internal sealed class EphemeralServerLauncher(
                 Arguments =
                     $"--urls={LoopbackUrl} "
                     + $"--parent-pid={Environment.ProcessId} "
-                    + "--ephemeral=true "
-                    + $"--log-level={levelSwitch.MinimumLevel}",
+                    + "--ephemeral=true",
             },
         };
 
         _process.Start();
         _stdinWriter = _process.StandardInput;
+        _errorCapture = CaptureLinesAsync(_process.StandardError);
 
-        var address = await ReadUntilReadyAsync(_process.StandardOutput, ct);
-        _outputForwarding = ForwardOutputAsync(_process.StandardOutput);
+        // stdout closing without READY means the server exited, so stderr is complete too
+        var address =
+            await ReadUntilReadyAsync(_process.StandardOutput, ct)
+            ?? throw new ServerStartException(await _errorCapture);
+
+        _outputDrain = CaptureLinesAsync(_process.StandardOutput);
         return address;
     }
 
@@ -91,63 +90,42 @@ internal sealed class EphemeralServerLauncher(
             _process.Dispose();
         }
 
-        if (_outputForwarding is not null)
+        if (_outputDrain is not null)
         {
-            await _outputForwarding;
+            await _outputDrain;
+        }
+
+        if (_errorCapture is not null)
+        {
+            await _errorCapture;
         }
     }
 
     /// <summary>
-    /// A server that stops before READY failed to start, usually because of invalid configuration
-    /// (ADR-019). Its error log lines are the only explanation the CLI gets, so they are kept for
-    /// the failure message rather than only forwarded to the log.
+    /// Returns the server's address, or null when stdout closes first because the server exited
+    /// before it was ready (usually invalid configuration, ADR-019).
     /// </summary>
-    private async Task<Uri> ReadUntilReadyAsync(TextReader output, CancellationToken ct)
+    private static async Task<Uri?> ReadUntilReadyAsync(TextReader output, CancellationToken ct)
     {
-        List<string> startupErrors = [];
-        while (true)
+        while (await output.ReadLineAsync(ct) is { } line)
         {
-            var line =
-                await output.ReadLineAsync(ct) ?? throw new ServerStartException(startupErrors);
-
             if (line.StartsWith(ReadyPrefix, StringComparison.Ordinal))
             {
                 return new Uri($"http://127.0.0.1:{line[ReadyPrefix.Length..]}");
             }
-
-            if (ForwardLine(line) is { Level: >= LogEventLevel.Error } forwarded)
-            {
-                startupErrors.Add(forwarded.Message);
-            }
         }
+
+        return null;
     }
 
-    private async Task ForwardOutputAsync(TextReader output)
+    private static async Task<List<string>> CaptureLinesAsync(TextReader output)
     {
+        List<string> lines = [];
         while (await output.ReadLineAsync() is { } line)
         {
-            ForwardLine(line);
-        }
-    }
-
-    private (LogEventLevel Level, string Message)? ForwardLine(string line)
-    {
-        if (!line.StartsWith(LogPrefix, StringComparison.Ordinal))
-        {
-            log.Debug("Unrecognized server output: {Line}", line);
-            return null;
+            lines.Add(line);
         }
 
-        var payload = line[LogPrefix.Length..];
-        var separator = payload.IndexOf(':', StringComparison.Ordinal);
-        if (separator < 0 || !Enum.TryParse<LogEventLevel>(payload[..separator], out var level))
-        {
-            log.Debug("Unrecognized server output: {Line}", line);
-            return null;
-        }
-
-        var message = payload[(separator + 1)..];
-        log.Write(level, "{ServerMessage}", message);
-        return (level, message);
+        return lines;
     }
 }
