@@ -14,6 +14,8 @@ internal class SyncProgressRenderer(IAnsiConsole console)
     /// Renders a live table from job snapshots as they arrive, and returns the final one. The
     /// display refreshes faster than snapshots arrive so the spinner keeps animating between polls.
     /// The live table clears when the job ends; the caller replaces it with the results table.
+    /// A non-interactive console only waits for the final snapshot, because live-display cursor
+    /// operations can fail on a redirected stream.
     /// </summary>
     public async Task<GetSyncJobResponse> RenderProgressAsync(
         IAsyncEnumerable<GetSyncJobResponse> updates,
@@ -21,6 +23,12 @@ internal class SyncProgressRenderer(IAnsiConsole console)
     )
     {
         GetSyncJobResponse? lastJob = null;
+
+        if (!console.Profile.Capabilities.Interactive)
+        {
+            await ConsumeUpdatesAsync();
+            return LastJobOrThrow();
+        }
 
         console.MarkupLine(
             "[grey]Legend:[/] "
@@ -36,7 +44,10 @@ internal class SyncProgressRenderer(IAnsiConsole console)
             .AutoClear(true)
             .StartAsync(RunPollLoop);
 
-        return lastJob
+        return LastJobOrThrow();
+
+        GetSyncJobResponse LastJobOrThrow() =>
+            lastJob
             ?? throw new InvalidOperationException("The sync job reported no status at all");
 
         async Task RunPollLoop(LiveDisplayContext ctx)

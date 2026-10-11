@@ -93,6 +93,12 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected string ConsoleOutput => _cli.Console.Output;
 
     /// <summary>
+    /// The CLI's console. It starts non-interactive and without ANSI control sequences in its
+    /// output, like redirected output; tests that need a terminal reconfigure it.
+    /// </summary>
+    protected TestConsole CliConsole => _cli.Console;
+
+    /// <summary>
     /// Every message the CLI logged, rendered, one per line.
     /// </summary>
     protected string LogOutput => _cli.Log.Rendered;
