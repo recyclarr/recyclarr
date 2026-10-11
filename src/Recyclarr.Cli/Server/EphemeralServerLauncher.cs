@@ -64,6 +64,7 @@ internal sealed class EphemeralServerLauncher(
                 Arguments =
                     $"--urls={LoopbackUrl} "
                     + $"--parent-pid={Environment.ProcessId} "
+                    + "--ephemeral=true "
                     + $"--log-level={levelSwitch.MinimumLevel}",
             },
         };

@@ -44,7 +44,8 @@ server, so `docker exec` CLI commands never start an ephemeral server.
 **Ephemeral (attached)**: No server configured. The CLI spawns the server binary as a child process,
 uses it for the duration of the command, and the server dies with the CLI. The flow:
 
-1. CLI starts `recyclarr-server --parent-pid={ownPid}` with redirected stdout and stdin
+1. CLI starts `recyclarr-server --parent-pid={ownPid} --ephemeral=true` with redirected stdout
+   and stdin
 2. Server binds `localhost:0` (OS assigns port), writes `READY:{port}` to stdout
 3. CLI reads the handshake line, stores the base address for the generated client
 4. CLI makes HTTP calls for the duration of the command
@@ -53,12 +54,23 @@ uses it for the duration of the command, and the server dies with the CLI. The f
 The stdout handshake replaces health-check polling for readiness detection. The `READY` line means
 the server is listening; no HTTP round-trip needed.
 
-### Lifeline: explicit opt-in via `--parent-pid`
+### Lifeline and mode are separate flags
 
-The server only monitors for parent death when launched with `--parent-pid={pid}`. Without the flag
-(standalone `recyclarr serve`, Docker, systemd), no monitoring runs and the server stays up until
-SIGTERM. This avoids false shutdowns when stdin is `/dev/null` or a non-TTY pipe in container
-environments.
+`--parent-pid={pid}` makes the server stop when the process that launched it ends.
+`--ephemeral=true` selects ephemeral mode: no durable state on disk and no sync schedule. They vary
+independently:
+
+| Launcher                         | `--parent-pid` | `--ephemeral` |
+| -------------------------------- | -------------- | ------------- |
+| API commands, no server address  | yes            | yes           |
+| `recyclarr serve`                | yes            | no            |
+| Docker, systemd, direct launch   | no             | no            |
+
+`recyclarr serve` is a foreground wrapper around a persistent server. Without the lifeline, ending
+the CLI any way other than Ctrl+C (SIGTERM, a crash, a `dotnet watch` restart) left the server
+running with no parent. Without `--parent-pid` (Docker, systemd), no monitoring runs and the server
+stays up until SIGTERM. This avoids false shutdowns when stdin is `/dev/null` or a non-TTY pipe in
+container environments.
 
 When the flag is present, the server runs two concurrent watchdogs (belt-and-suspenders):
 
