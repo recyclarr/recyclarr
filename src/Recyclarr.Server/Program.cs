@@ -18,15 +18,18 @@ using TickerQ.DependencyInjection;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-// Present only in ephemeral mode: the CLI passes its own pid and log level, and reads this
-// process's stdout for both the READY handshake and forwarded log events (ADR-010).
+// A CLI that launches this process passes its own pid so the server stops when the CLI does
+// (ADR-010). Whether the server is ephemeral is a separate choice: `recyclarr serve` launches a
+// persistent server it still owns. An ephemeral server's parent also passes its log level and
+// reads this process's stdout for the READY handshake and forwarded log events.
 var parentPid = ParseParentPid(builder.Configuration["parent-pid"]);
+var mode = builder.Configuration.GetValue<bool>("ephemeral")
+    ? ServerMode.Ephemeral
+    : ServerMode.Persistent;
 var logOptions = new ServerLogOptions(
     ParseLogLevel(builder.Configuration["log-level"]),
-    UseParentProtocol: parentPid is not null
+    UseParentProtocol: mode == ServerMode.Ephemeral
 );
-
-var mode = parentPid is null ? ServerMode.Persistent : ServerMode.Ephemeral;
 
 // Build-time OpenAPI generation runs this entry point and starts the host, including hosted
 // services, against a no-op server. Main cannot exit early (generation needs a built host), so
