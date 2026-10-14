@@ -107,4 +107,44 @@ internal sealed class SonarrV3MediaManagementGatewayTest
         sent["skipFreeSpaceCheckWhenGrabbing"]!.GetValue<bool>().Should().BeTrue();
         sent["userRejectedExtensions"]!.GetValue<string>().Should().Be(".exe");
     }
+
+    // Fields Sonarr adds after the vendored spec snapshot must survive the read-update cycle
+    [Test, AutoMockData]
+    public async Task Update_round_trips_server_fields_unknown_to_the_client(
+        [Frozen] SonarrApi.IMediaManagementConfigApi api,
+        SonarrV3MediaManagementGateway sut
+    )
+    {
+        const string serverJson = """
+            {
+              "id": 1,
+              "downloadPropersAndRepacks": "preferAndUpgrade",
+              "futureSetting": { "enabled": true, "limit": 5 }
+            }
+            """;
+        api.MediamanagementGet(default)
+            .ReturnsForAnyArgs(
+                JsonSerializer.Deserialize<SonarrApi.MediaManagementConfigResource>(
+                    serverJson,
+                    GlobalJsonSerializerSettings.Services
+                )!
+            );
+        var fetched = await sut.GetMediaManagement(CancellationToken.None);
+        await sut.UpdateMediaManagement(
+            fetched with
+            {
+                PropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
+            },
+            CancellationToken.None
+        );
+
+        var sentDto = api.ReceivedCalls()
+            .Single(c =>
+                c.GetMethodInfo().Name
+                == nameof(SonarrApi.IMediaManagementConfigApi.MediamanagementPut)
+            )
+            .GetArguments()[1];
+        var sent = JsonSerializer.SerializeToNode(sentDto, GlobalJsonSerializerSettings.Services)!;
+        sent["futureSetting"]!.ToJsonString().Should().Be("""{"enabled":true,"limit":5}""");
+    }
 }
