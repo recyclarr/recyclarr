@@ -1,31 +1,34 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-language: en-US
 reviews:
-  profile: chill
-  request_changes_workflow: false
-  high_level_summary: true
-  poem: false
-  collapse_walkthrough: true
   auto_review:
-    enabled: true
-    drafts: false
     base_branches:
-      - ".*"
+      - .*
     ignore_usernames:
       - renovate[bot]
+      - recyclarr[bot]
   path_filters:
-    - "!schemas-dist/**"
+    - "!src/**/openapi.json"
   path_instructions:
     - path: src/**
       instructions: >-
-        C# 14 / .NET 10 with Autofac DI and nullable reference types. Do not comment on
-        formatting or style; compiler analyzers and CSharpier handle those.
-    - path: tests/**
-      instructions: >-
-        NUnit 4 + NSubstitute + AutoFixture + AwesomeAssertions.
-    - path: schemas/**
-      instructions: >-
-        JSON Schemas are the single source of truth for recyclarr.yml and settings.yml
-        validation. Changes here must match corresponding C# model changes in src/.
-chat:
-  auto_reply: true
+        Do not comment on formatting or style; CSharpier and build-enforced analyzers handle it.
+  finishing_touches:
+    docstrings:
+      enabled: false
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      requirements: >-
+        Conventional Commits: type(scope): subject. Types: feat, fix, perf, refactor, test,
+        ci, build, docs, chore; append ! for breaking. Scope is optional; if present, one of
+        deps, sync, config, yaml, cli, servarr, docker, agents.
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - files: .opencode/skills/testing/SKILL.md
+        applyTo: tests/**
+      - files: .opencode/skills/mapperly/SKILL.md
+        applyTo: "**/*Mapper.cs"
+      - files: .opencode/skills/changelog/SKILL.md
+        applyTo: CHANGELOG.md
