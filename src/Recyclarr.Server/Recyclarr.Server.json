@@ -45,8 +45,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/guide/{service}/custom-formats": {
@@ -88,8 +96,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/guide/{service}/naming": {
@@ -131,8 +147,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/guide/{service}/qualities": {
@@ -174,8 +198,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/guide/{service}/quality-profiles": {
@@ -217,8 +249,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/guide/{service}/score-sets": {
@@ -260,8 +300,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/instances/{name}/custom-formats": {
@@ -294,6 +342,9 @@
               }
             }
           },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          },
           "404": {
             "description": "No configured instance has this name.",
             "content": {
@@ -314,7 +365,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/instances/{name}/custom-formats/{id}": {
@@ -379,8 +435,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/sync/jobs": {
@@ -435,8 +499,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -492,8 +564,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/sync/jobs/{id}": {
@@ -537,6 +617,9 @@
               }
             }
           },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          },
           "404": {
             "description": "No job has this ID.",
             "content": {
@@ -547,7 +630,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/sync/jobs/{id}/results": {
@@ -591,6 +679,9 @@
               }
             }
           },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          },
           "404": {
             "description": "No job has this ID.",
             "content": {
@@ -621,7 +712,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     },
     "/api/v1/sync/schedule": {
@@ -642,8 +738,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
       }
     }
   },
@@ -3920,6 +4024,12 @@
           }
         },
         "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\n            writes. A preview job computes the change but does not write it."
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   },

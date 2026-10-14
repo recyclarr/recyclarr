@@ -11,10 +11,6 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
         Get("/instances/{name}/custom-formats");
         Version(1);
 
-        // FastEndpoints secures endpoints by default. No authentication scheme exists yet, so the
-        // opt-out is explicit until API key auth lands (REC-153).
-        AllowAnonymous();
-
         Description(b =>
             b.Produces<ListInstanceCustomFormatsResponse>()
                 .ProducesProblems(404)

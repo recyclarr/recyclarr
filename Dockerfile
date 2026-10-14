@@ -38,6 +38,9 @@ LABEL name="recyclarr" \
 # ASPNETCORE_HTTP_PORTS is cleared so the base image's 8080 default does not compete with it.
 # RECYCLARR_SERVER_URL makes `docker exec <container> recyclarr ...` use this server instead of
 # starting a private one against the same /config.
+#
+# RECYCLARR_API_KEY has no default: the server refuses to start without it. Users set it on the
+# container, and both the server and `docker exec` CLI commands read it.
 ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_CONFIG_DIR=/config \
     ASPNETCORE_URLS=http://0.0.0.0:7982 \

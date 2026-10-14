@@ -10,7 +10,8 @@
   only for `sync.http`.
 - Assert with `??` or `test()` in `{{response}}` scripts. Body paths omit `$.` (`?? body items
   isArray`); httpyac 6.16.7 fails on `$.items`.
-- Defaults live in `.httpyac.json` `$default`; override with `--var name=value`.
+- Defaults live in `.httpyac.json` `$default`; override with `--var name=value`. `apiKey`
+  defaults to the process's `RECYCLARR_API_KEY` and MUST match the running server's key.
 - Requests that change Sonarr/Radarr state MUST carry `# @disabled !destructive`. `--all` ignores
   `--tag`, so tags cannot exclude them.
 - Exports from `# @loop` iterations do not reach later regions; share loop state via `$global`.

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
 using System.Net.Http.Json;
@@ -103,6 +104,24 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             .Contain(evt =>
                 evt.Level == LogEventLevel.Fatal
                 && evt.MessageTemplate.Text == "Server startup failed: {Message}"
+            );
+    }
+
+    // Fail closed: a server without a key would serve its API to anyone (ADR-027).
+    [TestCase(null)]
+    [TestCase("")]
+    public void Missing_server_api_key_stops_startup(string? key)
+    {
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns(key);
+
+        var start = () => CreateClient();
+
+        start.Should().Throw<Exception>();
+        _log.Events.Should()
+            .Contain(evt =>
+                evt.Level == LogEventLevel.Fatal
+                && evt.RenderMessage(CultureInfo.InvariantCulture)
+                    .Contains("RECYCLARR_API_KEY", StringComparison.Ordinal)
             );
     }
 

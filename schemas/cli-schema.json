@@ -16,6 +16,11 @@
           "pattern": "^https?://",
           "title": "Address of an already-running Recyclarr server",
           "description": "When set, commands send their work to this server instead of starting a private one. Use this to point the CLI at a 'recyclarr serve' instance, a container, or a Kubernetes deployment. A non-empty RECYCLARR_SERVER_URL environment variable overrides this value."
+        },
+        "api_key": {
+          "type": "string",
+          "title": "Server API key sent to the server at base_url",
+          "description": "Must match the RECYCLARR_API_KEY environment variable of that server. Not used without base_url, because the CLI gives the server it starts a one-time key. A non-empty RECYCLARR_API_KEY environment variable overrides this value."
         }
       }
     }

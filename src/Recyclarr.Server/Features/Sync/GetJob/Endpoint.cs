@@ -12,10 +12,6 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         Get("/sync/jobs/{id}");
         Version(1);
 
-        // FastEndpoints secures endpoints by default. No authentication scheme exists yet, so the
-        // opt-out is explicit until API key auth lands (REC-153).
-        AllowAnonymous();
-
         Description(b =>
             b.Produces<GetSyncJobResponse>().ProducesProblems(400, 404).WithTags("Sync")
         );

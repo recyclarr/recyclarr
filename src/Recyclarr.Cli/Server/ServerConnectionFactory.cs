@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using Recyclarr.Cli.Settings;
 
 namespace Recyclarr.Cli.Server;
@@ -16,23 +18,37 @@ internal sealed class ServerConnectionFactory(
 {
     public async Task<ServerConnection> ConnectAsync(CancellationToken ct)
     {
-        var configuredUrl = settingsLoader.Load().ServerBaseUrl;
-        if (configuredUrl is not null)
+        var settings = settingsLoader.Load();
+        if (settings.ServerBaseUrl is { } configuredUrl)
         {
             log.Debug("Using configured server at {BaseUrl}", configuredUrl);
-            return new ServerConnection(CreateClient(configuredUrl), ownedServer: null);
+            var client = CreateClient(configuredUrl, settings.ServerApiKey);
+            return new ServerConnection(client, ownedServer: null);
         }
 
+        // A one-time key keeps the private server closed to other local processes (ADR-027).
+        var apiKey = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
         var launcher = createLauncher();
-        var address = await launcher.StartAsync(ct);
+        var address = await launcher.StartAsync(apiKey, ct);
         log.Debug("Started ephemeral server at {BaseUrl}", address);
-        return new ServerConnection(CreateClient(address), launcher);
+        return new ServerConnection(CreateClient(address, apiKey), launcher);
     }
 
-    private HttpClient CreateClient(Uri baseAddress)
+    /// <summary>
+    /// Without a key the request carries no Authorization header, and the server answers 401.
+    /// </summary>
+    private HttpClient CreateClient(Uri baseAddress, string? apiKey)
     {
         var client = createClient();
         client.BaseAddress = baseAddress;
+        if (apiKey is not null)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                apiKey
+            );
+        }
+
         return client;
     }
 }

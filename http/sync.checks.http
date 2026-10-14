@@ -75,3 +75,11 @@ Content-Type: application/json
 
 ?? status == 400
 ?? body unknownInstances isArray
+
+###
+
+# Wrong server API key
+GET {{baseUrl}}/api/v1/sync/jobs
+Authorization: Bearer wrong-key
+
+?? status == 401

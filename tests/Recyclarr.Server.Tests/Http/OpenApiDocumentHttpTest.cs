@@ -58,6 +58,23 @@ internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
         undescribed.Should().BeEmpty();
     }
 
+    [Test]
+    public async Task Every_api_operation_requires_the_bearer_scheme()
+    {
+        var document = await GetDocument();
+        var schemes = document!["components"]!["securitySchemes"]!.AsObject();
+        var scheme = schemes.Should().ContainSingle().Which;
+        var unsecured = document["paths"]!
+            .AsObject()
+            .SelectMany(path => path.Value!.AsObject().Select(op => (path.Key, Op: op.Value!)))
+            .Where(x => x.Op["security"]?[0]?[scheme.Key] is null)
+            .Select(x => x.Key);
+
+        scheme.Value!["type"]!.GetValue<string>().Should().Be("http");
+        scheme.Value["scheme"]!.GetValue<string>().Should().Be("bearer");
+        unsecured.Should().BeEmpty();
+    }
+
     private async Task<JsonNode?> GetDocument()
     {
         using var client = CreateClient();

@@ -1,3 +1,4 @@
+using System.Net;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Cli.Processors.Sync.Results;
 using Recyclarr.Cli.Server;
@@ -56,10 +57,15 @@ internal class SyncCommandHandler(
             return response.Content!.Id;
         }
 
-        // No HTTP response at all: a transport failure, not a refusal.
-        if (response.Error is ApiRequestException transportFailure)
+        // No HTTP response at all (a transport failure) or a rejected API key: not a refusal of
+        // this request, so the exception handler reports it like any other command.
+        if (
+            response.Error
+            is ApiRequestException
+                or ApiException { StatusCode: HttpStatusCode.Unauthorized }
+        )
         {
-            throw transportFailure;
+            throw response.Error;
         }
 
         await RenderRefusalAsync(response);

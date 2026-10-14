@@ -11,7 +11,8 @@ namespace Recyclarr.Cli.Console.Commands;
 /// <summary>
 /// Starts a persistent server in the foreground. The server reads its own bind address and port
 /// (settings.yml, or --urls/ASPNETCORE_URLS); this command passes only its own pid, so the server
-/// stops when this process ends (ADR-010).
+/// stops when this process ends (ADR-010). The server inherits this process's environment, which
+/// must set <c>RECYCLARR_API_KEY</c> (ADR-027).
 /// </summary>
 [Description("Run the Recyclarr HTTP server in the foreground")]
 [UsedImplicitly]

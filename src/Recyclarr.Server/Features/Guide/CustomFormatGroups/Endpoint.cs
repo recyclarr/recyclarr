@@ -11,10 +11,6 @@ internal sealed class Endpoint(CfGroupResourceQuery groups)
         Get("/guide/{service}/custom-format-groups");
         Version(1);
 
-        // FastEndpoints secures endpoints by default. No authentication scheme exists yet, so the
-        // opt-out is explicit until API key auth lands (REC-153).
-        AllowAnonymous();
-
         Description(b => b.Produces<ListGuideCustomFormatGroupsResponse>().WithTags("Guide"));
         Summary(s =>
         {

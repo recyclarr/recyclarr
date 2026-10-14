@@ -12,28 +12,33 @@ namespace Recyclarr.Cli.Settings;
 /// <remarks>
 /// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
 /// YamlDotNet's deserializer names C# types instead. A non-empty <c>RECYCLARR_SERVER_URL</c>
-/// overrides <c>server.base_url</c>, so an image can target its own server without a file in the
-/// user's volume.
+/// overrides <c>server.base_url</c>, and a non-empty <c>RECYCLARR_API_KEY</c> overrides
+/// <c>server.api_key</c>, so an image can target its own server without a file in the user's
+/// volume. The server reads the same key variable, so one value serves both processes.
 /// </remarks>
 internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator, IEnvironment env)
 {
     public const string FileName = "cli.yml";
     public const string ServerUrlVariable = "RECYCLARR_SERVER_URL";
+    public const string ApiKeyVariable = "RECYCLARR_API_KEY";
 
     public CliSettings Load()
     {
         var settings = LoadFile();
 
         var envUrl = env.GetEnvironmentVariable(ServerUrlVariable);
-        if (string.IsNullOrEmpty(envUrl))
+        if (!string.IsNullOrEmpty(envUrl))
         {
-            return settings;
+            settings = settings with { ServerBaseUrl = ParseBaseUrl(envUrl, ServerUrlVariable) };
         }
 
-        return settings with
+        var envKey = env.GetEnvironmentVariable(ApiKeyVariable);
+        if (!string.IsNullOrEmpty(envKey))
         {
-            ServerBaseUrl = ParseBaseUrl(envUrl, ServerUrlVariable),
-        };
+            settings = settings with { ServerApiKey = envKey };
+        }
+
+        return settings;
     }
 
     private CliSettings LoadFile()
@@ -47,13 +52,15 @@ internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator, IE
         try
         {
             var root = Parse(file.OpenText);
-            var server = Mapping(root, "server", ["base_url"]);
+            var server = Mapping(root, "server", ["base_url", "api_key"]);
             var baseUrl = Scalar(server, "base_url", "server.base_url");
+            var apiKey = Scalar(server, "api_key", "server.api_key");
             return new CliSettings
             {
                 ServerBaseUrl = string.IsNullOrEmpty(baseUrl)
                     ? null
                     : ParseBaseUrl(baseUrl, "'server.base_url'"),
+                ServerApiKey = string.IsNullOrEmpty(apiKey) ? null : apiKey,
             };
         }
         catch (CliSettingsException e)

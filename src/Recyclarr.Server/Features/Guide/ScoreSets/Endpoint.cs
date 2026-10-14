@@ -11,10 +11,6 @@ internal sealed class Endpoint(CustomFormatResourceQuery customFormats)
         Get("/guide/{service}/score-sets");
         Version(1);
 
-        // FastEndpoints secures endpoints by default. No authentication scheme exists yet, so the
-        // opt-out is explicit until API key auth lands (REC-153).
-        AllowAnonymous();
-
         Description(b => b.Produces<ListGuideScoreSetsResponse>().WithTags("Guide"));
         Summary(s =>
         {

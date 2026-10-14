@@ -5,11 +5,14 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FastEndpoints;
 using FastEndpoints.OpenApi;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.OpenApi;
 using Recyclarr;
 using Recyclarr.Logging;
 using Recyclarr.Server;
+using Recyclarr.Server.Auth;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Sync.Schedule;
 using Scalar.AspNetCore;
@@ -61,6 +64,12 @@ builder
         o.Version = "v1";
         o.ShortSchemaNames = true;
         o.EnableJWTBearerAuth = false;
+
+        // No BearerFormat: the server API key is an opaque token, not a JWT.
+        o.AddAuth(
+            ApiKeyAuthenticationHandler.SchemeName,
+            new OpenApiSecurityScheme { Type = SecuritySchemeType.Http, Scheme = "bearer" }
+        );
         o.TagDescriptions = t =>
         {
             t["Guide"] = "Read-only TRaSH Guides data, scoped to one service.";
@@ -86,10 +95,44 @@ builder
                     return Task.CompletedTask;
                 }
             );
+            // FastEndpoints declares 401 with only a reason phrase, and not at all on endpoints
+            // that clear default responses. Everything under /api requires the key (ADR-027).
+            options.AddDocumentTransformer(
+                (document, _, _) =>
+                {
+                    var operations = document
+                        .Paths.Where(p => p.Key.StartsWith("/api/", StringComparison.Ordinal))
+                        .SelectMany(p =>
+                            p.Value.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>()
+                        );
+
+                    foreach (var operation in operations)
+                    {
+                        operation.Responses ??= [];
+                        operation.Responses["401"] = new OpenApiResponse
+                        {
+                            Description =
+                                "The request has no valid server API key in its Authorization "
+                                + "header.",
+                        };
+                    }
+
+                    return Task.CompletedTask;
+                }
+            );
             options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
             options.AddSchemaTransformer<EnumDescriptionSchemaTransformer>();
         };
     });
+
+// FastEndpoints requires authentication on every endpoint that does not opt out (ADR-027).
+builder
+    .Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
+    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyAuthenticationHandler.SchemeName,
+        configureOptions: null
+    );
+builder.Services.AddAuthorization();
 
 // Standalone invocations (e.g. the foreground `serve` command) have no parent to watch and manage
 // their own lifecycle via SIGTERM.
@@ -111,6 +154,8 @@ if (!isDocumentGeneration)
 await using var app = builder.Build();
 
 app.UseSerilogRequestLogging();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseFastEndpoints(c =>
 {
     c.Versioning.Prefix = "api/v";
@@ -132,6 +177,12 @@ if (!isDocumentGeneration)
 
 try
 {
+    if (!isDocumentGeneration)
+    {
+        // Fail closed: without a key the server would serve its API to anyone (ADR-027).
+        app.Services.GetRequiredService<ServerApiKey>();
+    }
+
     await app.StartAsync();
 }
 catch (Exception e)

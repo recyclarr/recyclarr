@@ -14,9 +14,10 @@ internal sealed class ServerUrlEnvironmentHttpTest : CliServerHttpFixture
     public async Task Variable_overrides_cli_yml_base_url()
     {
         WriteCliSettings(
-            """
+            $"""
             server:
               base_url: http://from-file:7982
+              api_key: {ApiKey}
             """
         );
         SetCliEnvironmentVariable(EnvVar, "http://from-env:7982");
@@ -31,9 +32,10 @@ internal sealed class ServerUrlEnvironmentHttpTest : CliServerHttpFixture
     public async Task Empty_variable_falls_back_to_cli_yml()
     {
         WriteCliSettings(
-            """
+            $"""
             server:
               base_url: http://from-file:7982
+              api_key: {ApiKey}
             """
         );
         SetCliEnvironmentVariable(EnvVar, "");
