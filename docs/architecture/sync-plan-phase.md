@@ -75,7 +75,9 @@ profile is created. Implicit profiles:
 These components have simpler planning:
 
 **Quality Size**: Validates configured quality definitions exist in guides, resolves preferred ratio
-calculations.
+calculations. On services that store sizes per profile (Sonarr v5), it assigns sizes to each
+profile listed under `quality_profiles` instead of planning global sizes (see
+[PDR-008](../decisions/product/008-sonarr-v5-per-profile-quality-sizes.md)).
 
 **Media Naming**: Validates naming format references exist in guides for the service type.
 

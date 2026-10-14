@@ -2,7 +2,7 @@ namespace Recyclarr.Compatibility.Sonarr;
 
 public class SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
 {
-    public async Task Check(CancellationToken ct)
+    public async Task<SonarrCapabilities> Check(CancellationToken ct)
     {
         var capabilities = await capabilityFetcher.GetCapabilities(ct);
 
@@ -13,5 +13,7 @@ public class SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher
                     + $"required version of {SonarrCapabilities.MinimumVersion}."
             );
         }
+
+        return capabilities;
     }
 }

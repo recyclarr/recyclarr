@@ -1,11 +1,11 @@
 using Recyclarr.Servarr.QualityProfile;
 using Riok.Mapperly.Abstractions;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.QualityProfile;
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class SonarrQualityProfileMapper
+internal static partial class SonarrV3QualityProfileMapper
 {
     public static partial QualityProfileData ToDomain(SonarrApi.QualityProfileResource dto);
 
@@ -30,6 +30,21 @@ internal static partial class SonarrQualityProfileMapper
                 ? new QualityProfileItemQuality { Id = dto.Quality.Id, Name = dto.Quality.Name }
                 : null,
             Items = (dto.Items ?? []).Select(ItemToDomain).ToList(),
+            Size = SizeToDomain(dto),
         };
+    }
+
+    private static QualityItemSize? SizeToDomain(SonarrApi.QualityProfileQualityItemResource dto)
+    {
+        if (dto is { MinSize: null, MaxSize: null, PreferredSize: null })
+        {
+            return null;
+        }
+
+        return new QualityItemSize(
+            (decimal)(dto.MinSize ?? 0),
+            (decimal?)dto.MaxSize,
+            (decimal?)dto.PreferredSize
+        );
     }
 }

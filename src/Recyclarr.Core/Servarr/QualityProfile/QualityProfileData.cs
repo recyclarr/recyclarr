@@ -35,6 +35,40 @@ public record QualityProfileItem
     public bool? Allowed { get; init; }
     public QualityProfileItemQuality? Quality { get; init; }
     public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
+
+    /// <summary>
+    /// Size limits stored on this quality item by services that keep sizes per profile (Sonarr
+    /// v5). Null means the service reported no sizes, or the item came from a source that does not
+    /// carry them; gateways then leave the service's values untouched.
+    /// </summary>
+    public QualityItemSize? Size { get; init; }
+}
+
+/// <summary>
+/// Quality size limits in MB per minute. A null <see cref="Max"/> or <see cref="Preferred"/> means
+/// unlimited.
+/// </summary>
+/// <remarks>
+/// Values are stored without trailing decimal zeros, so equal sizes serialize identically (for
+/// example <c>70.0</c> becomes <c>70</c>). Change detection compares serialized items, and
+/// computed sizes would otherwise never match the values a service returns.
+/// </remarks>
+public record QualityItemSize
+{
+    public QualityItemSize(decimal min, decimal? max, decimal? preferred)
+    {
+        Min = Normalize(min);
+        Max = max is { } m ? Normalize(m) : null;
+        Preferred = preferred is { } p ? Normalize(p) : null;
+    }
+
+    public decimal Min { get; }
+    public decimal? Max { get; }
+    public decimal? Preferred { get; }
+
+    // Dividing by 1 with maximum scale strips trailing zeros without changing the value
+    private static decimal Normalize(decimal value) =>
+        value / 1.0000000000000000000000000000m;
 }
 
 public record QualityProfileItemQuality

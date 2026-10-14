@@ -26,8 +26,9 @@ Re-verify against generated code after a Mapperly upgrade.
 - `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Generated DTOs
   have many properties we don't map; this silences unmapped-member warnings (RMG012, RMG020).
 - Mappers are `internal static partial class`.
-- One mapper class per service (Sonarr/Radarr). Generated DTO types share names but are distinct
-  types from separate packages; alias namespaces: `using SonarrApi = Recyclarr.Api.Sonarr`.
+- One mapper class per service API generation (`SonarrV3*`, `SonarrV5*`, `Radarr*`). Generated DTO
+  types share names but are distinct types; alias namespaces:
+  `using SonarrApi = Recyclarr.Api.Sonarr.V3`.
 - Domain-to-DTO writes use an existing-target method
   (`void UpdateDto(TDomain, [MappingTarget] TDto)`) so DTO fields the domain does not model keep
   their fetched values.
@@ -51,7 +52,7 @@ Consequences:
   object initializer overwrites them or throws. `public string Name { get; init; } = "";` still
   throws when the DTO field is null.
 - A field that Sonarr/Radarr may omit needs a nullable domain property, or a user-implemented method
-  that supplies the fallback (see `ItemToDomain` in `SonarrQualityProfileMapper`).
+  that supplies the fallback (see `ItemToDomain` in `SonarrV3QualityProfileMapper`).
 - A non-nullable settable property with no initializer stays `null` when the source is null,
   silently violating its contract. Avoid this shape.
 - In `UpdateDto`, a null domain value overwrites the DTO field with null, because DTO targets are
@@ -73,7 +74,7 @@ Consequences:
 
 Mapperly discovers any non-partial method in the mapper with a mapping signature and uses it for
 that type pair, including nested members and collection elements (`MapFieldValue` in
-`SonarrCustomFormatMapper`). Parameter and return types must match the mapped types exactly,
+`SonarrV3CustomFormatMapper`). Parameter and return types must match the mapped types exactly,
 including nullability.
 
 ## Verifying Generated Code

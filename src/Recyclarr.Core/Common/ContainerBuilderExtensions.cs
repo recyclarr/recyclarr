@@ -1,7 +1,6 @@
 using Autofac;
 using Autofac.Builder;
-using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide;
+using Recyclarr.Compatibility;
 
 namespace Recyclarr.Common;
 
@@ -15,28 +14,30 @@ public static class ContainerBuilderExtensions
             configure(scoped);
         }
 
-        // Keyed gateway registration: registers one gateway per service (Sonarr, Radarr) and a
-        // non-keyed resolution that selects the correct gateway based on IServiceConfiguration.
-        public void RegisterServiceGateway<TPort, TSonarr, TRadarr>()
+        // Registers the port as a non-keyed service that selects the gateway keyed by the
+        // detected API target. Resolving the port before detection fails because
+        // DetectedService is not registered yet.
+        public ServiceGatewayRegistration<TPort> RegisterServiceGateway<TPort>()
             where TPort : notnull
-            where TSonarr : TPort
-            where TRadarr : TPort
         {
             builder
-                .RegisterType<TSonarr>()
-                .Keyed<TPort>(SupportedServices.Sonarr)
-                .InstancePerLifetimeScope();
-            builder
-                .RegisterType<TRadarr>()
-                .Keyed<TPort>(SupportedServices.Radarr)
-                .InstancePerLifetimeScope();
-            builder
-                .Register(c =>
-                    c.ResolveKeyed<TPort>(c.Resolve<IServiceConfiguration>().ServiceType)
-                )
+                .Register(c => c.ResolveKeyed<TPort>(c.Resolve<DetectedService>().ApiTarget))
                 .As<TPort>()
                 .InstancePerLifetimeScope();
+
+            return new ServiceGatewayRegistration<TPort>(builder);
         }
+    }
+}
+
+public class ServiceGatewayRegistration<TPort>(ContainerBuilder builder)
+    where TPort : notnull
+{
+    public ServiceGatewayRegistration<TPort> For<TGateway>(ServiceApiTarget target)
+        where TGateway : TPort
+    {
+        builder.RegisterType<TGateway>().Keyed<TPort>(target).InstancePerLifetimeScope();
+        return this;
     }
 }
 

@@ -1,12 +1,12 @@
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 using Riok.Mapperly.Abstractions;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V5;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class SonarrCustomFormatMapper
+internal static partial class SonarrV5CustomFormatMapper
 {
     public static partial CustomFormatResource ToDomain(SonarrApi.CustomFormatResource dto);
 

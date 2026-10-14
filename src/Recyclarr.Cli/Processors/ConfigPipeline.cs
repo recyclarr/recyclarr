@@ -1,3 +1,5 @@
+using Autofac;
+using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
@@ -89,8 +91,12 @@ internal class ConfigPipeline(
     {
         foreach (var config in GetConfigs())
         {
-            using var scope = instanceScopeFactory.Start<TProcessor>(config);
-            await action(scope.Entry, ct);
+            using var instance = instanceScopeFactory.Start<ILifetimeScope>(config);
+            var enforcer = instance.Entry.Resolve<ServiceAgnosticCapabilityEnforcer>();
+            var detected = await enforcer.Check(config, ct);
+
+            await using var detectedScope = instance.Entry.BeginDetectedServiceScope(detected);
+            await action(detectedScope.Resolve<TProcessor>(), ct);
         }
     }
 }

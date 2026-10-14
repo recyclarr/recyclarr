@@ -1,12 +1,16 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
+using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
+using Recyclarr.Config.Models;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiFetchPhase(
     IQualityProfileService service,
-    IQualityProfileStatePersister statePersister
+    IQualityProfileStatePersister statePersister,
+    IQualityItemLimitFactory limitFactory,
+    IServiceConfiguration config
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -25,6 +29,12 @@ internal class QualityProfileApiFetchPhase(
             await languagesTask
         );
         context.State = statePersister.Load();
+
+        if (context.Plan.QualityProfiles.Any(x => x.QualitySizes is not null))
+        {
+            context.SizeLimits = await limitFactory.Create(config.ServiceType, ct);
+        }
+
         return PipelineFlow.Continue;
     }
 }

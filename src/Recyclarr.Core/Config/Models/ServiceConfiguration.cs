@@ -108,4 +108,7 @@ public record QualityProfileConfig
     public ResetUnmatchedScoresConfig ResetUnmatchedScores { get; init; } = new();
     public QualitySortAlgorithm QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfig> Qualities { get; init; } = [];
+
+    // Per-profile size source; honored only by services that store sizes per profile.
+    public QualityDefinitionConfig? QualityDefinition { get; init; }
 }

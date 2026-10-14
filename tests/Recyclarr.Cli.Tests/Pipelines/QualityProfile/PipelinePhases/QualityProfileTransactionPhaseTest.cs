@@ -6,6 +6,7 @@ using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
@@ -59,6 +60,51 @@ internal sealed class QualityProfileTransactionPhaseTest
             .BeEquivalentTo(
                 new UpdatedQualityProfile { ProfileConfig = validProfile, Profile = dtos[0] }
             );
+    }
+
+    [Test, AutoMockData]
+    public async Task Planned_sizes_are_resolved_within_limits_onto_profile_items(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var dto = new QualityProfileData
+        {
+            Id = 1,
+            Name = "profile1",
+            Items =
+            [
+                new QualityProfileItem
+                {
+                    Allowed = true,
+                    Quality = new QualityProfileItemQuality { Id = 9, Name = "HDTV-1080p" },
+                    Size = new QualityItemSize(1, 10, 5),
+                },
+            ],
+        };
+
+        var planned = NewPlan.Qp("profile1") with
+        {
+            QualitySizes = NewPlan.Qs("series", NewPlan.QsItem("HDTV-1080p", 5, 1500, 30)),
+        };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(planned),
+            ApiFetchOutput = NewQp.ServiceData([dto]),
+            State = CreateCache(),
+            SizeLimits = new QualityItemLimits(1000, 995),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.UpdatedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.BuildMergedProfile()
+            .Items.Should()
+            .ContainSingle()
+            .Which.Size.Should()
+            .Be(new QualityItemSize(5, null, 30), "max beyond the limit means unlimited");
     }
 
     [Test, AutoMockData]

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Pipelines;
@@ -18,16 +19,19 @@ internal class InstanceSyncProcessor(
     IAnsiConsole console,
     IServiceConfiguration config,
     IInstancePublisher instancePublisher,
-    PlanBuilder planBuilder,
-    IPipelineExecutor pipelines,
     ExceptionHandler exceptionHandler,
     SyncEventOutputStrategy syncEventOutput,
-    ServiceAgnosticCapabilityEnforcer enforcer
+    ServiceAgnosticCapabilityEnforcer enforcer,
+    ILifetimeScope instanceScope
 )
 {
     public async Task<InstanceSyncResult> Process(ISyncSettings settings, CancellationToken ct)
     {
         using var _ = LogContext.PushProperty(LogProperty.Scope, config.InstanceName);
+
+        // Pipelines exist only after detection succeeds; a failed compatibility check has none
+        // to mark as interrupted.
+        IPipelineExecutor? pipelines = null;
 
         try
         {
@@ -43,9 +47,11 @@ internal class InstanceSyncProcessor(
                 config.InstanceName
             );
 
-            await enforcer.Check(config, ct);
+            var detected = await enforcer.Check(config, ct);
+            using var detectedScope = instanceScope.BeginDetectedServiceScope(detected);
+            pipelines = detectedScope.Resolve<IPipelineExecutor>();
 
-            var plan = planBuilder.Build();
+            var plan = detectedScope.Resolve<PlanBuilder>().Build();
             var result = await pipelines.Execute(settings, plan, instancePublisher, ct);
             return result == PipelineResult.Failed
                 ? InstanceSyncResult.Failed
@@ -58,7 +64,7 @@ internal class InstanceSyncProcessor(
                 throw;
             }
 
-            pipelines.InterruptAll(instancePublisher);
+            pipelines?.InterruptAll(instancePublisher);
             return InstanceSyncResult.Failed;
         }
     }

@@ -10,19 +10,24 @@ public class ServiceAgnosticCapabilityEnforcer(
     RadarrCapabilityEnforcer radarrEnforcer
 )
 {
-    public async Task Check(IServiceConfiguration config, CancellationToken ct)
+    public async Task<DetectedService> Check(IServiceConfiguration config, CancellationToken ct)
     {
         await CheckServiceTypeMismatch(config, ct);
 
         switch (config)
         {
             case SonarrConfiguration:
-                await sonarrEnforcer.Check(ct);
-                break;
+                var sonarr = await sonarrEnforcer.Check(ct);
+                return new DetectedService(sonarr.Version, sonarr.ApiTarget);
 
             case RadarrConfiguration:
-                await radarrEnforcer.Check(ct);
-                break;
+                var radarr = await radarrEnforcer.Check(ct);
+                return new DetectedService(radarr.Version, ServiceApiTarget.RadarrV3);
+
+            default:
+                throw new InvalidOperationException(
+                    $"Unsupported configuration type: {config.GetType().Name}"
+                );
         }
     }
 

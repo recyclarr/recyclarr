@@ -1,15 +1,15 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines;
 
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
-    IOrderedEnumerable<IPipelinePhase<TContext>> phases,
+    Lazy<IOrderedEnumerable<IPipelinePhase<TContext>>> phases,
     IServiceConfiguration config
 ) : ISyncPipeline
     where TContext : PipelineContext, IPipelineMetadata, new()
@@ -17,10 +17,7 @@ internal class GenericSyncPipeline<TContext>(
     public PipelineType PipelineType => TContext.PipelineType;
     public IReadOnlyList<PipelineType> Dependencies => TContext.Dependencies;
 
-    public bool AppliesTo(SupportedServices serviceType)
-    {
-        return TContext.ServiceAffinity is null || TContext.ServiceAffinity == serviceType;
-    }
+    public bool AppliesTo(ServiceApiTarget target) => TContext.AppliesTo(target);
 
     public async Task<PipelineResult> Execute(
         ISyncSettings settings,
@@ -48,7 +45,7 @@ internal class GenericSyncPipeline<TContext>(
 
         try
         {
-            foreach (var phase in phases)
+            foreach (var phase in phases.Value)
             {
                 var flow = await phase.Execute(context, ct);
                 if (flow == PipelineFlow.Terminate)

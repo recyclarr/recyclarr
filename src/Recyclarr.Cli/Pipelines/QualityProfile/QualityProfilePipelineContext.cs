@@ -1,8 +1,9 @@
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Compatibility;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
-using Recyclarr.TrashGuide;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -10,13 +11,17 @@ internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource
 {
     public static PipelineType PipelineType => PipelineType.QualityProfile;
     public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
-    public static SupportedServices? ServiceAffinity => null;
+
+    public static bool AppliesTo(ServiceApiTarget target) => true;
 
     public override string PipelineDescription => "Quality Profile";
 
     public QualityProfileServiceData ApiFetchOutput { get; set; } = null!;
     public QualityProfileTransactionData TransactionOutput { get; set; } = null!;
     public TrashIdMappingStore State { get; set; } = null!;
+
+    // Fetched only when a planned profile carries quality sizes.
+    public QualityItemLimits? SizeLimits { get; set; }
 
     // ISyncStateSource implementation
     // Only store guide-backed profiles (those with a valid service ID).

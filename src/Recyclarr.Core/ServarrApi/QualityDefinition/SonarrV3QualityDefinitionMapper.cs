@@ -1,11 +1,11 @@
 using Recyclarr.Servarr.QualitySize;
 using Riok.Mapperly.Abstractions;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class SonarrQualityDefinitionMapper
+internal static partial class SonarrV3QualityDefinitionMapper
 {
     [MapProperty(
         [nameof(SonarrApi.QualityDefinitionResource.Quality), nameof(SonarrApi.Quality.Name)],

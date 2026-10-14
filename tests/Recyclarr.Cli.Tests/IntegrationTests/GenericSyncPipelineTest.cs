@@ -2,10 +2,10 @@ using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -29,7 +29,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
         return new GenericSyncPipeline<TestPipelineContext>(
             Resolve<ILogger>(),
-            orderedPhases,
+            new Lazy<IOrderedEnumerable<IPipelinePhase<TestPipelineContext>>>(orderedPhases),
             Substitute.For<IServiceConfiguration>()
         );
     }
@@ -41,7 +41,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
         return new GenericSyncPipeline<SkippedTestPipelineContext>(
             Resolve<ILogger>(),
-            orderedPhases,
+            new Lazy<IOrderedEnumerable<IPipelinePhase<SkippedTestPipelineContext>>>(orderedPhases),
             Substitute.For<IServiceConfiguration>()
         );
     }
@@ -149,7 +149,9 @@ internal sealed class TestPipelineContext : PipelineContext, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
-    public static SupportedServices? ServiceAffinity => null;
+
+    public static bool AppliesTo(ServiceApiTarget target) => true;
+
     public override string PipelineDescription => "Test Pipeline";
 }
 
@@ -157,7 +159,9 @@ internal sealed class SkippedTestPipelineContext : PipelineContext, IPipelineMet
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
-    public static SupportedServices? ServiceAffinity => null;
+
+    public static bool AppliesTo(ServiceApiTarget target) => true;
+
     public override string PipelineDescription => "Skipped Test Pipeline";
     public override bool ShouldSkip => true;
 }

@@ -10,7 +10,7 @@
     },
     "sonarr": {
       "custom_formats": ["docs/Sonarr/cf"],
-      "qualities": [],
+      "qualities": ["docs/Sonarr/quality-size"],
       "naming": [],
       "custom_format_groups": ["docs/Sonarr/cf-groups"],
       "quality_profiles": ["docs/Sonarr/quality-profiles"]

@@ -229,6 +229,9 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         RuleFor(x => x.ResetUnmatchedScores)
             .SetNonNullableValidator(new ResetUnmatchedScoresConfigYamlValidator());
 
+        RuleFor(x => x.QualityDefinition)
+            .SetNonNullableValidator(new QualitySizeConfigYamlValidator());
+
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)
             .Custom(ValidateGroupQualityCount!)

@@ -45,19 +45,20 @@ independent pipelines continue running.
 ### Pipeline Metadata and Orchestration
 
 Pipelines expose static metadata through `IPipelineMetadata`: pipeline type identity, dependency
-declarations, and service affinity. `GenericSyncPipeline<TContext>` bridges these static members to
-instance properties on `ISyncPipeline`, enabling the orchestrator to access metadata without knowing
-concrete types.
+declarations, and API target applicability. `GenericSyncPipeline<TContext>` bridges these static
+members to instance properties on `ISyncPipeline`, enabling the orchestrator to access metadata
+without knowing concrete types.
 
-### Service Affinity
+### API Target Applicability
 
-Each pipeline declares an optional service affinity. Universal pipelines (Custom Formats, Quality
-Profiles, Quality Sizes, Media Management) have no affinity and run for any instance. Service-
-specific pipelines (Media Naming) declare their target service (Sonarr or Radarr).
+Each pipeline declares which API targets (`ServiceApiTarget`: `SonarrV3`, `SonarrV5`, `RadarrV3`)
+it applies to. Custom Formats, Quality Profiles, and Media Management apply to all targets. Media
+Naming is split per service. Quality Sizes excludes `SonarrV5`, where sizes live on quality profile
+items and the Quality Profile pipeline syncs them.
 
-`CompositeSyncPipeline` filters pipelines by affinity before the topological sort, so
-service-specific pipelines are never executed for the wrong instance type. This means each pipeline
-column in the progress table maps 1:1 to a `PipelineType` with no special-case logic.
+`CompositeSyncPipeline` filters pipelines by the detected target before the topological sort.
+Phases resolve lazily, so an excluded pipeline never resolves ports its target has no gateway for.
+Each pipeline column in the progress table maps 1:1 to a `PipelineType` with no special-case logic.
 
 ### Failure Cascade Behavior
 

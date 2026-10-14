@@ -26,8 +26,18 @@ sonarr:
               - WEBDL-1080p
               - WEBRip-1080p
           - name: HDTV-1080p
+        # Per-profile sizes (Sonarr v5 only; ignored with a warning on v4). Wins over the
+        # instance-level quality_definition below.
+        quality_definition:
+          type: series
+          qualities:
+            - name: HDTV-1080p
+              min: 6
+              max: 60
+              preferred: 40
 
-      # Guide-synced quality profile with config overrides
+      # Guide-synced quality profile with config overrides. Its guide JSON references the
+      # local `e2e` quality size file, which wins over the instance-level quality_definition.
       - trash_id: e2e00000000000000000000000000002
         name: E2E-SonarrGuideOverride
         min_upgrade_format_score: 150

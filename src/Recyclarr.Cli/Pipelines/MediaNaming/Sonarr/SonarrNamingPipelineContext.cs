@@ -1,6 +1,6 @@
+using Recyclarr.Compatibility;
 using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Sync;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 
@@ -8,7 +8,9 @@ internal class SonarrNamingPipelineContext : PipelineContext, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.MediaNaming;
     public static IReadOnlyList<PipelineType> Dependencies => [];
-    public static SupportedServices? ServiceAffinity => SupportedServices.Sonarr;
+
+    public static bool AppliesTo(ServiceApiTarget target) =>
+        target is ServiceApiTarget.SonarrV3 or ServiceApiTarget.SonarrV5;
 
     public override string PipelineDescription => "Sonarr Media Naming";
     public override bool ShouldSkip => !Plan.SonarrMediaNamingAvailable;

@@ -1,11 +1,11 @@
 using Recyclarr.Servarr.MediaManagement;
 using Riok.Mapperly.Abstractions;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.MediaManagement;
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class SonarrMediaManagementMapper
+internal static partial class SonarrV3MediaManagementMapper
 {
     [MapProperty(
         nameof(SonarrApi.MediaManagementConfigResource.DownloadPropersAndRepacks),

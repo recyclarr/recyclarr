@@ -99,6 +99,7 @@ public record QualityProfileConfigYaml
     public QualitySortAlgorithm? QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
     public string? ScoreSet { get; init; }
+    public QualitySizeConfigYaml? QualityDefinition { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

@@ -1,6 +1,9 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.Compatibility;
+using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
@@ -8,10 +11,26 @@ namespace Recyclarr.Cli.Pipelines.Plan.Components;
 internal class QualitySizePlanComponent(
     QualitySizeResourceQuery guide,
     IServiceConfiguration config,
+    DetectedService detectedService,
     ILogger log
 ) : IPlanComponent
 {
     public void Process(PipelinePlan plan)
+    {
+        if (
+            config.ServiceType == SupportedServices.Sonarr
+            && new SonarrCapabilities(detectedService.Version).QualitySizesPerProfile
+        )
+        {
+            PlanPerProfileSizes(plan);
+            return;
+        }
+
+        WarnIgnoredProfileSizeSources(plan);
+        PlanGlobalSizes(plan);
+    }
+
+    private void PlanGlobalSizes(PipelinePlan plan)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
@@ -20,6 +39,112 @@ internal class QualitySizePlanComponent(
             return;
         }
 
+        var sizes = ResolveSizes(configSizeData, plan, errorPrefix: "");
+        if (sizes is not null)
+        {
+            plan.QualitySizes = sizes;
+        }
+    }
+
+    // Sizes live on quality profile items; only profiles listed under `quality_profiles` receive
+    // them. Precedence: profile YAML, then the guide profile's `trash_quality_definition`
+    // reference (a quality size trash_id), then the instance `quality_definition`.
+    private void PlanPerProfileSizes(PipelinePlan plan)
+    {
+        var explicitProfiles = plan.QualityProfiles.Where(x => x.ShouldCreate).ToList();
+
+        if (config.QualityDefinition is not null && explicitProfiles.Count == 0)
+        {
+            plan.AddWarning(
+                "This Sonarr version stores quality sizes per quality profile. "
+                    + "`quality_definition` only applies to profiles listed under "
+                    + "`quality_profiles`, and none are configured."
+            );
+        }
+
+        foreach (var profile in explicitProfiles)
+        {
+            var errorPrefix = $"Quality profile '{profile.Name}': ";
+            var source = SelectSizeSource(profile, plan, errorPrefix);
+            if (source is null)
+            {
+                continue;
+            }
+
+            var sizes = ResolveSizes(source, plan, errorPrefix);
+            if (sizes is not null)
+            {
+                plan.AddQualityProfile(profile with { QualitySizes = sizes });
+            }
+        }
+    }
+
+    private QualityDefinitionConfig? SelectSizeSource(
+        PlannedQualityProfile profile,
+        PipelinePlan plan,
+        string errorPrefix
+    )
+    {
+        if (profile.Config.QualityDefinition is not null)
+        {
+            return profile.Config.QualityDefinition;
+        }
+
+        var guideReference = profile.GuideResource?.TrashQualityDefinition;
+        if (guideReference is null || guideReference.Count == 0)
+        {
+            return config.QualityDefinition;
+        }
+
+        if (guideReference.Count > 1)
+        {
+            plan.AddError(
+                $"{errorPrefix}The guide profile references more than one quality definition: "
+                    + string.Join(", ", guideReference.Keys)
+            );
+            return null;
+        }
+
+        var (label, guideTrashId) = guideReference.First();
+        var guideSizes = guide
+            .Get(config.ServiceType)
+            .LastOrDefault(x => x.TrashId.EqualsIgnoreCase(guideTrashId));
+
+        if (guideSizes is null)
+        {
+            plan.AddError(
+                $"{errorPrefix}The guide profile references a quality definition that does not "
+                    + $"exist: {label} ({guideTrashId})"
+            );
+            return null;
+        }
+
+        return new QualityDefinitionConfig { Type = guideSizes.Type };
+    }
+
+    // Only user YAML warns; guide references are ignored silently because users cannot change
+    // guide data.
+    private static void WarnIgnoredProfileSizeSources(PipelinePlan plan)
+    {
+        var profiles = plan.QualityProfiles.Where(x =>
+            x.ShouldCreate && x.Config.QualityDefinition is not null
+        );
+
+        foreach (var profile in profiles)
+        {
+            plan.AddWarning(
+                $"Quality profile '{profile.Name}': this service version does not store quality "
+                    + "sizes per profile, so the profile's `quality_definition` is ignored"
+            );
+        }
+    }
+
+    private PlannedQualitySizes? ResolveSizes(
+        QualityDefinitionConfig configSizeData,
+        PipelinePlan plan,
+        string errorPrefix
+    )
+    {
         var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, plan);
 
         var guideSizeData = guide
@@ -29,9 +154,10 @@ internal class QualitySizePlanComponent(
         if (guideSizeData is null)
         {
             plan.AddError(
-                $"The specified quality definition type does not exist: {configSizeData.Type}"
+                $"{errorPrefix}The specified quality definition type does not exist: "
+                    + configSizeData.Type
             );
-            return;
+            return null;
         }
 
         var overrideLookup = configSizeData.Qualities.ToDictionary(
@@ -47,7 +173,7 @@ internal class QualitySizePlanComponent(
         // Validate min ≤ preferred ≤ max ordering for each quality
         if (plannedQualities.Any(quality => !ValidateQualitySizeOrder(quality, plan)))
         {
-            return;
+            return null;
         }
 
         // Check for overrides that don't match any guide quality
@@ -56,12 +182,13 @@ internal class QualitySizePlanComponent(
             if (!guideSizeData.Qualities.Any(x => x.Quality.EqualsIgnoreCase(configQuality.Name)))
             {
                 plan.AddError(
-                    $"Quality '{configQuality.Name}' does not exist in the guide for type '{configSizeData.Type}'"
+                    $"{errorPrefix}Quality '{configQuality.Name}' does not exist in the guide "
+                        + $"for type '{configSizeData.Type}'"
                 );
             }
         }
 
-        plan.QualitySizes = new PlannedQualitySizes
+        return new PlannedQualitySizes
         {
             Type = configSizeData.Type,
             PreferredRatio = preferredRatio,

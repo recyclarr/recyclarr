@@ -25,6 +25,10 @@ internal abstract record PlannedQualityProfile
     // CF scores: resolved from score_set or explicit config
     public IList<PlannedCfScore> CfScores { get; init; } = [];
 
+    // Sizes assigned to this profile's qualities on services that store sizes per profile. Null
+    // when no size source applies; the service's existing sizes are then left untouched.
+    public PlannedQualitySizes? QualitySizes { get; init; }
+
     public QualityProfileResource? GuideResource =>
         this is GuideBacked guideBacked ? guideBacked.Resource : null;
 

@@ -28,30 +28,37 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     };
 
     private readonly HttpClient _sonarr;
-    private readonly HttpClient _radarr;
+    private readonly HttpClient? _radarr;
     private readonly IContainer _sonarrContainer;
-    private readonly IContainer _radarrContainer;
+    private readonly IContainer? _radarrContainer;
 
     public string RecyclarrBinaryPath { get; }
     public IDirectoryInfo AppDataDir { get; }
     public string ConfigPath { get; }
     public string ConfigPathDeleteDisabled { get; }
 
+    // Radarr is started by only one fixture so it is exercised once per run.
+    public bool HasRadarr => _radarr is not null;
+
     public T SonarrApi<T>()
         where T : class => RestService.For<T>(_sonarr, ServarrRefitSettings);
 
     public T RadarrApi<T>()
-        where T : class => RestService.For<T>(_radarr, ServarrRefitSettings);
+        where T : class =>
+        RestService.For<T>(
+            _radarr ?? throw new InvalidOperationException("Radarr is not started"),
+            ServarrRefitSettings
+        );
 
     // Expose ports for environment variable setup in RunRecyclarrSync
     public int SonarrPort => _sonarrContainer.GetMappedPublicPort(8989);
-    public int RadarrPort => _radarrContainer.GetMappedPublicPort(7878);
+    public int? RadarrPort => _radarrContainer?.GetMappedPublicPort(7878);
 
     private RecyclarrTestHarness(
         HttpClient sonarr,
-        HttpClient radarr,
+        HttpClient? radarr,
         IContainer sonarrContainer,
-        IContainer radarrContainer,
+        IContainer? radarrContainer,
         string recyclarrBinaryPath,
         IDirectoryInfo appDataDir,
         string configPath,
@@ -68,7 +75,11 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         ConfigPathDeleteDisabled = configPathDeleteDisabled;
     }
 
-    public static async Task<RecyclarrTestHarness> StartAsync(TestContext testContext)
+    public static async Task<RecyclarrTestHarness> StartAsync(
+        TestContext testContext,
+        string sonarrImageTag,
+        bool startRadarr
+    )
     {
         var ct = testContext.CancellationToken;
         const string apiKey = "testkey";
@@ -94,7 +105,7 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         var repositoryRoot = GetRepositoryRoot();
         var cliProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Cli");
 
-        var sonarrContainer = new ContainerBuilder("linuxserver/sonarr:latest")
+        var sonarrContainer = new ContainerBuilder($"lscr.io/linuxserver/sonarr:{sonarrImageTag}")
             .WithPortBinding(8989, true)
             .WithEnvironment("SONARR__AUTH__APIKEY", apiKey)
             .WithTmpfsMount("/config")
@@ -104,18 +115,20 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
             .WithCleanUp(true)
             .Build();
 
-        var radarrContainer = new ContainerBuilder("linuxserver/radarr:latest")
-            .WithPortBinding(7878, true)
-            .WithEnvironment("RADARR__AUTH__APIKEY", apiKey)
-            .WithTmpfsMount("/config")
-            .WithWaitStrategy(
-                Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(7878))
-            )
-            .WithCleanUp(true)
-            .Build();
+        var radarrContainer = startRadarr
+            ? new ContainerBuilder("lscr.io/linuxserver/radarr:latest")
+                .WithPortBinding(7878, true)
+                .WithEnvironment("RADARR__AUTH__APIKEY", apiKey)
+                .WithTmpfsMount("/config")
+                .WithWaitStrategy(
+                    Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(7878))
+                )
+                .WithCleanUp(true)
+                .Build()
+            : null;
 
         var sonarrStartTask = sonarrContainer.StartAsync(ct);
-        var radarrStartTask = radarrContainer.StartAsync(ct);
+        var radarrStartTask = radarrContainer?.StartAsync(ct) ?? Task.CompletedTask;
         var publishTask = Cli.Wrap("dotnet")
             .WithArguments([
                 "publish",
@@ -131,10 +144,13 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         await Task.WhenAll(sonarrStartTask, radarrStartTask, publishTask);
 
         var sonarrUrl = $"http://localhost:{sonarrContainer.GetMappedPublicPort(8989)}";
-        var radarrUrl = $"http://localhost:{radarrContainer.GetMappedPublicPort(7878)}";
-
         var sonarr = CreateHttpClient(sonarrUrl, apiKey);
-        var radarr = CreateHttpClient(radarrUrl, apiKey);
+        var radarr = radarrContainer is null
+            ? null
+            : CreateHttpClient(
+                $"http://localhost:{radarrContainer.GetMappedPublicPort(7878)}",
+                apiKey
+            );
 
         return new RecyclarrTestHarness(
             sonarr,
@@ -151,9 +167,12 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _sonarr.Dispose();
-        _radarr.Dispose();
+        _radarr?.Dispose();
         await _sonarrContainer.DisposeAsync();
-        await _radarrContainer.DisposeAsync();
+        if (_radarrContainer is not null)
+        {
+            await _radarrContainer.DisposeAsync();
+        }
 
         if (AppDataDir.Exists)
         {

@@ -32,13 +32,7 @@ public abstract class ServiceConfigMerger<T>
             QualityDefinition = Combine(
                 a.QualityDefinition,
                 b.QualityDefinition,
-                (a1, b1) =>
-                    a1 with
-                    {
-                        Type = b1.Type ?? a1.Type,
-                        PreferredRatio = b1.PreferredRatio ?? a1.PreferredRatio,
-                        Qualities = MergeQualitySizeItems(a1.Qualities, b1.Qualities),
-                    }
+                MergeQualityDefinition
             ),
 
             DeleteOldCustomFormats = b.DeleteOldCustomFormats ?? a.DeleteOldCustomFormats,
@@ -300,6 +294,24 @@ public abstract class ServiceConfigMerger<T>
                     }
             ),
             Qualities = b.Qualities ?? a.Qualities,
+            QualityDefinition = Combine(
+                a.QualityDefinition,
+                b.QualityDefinition,
+                MergeQualityDefinition
+            ),
+        };
+    }
+
+    private static QualitySizeConfigYaml MergeQualityDefinition(
+        QualitySizeConfigYaml a,
+        QualitySizeConfigYaml b
+    )
+    {
+        return a with
+        {
+            Type = b.Type ?? a.Type,
+            PreferredRatio = b.PreferredRatio ?? a.PreferredRatio,
+            Qualities = MergeQualitySizeItems(a.Qualities, b.Qualities),
         };
     }
 

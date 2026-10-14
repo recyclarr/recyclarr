@@ -9,6 +9,7 @@
   "cutoffFormatScore": 10000,
   "minUpgradeFormatScore": 75,
   "language": "Original",
+  "trash_quality_definition": { "e2e": "e2e00000000000000000000000000020" },
   "items": [
     { "name": "Unknown", "allowed": false },
     { "name": "SDTV", "allowed": false },

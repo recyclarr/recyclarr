@@ -1,5 +1,5 @@
 using Recyclarr.Servarr.SystemStatus;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.System;
 

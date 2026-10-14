@@ -82,6 +82,56 @@ internal sealed class ConfigYamlExtensionsTest
     }
 
     [Test]
+    public void Profile_quality_definition_maps_to_profile_config()
+    {
+        var serviceYaml = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml
+                {
+                    Name = "Anime",
+                    QualityDefinition = new QualitySizeConfigYaml
+                    {
+                        Type = "anime",
+                        PreferredRatio = 0.5m,
+                        Qualities =
+                        [
+                            new QualitySizeItemConfigYaml
+                            {
+                                Name = "HDTV-1080p",
+                                Max = "unlimited",
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
+
+        var result = serviceYaml.ToSonarrConfiguration("test", null);
+
+        result
+            .QualityProfiles.Should()
+            .ContainSingle()
+            .Which.QualityDefinition.Should()
+            .BeEquivalentTo(
+                new QualityDefinitionConfig
+                {
+                    Type = "anime",
+                    PreferredRatio = 0.5m,
+                    Qualities =
+                    [
+                        new QualityDefinitionItemConfig
+                        {
+                            Name = "HDTV-1080p",
+                            Max = new QualitySizeValue.Unlimited(),
+                        },
+                    ],
+                }
+            );
+    }
+
+    [Test]
     public void Entry_level_score_applies_as_default_to_all_profiles()
     {
         var serviceYaml = new RadarrConfigYaml

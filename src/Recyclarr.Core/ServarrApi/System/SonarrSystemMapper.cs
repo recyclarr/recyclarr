@@ -1,6 +1,6 @@
 using Recyclarr.Servarr.SystemStatus;
 using Riok.Mapperly.Abstractions;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.System;
 

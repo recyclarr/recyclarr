@@ -14,11 +14,12 @@ internal record UpdatedQualityItem
 
     public QualityDefinitionItem BuildUpdatedItem(QualityItemLimits limits)
     {
+        var size = QualitySizeCalculator.ToServiceSize((Min, Max, Preferred), limits);
         return ServerItem with
         {
-            MinSize = Min,
-            MaxSize = Max < limits.MaxLimit ? Max : null,
-            PreferredSize = Preferred < limits.PreferredLimit ? Preferred : null,
+            MinSize = size.Min,
+            MaxSize = size.Max,
+            PreferredSize = size.Preferred,
         };
     }
 }

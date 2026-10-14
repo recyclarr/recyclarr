@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Compatibility;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync;
-using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
@@ -15,7 +15,9 @@ internal class QualitySizePipelineContext : PipelineContext, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.QualitySize;
     public static IReadOnlyList<PipelineType> Dependencies => [];
-    public static SupportedServices? ServiceAffinity => null;
+
+    // Sonarr v5 stores sizes on quality profile items; the quality profile pipeline owns them.
+    public static bool AppliesTo(ServiceApiTarget target) => target != ServiceApiTarget.SonarrV5;
 
     public override string PipelineDescription => "Quality Definition";
     public override bool ShouldSkip => !Plan.QualitySizesAvailable;

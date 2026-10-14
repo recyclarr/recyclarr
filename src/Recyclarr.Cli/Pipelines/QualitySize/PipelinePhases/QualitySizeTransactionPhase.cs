@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -26,7 +25,11 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
                 continue;
             }
 
-            var resolved = ResolveValues(plannedQuality, planned.PreferredRatio, limits);
+            var resolved = QualitySizeCalculator.ResolveValues(
+                plannedQuality,
+                planned.PreferredRatio,
+                limits
+            );
             var item = new UpdatedQualityItem
             {
                 Quality = plannedQuality.Quality,
@@ -62,25 +65,6 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
         context.QualityDefinitionType = planned.Type;
 
         return Task.FromResult(PipelineFlow.Continue);
-    }
-
-    private static (decimal Min, decimal Max, decimal Preferred) ResolveValues(
-        PlannedQualityItem planned,
-        decimal? preferredRatio,
-        QualityItemLimits limits
-    )
-    {
-        var min = planned.Min;
-        var max = Math.Min(planned.Max ?? limits.MaxLimit, limits.MaxLimit);
-        var preferred = Math.Min(planned.Preferred ?? limits.PreferredLimit, limits.PreferredLimit);
-
-        if (preferredRatio is not null)
-        {
-            var cappedMax = Math.Min(max, limits.PreferredLimit);
-            preferred = Math.Round(min + (cappedMax - min) * preferredRatio.Value, decimals: 1);
-        }
-
-        return (min, max, preferred);
     }
 
     private static bool IsDifferent(

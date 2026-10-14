@@ -1,7 +1,7 @@
 name: recyclarr
 
 x-radarr: &radarr
-  image: ghcr.io/home-operations/radarr:rolling
+  image: lscr.io/linuxserver/radarr:latest
   pull_policy: always
   environment:
     TZ: America/Chicago
@@ -10,7 +10,7 @@ x-radarr: &radarr
     RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
 
 x-sonarr: &sonarr
-  image: ghcr.io/home-operations/sonarr:rolling
+  image: lscr.io/linuxserver/sonarr:latest
   pull_policy: always
   environment:
     TZ: America/Chicago
@@ -40,8 +40,10 @@ services:
     ports: [8990:8989]
     volumes: [sonarr_develop1:/config]
 
+  # Sonarr v5 (develop branch); sonarr_develop1 stays on v4
   sonarr_develop2:
     <<: *sonarr
+    image: lscr.io/linuxserver/sonarr:develop
     ports: [8991:8989]
     volumes: [sonarr_develop2:/config]
 

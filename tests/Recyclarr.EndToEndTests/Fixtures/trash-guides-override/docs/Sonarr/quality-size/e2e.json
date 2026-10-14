@@ -1,0 +1,9 @@
+{
+  "trash_id": "e2e00000000000000000000000000020",
+  "type": "e2e",
+  "qualities": [
+    { "quality": "HDTV-1080p", "min": 7, "preferred": 35, "max": 70 },
+    { "quality": "WEBDL-1080p", "min": 8, "preferred": 36, "max": 71 },
+    { "quality": "Bluray-1080p", "min": 9, "preferred": 37, "max": 72 }
+  ]
+}

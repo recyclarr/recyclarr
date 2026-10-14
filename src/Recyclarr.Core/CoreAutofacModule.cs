@@ -13,6 +13,7 @@ using Recyclarr.Compatibility.Radarr;
 using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
+using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing;
@@ -41,13 +42,15 @@ using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 using RadarrApi = Recyclarr.Api.Radarr;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
+using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
 
 namespace Recyclarr;
 
@@ -268,39 +271,61 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<RadarrApi.INamingConfigApi>();
         builder.RegisterServarrRefitClient<SonarrApi.ISystemApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ISystemApi>();
+
+        builder.RegisterServarrRefitClient<SonarrV5Api.ICustomFormatApi>();
+        builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileApi>();
+        builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileSchemaApi>();
+        builder.RegisterServarrRefitClient<SonarrV5Api.ILanguageApi>();
+        builder.RegisterServarrRefitClient<SonarrV5Api.IMediaManagementSettingsApi>();
+        builder.RegisterServarrRefitClient<SonarrV5Api.INamingSettingsApi>();
     }
 
     private static void RegisterServarrGateways(ContainerBuilder builder)
     {
-        builder.RegisterServiceGateway<ISystemService, SonarrSystemGateway, RadarrSystemGateway>();
-        builder.RegisterServiceGateway<
-            IQualityProfileService,
-            SonarrQualityProfileGateway,
-            RadarrQualityProfileGateway
-        >();
-        builder.RegisterServiceGateway<
-            ICustomFormatService,
-            SonarrCustomFormatGateway,
-            RadarrCustomFormatGateway
-        >();
-        builder.RegisterServiceGateway<
-            IQualityDefinitionService,
-            SonarrQualityDefinitionGateway,
-            RadarrQualityDefinitionGateway
-        >();
+        // The system gateway performs version detection, so it is selected by service type
+        // rather than by the detected API target.
         builder
-            .RegisterType<SonarrNamingGateway>()
-            .As<ISonarrNamingService>()
+            .RegisterType<SonarrSystemGateway>()
+            .Keyed<ISystemService>(SupportedServices.Sonarr)
             .InstancePerLifetimeScope();
+        builder
+            .RegisterType<RadarrSystemGateway>()
+            .Keyed<ISystemService>(SupportedServices.Radarr)
+            .InstancePerLifetimeScope();
+        builder
+            .Register(c =>
+                c.ResolveKeyed<ISystemService>(c.Resolve<IServiceConfiguration>().ServiceType)
+            )
+            .As<ISystemService>()
+            .InstancePerLifetimeScope();
+
+        builder
+            .RegisterServiceGateway<IQualityProfileService>()
+            .For<SonarrV3QualityProfileGateway>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5QualityProfileGateway>(ServiceApiTarget.SonarrV5)
+            .For<RadarrQualityProfileGateway>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<ICustomFormatService>()
+            .For<SonarrV3CustomFormatGateway>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5CustomFormatGateway>(ServiceApiTarget.SonarrV5)
+            .For<RadarrCustomFormatGateway>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<IQualityDefinitionService>()
+            .For<SonarrV3QualityDefinitionGateway>(ServiceApiTarget.SonarrV3)
+            .For<RadarrQualityDefinitionGateway>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<ISonarrNamingService>()
+            .For<SonarrV3NamingGateway>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5NamingGateway>(ServiceApiTarget.SonarrV5);
         builder
             .RegisterType<RadarrNamingGateway>()
             .As<IRadarrNamingService>()
             .InstancePerLifetimeScope();
-        builder.RegisterServiceGateway<
-            IMediaManagementService,
-            SonarrMediaManagementGateway,
-            RadarrMediaManagementGateway
-        >();
+        builder
+            .RegisterServiceGateway<IMediaManagementService>()
+            .For<SonarrV3MediaManagementGateway>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5MediaManagementGateway>(ServiceApiTarget.SonarrV5)
+            .For<RadarrMediaManagementGateway>(ServiceApiTarget.RadarrV3);
     }
 
     private static void RegisterSettings(ContainerBuilder builder)

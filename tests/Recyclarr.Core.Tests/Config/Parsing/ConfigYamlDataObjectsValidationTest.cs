@@ -47,6 +47,22 @@ internal sealed class ConfigYamlDataObjectsValidationTest
     }
 
     [Test]
+    public void Quality_profile_quality_definition_is_validated()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "My QP",
+            QualityDefinition = new QualitySizeConfigYaml { PreferredRatio = 2 },
+        };
+
+        var result = new QualityProfileConfigYamlValidator().TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor("QualityDefinition.Type")
+            .WithErrorMessage("'type' is required for 'quality_definition'");
+    }
+
+    [Test]
     public void Quality_profile_name_required()
     {
         var data = new QualityProfileConfigYaml();

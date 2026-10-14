@@ -3,10 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
@@ -28,6 +30,8 @@ internal class QualityProfileTransactionPhase(
             context.ApiFetchOutput,
             context.State
         );
+
+        AssignQualitySizes(transactions.NewProfiles.Concat(existingProfiles), context.SizeLimits);
 
         // Process new profiles: update scores, validate (remove invalid from collection)
         UpdateProfileScores(transactions.NewProfiles);
@@ -109,6 +113,31 @@ internal class QualityProfileTransactionPhase(
     {
         var builder = new UpdatedProfileBuilder(log, serviceData, state, transactions);
         return builder.BuildFrom(plannedProfiles);
+    }
+
+    private static void AssignQualitySizes(
+        IEnumerable<UpdatedQualityProfile> profiles,
+        QualityItemLimits? limits
+    )
+    {
+        foreach (var profile in profiles)
+        {
+            var planned = profile.ProfileConfig.QualitySizes;
+            if (planned is null || limits is null)
+            {
+                continue;
+            }
+
+            profile.AssignedSizes = planned.Qualities.ToDictionary(
+                x => x.Quality,
+                x =>
+                    QualitySizeCalculator.ToServiceSize(
+                        QualitySizeCalculator.ResolveValues(x, planned.PreferredRatio, limits),
+                        limits
+                    ),
+                StringComparer.OrdinalIgnoreCase
+            );
+        }
     }
 
     private static void UpdateProfileScores(IEnumerable<UpdatedQualityProfile> updatedProfiles)

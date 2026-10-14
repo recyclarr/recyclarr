@@ -21,6 +21,11 @@ internal record UpdatedQualityProfile
     public IReadOnlyCollection<string> InvalidExceptCfPatterns { get; set; } = [];
     public IReadOnlyCollection<string> MissingQualities { get; set; } = [];
 
+    // Quality name -> sizes to write onto matching items. Qualities not listed keep their service
+    // sizes.
+    public IReadOnlyDictionary<string, QualityItemSize> AssignedSizes { get; set; } =
+        new Dictionary<string, QualityItemSize>();
+
     public string ProfileName
     {
         get
@@ -88,6 +93,11 @@ internal record UpdatedQualityProfile
             merged = merged with { Items = UpdatedQualities.Items };
         }
 
+        if (AssignedSizes.Count > 0)
+        {
+            merged = merged with { Items = merged.Items.Select(ApplyAssignedSize).ToList() };
+        }
+
         // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set
         // to `false`. Because of this, we cannot set cutoff to null. We pick the first available if
         // the user didn't specify one.
@@ -125,5 +135,18 @@ internal record UpdatedQualityProfile
         }
 
         return merged;
+    }
+
+    private QualityProfileItem ApplyAssignedSize(QualityProfileItem item)
+    {
+        if (item.Quality?.Name is { } name)
+        {
+            return AssignedSizes.TryGetValue(name, out var size) ? item with { Size = size } : item;
+        }
+
+        return item with
+        {
+            Items = item.Items.Select(ApplyAssignedSize).ToList(),
+        };
     }
 }

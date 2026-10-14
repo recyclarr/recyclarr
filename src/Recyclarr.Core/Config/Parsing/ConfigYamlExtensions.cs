@@ -129,6 +129,7 @@ public static class ConfigYamlExtensions
             ResetUnmatchedScores = yaml.ResetUnmatchedScores.ToResetUnmatchedScoresConfig(),
             Qualities =
                 yaml.Qualities?.Select(x => x.ToQualityProfileQualityConfig()).ToList() ?? [],
+            QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
         };
     }
 

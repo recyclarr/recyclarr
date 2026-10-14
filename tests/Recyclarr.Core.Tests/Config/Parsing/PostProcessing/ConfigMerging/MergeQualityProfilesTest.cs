@@ -55,6 +55,66 @@ internal sealed class MergeQualityProfilesTest
     }
 
     [Test]
+    public void Profile_quality_definition_merges_like_instance_quality_definition()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml
+                {
+                    Name = "p",
+                    QualityDefinition = new QualitySizeConfigYaml
+                    {
+                        Type = "series",
+                        PreferredRatio = 0.5m,
+                        Qualities = [new QualitySizeItemConfigYaml { Name = "q1", Min = "1" }],
+                    },
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml
+                {
+                    Name = "p",
+                    QualityDefinition = new QualitySizeConfigYaml
+                    {
+                        Type = "anime",
+                        Qualities = [new QualitySizeItemConfigYaml { Name = "q1", Max = "9" }],
+                    },
+                },
+            ],
+        };
+
+        var result = new SonarrConfigMerger().Merge(leftConfig, rightConfig);
+
+        result
+            .QualityProfiles.Should()
+            .ContainSingle()
+            .Which.QualityDefinition.Should()
+            .BeEquivalentTo(
+                new QualitySizeConfigYaml
+                {
+                    Type = "anime",
+                    PreferredRatio = 0.5m,
+                    Qualities =
+                    [
+                        new QualitySizeItemConfigYaml
+                        {
+                            Name = "q1",
+                            Min = "1",
+                            Max = "9",
+                        },
+                    ],
+                }
+            );
+    }
+
+    [Test]
     public void Non_empty_right_to_empty_left()
     {
         var leftConfig = new SonarrConfigYaml();

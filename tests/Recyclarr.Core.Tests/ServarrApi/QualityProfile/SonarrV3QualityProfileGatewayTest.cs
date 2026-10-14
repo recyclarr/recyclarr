@@ -1,11 +1,13 @@
+using System.Text.Json;
+using Recyclarr.Json;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.TestLibrary;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.Core.Tests.ServarrApi.QualityProfile;
 
-internal sealed class SonarrQualityProfileGatewayTest
+internal sealed class SonarrV3QualityProfileGatewayTest
 {
     [Test]
     public async Task Update_preserves_renamed_quality_group()
@@ -63,7 +65,7 @@ internal sealed class SonarrQualityProfileGatewayTest
         var languageApi = Substitute.For<SonarrApi.ILanguageApi>();
         api.QualityprofileGet().ReturnsForAnyArgs([originalDto]);
 
-        var sut = new SonarrQualityProfileGateway(
+        var sut = new SonarrV3QualityProfileGateway(
             new TestableLogger(),
             api,
             schemaApi,
@@ -143,5 +145,127 @@ internal sealed class SonarrQualityProfileGatewayTest
                 "the PUT body should contain the renamed group 'Bluray 1080p', "
                     + "not the stashed old name 'Bluray-1080p'"
             );
+    }
+
+    [Test]
+    public async Task Update_preserves_server_item_sizes()
+    {
+        const string serverJson = """
+            [{
+              "id": 3,
+              "name": "WEB-2160p",
+              "cutoff": 1,
+              "formatItems": [],
+              "items": [
+                {
+                  "quality": { "id": 9, "name": "HDTV-1080p" },
+                  "items": [], "allowed": true,
+                  "minSize": 5, "maxSize": 50, "preferredSize": 30
+                },
+                {
+                  "id": 1001, "name": "WEB 1080p", "allowed": true,
+                  "items": [{
+                    "quality": { "id": 3, "name": "WEBDL-1080p" },
+                    "items": [], "allowed": true,
+                    "minSize": 4, "maxSize": 40, "preferredSize": 20
+                  }]
+                }
+              ]
+            }]
+            """;
+
+        var api = Substitute.For<SonarrApi.IQualityProfileApi>();
+        api.QualityprofileGet()
+            .ReturnsForAnyArgs(
+                JsonSerializer.Deserialize<List<SonarrApi.QualityProfileResource>>(
+                    serverJson,
+                    GlobalJsonSerializerSettings.Services
+                )!
+            );
+        var sut = new SonarrV3QualityProfileGateway(
+            new TestableLogger(),
+            api,
+            Substitute.For<SonarrApi.IQualityProfileSchemaApi>(),
+            Substitute.For<SonarrApi.ILanguageApi>()
+        );
+
+        var profile = (await sut.GetQualityProfiles(CancellationToken.None)).Single();
+        await sut.UpdateQualityProfile(
+            profile with
+            {
+                UpgradeAllowed = true,
+            },
+            CancellationToken.None
+        );
+
+        var sentDto = api.ReceivedCalls()
+            .Single(c =>
+                c.GetMethodInfo().Name == nameof(SonarrApi.IQualityProfileApi.QualityprofilePut)
+            )
+            .GetArguments()[1];
+        var sent = JsonSerializer.SerializeToNode(sentDto, GlobalJsonSerializerSettings.Services)!;
+        var items = sent["items"]!.AsArray();
+        var hdtv = items.Single(i => i!["quality"]?["id"]?.GetValue<int>() == 9)!;
+        hdtv["minSize"]!.GetValue<double>().Should().Be(5);
+        hdtv["maxSize"]!.GetValue<double>().Should().Be(50);
+        hdtv["preferredSize"]!.GetValue<double>().Should().Be(30);
+
+        var webdl = items.Single(i => i!["id"]?.GetValue<int>() == 1001)!["items"]![0]!;
+        webdl["minSize"]!.GetValue<double>().Should().Be(4);
+        webdl["maxSize"]!.GetValue<double>().Should().Be(40);
+        webdl["preferredSize"]!.GetValue<double>().Should().Be(20);
+    }
+
+    [Test]
+    public async Task Update_writes_assigned_item_sizes_with_unlimited_as_absent()
+    {
+        var api = Substitute.For<SonarrApi.IQualityProfileApi>();
+        api.QualityprofileGet()
+            .ReturnsForAnyArgs([
+                new SonarrApi.QualityProfileResource
+                {
+                    Id = 3,
+                    Name = "P",
+                    FormatItems = [],
+                    Items =
+                    [
+                        new SonarrApi.QualityProfileQualityItemResource
+                        {
+                            Quality = new SonarrApi.Quality { Id = 9, Name = "HDTV-1080p" },
+                            Items = [],
+                            Allowed = true,
+                            MinSize = 1,
+                            MaxSize = 10,
+                            PreferredSize = 5,
+                        },
+                    ],
+                },
+            ]);
+
+        var sut = new SonarrV3QualityProfileGateway(
+            new TestableLogger(),
+            api,
+            Substitute.For<SonarrApi.IQualityProfileSchemaApi>(),
+            Substitute.For<SonarrApi.ILanguageApi>()
+        );
+
+        var profile = (await sut.GetQualityProfiles(CancellationToken.None)).Single();
+        var resized = profile with
+        {
+            Items = [profile.Items[0] with { Size = new QualityItemSize(5, null, 30) }],
+        };
+        await sut.UpdateQualityProfile(resized, CancellationToken.None);
+
+        var sentDto = api.ReceivedCalls()
+            .Single(c =>
+                c.GetMethodInfo().Name == nameof(SonarrApi.IQualityProfileApi.QualityprofilePut)
+            )
+            .GetArguments()[1];
+        var item = JsonSerializer.SerializeToNode(sentDto, GlobalJsonSerializerSettings.Services)![
+            "items"
+        ]![0]!;
+        item["minSize"]!.GetValue<double>().Should().Be(5);
+        item["maxSize"].Should().BeNull("unlimited is sent as an absent value");
+        item["preferredSize"]!.GetValue<double>().Should().Be(30);
     }
 }

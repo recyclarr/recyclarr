@@ -1,9 +1,9 @@
 using Recyclarr.Servarr.QualitySize;
-using SonarrApi = Recyclarr.Api.Sonarr;
+using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
-internal class SonarrQualityDefinitionGateway(SonarrApi.IQualityDefinitionApi api)
+internal class SonarrV3QualityDefinitionGateway(SonarrApi.IQualityDefinitionApi api)
     : IQualityDefinitionService
 {
     private readonly Dictionary<int, SonarrApi.QualityDefinitionResource> _stashedDtos = [];
@@ -21,7 +21,7 @@ internal class SonarrQualityDefinitionGateway(SonarrApi.IQualityDefinitionApi ap
             }
         }
 
-        return dtos.Select(SonarrQualityDefinitionMapper.ToDomain).ToList();
+        return dtos.Select(SonarrV3QualityDefinitionMapper.ToDomain).ToList();
     }
 
     public async Task UpdateQualityDefinitions(
@@ -37,7 +37,7 @@ internal class SonarrQualityDefinitionGateway(SonarrApi.IQualityDefinitionApi ap
     private SonarrApi.QualityDefinitionResource ApplyToStashed(QualityDefinitionItem domain)
     {
         var original = _stashedDtos[domain.Id];
-        SonarrQualityDefinitionMapper.UpdateDto(domain, original);
+        SonarrV3QualityDefinitionMapper.UpdateDto(domain, original);
         return original;
     }
 }

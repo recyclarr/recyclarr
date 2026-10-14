@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Sync: Support for Sonarr v5
+- Sync: Per-profile quality sizes for Sonarr v5, set with `quality_definition` under a quality
+  profile or suggested by the guide's quality profile
+
+### Changed
+
+- Sync: On Sonarr v5, `quality_definition` applies its sizes only to the quality profiles listed in
+  your configuration
+
+### Fixed
+
+- Sync: Crash when syncing quality definitions with Sonarr v5 (#988)
+- Sync: Quality profile updates on Sonarr v5 removed the profile's size limits (#988)
+- Sync: Media management updates reset Sonarr settings that Recyclarr does not manage
+
 ## [8.7.3] - 2026-10-05
 
 ### Fixed

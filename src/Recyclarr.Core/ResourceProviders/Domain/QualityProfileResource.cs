@@ -44,6 +44,13 @@ public record QualityProfileResource : IGuideResource
     public IReadOnlyCollection<QualityProfileQualityItem> Items { get; init; } = [];
     public IReadOnlyDictionary<string, string> FormatItems { get; init; } =
         new Dictionary<string, string>();
+
+    // Single entry mapping a readable label to the trash_id of the quality size resource whose
+    // sizes this profile uses on services that store sizes per profile. Same shape as
+    // FormatItems; only the trash_id value is used for matching.
+    [JsonPropertyName("trash_quality_definition")]
+    public IReadOnlyDictionary<string, string> TrashQualityDefinition { get; init; } =
+        new Dictionary<string, string>();
 }
 
 [UsedImplicitly]

@@ -1,0 +1,50 @@
+using Recyclarr.Servarr.QualityProfile;
+using Riok.Mapperly.Abstractions;
+using SonarrApi = Recyclarr.Api.Sonarr.V5;
+
+namespace Recyclarr.ServarrApi.QualityProfile;
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
+internal static partial class SonarrV5QualityProfileMapper
+{
+    public static partial QualityProfileData ToDomain(SonarrApi.QualityProfileResource dto);
+
+    public static partial ProfileLanguage ToDomain(SonarrApi.LanguageResource dto);
+
+    [MapProperty(
+        nameof(SonarrApi.ProfileFormatItemResource.Format),
+        nameof(QualityProfileFormatItem.FormatId)
+    )]
+    private static partial QualityProfileFormatItem FormatItemToDomain(
+        SonarrApi.ProfileFormatItemResource dto
+    );
+
+    private static QualityProfileItem ItemToDomain(SonarrApi.QualityProfileQualityItemResource dto)
+    {
+        return new QualityProfileItem
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Allowed = dto.Allowed,
+            Quality = dto.Quality is not null
+                ? new QualityProfileItemQuality { Id = dto.Quality.Id, Name = dto.Quality.Name }
+                : null,
+            Items = (dto.Items ?? []).Select(ItemToDomain).ToList(),
+            Size = SizeToDomain(dto),
+        };
+    }
+
+    private static QualityItemSize? SizeToDomain(SonarrApi.QualityProfileQualityItemResource dto)
+    {
+        if (dto is { MinSize: null, MaxSize: null, PreferredSize: null })
+        {
+            return null;
+        }
+
+        return new QualityItemSize(
+            (decimal)(dto.MinSize ?? 0),
+            (decimal?)dto.MaxSize,
+            (decimal?)dto.PreferredSize
+        );
+    }
+}

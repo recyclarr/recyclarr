@@ -15,6 +15,10 @@
         "type": "string",
         "description": "The name of the quality profile. For guide-backed profiles (with trash_id), this overrides the guide name. For user-defined profiles, this is the profile identity."
       },
+      "quality_definition": {
+        "description": "Quality sizes for this profile only. Overrides the guide profile's quality definition and the instance-level `quality_definition`. Only applies to services that store quality sizes per profile (Sonarr v5 and later).",
+        "$ref": "quality-definition.json"
+      },
       "reset_unmatched_scores": {
         "type": ["null", "object"],
         "description": "Settings related to resetting unmatched CF scores.",

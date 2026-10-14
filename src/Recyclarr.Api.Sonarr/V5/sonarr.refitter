@@ -1,0 +1,23 @@
+{
+  "openApiPath": "./openapi.json",
+  "namespace": "Recyclarr.Api.Sonarr.V5",
+  "multipleInterfaces": "ByTag",
+  "includeTags": [
+    "CustomFormat",
+    "QualityProfile",
+    "QualityProfileSchema",
+    "MediaManagementSettings",
+    "NamingSettings",
+    "Language"
+  ],
+  "generateContracts": true,
+  "useCancellationTokens": true,
+  "trimUnusedSchema": true,
+  "operationNameGenerator": "MultipleClientsFromPathSegments",
+  "outputFolder": "Generated",
+  "outputFilename": "SonarrApi.g.cs",
+  "codeGeneratorSettings": {
+    "generateOptionalPropertiesAsNullable": true,
+    "generateNullableReferenceTypes": true
+  }
+}

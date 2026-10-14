@@ -4,12 +4,15 @@ using System.Text.Json;
 using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Compatibility;
+using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
@@ -34,9 +37,19 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         params (string Name, decimal Min, decimal Max, decimal Preferred)[] qualities
     )
     {
+        SetupQualitySizeGuideData<RadarrQualitySizeResource>(type, qualities);
+    }
+
+    protected void SetupQualitySizeGuideData<TResource>(
+        string type,
+        params (string Name, decimal Min, decimal Max, decimal Preferred)[] qualities
+    )
+        where TResource : QualitySizeResource, new()
+    {
         var registry = Resolve<ResourceRegistry<IFileInfo>>();
-        var qs = new RadarrQualitySizeResource
+        var qs = new TResource
         {
+            TrashId = $"qs-{type}",
             Type = type,
             Qualities = qualities
                 .Select(q => new QualityItem
@@ -49,9 +62,9 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
                 .ToList(),
         };
         var json = JsonSerializer.Serialize(qs, GlobalJsonSerializerSettings.Guide);
-        var path = $"/guide/radarr/quality-size/{type}.json";
+        var path = $"/guide/{typeof(TResource).Name}/{type}.json";
         Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrQualitySizeResource>([Fs.FileInfo.New(path)]);
+        registry.Register<TResource>([Fs.FileInfo.New(path)]);
     }
 
     protected void SetupMediaNamingGuideData(
@@ -95,6 +108,28 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         var path = $"/guide/radarr/quality-profiles/{trashId}.json";
         Fs.AddFile(path, new MockFileData(json));
         registry.Register<RadarrQualityProfileResource>([Fs.FileInfo.New(path)]);
+    }
+
+    protected void SetupSonarrQualityProfileGuideData(
+        string trashId,
+        string name,
+        params (string Label, string TrashId)[] trashQualityDefinition
+    )
+    {
+        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var qp = new SonarrQualityProfileResource
+        {
+            TrashId = trashId,
+            Name = name,
+            TrashQualityDefinition = trashQualityDefinition.ToDictionary(
+                x => x.Label,
+                x => x.TrashId
+            ),
+        };
+        var json = JsonSerializer.Serialize(qp, GlobalJsonSerializerSettings.Guide);
+        var path = $"/guide/sonarr/quality-profiles/{trashId}.json";
+        Fs.AddFile(path, new MockFileData(json));
+        registry.Register<SonarrQualityProfileResource>([Fs.FileInfo.New(path)]);
     }
 
     protected void SetupQualityProfileWithFormatItems(
@@ -166,13 +201,31 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
 
     [SuppressMessage("Reliability", "CA2000", Justification = "Scope lives for the test duration")]
     protected (PlanBuilder Sut, IInstancePublisher Publisher) CreatePlanBuilder(
-        IServiceConfiguration config
+        IServiceConfiguration config,
+        Version? serviceVersion = null
     )
     {
+        var sonarrVersion = serviceVersion ?? new Version(4, 0);
+        var detected = config.ServiceType switch
+        {
+            SupportedServices.Sonarr => new DetectedService(
+                sonarrVersion,
+                new SonarrCapabilities(sonarrVersion).ApiTarget
+            ),
+            _ => new DetectedService(
+                serviceVersion ?? new Version(5, 0),
+                ServiceApiTarget.RadarrV3
+            ),
+        };
+
         var publisher = Substitute.For<IInstancePublisher>();
         var scope = ResolveWithConfig<PlanBuilder>(
             config,
-            c => c.RegisterInstance(publisher).As<IInstancePublisher>()
+            c =>
+            {
+                c.RegisterInstance(publisher).As<IInstancePublisher>();
+                c.RegisterInstance(detected);
+            }
         );
         return (scope.Entry, publisher);
     }

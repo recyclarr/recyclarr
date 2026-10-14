@@ -1,6 +1,6 @@
 {
   "openApiPath": "./openapi.json",
-  "namespace": "Recyclarr.Api.Sonarr",
+  "namespace": "Recyclarr.Api.Sonarr.V3",
   "multipleInterfaces": "ByTag",
   "includeTags": [
     "CustomFormat",

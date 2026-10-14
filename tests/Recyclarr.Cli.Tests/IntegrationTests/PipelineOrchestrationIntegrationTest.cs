@@ -3,6 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
@@ -68,6 +69,9 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var scope = Container.BeginLifetimeScope(builder =>
         {
             builder.RegisterInstance(pipelines).As<IEnumerable<ISyncPipeline>>();
+            builder.RegisterInstance(
+                new DetectedService(new Version(4, 0), ServiceApiTarget.SonarrV3)
+            );
         });
         return scope.Resolve<IPipelineExecutor>();
     }

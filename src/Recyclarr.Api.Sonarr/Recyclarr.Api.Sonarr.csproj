@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Generated/**" />
+      <Compile Remove="**/Generated/**" />
     </ItemGroup>
 
     <ItemGroup>
