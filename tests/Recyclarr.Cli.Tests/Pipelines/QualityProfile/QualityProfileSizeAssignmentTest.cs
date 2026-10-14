@@ -83,10 +83,7 @@ internal sealed class QualityProfileSizeAssignmentTest
     )
     {
         var profile = CreateProfile(
-            new Dictionary<string, QualityItemSize>
-            {
-                ["HDTV-1080p"] = new(1.0m, 10.00m, 5.0m),
-            }
+            new Dictionary<string, QualityItemSize> { ["HDTV-1080p"] = new(1.0m, 10.00m, 5.0m) }
         );
 
         sut.Calculate(profile).QualitiesChanged.Should().BeFalse();

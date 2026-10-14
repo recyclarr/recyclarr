@@ -119,7 +119,8 @@ internal sealed class SonarrV5QualityProfileGatewayTest
         SentItems()
             .Should()
             .ContainSingle(x => x!["id"] != null && x["id"]!.GetValue<int>() == 1001)
-            .Which!["name"]!.GetValue<string>()
+            .Which!["name"]!
+            .GetValue<string>()
             .Should()
             .Be("WEB 1080p Renamed");
     }

@@ -67,8 +67,7 @@ public record QualityItemSize
     public decimal? Preferred { get; }
 
     // Dividing by 1 with maximum scale strips trailing zeros without changing the value
-    private static decimal Normalize(decimal value) =>
-        value / 1.0000000000000000000000000000m;
+    private static decimal Normalize(decimal value) => value / 1.0000000000000000000000000000m;
 }
 
 public record QualityProfileItemQuality
