@@ -15,6 +15,10 @@ scheduled syncs.
 **Ephemeral server**: A Recyclarr server that one CLI command starts for its own use. It stops when
 that command ends and never runs scheduled syncs.
 
+**Server API key**: The secret a client presents to call a Recyclarr server's API. _Avoid_: API key
+
+**Instance API key**: The secret Recyclarr presents to a Sonarr or Radarr instance. _Avoid_: API key
+
 **Sync request**: A request to create a sync job. It selects instances from the server's loaded
 configuration; selectors that match no loaded instance are client errors.
 
