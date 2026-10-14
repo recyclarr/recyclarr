@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
+using Recyclarr.Cli.Settings;
 
 namespace Recyclarr.Cli.Server;
 
@@ -33,7 +34,7 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
     /// <exception cref="ServerStartException">
     /// Thrown when the process exits before sending READY.
     /// </exception>
-    public async Task<Uri> StartAsync(CancellationToken ct)
+    public async Task<Uri> StartAsync(string apiKey, CancellationToken ct)
     {
         var serverBinary = ServerBinaryLocator.GetServerBinary(fs);
         if (!serverBinary.Exists)
@@ -60,6 +61,8 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
                     $"--urls={LoopbackUrl} "
                     + $"--parent-pid={Environment.ProcessId} "
                     + "--ephemeral=true",
+                // Replaces any inherited value, so the server accepts only this command's key.
+                Environment = { [CliSettingsLoader.ApiKeyVariable] = apiKey },
             },
         };
 

@@ -2,3 +2,23 @@
 GET {{baseUrl}}/api/v1/guide/lidarr/custom-formats
 
 ?? status == 400
+
+###
+
+# Missing server API key: drops the default Authorization header from .httpyac.json
+{{@request
+  delete request.headers.Authorization;
+}}
+GET {{baseUrl}}/api/v1/guide/radarr/custom-formats
+
+?? status == 401
+?? header www-authenticate == Bearer
+
+###
+
+# Wrong server API key
+GET {{baseUrl}}/api/v1/guide/radarr/custom-formats
+Authorization: Bearer wrong-key
+
+?? status == 401
+?? header www-authenticate == Bearer

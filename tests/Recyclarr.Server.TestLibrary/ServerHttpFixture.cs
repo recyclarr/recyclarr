@@ -1,7 +1,9 @@
 using System.IO.Abstractions.TestingHelpers;
+using System.Net.Http.Headers;
 using Autofac;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
+using NSubstitute;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Platform;
 
@@ -21,10 +23,32 @@ namespace Recyclarr.Server.TestLibrary;
 /// </remarks>
 public abstract class ServerHttpFixture : WebApplicationFactory<Program>
 {
-    private readonly TestStubsModule _stubs = new();
+    /// <summary>
+    /// The server API key the in-process server requires. Clients from <c>CreateClient</c> send
+    /// it; a test that needs a different key or none changes the client's headers.
+    /// </summary>
+    public const string ApiKey = "test-server-api-key";
+
+    private readonly TestStubsModule _stubs;
+
+    protected ServerHttpFixture()
+    {
+        _stubs = new TestStubsModule();
+        _stubs.Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns(ApiKey);
+    }
 
     protected MockFileSystem Fs => _stubs.Fs;
     protected IAppPaths Paths => _stubs.Paths;
+    protected IEnvironment Env => _stubs.Env;
+
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            ApiKey
+        );
+    }
 
     protected override IHost CreateHost(IHostBuilder builder)
     {

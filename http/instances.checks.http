@@ -16,3 +16,11 @@ DELETE {{baseUrl}}/api/v1/instances/does-not-exist/custom-formats/1
 DELETE {{baseUrl}}/api/v1/instances/radarr/custom-formats/2147483647
 
 ?? status == 404
+
+###
+
+# Wrong server API key
+GET {{baseUrl}}/api/v1/instances/does-not-exist/custom-formats
+Authorization: Bearer wrong-key
+
+?? status == 401

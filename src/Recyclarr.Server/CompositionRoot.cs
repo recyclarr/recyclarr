@@ -10,6 +10,7 @@ using Recyclarr.Common;
 using Recyclarr.Pipelines;
 using Recyclarr.Platform;
 using Recyclarr.ResourceProviders;
+using Recyclarr.Server.Auth;
 using Recyclarr.Server.Features.Instances;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Sync;
@@ -61,6 +62,7 @@ internal static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
 
+        builder.RegisterType<ServerApiKey>().SingleInstance();
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
         builder.RegisterType<SettingsEndpointSetup>().As<IConfigureOptions<KestrelServerOptions>>();
 

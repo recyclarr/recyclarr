@@ -10,4 +10,10 @@ internal sealed record CliSettings
     /// to that server. Unset, each command launches a private server for its duration (ADR-010).
     /// </summary>
     public Uri? ServerBaseUrl { get; init; }
+
+    /// <summary>
+    /// The server API key sent to the configured server. An ephemeral server ignores it, because
+    /// the CLI gives that server a one-time key of its own (ADR-027).
+    /// </summary>
+    public string? ServerApiKey { get; init; }
 }

@@ -1,7 +1,11 @@
 {
+  "defaultHeaders": {
+    "Authorization": "Bearer {{apiKey}}"
+  },
   "environments": {
     "$default": {
       "baseUrl": "http://localhost:7982",
+      "apiKey": "{{$processEnv RECYCLARR_API_KEY}}",
       "preview": true,
       "destructive": false
     }

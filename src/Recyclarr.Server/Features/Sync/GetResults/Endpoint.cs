@@ -11,7 +11,6 @@ internal sealed class Endpoint(ILogger log, ISyncJobStore jobStore)
     {
         Get("/sync/jobs/{id}/results");
         Version(1);
-        AllowAnonymous();
 
         Description(b =>
             b.Produces<SyncJobResultsResponse>()

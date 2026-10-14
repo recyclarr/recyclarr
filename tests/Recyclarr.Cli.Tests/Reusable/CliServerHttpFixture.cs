@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO.Abstractions;
+using System.Net.Http.Headers;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
@@ -44,6 +45,10 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         {
             var client = _cli.Resolve<Func<HttpClient>>()();
             client.BaseAddress = ServerAddress;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                ApiKey
+            );
             return new ServerConnection(client, ownedServer: null);
         });
     }
@@ -147,6 +152,16 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         }
     }
 
+    /// <summary>
+    /// The CLI sets its own Authorization header from cli.yml or the environment, so the server
+    /// fixture's default header is removed to let tests observe what the CLI sends.
+    /// </summary>
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        client.DefaultRequestHeaders.Authorization = null;
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -172,6 +187,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
                 $"""
                 server:
                   base_url: {ServerAddress}
+                  api_key: {ApiKey}
                 """
             );
         }
