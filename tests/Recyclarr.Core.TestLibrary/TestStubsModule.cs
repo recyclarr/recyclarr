@@ -29,8 +29,15 @@ public sealed class TestStubsModule : Module
 
     public IAppPaths Paths { get; }
 
+    /// <summary>
+    /// The process environment the container sees. Fixtures configure variables on it.
+    /// </summary>
+    public IEnvironment Env { get; } = Substitute.For<IEnvironment>();
+
     public TestStubsModule()
     {
+        Env.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
+
         var testRoot = Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
         var paths = new AppPaths(testRoot, testRoot);
         paths.CreateTopDirectories();
@@ -53,10 +60,7 @@ public sealed class TestStubsModule : Module
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
         builder.RegisterType<BlockedHttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
 
-        builder.RegisterMockFor<IEnvironment>(m =>
-        {
-            m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
-        });
+        builder.RegisterInstance(Env);
 
         builder.RegisterMockFor<IGitRepository>();
 

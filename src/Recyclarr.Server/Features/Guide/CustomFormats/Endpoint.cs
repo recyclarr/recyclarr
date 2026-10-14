@@ -11,10 +11,6 @@ internal sealed class Endpoint(CategorizedCustomFormatProvider customFormats)
         Get("/guide/{service}/custom-formats");
         Version(1);
 
-        // FastEndpoints secures endpoints by default. No authentication scheme exists yet, so the
-        // opt-out is explicit until API key auth lands (REC-153).
-        AllowAnonymous();
-
         Description(b => b.Produces<ListGuideCustomFormatsResponse>().WithTags("Guide"));
         Summary(s =>
         {

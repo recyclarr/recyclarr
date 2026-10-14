@@ -14,6 +14,7 @@ internal sealed class ServerProcessTest
     private static readonly TimeSpan ExitTimeout = TimeSpan.FromSeconds(30);
 
     private IDirectoryInfo _root = null!;
+    private string? _apiKey = "test-server-api-key";
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
 
     [SetUp]
@@ -145,6 +146,21 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("base_url must start with 'http' or 'https'");
     }
 
+    [Test]
+    public async Task An_ephemeral_server_without_an_api_key_explains_why_on_stderr()
+    {
+        _apiKey = null;
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().NotBe(0);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("RECYCLARR_API_KEY");
+    }
+
     private IFileInfo StateDatabase => ConfigDirectory.SubDirectory("state").File("server.db");
 
     private Process Start(params string[] arguments)
@@ -157,7 +173,11 @@ internal sealed class ServerProcessTest
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            Environment = { ["RECYCLARR_CONFIG_DIR"] = ConfigDirectory.FullName },
+            Environment =
+            {
+                ["RECYCLARR_CONFIG_DIR"] = ConfigDirectory.FullName,
+                ["RECYCLARR_API_KEY"] = _apiKey,
+            },
         };
 
         startInfo.ArgumentList.Add("--urls=http://127.0.0.1:0");

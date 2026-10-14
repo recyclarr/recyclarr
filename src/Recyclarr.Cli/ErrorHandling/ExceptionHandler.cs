@@ -57,6 +57,17 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
 
     private static async Task<IReadOnlyList<string>> DescribeAsync(ApiException e)
     {
+        if (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return
+            [
+                "The Recyclarr server rejected the request: missing or wrong API key. Set "
+                    + $"server.api_key in {CliSettingsLoader.FileName} or the "
+                    + $"{CliSettingsLoader.ApiKeyVariable} environment variable to the key the "
+                    + "server uses.",
+            ];
+        }
+
         if (e.StatusCode == HttpStatusCode.BadGateway)
         {
             var failure = await e.GetContentAsAsync<ServiceFailureProblemDetails>();

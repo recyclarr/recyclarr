@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -44,6 +45,7 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     };
 
     private const string ApiKey = "testkey";
+    private const string ServerApiKey = "e2e-server-api-key";
 
     private readonly HttpClient _sonarr;
     private readonly HttpClient _radarr;
@@ -194,11 +196,16 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
                 ["RECYCLARR_CONFIG_DIR"] = AppDataDir.FullName,
                 ["RECYCLARR_DATA_DIR"] = AppDataDir.FullName,
                 ["RECYCLARR_APP_DATA"] = "",
+                ["RECYCLARR_API_KEY"] = ServerApiKey,
             },
             ct
         );
 
         _serverClient = new HttpClient { BaseAddress = _server.BaseAddress };
+        _serverClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            ServerApiKey
+        );
         _sync = RestService.For<ISyncApi>(_serverClient, ServerRefitSettings);
     }
 
