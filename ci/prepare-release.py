@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare a Recyclarr release: update CHANGELOG.md, commit, tag, and optionally push."""
+"""Release helpers for the Prepare, Tag, and Recover Release workflows."""
 
 import argparse
 import json
@@ -15,8 +15,6 @@ CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 
 # ANSI colors (no third-party deps)
 RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
 CYAN = "\033[36m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
@@ -27,7 +25,6 @@ VERSION_HEADING_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)]")
 UNRELEASED_LINK_RE = re.compile(r"^\[Unreleased]:\s+(.+)/compare/v.+\.\.\.HEAD$")
 VERSION_LINK_RE = re.compile(r"^\[(\d+\.\d+\.\d+)]:\s+")
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
-RELEASE_COMMIT_RE = re.compile(r"^release: v(\d+\.\d+\.\d+)$")
 
 
 def error(msg: str) -> None:
@@ -36,10 +33,6 @@ def error(msg: str) -> None:
 
 def info(label: str, value: str) -> None:
     print(f"  {CYAN}{label}{RESET} {value}")
-
-
-def success(msg: str) -> None:
-    print(f"{GREEN}{BOLD}done:{RESET} {msg}")
 
 
 def run_quiet(
@@ -216,34 +209,6 @@ def update_link_references(
     return result
 
 
-def git_commit(version: str) -> str:
-    """Commit the changelog and return the abbreviated commit SHA."""
-    run_or_die(
-        [
-            "git",
-            "commit",
-            "-m",
-            f"release: v{version}",
-            "--no-verify",
-            "--",
-            "CHANGELOG.md",
-        ],
-        "git commit failed",
-    )
-
-    # Get abbreviated SHA of the new commit
-    sha_result = run_quiet(["git", "rev-parse", "--short", "HEAD"])
-    return sha_result.stdout.strip()
-
-
-def git_tag(version: str) -> None:
-    """Create an annotated tag for the release."""
-    run_or_die(
-        ["git", "tag", "-fm", f"release v{version}", f"v{version}"],
-        "git tag failed",
-    )
-
-
 def detect_mainline() -> str:
     """Detect the mainline branch name from the remote (main or master)."""
     for candidate in ("main", "master"):
@@ -262,16 +227,6 @@ def require_mainline_branch(mainline: str) -> None:
     current = result.stdout.strip()
     if current != mainline:
         error(f"must be on {mainline} branch to release (currently on {current})")
-        sys.exit(1)
-
-
-def require_up_to_date(mainline: str) -> None:
-    """Exit if the local branch is behind the remote."""
-    run_quiet(["git", "fetch", "origin", mainline])
-    result = run_quiet(["git", "rev-list", "--count", f"origin/{mainline}..HEAD"])
-    behind = run_quiet(["git", "rev-list", "--count", f"HEAD..origin/{mainline}"])
-    if int(behind.stdout.strip()) > 0:
-        error(f"{mainline} is behind origin/{mainline}; pull or rebase first")
         sys.exit(1)
 
 
@@ -354,14 +309,6 @@ def require_workflows_healthy(mainline: str) -> None:
         sys.exit(1)
 
 
-def git_push(version: str, mainline: str) -> None:
-    """Push the mainline branch and the release tag."""
-    run_or_die(
-        ["git", "push", "origin", mainline, f"v{version}"],
-        "git push failed",
-    )
-
-
 def require_clean_worktree() -> None:
     """Exit if the working copy has uncommitted changes."""
     unstaged = run_quiet(["git", "diff", "--quiet"])
@@ -369,12 +316,6 @@ def require_clean_worktree() -> None:
     if unstaged.returncode != 0 or staged.returncode != 0:
         error("working copy has uncommitted changes; commit or stash them first")
         sys.exit(1)
-
-
-def tag_exists_on_remote(tag: str) -> bool:
-    """Check whether a tag has been pushed to origin."""
-    result = run_quiet(["git", "ls-remote", "--tags", "origin", f"refs/tags/{tag}"])
-    return bool(result.stdout.strip())
 
 
 def recovery_info(mainline: str) -> dict[str, str]:
@@ -442,46 +383,6 @@ def recovery_info(mainline: str) -> dict[str, str]:
     }
 
 
-def undo_release() -> None:
-    """Reverse a local release commit and tag."""
-    # Verify HEAD is a release commit
-    result = run_quiet(["git", "log", "-1", "--format=%s", "HEAD"])
-    subject = result.stdout.strip()
-    m = RELEASE_COMMIT_RE.match(subject)
-    if not m:
-        error(f"HEAD is not a release commit: {subject!r}")
-        sys.exit(1)
-
-    version = m.group(1)
-    tag = f"v{version}"
-
-    # Verify the tag exists and points to HEAD
-    tag_result = run_quiet(["git", "rev-parse", "--verify", f"refs/tags/{tag}"])
-    if tag_result.returncode != 0:
-        error(f"tag {tag} does not exist")
-        sys.exit(1)
-
-    head_sha = run_quiet(["git", "rev-parse", "HEAD"]).stdout.strip()
-    # Dereference annotated tag to get the commit it points to
-    tag_sha = run_quiet(["git", "rev-parse", f"{tag}^{{commit}}"]).stdout.strip()
-    if tag_sha != head_sha:
-        error(f"tag {tag} does not point to HEAD")
-        sys.exit(1)
-
-    # Refuse if already pushed
-    if tag_exists_on_remote(tag):
-        error(f"tag {tag} has been pushed to origin; undo manually")
-        sys.exit(1)
-
-    # Delete tag, then undo the release commit without touching the working tree
-    run_quiet(["git", "tag", "-d", tag])
-    run_quiet(["git", "reset", "--soft", "HEAD^"])
-    # Restore CHANGELOG.md to its pre-release state (updates both index and working tree)
-    run_quiet(["git", "checkout", "HEAD", "--", "CHANGELOG.md"])
-
-    success(f"undid release v{version} (tag {tag} deleted, commit removed)")
-
-
 def format_version_label(version: str, prev_version: str | None) -> str:
     """Format the version line, e.g. 'v8.2.1 -> v8.3.0'."""
     if prev_version:
@@ -536,25 +437,10 @@ def print_dry_run(
     print(f"{DIM}No files were modified.{RESET}")
 
 
-def prompt_action(version: str, mainline: str) -> int:
-    """Present release options and return the user's choice (1, 2, or 3)."""
-    print(f"{YELLOW}What would you like to do?{RESET}")
-    print(f"  {BOLD}1{RESET}) Create release (commit + tag)")
-    print(f"  {BOLD}2{RESET}) Create release & push {mainline} + v{version} to origin")
-    print(f"     {DIM}This will start the release pipeline.{RESET}")
-    print(f"  {BOLD}3{RESET}) Abort")
-
-    while True:
-        choice = input(f"  {YELLOW}[1/2/3]{RESET} ").strip()
-        if choice in ("1", "2", "3"):
-            print()
-            return int(choice)
-        print(f"  {DIM}Please enter 1, 2, or 3.{RESET}")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare a Recyclarr release.")
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group(required=True)
+    modes.add_argument(
         "--dry-run",
         nargs="?",
         const=True,
@@ -562,51 +448,29 @@ def main() -> None:
         metavar="VERSION",
         help="preview without writing; optionally replay a previous release (e.g. --dry-run 8.6.0)",
     )
-    parser.add_argument(
-        "--undo",
-        action="store_true",
-        help="reverse the most recent local release (delete tag, remove commit)",
-    )
-    parser.add_argument(
+    modes.add_argument(
         "--update-changelog",
         action="store_true",
         help="update CHANGELOG.md without committing or tagging; print the version",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--verify",
         metavar="VERSION",
         help="verify that CHANGELOG.md and GitVersion match a prepared release",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--check-workflows",
         action="store_true",
         help="verify that mainline workflows are complete and successful",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--recovery-info",
         action="store_true",
         help="print JSON describing the release eligible for recovery",
     )
     args = parser.parse_args()
 
-    mode_count = sum(
-        (
-            bool(args.dry_run),
-            args.undo,
-            args.update_changelog,
-            args.verify is not None,
-            args.check_workflows,
-            args.recovery_info,
-        )
-    )
-    if mode_count > 1:
-        parser.error("release modes cannot be combined")
-
     mainline = detect_mainline()
-
-    if args.undo:
-        undo_release()
-        return
 
     if args.check_workflows:
         require_workflows_healthy(mainline)
@@ -698,40 +562,8 @@ def main() -> None:
         return
 
     require_clean_worktree()
-
-    if args.update_changelog:
-        CHANGELOG_PATH.write_text(new_text)
-        print(version)
-        return
-
-    require_up_to_date(mainline)
-
-    # Show what will be released
-    print()
-    print(f"{BOLD}Release: {format_version_label(version, prev_version)}{RESET}")
-    print()
-    print_changelog_preview(lines, version, prev_version)
-    print()
-
-    choice = prompt_action(version, mainline)
-    if choice == 3:
-        print(f"{DIM}Aborted.{RESET}")
-        return
-
-    # Write, commit, tag
     CHANGELOG_PATH.write_text(new_text)
-    sha = git_commit(version)
-    git_tag(version)
-    success(f"committed {sha} and tagged v{version}")
-
-    if choice == 2:
-        require_workflows_healthy(mainline)
-        git_push(version, mainline)
-        success(f"pushed {mainline} and v{version} to origin")
-    else:
-        print(f"  {DIM}To push manually:{RESET}")
-        print(f"  {DIM}  git push origin {mainline} v{version}{RESET}")
-    print()
+    print(version)
 
 
 if __name__ == "__main__":
