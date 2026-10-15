@@ -152,10 +152,24 @@ jobs:
           path: publish
 
   #############################################
-  docker:
-    name: Docker
+  docker-edge:
+    name: Docker (edge)
+    if: github.ref_type == 'branch'
     # Wait on builds only to verify tests pass
     needs: [build-win, build-linux, build-osx, build-musl]
+    permissions:
+      contents: read
+      packages: write
+    uses: $/.github/workflows/reusable-docker.yml
+    secrets: inherit
+
+  #############################################
+  docker-release:
+    name: Docker (release)
+    # Push version tags only after the GitHub release exists. Recover Release moves the git tag
+    # only while no release exists, so published image versions are never rebuilt.
+    if: github.ref_type == 'tag'
+    needs: [release]
     permissions:
       contents: read
       packages: write
@@ -172,7 +186,6 @@ jobs:
       - build-linux
       - build-musl
       - codesign # Depends on build-osx, and reuploads artifacts after signing
-      - docker
     env:
       XZ_OPT: "-T0 -9"
     steps:
