@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
@@ -6,6 +7,7 @@ using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
+using Recyclarr.Sync.Progress;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
@@ -15,6 +17,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private List<PipelineType> _executionOrder = null!;
     private IInstancePublisher _instancePublisher = null!;
     private Dictionary<PipelineType, IPipelinePublisher> _pipelinePublishers = null!;
+    private Dictionary<PipelineType, PipelineSnapshot> _statuses = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
@@ -22,6 +25,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
 
         _executionOrder = [];
         _pipelinePublishers = [];
+        _statuses = [];
 
         var config = Substitute.For<IServiceConfiguration>();
         config.ServiceType.Returns(SupportedServices.Sonarr);
@@ -34,6 +38,13 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             {
                 var type = ci.Arg<PipelineType>();
                 var pub = Substitute.For<IPipelinePublisher>();
+                pub.WhenForAnyArgs(x => x.SetStatus(default))
+                    .Do(c =>
+                        _statuses[type] = new PipelineSnapshot(
+                            c.Arg<PipelineProgressStatus>(),
+                            null
+                        )
+                    );
                 _pipelinePublishers[type] = pub;
                 return pub;
             });
@@ -42,13 +53,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private ISyncPipeline CreateStubPipeline(
         PipelineType type,
         IReadOnlyList<PipelineType> dependencies,
-        PipelineResult result = PipelineResult.Completed
+        PipelineResult result = PipelineResult.Completed,
+        bool applies = true
     )
     {
         var pipeline = Substitute.For<ISyncPipeline>();
         pipeline.PipelineType.Returns(type);
         pipeline.Dependencies.Returns(dependencies);
-        pipeline.AppliesTo(default).ReturnsForAnyArgs(true);
+        pipeline.AppliesTo(default).ReturnsForAnyArgs(applies);
         pipeline
             .Execute(
                 Arg.Any<ISyncSettings>(),
@@ -56,12 +68,49 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
                 Arg.Any<IPipelinePublisher>(),
                 Arg.Any<CancellationToken>()
             )
-            .Returns(_ =>
+            .Returns(c =>
             {
                 _executionOrder.Add(type);
+                c.Arg<IPipelinePublisher>()
+                    .SetStatus(
+                        result == PipelineResult.Completed
+                            ? PipelineProgressStatus.Succeeded
+                            : PipelineProgressStatus.Failed
+                    );
                 return Task.FromResult(result);
             });
         return pipeline;
+    }
+
+    private ISyncPipeline[] CreateAllStubPipelines(PipelineType notApplicable)
+    {
+        return Enum.GetValues<PipelineType>()
+            .Select(type => CreateStubPipeline(type, [], applies: type != notApplicable))
+            .ToArray();
+    }
+
+    [Test]
+    public async Task Pipeline_types_not_applicable_to_the_service_are_reported_skipped()
+    {
+        var sut = CreateExecutor(CreateAllStubPipelines(notApplicable: PipelineType.QualitySize));
+
+        await sut.Execute(
+            Substitute.For<ISyncSettings>(),
+            new TestPlan(),
+            _instancePublisher,
+            CancellationToken.None
+        );
+
+        _executionOrder.Should().NotContain(PipelineType.QualitySize);
+        _statuses
+            .Should()
+            .ContainKey(PipelineType.QualitySize)
+            .WhoseValue.Status.Should()
+            .Be(PipelineProgressStatus.Skipped);
+        InstanceSnapshot
+            .DeriveStatus(_statuses.ToImmutableDictionary())
+            .Should()
+            .Be(InstanceProgressStatus.Succeeded);
     }
 
     private IPipelineExecutor CreateExecutor(IEnumerable<ISyncPipeline> pipelines)

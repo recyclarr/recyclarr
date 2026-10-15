@@ -20,7 +20,18 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
-        var applicable = pipelines.Where(p => p.AppliesTo(detectedService.ApiTarget));
+        var applicable = pipelines.Where(p => p.AppliesTo(detectedService.ApiTarget)).ToList();
+
+        // Consumers derive instance status only once every pipeline type is terminal, so types
+        // with no pipeline for this service (e.g. quality sizes on Sonarr v5) must be skipped.
+        foreach (
+            var type in Enum.GetValues<PipelineType>()
+                .Except(applicable.Select(p => p.PipelineType))
+        )
+        {
+            instancePublisher.ForPipeline(type).SetStatus(PipelineProgressStatus.Skipped);
+        }
+
         var sortedPipelines = TopologicalSort(applicable);
         log.Debug(
             "Pipeline execution order: {Order}",

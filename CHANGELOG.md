@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync: On Sonarr v5, the progress table kept showing a spinner for quality sizes after sync
+  finished, and failed syncs could be reported as successful in notifications
+
 ## [8.8.0] - 2026-10-14
 
 ### Added
