@@ -34,6 +34,9 @@ jobs:
           token: ${{ secrets.SPONSORS_PAT }}
           file: README.md
           active-only: false
+          template: >-
+            <a href="https://github.com/{{ login }}"><img src="{{ avatarUrl }}" width="60px"
+            alt="User avatar: {{#name}}{{ name }}{{/name}}{{^name}}{{ login }}{{/name}}" /></a>
 
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
