@@ -288,8 +288,8 @@ changes you may need to make.
 - CLI: **BREAKING** List commands now display formatted tables instead of plain text. Use `--raw`
   for the previous behavior (now TSV format for scripting).
 - CLI: **BREAKING** The global `--raw` option has been removed. It is now specific to list commands.
-- CLI: **BREAKING** The `--score-sets` option on `list custom-formats` has been removed. Use `list
-  score-sets` instead.
+- CLI: **BREAKING** The `--score-sets` option on `list custom-formats` has been removed. Use
+  `list score-sets` instead.
 - Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
   reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
 - Sync: Preview mode now shows instance name in section headers and a visual separator between
@@ -300,8 +300,8 @@ changes you may need to make.
 
 ### Removed
 
-- Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use `recyclarr
-  state repair --adopt` to adopt manually-created custom formats.
+- Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use
+  `recyclarr state repair --adopt` to adopt manually-created custom formats.
 - Config: **BREAKING** The deprecated `quality_profiles` element under `custom_formats` has been
   removed.
 - Config: **BREAKING** Include templates in the `configs` directory are no longer supported. Move
@@ -498,9 +498,9 @@ changes you may need to make.
 
 ### Changed
 
-- **BREAKING**: The app data directory on OSX has changed. It now lives at `~/Library/Application
-  Support/recyclarr` instead of `~/.config/recyclarr`. Users will need to run `recyclarr migrate` to
-  move the directory (or do it manually).
+- **BREAKING**: The app data directory on OSX has changed. It now lives at
+  `~/Library/Application Support/recyclarr` instead of `~/.config/recyclarr`. Users will need to run
+  `recyclarr migrate` to move the directory (or do it manually).
 - **BREAKING**: Removed support for Release Profiles and Sonarr version 3. The new minimum required
   version for Sonarr is v4.0.0.
 - CLI: Slightly improved display of version number when using `-v` option.
@@ -582,8 +582,8 @@ changes you may need to make.
 
 - `qualities` (inside `quality_profiles`) is now a "Replace" merge operation instead of "Add". This
   means only one YAML file manages the full list of qualities. Either an include does it, or you
-  override the full list in your configuration file. There is no longer any combination. See [the
-  docs][qualitiesmerge] for more details.
+  override the full list in your configuration file. There is no longer any combination. See
+  [the docs][qualitiesmerge] for more details.
 
 [qualitiesmerge]: https://recyclarr.dev/reference/configuration/include/#detail-qualities
 
@@ -799,11 +799,11 @@ changes you may need to make.
 - `replace_existing_custom_formats` must be explicitly specified, otherwise you will get a
   deprecation warning. In a future release, the default will change from `true` to `false`. To
   prepare for that, users must explicitly state what behavior they want to avoid unwanted behavior
-  in the future. Read more on the [upgrade
-  guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#replace-existing-custom-formats/).
+  in the future. Read more on the
+  [upgrade guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#replace-existing-custom-formats/).
 - `reset_unmatched_scores` is being moved to the `quality_profiles` section; a deprecation message
-  will be logged until it is moved. Read more on the [upgrade
-  guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#reset-unmatched-scores/).
+  will be logged until it is moved. Read more on the
+  [upgrade guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#reset-unmatched-scores/).
 
 ### Fixed
 
@@ -1183,8 +1183,9 @@ make.
 
 ### Changed
 
-- **BREAKING**: Sonarr Release profiles are now synced based on a "Trash ID" taken from [the sonarr
-  JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes _are required_.
+- **BREAKING**: Sonarr Release profiles are now synced based on a "Trash ID" taken from
+  [the sonarr JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes
+  _are required_.
 - Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
   using the wrong URL.
 - Radarr: Sanitize URLs in HTTP exception messages ([#17]).
@@ -1237,8 +1238,8 @@ make.
 
 ### Added
 
-- New settings file to control non-service specific behavior of Trash Updater. See [the
-  documentation][setref] for more information.
+- New settings file to control non-service specific behavior of Trash Updater. See
+  [the documentation][setref] for more information.
 - Trash git repository URL can be overridden in settings.
 - Schema added for `settings.yml`.
 - Add setting to bypass HTTPS certificate validation (useful for self-signed certificates used with
