@@ -6,25 +6,32 @@
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
 [![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
-A command-line application that will automatically synchronize recommended settings from the [TRaSH
-guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
+A command-line application that will automatically synchronize recommended settings from the
+[TRaSH guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
 
 ## Features
 
-Recyclarr supports Radarr and Sonarr (v4 and higher only). The following information can be synced
+Recyclarr supports Radarr and Sonarr (Sonarr v4 or newer). The following information can be synced
 to these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
 
 [Features]: https://recyclarr.dev/guide/features/
 
 - Quality Profiles, including qualities and quality groups
-- Custom Formats, including scores (from guide or manual)
+- Custom Formats, individually or as groups, including scores (from guide or manual)
 - Quality Definitions (file sizes)
 - Media Naming Formats
 - Media Management (Propers/Repacks)
 
+## Getting Started
+
+New to Recyclarr? The [Getting Started] guide walks through installing it with Docker and syncing
+your first TRaSH Guides quality profile from a ready-made template.
+
+[Getting Started]: https://recyclarr.dev/guide/getting-started/
+
 > [!WARNING]
 > The `latest` Docker tag is not available on Docker Hub or GHCR. Use a major version tag (e.g. `8`)
-> instead.
+> instead. See the [Docker tags](https://recyclarr.dev/guide/installation/docker/#tags) docs.
 
 ## Read the Documentation
 
@@ -37,13 +44,14 @@ some main topics.
 - [Command Line Reference](https://recyclarr.dev/cli/)
 - [Configuration Reference](https://recyclarr.dev/reference/configuration/)
 - [Settings Reference](https://recyclarr.dev/reference/settings/)
-- [Troubleshooting](https://recyclarr.dev/guide/troubleshooting/)
+- [Errors & Warnings](https://recyclarr.dev/guide/troubleshooting/errors/)
 - [Upgrade Guides](https://recyclarr.dev/guide/upgrade-guide/)
 
 ## Getting Support
 
 For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] and ask in the
-`#recyclarr` channel.
+`#recyclarr` channel. Read [Getting Help](https://recyclarr.dev/guide/troubleshooting/help/) first
+for the details to include with your question.
 
 > [!IMPORTANT]
 > The GitHub Issues section is reserved for:
@@ -51,7 +59,14 @@ For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] a
 > - Bug reports
 > - Feature requests
 >
-> Please do not use GitHub Issues for general support questions or configuration help.
+> Please do not use GitHub Issues for general support questions or configuration help. Report
+> security vulnerabilities privately as described in the [Security Policy](.github/SECURITY.md).
+
+## Contributing
+
+Contributions are welcome. Non-trivial changes need an approved design in an issue before a pull
+request is opened. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, standards, and
+development setup.
 
 ## Sponsors
 
