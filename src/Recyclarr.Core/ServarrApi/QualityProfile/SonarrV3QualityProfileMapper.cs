@@ -28,21 +28,6 @@ internal static partial class SonarrV3QualityProfileMapper
                 ? new QualityProfileItemQuality { Id = dto.Quality.Id, Name = dto.Quality.Name }
                 : null,
             Items = (dto.Items ?? []).Select(ItemToDomain).ToList(),
-            Size = SizeToDomain(dto),
         };
-    }
-
-    private static QualityItemSize? SizeToDomain(SonarrApi.QualityProfileQualityItemResource dto)
-    {
-        if (dto is { MinSize: null, MaxSize: null, PreferredSize: null })
-        {
-            return null;
-        }
-
-        return new QualityItemSize(
-            (decimal)(dto.MinSize ?? 0),
-            (decimal?)dto.MaxSize,
-            (decimal?)dto.PreferredSize
-        );
     }
 }

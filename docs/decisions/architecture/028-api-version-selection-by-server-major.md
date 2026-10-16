@@ -1,4 +1,4 @@
-# ADR-009: API version selection by server major version
+# ADR-028: API version selection by server major version
 
 - **Status:** Accepted
 - **Date:** 2026-10-13
@@ -33,8 +33,11 @@ then has its own contract and version differences stay inside gateways.
 - The capability check maps the detected version to a `ServiceApiTarget` (`SonarrV3`, `SonarrV5`,
   `RadarrV3`). Gateways are keyed by target; the instance processor resolves ports from a child
   scope that registers the detected service. Resolving a port before detection fails.
-- Pipelines declare which targets they apply to. Excluded pipelines are never constructed, so their
-  phases may depend on ports the target has no gateway for (quality definitions on Sonarr v5).
+- Service-owned quality profile fields (ADR-023) are keyed by target as well, so Sonarr v5
+  per-profile quality sizes have their own component.
+- A sync operation that has no gateway on a target resolves that gateway lazily and is skipped by
+  its plan there (the quality definition operation on Sonarr v5, whose planner assigns sizes to
+  profiles instead).
 - The version probe stays on `/api/v3/system/status`, which both majors serve.
 
 ### Consequences

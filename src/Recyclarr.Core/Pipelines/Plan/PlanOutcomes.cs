@@ -45,6 +45,37 @@ public record PreferredGreaterThanMaxOutcome(string Quality, decimal Preferred, 
     public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
 }
 
+public record GuideQualityDefinitionNotFoundOutcome(string Label, string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
+
+public record AmbiguousGuideQualityDefinitionOutcome(IReadOnlyList<string> Labels) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
+
+// Wraps a quality size outcome raised while resolving sizes for one profile on a service that
+// stores sizes per profile, so the quality profile operation can attribute it to that profile.
+internal record QualityProfileSizeOutcome(PlannedQualityProfile Profile, SyncOutcome Inner)
+    : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => Inner.Level;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
+
+internal record ProfileQualityDefinitionIgnoredOutcome(PlannedQualityProfile Profile) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
+
+public record QualityDefinitionUnusedOutcome : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
+
 public record DuplicateQualityProfileNameOutcome(string Name) : SyncOutcome
 {
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;

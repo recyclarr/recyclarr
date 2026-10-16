@@ -168,6 +168,7 @@ internal class PreviewRenderer(IAnsiConsole console)
             var tree = ProfileTree(change.Identity, change.Reason);
             AddFields(tree, change.Fields);
             AddQualities(tree, change.CurrentQualities, change.DesiredQualities);
+            AddSizes(tree, change.Sizes);
             AddScores(tree, change.Scores);
             rows.Add(tree);
         }
@@ -222,6 +223,32 @@ internal class PreviewRenderer(IAnsiConsole console)
             return new Panel(items.Count == 0 ? new Markup("[dim]none[/]") : tree)
                 .Header($"[bold][underline]{header}[/][/]")
                 .NoBorder();
+        }
+
+        static void AddSizes(Tree tree, IReadOnlyList<SizeChange> sizes)
+        {
+            if (sizes.Count == 0)
+            {
+                return;
+            }
+
+            var table = new Table()
+                .AddColumn("[bold]Quality[/]")
+                .AddColumn("[bold]Min[/]")
+                .AddColumn("[bold]Max[/]")
+                .AddColumn("[bold]Preferred[/]");
+
+            foreach (var size in sizes)
+            {
+                table.AddRow(
+                    size.Quality.EscapeMarkup(),
+                    size.Minimum,
+                    size.Maximum,
+                    size.Preferred
+                );
+            }
+
+            tree.AddNode(new Rows(new Markup("[b]Quality Size Updates[/]"), table));
         }
 
         static void AddScores(Tree tree, IReadOnlyList<ScoreChange> scores)

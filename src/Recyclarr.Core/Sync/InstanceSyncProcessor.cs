@@ -1,3 +1,4 @@
+using Autofac;
 using Autofac.Core;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
@@ -13,9 +14,8 @@ namespace Recyclarr.Sync;
 internal class InstanceSyncProcessor(
     ILogger log,
     IServiceConfiguration config,
-    PlanBuilder planBuilder,
-    IPipelineExecutor pipelines,
-    ServiceAgnosticCapabilityEnforcer enforcer
+    ServiceAgnosticCapabilityEnforcer enforcer,
+    ILifetimeScope instanceScope
 )
 {
     public async Task<SemanticInstanceResult> Process(
@@ -35,11 +35,19 @@ internal class InstanceSyncProcessor(
                 config.InstanceName
             );
 
-            await enforcer.Check(config, ct);
+            // Planning and pipelines depend on version-selected gateways, which exist only in the
+            // scope created after detection succeeds. The instance scope owns its disposal so
+            // cleanup faults surface where the orchestrator isolates them, not as processing
+            // failures.
+            var detected = await enforcer.Check(config, ct);
+            var detectedScope = instanceScope.BeginDetectedServiceScope(detected);
+            instanceScope.Disposer.AddInstanceForAsyncDisposal(detectedScope);
 
-            plan = planBuilder.Build();
+            plan = detectedScope.Resolve<PlanBuilder>().Build();
             state.RetainPlanningOutcomes(plan.PlanningOutcomes);
-            var result = await pipelines.Execute(settings, plan, state.PipelineBuffer, ct);
+            var result = await detectedScope
+                .Resolve<IPipelineExecutor>()
+                .Execute(settings, plan, state.PipelineBuffer, ct);
             return new SemanticInstanceResult(
                 config.InstanceName,
                 config.ServiceType,

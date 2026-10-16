@@ -153,11 +153,10 @@ internal class SonarrV3QualityProfileGateway(
             stashed.Name = domain.Name ?? stashed.Name;
             stashed.Allowed = domain.Allowed ?? stashed.Allowed;
             stashed.Items = domain.Items.Select(i => MergeItem(i, index)).ToList();
-            ApplySize(domain.Size, stashed);
             return stashed;
         }
 
-        var created = new SonarrApi.QualityProfileQualityItemResource
+        return new SonarrApi.QualityProfileQualityItemResource
         {
             Id = domain.Id ?? 0,
             Name = domain.Name ?? "",
@@ -171,24 +170,6 @@ internal class SonarrV3QualityProfileGateway(
                 : null,
             Items = domain.Items.Select(i => MergeItem(i, index)).ToList(),
         };
-        ApplySize(domain.Size, created);
-        return created;
-    }
-
-    // A null domain size means "not managed": the stashed service values are kept as-is.
-    private static void ApplySize(
-        QualityItemSize? size,
-        SonarrApi.QualityProfileQualityItemResource dto
-    )
-    {
-        if (size is null)
-        {
-            return;
-        }
-
-        dto.MinSize = (double)size.Min;
-        dto.MaxSize = (double?)size.Max;
-        dto.PreferredSize = (double?)size.Preferred;
     }
 
     // Builds a flat index of all quality items for stash lookup.

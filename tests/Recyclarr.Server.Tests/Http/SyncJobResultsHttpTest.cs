@@ -400,10 +400,36 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        pipeline.Creates.Should().ContainSingle();
+        pipeline
+            .Creates.Should()
+            .ContainSingle()
+            .Which.State.QualitySizes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Quality = "HDTV-1080p",
+                    Minimum = new { Kind = QualitySizeKind.Numeric, Value = 5m },
+                    Maximum = new { Kind = QualitySizeKind.Unlimited },
+                }
+            );
         AssertQualityProfileOutcomes(pipeline.Outcomes);
+        pipeline
+            .Outcomes.QualitySizeOutcomes.Should()
+            .ContainSingle()
+            .Which.Outcomes.GuideReferenceMismatches.Should()
+            .ContainSingle()
+            .Which.TrashId.Should()
+            .Be("qs-missing");
+        pipeline.Outcomes.QualityDefinitionUnused.Should().BeTrue();
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
+        update
+            .QualitySizes.Should()
+            .ContainSingle()
+            .Which.Minimum.Should()
+            .BeEquivalentTo(new { Current = new { Value = 1m }, Desired = new { Value = 5m } });
         object?[] changes =
         [
             update.Name,
@@ -423,6 +449,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         pipeline.Should().NotBeNull();
         pipeline.Creates.Should().ContainSingle().Which.State.Language.Should().Be("English");
         AssertQualityProfileOutcomes(pipeline.Outcomes);
+        pipeline.Outcomes.QualityDefinitionsIgnored.Should().ContainSingle();
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
         object?[] changes =
@@ -476,8 +503,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.MinimumGreaterThanPreferred?.Count,
             outcomes.UnlimitedPreferredGreaterThanMaximum?.Count,
             outcomes.PreferredGreaterThanMaximum?.Count,
+            outcomes.GuideReferenceMismatches?.Count,
+            outcomes.AmbiguousGuideReferences?.Count,
         ];
-        counts.Should().HaveCount(7).And.OnlyContain(x => x == 1);
+        counts.Should().HaveCount(9).And.OnlyContain(x => x == 1);
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
         update.Minimum.Should().NotBeNull();

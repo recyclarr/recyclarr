@@ -8,9 +8,12 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Pipelines.QualitySize;
 
+// The quality definition gateway is resolved lazily because Sonarr v5 has none: sizes live on
+// quality profiles there, so the planner never sets plan.QualitySizes and ShouldSkip keeps this
+// operation from touching the gateway.
 internal class QualitySizeSyncOperation(
     ILogger log,
-    IQualityDefinitionService api,
+    Lazy<IQualityDefinitionService> api,
     IQualityItemLimitFactory limitFactory,
     IServiceConfiguration config
 ) : SyncOperation<QualitySizeComputeResult>
@@ -38,7 +41,7 @@ internal class QualitySizeSyncOperation(
             return new QualitySizeComputeResult([], null, planned.Type, emptyResult);
         }
 
-        var serverQuality = await api.GetQualityDefinitions(ct);
+        var serverQuality = await api.Value.GetQualityDefinitions(ct);
         var limits = await limitFactory.Create(config.ServiceType, ct);
         var updatedItems = new List<UpdatedQualityItem>();
         var deltas = new List<QualitySizeDelta>();
@@ -56,7 +59,11 @@ internal class QualitySizeSyncOperation(
                 continue;
             }
 
-            var resolved = ResolveValues(plannedQuality, planned.PreferredRatio, limits);
+            var resolved = QualitySizeCalculator.ResolveValues(
+                plannedQuality,
+                planned.PreferredRatio,
+                limits
+            );
             var item = new UpdatedQualityItem
             {
                 Quality = plannedQuality.Quality,
@@ -130,7 +137,7 @@ internal class QualitySizeSyncOperation(
             return;
         }
 
-        await api.UpdateQualityDefinitions(itemsToUpdate, ct);
+        await api.Value.UpdateQualityDefinitions(itemsToUpdate, ct);
 
         log.Information(
             "Total of {Count} sizes were synced for quality definition {Name}",
@@ -149,45 +156,14 @@ internal class QualitySizeSyncOperation(
 
         foreach (var outcome in plan.Outcomes)
         {
-            QualitySizeOutcome? mapped = outcome switch
-            {
-                QualityDefinitionNotFoundOutcome x =>
-                    new QualitySizeDefinitionReferenceMismatchOutcome(x.Type),
-                QualityNotFoundOutcome x => new QualitySizeReferenceMismatchOutcome(
-                    x.Quality,
-                    x.Type
-                ),
-                PreferredRatioClampedOutcome x => new QualitySizePreferredRatioClampedOutcome(
-                    new ValueDelta<decimal>(x.Original, x.Clamped)
-                ),
-                MinGreaterThanPreferredOutcome x =>
-                    new QualitySizeMinimumGreaterThanPreferredOutcome(
-                        x.Quality,
-                        Numeric(x.Min),
-                        Numeric(x.Preferred)
-                    ),
-                UnlimitedPreferredGreaterThanMaxOutcome x =>
-                    new QualitySizeUnlimitedPreferredGreaterThanMaximumOutcome(
-                        x.Quality,
-                        new QualitySizeValue.Unlimited(),
-                        Numeric(x.Max)
-                    ),
-                PreferredGreaterThanMaxOutcome x =>
-                    new QualitySizePreferredGreaterThanMaximumOutcome(
-                        x.Quality,
-                        Numeric(x.Preferred),
-                        Numeric(x.Max)
-                    ),
-                _ => null,
-            };
-
+            var mapped = QualitySizeOutcomeMapper.Map(outcome);
             if (mapped is null)
             {
                 continue;
             }
 
             outcomes.Add(mapped);
-            if (mapped is not QualitySizePreferredRatioClampedOutcome)
+            if (QualitySizeOutcomeMapper.IsIncomplete(mapped))
             {
                 incompleteResources++;
             }
@@ -245,25 +221,6 @@ internal class QualitySizeSyncOperation(
 
     private static QualitySizeValue ToSemanticValue(decimal value, decimal unlimitedBoundary) =>
         value >= unlimitedBoundary ? new QualitySizeValue.Unlimited() : Numeric(value);
-
-    private static (decimal Min, decimal Max, decimal Preferred) ResolveValues(
-        PlannedQualityItem planned,
-        decimal? preferredRatio,
-        QualityItemLimits limits
-    )
-    {
-        var min = planned.Min;
-        var max = Math.Min(planned.Max ?? limits.MaxLimit, limits.MaxLimit);
-        var preferred = Math.Min(planned.Preferred ?? limits.PreferredLimit, limits.PreferredLimit);
-
-        if (preferredRatio is not null)
-        {
-            var cappedMax = Math.Min(max, limits.PreferredLimit);
-            preferred = Math.Round(min + (cappedMax - min) * preferredRatio.Value, decimals: 1);
-        }
-
-        return (min, max, preferred);
-    }
 
     private static bool IsDifferent(
         QualityDefinitionItem server,

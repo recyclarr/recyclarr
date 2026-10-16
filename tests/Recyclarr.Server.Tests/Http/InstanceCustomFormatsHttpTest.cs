@@ -19,6 +19,7 @@ internal sealed class InstanceCustomFormatsHttpTest : ServerHttpFixture
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterInstance(_service).As<ICustomFormatService>();
+        builder.RegisterRadarrDetection();
     }
 
     private HttpClient StartWithInstance()

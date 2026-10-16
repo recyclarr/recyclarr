@@ -6,11 +6,14 @@ using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualityProfile.State;
+using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide.QualitySize;
 using Refit;
 
 namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
@@ -185,6 +188,33 @@ internal sealed class QualityProfileSyncOperationTest
         compute.Outcomes.Should().Contain(x => x is QualityProfileReferenceMismatchOutcome);
         compute.Outcomes.Should().Contain(x => x is QualityProfileDuplicateNameOutcome);
         compute.Outcomes.Should().Contain(x => x is QualityProfileScoreCollisionOutcome);
+    }
+
+    [Test]
+    public async Task Per_profile_quality_size_outcomes_are_attributed_to_the_profile()
+    {
+        var planned = GuideProfile("Series", "qp");
+        var harness = CreateHarness([], [], Schema());
+        harness.Plan.Add(
+            new QualityProfileSizeOutcome(planned, new QualityDefinitionNotFoundOutcome("x"))
+        );
+        harness.Plan.Add(new ProfileQualityDefinitionIgnoredOutcome(planned));
+        harness.Plan.Add(new QualityDefinitionUnusedOutcome());
+
+        var compute = await Compute(harness);
+
+        var identity = new GuideBackedQualityProfileIdentity(new MappingKey("qp", "Series"));
+        compute
+            .Outcomes.Should()
+            .Equal(
+                new QualityProfileQualitySizeOutcome(
+                    identity,
+                    new QualitySizeDefinitionReferenceMismatchOutcome("x")
+                ),
+                new QualityProfileQualityDefinitionIgnoredOutcome(identity),
+                new QualityProfileQualityDefinitionUnusedOutcome()
+            );
+        compute.Status.Should().Be(SyncResultStatus.Failed, "the size error is incomplete work");
     }
 
     [Test]
@@ -683,6 +713,140 @@ internal sealed class QualityProfileSyncOperationTest
             );
     }
 
+    private static readonly QualityItemSize ServiceSize = new(1, 10, 5);
+
+    private static SonarrV5QualityProfileData SonarrV5Profile() =>
+        new()
+        {
+            Id = 7,
+            Name = "Series",
+            UpgradeAllowed = false,
+            MinFormatScore = 0,
+            MinUpgradeFormatScore = 0,
+            CutoffFormatScore = 0,
+            Cutoff = 9,
+            Items =
+            [
+                NewQp.QualityItem(9, "HDTV-1080p", true),
+                NewQp.GroupItem(1001, "WEB 1080p", true, NewQp.QualityItem(3, "WEBDL-1080p", true)),
+            ],
+            QualitySizes = new Dictionary<string, QualityItemSize>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["HDTV-1080p"] = ServiceSize,
+                ["WEBDL-1080p"] = ServiceSize,
+            },
+        };
+
+    private static PlannedQualityProfile SonarrV5Planned(params PlannedQualityItem[] sizes) =>
+        NewPlan.Qp(
+            new QualityProfileConfig { Name = "Series" },
+            NewPlan.QpResource("qp", "Series")
+        ) with
+        {
+            QualitySizes = new PlannedQualitySizes { Type = "series", Qualities = sizes },
+        };
+
+    private static SonarrV5QualityProfileFields SonarrV5Fields()
+    {
+        var limits = Substitute.For<IQualityItemLimitFactory>();
+        limits.Create(default, default).ReturnsForAnyArgs(new QualityItemLimits(1000m, 995m));
+        return new SonarrV5QualityProfileFields(limits);
+    }
+
+    [Test]
+    public async Task Sonarr_v5_planned_sizes_are_reported_and_written_to_matching_qualities()
+    {
+        var harness = CreateHarness(
+            [SonarrV5Planned(new PlannedQualityItem("HDTV-1080p", 5, 50, 30))],
+            [SonarrV5Profile()],
+            SonarrV5Profile(),
+            [NewSyncState.Mapping("qp", "Series", 7)],
+            SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        compute
+            .Deltas.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfileUpdateDelta>()
+            .Which.Components.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SonarrQualityProfileQualitySizesChanged>()
+            .Which.Sizes.Should()
+            .ContainSingle()
+            .Which.Quality.Should()
+            .Be("HDTV-1080p");
+        await harness
+            .Service.Received()
+            .UpdateQualityProfile(
+                Arg.Is<SonarrV5QualityProfileData>(x =>
+                    x.QualitySizes["HDTV-1080p"] == new QualityItemSize(5, 50, 30)
+                    && x.QualitySizes["WEBDL-1080p"] == ServiceSize
+                ),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
+    // Planned sizes carry a decimal scale (10.00) that service values (10) do not
+    [Test]
+    public async Task Sonarr_v5_equal_sizes_with_different_decimal_scale_are_unchanged()
+    {
+        var harness = CreateHarness(
+            [SonarrV5Planned(new PlannedQualityItem("HDTV-1080p", 1.0m, 10.00m, 5.0m))],
+            [SonarrV5Profile()],
+            SonarrV5Profile(),
+            [NewSyncState.Mapping("qp", "Series", 7)],
+            SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Deltas.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Sonarr_v5_created_profile_describes_only_planned_sizes()
+    {
+        // A new profile needs at least one quality
+        var planned = SonarrV5Planned(new PlannedQualityItem("WEBDL-1080p", 5, null, 30));
+        planned = planned with
+        {
+            Config = planned.Config with { Qualities = [NewQp.QualityConfig("WEBDL-1080p")] },
+        };
+        var harness = CreateHarness(
+            [planned],
+            [],
+            SonarrV5Profile() with
+            {
+                Id = null,
+            },
+            serviceFields: SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Deltas.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfileCreateDelta>()
+            .Which.State.Should()
+            .BeOfType<SonarrQualityProfileControlledState>()
+            .Which.QualitySizes.Should()
+            .Equal(
+                new QualityProfileQualitySize(
+                    "WEBDL-1080p",
+                    new QualitySizeValue.Numeric(5),
+                    new QualitySizeValue.Numeric(30),
+                    new QualitySizeValue.Unlimited()
+                )
+            );
+    }
+
     private static Harness CreateHarness(
         IReadOnlyList<PlannedQualityProfile> planned,
         IReadOnlyList<QualityProfileData> serviceProfiles,
@@ -707,7 +871,7 @@ internal sealed class QualityProfileSyncOperationTest
 
         // Unless a test supplies Radarr's, Sonarr's (empty) service-owned field behavior applies.
         var log = Substitute.For<ILogger>();
-        serviceFields ??= new SonarrQualityProfileFields();
+        serviceFields ??= new SonarrV3QualityProfileFields();
         var sut = new QualityProfileSyncOperation(
             log,
             service,

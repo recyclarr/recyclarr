@@ -8,8 +8,7 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 internal class SonarrV5QualityProfileGateway(
     ILogger log,
     SonarrApi.IQualityProfileApi profileApi,
-    SonarrApi.IQualityProfileSchemaApi schemaApi,
-    SonarrApi.ILanguageApi languageApi
+    SonarrApi.IQualityProfileSchemaApi schemaApi
 ) : IQualityProfileService
 {
     private readonly Dictionary<int, SonarrApi.QualityProfileResource> _stashedProfiles = [];
@@ -36,12 +35,6 @@ internal class SonarrV5QualityProfileGateway(
         dto.ReverseItems();
         _stashedSchema = dto;
         return SonarrV5QualityProfileMapper.ToDomain(dto);
-    }
-
-    public async Task<IReadOnlyList<ProfileLanguage>> GetLanguages(CancellationToken ct)
-    {
-        var dtos = await languageApi.LanguageGet(ct);
-        return dtos.Select(SonarrV5QualityProfileMapper.ToDomain).ToList();
     }
 
     public async Task<QualityProfileData> CreateQualityProfile(
@@ -114,6 +107,11 @@ internal class SonarrV5QualityProfileGateway(
             .ToList();
         baseDto.Items = domain.Items.Select(i => MergeItem(i, qualityIndex)).ToList();
 
+        if (domain is SonarrV5QualityProfileData { QualitySizes: var sizes })
+        {
+            ApplySizes(baseDto.Items, sizes);
+        }
+
         return baseDto;
     }
 
@@ -160,11 +158,10 @@ internal class SonarrV5QualityProfileGateway(
             stashed.Name = domain.Name ?? stashed.Name;
             stashed.Allowed = domain.Allowed ?? stashed.Allowed;
             stashed.Items = domain.Items.Select(i => MergeItem(i, index)).ToList();
-            ApplySize(domain.Size, stashed);
             return stashed;
         }
 
-        var created = new SonarrApi.QualityProfileQualityItemResource
+        return new SonarrApi.QualityProfileQualityItemResource
         {
             Id = domain.Id ?? 0,
             Name = domain.Name ?? "",
@@ -178,24 +175,25 @@ internal class SonarrV5QualityProfileGateway(
                 : null,
             Items = domain.Items.Select(i => MergeItem(i, index)).ToList(),
         };
-        ApplySize(domain.Size, created);
-        return created;
     }
 
-    // A null domain size means "not managed": the stashed service values are kept as-is.
-    private static void ApplySize(
-        QualityItemSize? size,
-        SonarrApi.QualityProfileQualityItemResource dto
+    // Qualities without a size entry keep the values already on the DTO.
+    private static void ApplySizes(
+        IEnumerable<SonarrApi.QualityProfileQualityItemResource> items,
+        IReadOnlyDictionary<string, QualityItemSize> sizes
     )
     {
-        if (size is null)
+        foreach (var item in items.Flatten(x => x.Items ?? []))
         {
-            return;
-        }
+            if (item.Quality?.Name is not { } name || !sizes.TryGetValue(name, out var size))
+            {
+                continue;
+            }
 
-        dto.MinSize = (double)size.Min;
-        dto.MaxSize = (double?)size.Max;
-        dto.PreferredSize = (double?)size.Preferred;
+            item.MinSize = (double)size.Min;
+            item.MaxSize = (double?)size.Max;
+            item.PreferredSize = (double?)size.Preferred;
+        }
     }
 
     // Builds a flat index of all quality items for stash lookup.
