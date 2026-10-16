@@ -78,7 +78,7 @@ internal sealed class SonarrV3MediaManagementGatewayTest
               "userRejectedExtensions": ".exe"
             }
             """;
-        api.MediamanagementGet(default)
+        api.MediamanagementGet()
             .ReturnsForAnyArgs(
                 JsonSerializer.Deserialize<SonarrApi.MediaManagementConfigResource>(
                     serverJson,
@@ -122,7 +122,7 @@ internal sealed class SonarrV3MediaManagementGatewayTest
               "futureSetting": { "enabled": true, "limit": 5 }
             }
             """;
-        api.MediamanagementGet(default)
+        api.MediamanagementGet()
             .ReturnsForAnyArgs(
                 JsonSerializer.Deserialize<SonarrApi.MediaManagementConfigResource>(
                     serverJson,

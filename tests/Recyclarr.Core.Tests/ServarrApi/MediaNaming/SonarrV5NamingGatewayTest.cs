@@ -11,7 +11,7 @@ internal sealed class SonarrV5NamingGatewayTest
         SonarrV5NamingGateway sut
     )
     {
-        api.NamingGet(default)
+        api.NamingGet()
             .ReturnsForAnyArgs(
                 new SonarrApi.NamingSettingsResource
                 {

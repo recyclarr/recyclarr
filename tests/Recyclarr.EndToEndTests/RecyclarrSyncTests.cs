@@ -5,6 +5,7 @@ using AwesomeAssertions;
 using NUnit.Framework;
 using Recyclarr.Client.V1;
 using Refit;
+using SizeSnapshot = (double? Min, double? Max, double? Preferred);
 using RadarrApi = Recyclarr.Api.Radarr;
 using SonarrApi = Recyclarr.Api.Sonarr.V3;
 using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
@@ -33,8 +34,6 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
     private bool _sonarrV5;
     private IReadOnlyDictionary<string, SizeSnapshot> _unmanagedProfileSizesBeforeSync =
         new Dictionary<string, SizeSnapshot>();
-
-    private sealed record SizeSnapshot(double? Min, double? Max, double? Preferred);
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -395,7 +394,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             {
                 var item = p.Items!.SelectMany(i => i.Quality is null ? i.Items ?? [] : [i])
                     .First(i => i.Quality!.Name == "HDTV-1080p");
-                return new SizeSnapshot(item.MinSize, item.MaxSize, item.PreferredSize);
+                return (SizeSnapshot)(item.MinSize, item.MaxSize, item.PreferredSize);
             }
         );
     }
@@ -410,17 +409,17 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Should()
             .ContainKey("HD-1080p")
             .WhoseValue.Should()
-            .Be(new SizeSnapshot(6, 60, 40), "the profile's YAML quality_definition wins");
+            .Be((6, 60, 40), "the profile's YAML quality_definition wins");
         after
             .Should()
             .ContainKey("E2E-SonarrGuideOverride")
             .WhoseValue.Should()
-            .Be(new SizeSnapshot(7, 70, 35), "the guide profile's reference wins over instance");
+            .Be((7, 70, 35), "the guide profile's reference wins over instance");
         after
             .Should()
             .ContainKey("E2E-GuideOnlyProfile")
             .WhoseValue.Should()
-            .Be(new SizeSnapshot(5, 50, 30), "the instance quality_definition applies");
+            .Be((5, 50, 30), "the instance quality_definition applies");
 
         // Sonarr ships a default "HD-1080p" profile, which the config manages
         string[] managed = ["HD-1080p", "E2E-SonarrGuideOverride", "E2E-GuideOnlyProfile"];

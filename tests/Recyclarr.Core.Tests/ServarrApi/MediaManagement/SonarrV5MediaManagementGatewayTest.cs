@@ -25,7 +25,7 @@ internal sealed class SonarrV5MediaManagementGatewayTest
               "userRejectedExtensions": ".exe"
             }
             """;
-        api.MediamanagementGet(default)
+        api.MediamanagementGet()
             .ReturnsForAnyArgs(
                 JsonSerializer.Deserialize<SonarrApi.MediaManagementSettingsResource>(
                     serverJson,
