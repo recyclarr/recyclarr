@@ -224,7 +224,6 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<SonarrV5Api.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileSchemaApi>();
-        builder.RegisterServarrRefitClient<SonarrV5Api.ILanguageApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IMediaManagementSettingsApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.INamingSettingsApi>();
     }

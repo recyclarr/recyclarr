@@ -298,14 +298,38 @@ internal static class SyncDiagnostics
             .. (o.UpdateRejected ?? []).Select(x =>
                 Error($"The service rejected update of quality profile {Profile(x.Identity)}")
             ),
+            .. (o.QualitySizeOutcomes ?? []).SelectMany(x =>
+                QualitySizeOutcomes(x.Outcomes)
+                    .Select(d => (d.Item1, $"Quality profile {Profile(x.Identity)}: {d.Item2}"))
+            ),
+            .. (o.QualityDefinitionsIgnored ?? []).Select(x =>
+                Warning(
+                    $"Quality profile {Profile(x.Identity)}: this service version does not store "
+                        + "quality sizes per profile, so the profile's quality_definition is "
+                        + "ignored"
+                )
+            ),
+            .. o.QualityDefinitionUnused == true
+                ?
+                [
+                    Warning(
+                        "This service version stores quality sizes per quality profile. "
+                            + "quality_definition only applies to profiles listed under "
+                            + "quality_profiles, and none are configured"
+                    ),
+                ]
+                : Array.Empty<(DiagnosticSeverity, string)>(),
         ];
     }
 
     private static IEnumerable<(DiagnosticSeverity, string)> QualitySizes(
         QualitySizePipelineResponse pipeline
+    ) => QualitySizeOutcomes(pipeline.Outcomes);
+
+    private static IEnumerable<(DiagnosticSeverity, string)> QualitySizeOutcomes(
+        QualitySizeOutcomesResponse o
     )
     {
-        var o = pipeline.Outcomes;
         return
         [
             .. (o.DefinitionReferenceMismatches ?? []).Select(x =>
@@ -336,6 +360,18 @@ internal static class SyncDiagnostics
                 Error(
                     $"Quality '{x.Quality}' preferred {QualitySizeText.Of(x.Preferred)} exceeds "
                         + $"maximum {QualitySizeText.Of(x.Maximum)}"
+                )
+            ),
+            .. (o.GuideReferenceMismatches ?? []).Select(x =>
+                Error(
+                    "The guide profile references a quality definition that does not exist: "
+                        + $"{x.Label} ({x.TrashId})"
+                )
+            ),
+            .. (o.AmbiguousGuideReferences ?? []).Select(x =>
+                Error(
+                    "The guide profile references more than one quality definition: "
+                        + Names(x.Labels)
                 )
             ),
         ];

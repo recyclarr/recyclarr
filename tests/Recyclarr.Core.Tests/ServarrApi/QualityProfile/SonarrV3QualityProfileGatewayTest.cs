@@ -179,8 +179,7 @@ internal sealed class SonarrV3QualityProfileGatewayTest
         var sut = new SonarrV3QualityProfileGateway(
             new TestableLogger(),
             api,
-            Substitute.For<SonarrApi.IQualityProfileSchemaApi>(),
-            Substitute.For<SonarrApi.ILanguageApi>()
+            Substitute.For<SonarrApi.IQualityProfileSchemaApi>()
         );
 
         var profile = (await sut.GetQualityProfiles(CancellationToken.None)).Single();
@@ -208,58 +207,5 @@ internal sealed class SonarrV3QualityProfileGatewayTest
         webdl["minSize"]!.GetValue<double>().Should().Be(4);
         webdl["maxSize"]!.GetValue<double>().Should().Be(40);
         webdl["preferredSize"]!.GetValue<double>().Should().Be(20);
-    }
-
-    [Test]
-    public async Task Update_writes_assigned_item_sizes_with_unlimited_as_absent()
-    {
-        var api = Substitute.For<SonarrApi.IQualityProfileApi>();
-        api.QualityprofileGet()
-            .ReturnsForAnyArgs([
-                new SonarrApi.QualityProfileResource
-                {
-                    Id = 3,
-                    Name = "P",
-                    FormatItems = [],
-                    Items =
-                    [
-                        new SonarrApi.QualityProfileQualityItemResource
-                        {
-                            Quality = new SonarrApi.Quality { Id = 9, Name = "HDTV-1080p" },
-                            Items = [],
-                            Allowed = true,
-                            MinSize = 1,
-                            MaxSize = 10,
-                            PreferredSize = 5,
-                        },
-                    ],
-                },
-            ]);
-
-        var sut = new SonarrV3QualityProfileGateway(
-            new TestableLogger(),
-            api,
-            Substitute.For<SonarrApi.IQualityProfileSchemaApi>(),
-            Substitute.For<SonarrApi.ILanguageApi>()
-        );
-
-        var profile = (await sut.GetQualityProfiles(CancellationToken.None)).Single();
-        var resized = profile with
-        {
-            Items = [profile.Items[0] with { Size = new QualityItemSize(5, null, 30) }],
-        };
-        await sut.UpdateQualityProfile(resized, CancellationToken.None);
-
-        var sentDto = api.ReceivedCalls()
-            .Single(c =>
-                c.GetMethodInfo().Name == nameof(SonarrApi.IQualityProfileApi.QualityprofilePut)
-            )
-            .GetArguments()[1];
-        var item = JsonSerializer.SerializeToNode(sentDto, GlobalJsonSerializerSettings.Services)![
-            "items"
-        ]![0]!;
-        item["minSize"]!.GetValue<double>().Should().Be(5);
-        item["maxSize"].Should().BeNull("unlimited is sent as an absent value");
-        item["preferredSize"]!.GetValue<double>().Should().Be(30);
     }
 }

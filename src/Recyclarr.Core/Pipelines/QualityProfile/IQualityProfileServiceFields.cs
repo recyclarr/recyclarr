@@ -5,8 +5,9 @@ namespace Recyclarr.Pipelines.QualityProfile;
 
 /// <summary>
 /// Quality profile behavior for fields that only one service has (ADR-023). The sync operation
-/// handles the fields both services share; DI selects the implementation for the instance's
-/// service. An implementation is scoped to one sync and may keep data from
+/// handles the fields both services share; DI selects the implementation for the detected service
+/// API target (Sonarr v3, Sonarr v5, Radarr). An implementation is scoped to one sync and may keep
+/// data from
 /// <see cref="LoadAsync"/> for the later calls.
 /// </summary>
 internal interface IQualityProfileServiceFields
@@ -32,6 +33,7 @@ internal interface IQualityProfileServiceFields
     /// </summary>
     QualityProfileControlledState DescribeCreate(
         QualityProfileControlledState shared,
-        QualityProfileData desired
+        QualityProfileData desired,
+        PlannedQualityProfile planned
     );
 }

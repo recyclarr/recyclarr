@@ -39,7 +39,8 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
     {
         var result = await caller.Call(
             req.Name,
-            (ICustomFormatService service) => service.GetCustomFormats(ct)
+            (ICustomFormatService service) => service.GetCustomFormats(ct),
+            ct
         );
 
         if (!result.InstanceFound)

@@ -50,8 +50,7 @@ internal sealed class SonarrV5QualityProfileGatewayTest
         return new SonarrV5QualityProfileGateway(
             new TestableLogger(),
             _api,
-            Substitute.For<SonarrApi.IQualityProfileSchemaApi>(),
-            Substitute.For<SonarrApi.ILanguageApi>()
+            Substitute.For<SonarrApi.IQualityProfileSchemaApi>()
         );
     }
 
@@ -82,8 +81,17 @@ internal sealed class SonarrV5QualityProfileGatewayTest
 
         profile.Name.Should().Be("WEB-1080p");
         profile.FormatItems.Should().ContainSingle().Which.FormatId.Should().Be(10);
-        var hdtv = profile.Items.Single(x => x.Quality?.Id == 9);
-        hdtv.Size.Should().Be(new QualityItemSize(5, 50, 30));
+        profile
+            .Should()
+            .BeOfType<SonarrV5QualityProfileData>()
+            .Which.QualitySizes.Should()
+            .BeEquivalentTo(
+                new Dictionary<string, QualityItemSize>
+                {
+                    ["HDTV-1080p"] = new(5, 50, 30),
+                    ["WEBDL-1080p"] = new(4, 40, 20),
+                }
+            );
     }
 
     [Test]
@@ -132,7 +140,7 @@ internal sealed class SonarrV5QualityProfileGatewayTest
         await sut.GetQualityProfiles(CancellationToken.None);
 
         // WEBDL-1080p leaves its group and becomes a top-level item; the domain carries no size.
-        var regrouped = new QualityProfileData
+        var regrouped = new SonarrV5QualityProfileData
         {
             Id = 3,
             Name = "WEB-1080p",
@@ -162,12 +170,20 @@ internal sealed class SonarrV5QualityProfileGatewayTest
     public async Task Update_writes_assigned_sizes_with_unlimited_as_absent()
     {
         var sut = CreateSut();
-        var profile = (await sut.GetQualityProfiles(CancellationToken.None)).Single();
-        var hdtvIndex = profile.Items.ToList().FindIndex(x => x.Quality?.Id == 9);
-        var items = profile.Items.ToList();
-        items[hdtvIndex] = items[hdtvIndex] with { Size = new QualityItemSize(6, null, 25) };
+        var profile = (SonarrV5QualityProfileData)
+            (await sut.GetQualityProfiles(CancellationToken.None)).Single();
+        var sizes = new Dictionary<string, QualityItemSize>(profile.QualitySizes)
+        {
+            ["HDTV-1080p"] = new(6, null, 25),
+        };
 
-        await sut.UpdateQualityProfile(profile with { Items = items }, CancellationToken.None);
+        await sut.UpdateQualityProfile(
+            profile with
+            {
+                QualitySizes = sizes,
+            },
+            CancellationToken.None
+        );
 
         var hdtv = QualityNode(SentItems(), 9);
         hdtv["minSize"]!.GetValue<double>().Should().Be(6);

@@ -564,7 +564,6 @@ internal sealed class SyncOrchestratorIntegrationTest
                 _config.InstanceName
                 is "dispose-fault"
                     or "fault-dispose-fault"
-                    or "incompatible-dispose-fault"
                     or "cancel-dispose-fault"
             )
             {
@@ -632,7 +631,11 @@ internal sealed class SyncOrchestratorIntegrationTest
         public void InstanceCompleted(SyncInstanceResult result) { }
     }
 
-    private sealed class TestServiceInformation(IServiceConfiguration config) : IServiceInformation
+    // Resolved for version detection, so it exists in the instance scope even when detection
+    // fails and pipelines are never built; its disposal fault therefore models instance cleanup.
+    private sealed class TestServiceInformation(IServiceConfiguration config)
+        : IServiceInformation,
+            IDisposable
     {
         public Task<string> GetAppName(CancellationToken ct) =>
             Task.FromResult(
@@ -642,6 +645,14 @@ internal sealed class SyncOrchestratorIntegrationTest
             );
 
         public Task<Version> GetVersion(CancellationToken ct) => Task.FromResult(new Version(6, 0));
+
+        public void Dispose()
+        {
+            if (config.InstanceName == "incompatible-dispose-fault")
+            {
+                throw new InvalidOperationException("scope disposal failed");
+            }
+        }
     }
 
     private sealed record TestPipelineResult : SemanticPipelineResult

@@ -4,9 +4,9 @@ using Recyclarr.Servarr.QualityProfile;
 namespace Recyclarr.Pipelines.QualityProfile;
 
 /// <summary>
-/// Sonarr quality profiles have no fields beyond the shared ones.
+/// Sonarr v4 profiles (served through the v3 API) have no fields beyond the shared ones.
 /// </summary>
-internal class SonarrQualityProfileFields : IQualityProfileServiceFields
+internal class SonarrV3QualityProfileFields : IQualityProfileServiceFields
 {
     public Task LoadAsync(CancellationToken ct) => Task.CompletedTask;
 
@@ -22,6 +22,7 @@ internal class SonarrQualityProfileFields : IQualityProfileServiceFields
 
     public QualityProfileControlledState DescribeCreate(
         QualityProfileControlledState shared,
-        QualityProfileData desired
-    ) => shared;
+        QualityProfileData desired,
+        PlannedQualityProfile planned
+    ) => new SonarrQualityProfileControlledState(shared, []);
 }

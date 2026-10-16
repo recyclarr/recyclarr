@@ -61,11 +61,15 @@ Each operation declares whether it should skip via `ShouldSkip(plan)`, based on 
 the plan (no `quality_sizes` section means the quality size operation skips). The orchestrator
 checks it while running the sorted operations; a skipped operation reports no result.
 
+On Sonarr v5 the planner assigns quality sizes to quality profiles instead of planning global sizes,
+so the quality size operation always skips there. That operation resolves its quality definition
+gateway lazily because Sonarr v5 has none; operations are otherwise built for every API target.
+
 ## Dependency management
 
 Operations declare dependencies via `ISyncOperation.Dependencies`. The orchestrator uses topological
-sort to determine execution order. `Partial`, `Failed`, and `Blocked` results give dependents a typed
-`Blocked` result. Blocking is transitive, while independent operations continue.
+sort to determine execution order. `Partial`, `Failed`, and `Blocked` results give dependents a
+typed `Blocked` result. Blocking is transitive, while independent operations continue.
 
 - CF fails: QP skipped (depends on CF), QS/MN/MM continue (independent)
 - QS fails: all others continue (nothing depends on QS)
@@ -121,8 +125,8 @@ The "collect and report later" pattern categorizes errors by source and timing:
   violations
 - Runtime errors (persistence): network issues, authentication failures, service unavailability
 
-Plan and operation outcomes are retained as structured terminal result data. Server consumers
-format those outcomes for logs, notifications, and HTTP responses.
+Plan and operation outcomes are retained as structured terminal result data. Server consumers format
+those outcomes for logs, notifications, and HTTP responses.
 
 Expected instance-wide failures attach a typed `OperationalFailure` to the instance result.
 Unexpected faults inside instance creation, processing, or cleanup attach one opaque fault reference

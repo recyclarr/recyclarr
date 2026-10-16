@@ -15,22 +15,55 @@ internal static partial class QualityProfileResponseMapper
         var creates = result
             .Deltas.OfType<QualityProfileCreateDelta>()
             .Select(x =>
-                x.State.GetType() == typeof(QualityProfileControlledState)
-                    ? new QualityProfileCreateResponse(
-                        MapIdentity(x.Identity),
-                        MapSharedState(x.State)
-                    )
-                    : throw new InvalidOperationException(
-                        $"Sonarr Quality Profile create has {x.State.GetType().Name}"
-                    )
-            )
+            {
+                var state =
+                    x.State as SonarrQualityProfileControlledState
+                    ?? throw new InvalidOperationException(
+                        "Sonarr Quality Profile create has no Sonarr state"
+                    );
+                var shared = MapSharedState(state);
+                return new SonarrQualityProfileCreateResponse(
+                    MapIdentity(x.Identity),
+                    new SonarrQualityProfileControlledStateResponse
+                    {
+                        Name = shared.Name,
+                        UpgradeAllowed = shared.UpgradeAllowed,
+                        UpgradeUntilQuality = shared.UpgradeUntilQuality,
+                        UpgradeUntilScore = shared.UpgradeUntilScore,
+                        MinimumFormatScore = shared.MinimumFormatScore,
+                        MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
+                        Qualities = shared.Qualities,
+                        CustomFormatScores = shared.CustomFormatScores,
+                        QualitySizes = state.QualitySizes.Select(MapQualitySize).ToList(),
+                    }
+                );
+            })
             .ToList();
         var updates = result
             .Deltas.OfType<QualityProfileUpdateDelta>()
             .Select(x =>
             {
-                var response = MapSharedUpdate(x);
-                EnsureUpdateMapped(x, response, serviceComponents: 0);
+                var shared = MapSharedUpdate(x);
+                var sizeChanges = x
+                    .Components.OfType<SonarrQualityProfileQualitySizesChanged>()
+                    .ToList();
+                var response = new SonarrQualityProfileUpdateResponse
+                {
+                    Identity = shared.Identity,
+                    Name = shared.Name,
+                    UpgradeAllowed = shared.UpgradeAllowed,
+                    UpgradeUntilQuality = shared.UpgradeUntilQuality,
+                    UpgradeUntilScore = shared.UpgradeUntilScore,
+                    MinimumFormatScore = shared.MinimumFormatScore,
+                    MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
+                    QualityLayout = shared.QualityLayout,
+                    CustomFormatScores = shared.CustomFormatScores,
+                    QualitySizes = sizeChanges
+                        .SelectMany(y => y.Sizes)
+                        .Select(QualitySizeResponseMapper.MapUpdate)
+                        .ToList(),
+                };
+                EnsureUpdateMapped(x, response, sizeChanges.Count);
                 return response;
             })
             .ToList();
@@ -134,10 +167,35 @@ internal static partial class QualityProfileResponseMapper
             outcomes.RenameBlocked.Count,
             outcomes.AmbiguousMatches.Count,
             outcomes.CreateRejected.Count,
-            outcomes.UpdateRejected.Count
+            outcomes.UpdateRejected.Count,
+            result.Outcomes.OfType<QualityProfileQualitySizeOutcome>().Count(),
+            outcomes.QualityDefinitionsIgnored.Count,
+            outcomes.QualityDefinitionUnused ? 1 : 0
         );
         return outcomes;
     }
+
+    // Groups per-profile quality size outcomes by profile, preserving first-seen order.
+    private static List<QualityProfileQualitySizeOutcomesResponse> MapQualitySizeOutcomes(
+        IReadOnlyList<QualityProfileOutcome> outcomes
+    ) =>
+        outcomes
+            .OfType<QualityProfileQualitySizeOutcome>()
+            .GroupBy(x => x.Identity)
+            .Select(g => new QualityProfileQualitySizeOutcomesResponse(
+                MapIdentity(g.Key),
+                QualitySizeResponseMapper.MapOutcomes(g.Select(x => x.Outcome).ToList())
+            ))
+            .ToList();
+
+    private static QualitySizeResponse MapQualitySize(QualityProfileQualitySize size) =>
+        new()
+        {
+            Quality = size.Quality,
+            Minimum = ResultValueMapper.MapQualitySize(size.Minimum),
+            Preferred = ResultValueMapper.MapQualitySize(size.Preferred),
+            Maximum = ResultValueMapper.MapQualitySize(size.Maximum),
+        };
 
     private static void EnsureDeltasMapped(
         QualityProfilePipelineResult result,
@@ -319,6 +377,14 @@ internal static partial class QualityProfileResponseMapper
                 .OfType<QualityProfileUpdateRejectedOutcome>()
                 .Select(x => MapIdentityOutcome(x.Identity))
                 .ToList(),
+            QualitySizeOutcomes = MapQualitySizeOutcomes(outcomes),
+            QualityDefinitionsIgnored = outcomes
+                .OfType<QualityProfileQualityDefinitionIgnoredOutcome>()
+                .Select(x => MapIdentityOutcome(x.Identity))
+                .ToList(),
+            QualityDefinitionUnused = outcomes
+                .OfType<QualityProfileQualityDefinitionUnusedOutcome>()
+                .Any(),
         };
 
     private static QualityProfileIdentityResponse MapIdentity(QualityProfileIdentity identity) =>

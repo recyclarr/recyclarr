@@ -186,12 +186,53 @@ internal static class SyncResultScenarios
             CustomFormatScores = [new QualityProfileCustomFormatScore("CF", "cf-one", 10)],
         };
         var isRadarr = service == SupportedServices.Radarr;
-        var state = isRadarr
+        QualityProfileControlledState state = isRadarr
             ? new RadarrQualityProfileControlledState(sharedState, "English")
-            : sharedState;
+            : new SonarrQualityProfileControlledState(
+                sharedState,
+                [
+                    new QualityProfileQualitySize(
+                        "HDTV-1080p",
+                        new QualitySizeValue.Numeric(5),
+                        new QualitySizeValue.Numeric(30),
+                        new QualitySizeValue.Unlimited()
+                    ),
+                ]
+            );
         QualityProfileUpdateComponent[] serviceComponents = isRadarr
             ? [new RadarrQualityProfileLanguageChanged(new ValueDelta<string?>(null, "English"))]
-            : [];
+            :
+            [
+                new SonarrQualityProfileQualitySizesChanged([
+                    new QualitySizeDelta(
+                        "HDTV-1080p",
+                        [
+                            new QualitySizeMinimumChanged(
+                                new ValueDelta<QualitySizeValue>(
+                                    new QualitySizeValue.Numeric(1),
+                                    new QualitySizeValue.Numeric(5)
+                                )
+                            ),
+                        ]
+                    ),
+                ]),
+            ];
+        if (!isRadarr)
+        {
+            outcomes =
+            [
+                .. outcomes,
+                new QualityProfileQualitySizeOutcome(
+                    guide,
+                    new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-missing")
+                ),
+                new QualityProfileQualityDefinitionUnusedOutcome(),
+            ];
+        }
+        else
+        {
+            outcomes = [.. outcomes, new QualityProfileQualityDefinitionIgnoredOutcome(guide)];
+        }
         QualityProfileDelta[] deltas =
         [
             new QualityProfileCreateDelta { Identity = guide, State = state },
@@ -249,6 +290,8 @@ internal static class SyncResultScenarios
             new QualitySizeMinimumGreaterThanPreferredOutcome("One", two, one),
             new QualitySizeUnlimitedPreferredGreaterThanMaximumOutcome("Two", unlimited, two),
             new QualitySizePreferredGreaterThanMaximumOutcome("Three", two, one),
+            new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-missing"),
+            new QualitySizeAmbiguousGuideReferenceOutcome(["series", "anime"]),
         ];
         QualitySizeDelta[] deltas =
         [

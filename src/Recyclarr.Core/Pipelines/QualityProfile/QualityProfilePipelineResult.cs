@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.SyncState;
@@ -149,6 +151,29 @@ public sealed record QualityProfileCreateRejectedOutcome(QualityProfileIdentity 
 public sealed record QualityProfileUpdateRejectedOutcome(QualityProfileIdentity Identity)
     : QualityProfileOutcome;
 
+/// <summary>
+/// A problem with the quality sizes resolved for one profile on a service that stores sizes per
+/// quality profile (Sonarr v5). Qualities named by an error keep the service's sizes; the rest of
+/// the profile still syncs.
+/// </summary>
+public sealed record QualityProfileQualitySizeOutcome(
+    QualityProfileIdentity Identity,
+    QualitySizeOutcome Outcome
+) : QualityProfileOutcome;
+
+/// <summary>
+/// The profile's <c>quality_definition</c> was ignored because the service stores quality sizes
+/// globally rather than per quality profile.
+/// </summary>
+public sealed record QualityProfileQualityDefinitionIgnoredOutcome(QualityProfileIdentity Identity)
+    : QualityProfileOutcome;
+
+/// <summary>
+/// The instance <c>quality_definition</c> applies to nothing: the service stores sizes per quality
+/// profile and no profile is listed under <c>quality_profiles</c>.
+/// </summary>
+public sealed record QualityProfileQualityDefinitionUnusedOutcome : QualityProfileOutcome;
+
 public abstract record QualityProfileDelta : ResourceDelta
 {
     public required QualityProfileIdentity Identity { get; init; }
@@ -195,6 +220,35 @@ public sealed record RadarrQualityProfileControlledState : QualityProfileControl
     public string? Language { get; }
 }
 
+/// <summary>
+/// Controlled state for a Sonarr profile. Only Sonarr v5 stores quality sizes per profile; on
+/// earlier versions <see cref="QualitySizes"/> is empty.
+/// </summary>
+public sealed record SonarrQualityProfileControlledState : QualityProfileControlledState
+{
+    [SetsRequiredMembers]
+    public SonarrQualityProfileControlledState(
+        QualityProfileControlledState shared,
+        IReadOnlyList<QualityProfileQualitySize> qualitySizes
+    )
+        : base(shared)
+    {
+        QualitySizes = qualitySizes;
+    }
+
+    public IReadOnlyList<QualityProfileQualitySize> QualitySizes { get; }
+}
+
+/// <summary>
+/// Size limits Recyclarr assigns to one quality of a profile, in MB per minute.
+/// </summary>
+public sealed record QualityProfileQualitySize(
+    string Quality,
+    QualitySizeValue Minimum,
+    QualitySizeValue Preferred,
+    QualitySizeValue Maximum
+);
+
 public abstract record QualityProfileQualityLayoutItem
 {
     public required string Name { get; init; }
@@ -231,6 +285,12 @@ public sealed record QualityProfileMinimumUpgradeFormatScoreChanged(ValueDelta<i
     : QualityProfileUpdateComponent;
 
 public sealed record RadarrQualityProfileLanguageChanged(ValueDelta<string?> Value)
+    : QualityProfileUpdateComponent;
+
+/// <summary>
+/// Per-quality size changes on a Sonarr profile. Only Sonarr v5 stores sizes per profile.
+/// </summary>
+public sealed record SonarrQualityProfileQualitySizesChanged(IReadOnlyList<QualitySizeDelta> Sizes)
     : QualityProfileUpdateComponent;
 
 public sealed record QualityProfileQualityLayoutChanged(

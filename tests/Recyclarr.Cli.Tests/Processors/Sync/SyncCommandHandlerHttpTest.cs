@@ -731,6 +731,65 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             );
     }
 
+    [Test]
+    public async Task Sonarr_v5_profile_sizes_render_in_preview_and_diagnostics()
+    {
+        AddInstanceConfig(InstanceName);
+        var identity = new UserDefinedQualityProfileIdentity("Series");
+        _result = new SyncRunResult([
+            new SyncInstanceResult(
+                InstanceName,
+                SupportedServices.Sonarr,
+                [
+                    NewPipelineResult.QualityProfiles(
+                        [
+                            new QualityProfileQualitySizeOutcome(
+                                identity,
+                                new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-x")
+                            ),
+                            new QualityProfileQualityDefinitionUnusedOutcome(),
+                        ],
+                        [
+                            new QualityProfileUpdateDelta
+                            {
+                                Identity = identity,
+                                Components =
+                                [
+                                    new SonarrQualityProfileQualitySizesChanged([
+                                        new QualitySizeDelta(
+                                            "HDTV-1080p",
+                                            [
+                                                new QualitySizeMinimumChanged(
+                                                    new ValueDelta<QualitySizeValue>(
+                                                        new QualitySizeValue.Numeric(1),
+                                                        new QualitySizeValue.Numeric(5)
+                                                    )
+                                                ),
+                                            ]
+                                        ),
+                                    ]),
+                                ],
+                            },
+                        ],
+                        failed: 1
+                    ),
+                ]
+            ),
+        ]);
+
+        await RunSync(new CreateSyncJobRequest { Preview = true });
+
+        ConsoleOutput
+            .Should()
+            .Contain("Quality Size Updates")
+            .And.MatchRegex(@"HDTV-1080p\s+│\s+1 -> 5\s+│")
+            .And.Contain(
+                "[real-instance] Quality profile 'Series': The guide profile references a quality "
+                    + "definition that does not exist: guide (qs-x)"
+            )
+            .And.Contain("quality_definition only applies to profiles listed under");
+    }
+
     private static QualityProfileUpdateDelta NewProfileUpdate(string name) =>
         new()
         {

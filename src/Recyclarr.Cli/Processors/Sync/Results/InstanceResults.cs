@@ -160,7 +160,10 @@ internal sealed record QualityProfileResults(
                         ),
                         x.State.Qualities,
                         x.State.CustomFormatScores
-                    )
+                    ) with
+                    {
+                        Sizes = [.. x.State.QualitySizes.Select(SizeChange.From)],
+                    }
                 ),
                 .. pipeline.Updates.Select(x =>
                     Update(
@@ -175,7 +178,10 @@ internal sealed record QualityProfileResults(
                         ),
                         x.QualityLayout,
                         x.CustomFormatScores
-                    )
+                    ) with
+                    {
+                        Sizes = [.. (x.QualitySizes ?? []).Select(SizeChange.From)],
+                    }
                 ),
             ]
         );
@@ -284,7 +290,8 @@ internal sealed record QualityProfileResults(
                     FieldChange.Text(x.Score),
                     "Set"
                 )),
-            ]
+            ],
+            []
         );
 
     private static ProfileChange Update(
@@ -306,7 +313,8 @@ internal sealed record QualityProfileResults(
                     FieldChange.Text(x.Value.Desired),
                     x.Reason.ToString()
                 )),
-            ]
+            ],
+            []
         );
 }
 
@@ -320,10 +328,35 @@ internal sealed record ProfileChange(
     IReadOnlyList<FieldChange> Fields,
     IReadOnlyList<QualityProfileLayoutResponse> CurrentQualities,
     IReadOnlyList<QualityProfileLayoutResponse> DesiredQualities,
-    IReadOnlyList<ScoreChange> Scores
+    IReadOnlyList<ScoreChange> Scores,
+    IReadOnlyList<SizeChange> Sizes
 );
 
 internal sealed record ScoreChange(string Name, string Current, string Desired, string Reason);
+
+/// <summary>
+/// Per-quality size changes on a profile (Sonarr v5), each value formatted for display.
+/// </summary>
+internal sealed record SizeChange(string Quality, string Minimum, string Maximum, string Preferred)
+{
+    private const string Unchanged = "[dim]unchanged[/]";
+
+    public static SizeChange From(QualitySizeResponse size) =>
+        new(
+            size.Quality,
+            QualitySizeText.Of(size.Minimum),
+            QualitySizeText.Of(size.Maximum),
+            QualitySizeText.Of(size.Preferred)
+        );
+
+    public static SizeChange From(QualitySizeUpdateResponse update) =>
+        new(update.Quality, Text(update.Minimum), Text(update.Maximum), Text(update.Preferred));
+
+    private static string Text(ValueChangeResponseOfQualitySizeValueResponse? change) =>
+        change is null
+            ? Unchanged
+            : $"{QualitySizeText.Of(change.Current)} -> {QualitySizeText.Of(change.Desired)}";
+}
 
 /// <summary>
 /// A labeled current-to-desired change of one settings field, with both values already formatted

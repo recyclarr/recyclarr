@@ -44,7 +44,7 @@ internal sealed class QualitySizeSyncOperationTest
         limitFactory.Create(default, default).ReturnsForAnyArgs(new QualityItemLimits(400, 400));
         var sut = new QualitySizeSyncOperation(
             Substitute.For<ILogger>(),
-            api,
+            new Lazy<IQualityDefinitionService>(api),
             limitFactory,
             NewConfig.Radarr()
         );
@@ -106,7 +106,7 @@ internal sealed class QualitySizeSyncOperationTest
         limitFactory.Create(default, default).ReturnsForAnyArgs(new QualityItemLimits(400, 400));
         var sut = new QualitySizeSyncOperation(
             Substitute.For<ILogger>(),
-            api,
+            new Lazy<IQualityDefinitionService>(api),
             limitFactory,
             NewConfig.Radarr()
         );
@@ -153,7 +153,7 @@ internal sealed class QualitySizeSyncOperationTest
         limitFactory.Create(default, default).ReturnsForAnyArgs(new QualityItemLimits(400, 400));
         var sut = new QualitySizeSyncOperation(
             Substitute.For<ILogger>(),
-            api,
+            new Lazy<IQualityDefinitionService>(api),
             limitFactory,
             NewConfig.Radarr()
         );

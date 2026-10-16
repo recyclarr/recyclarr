@@ -7,6 +7,7 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile.Models;
 using Recyclarr.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Pipelines.QualityProfile.State;
+using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
@@ -351,6 +352,25 @@ internal class QualityProfileSyncOperation(
                     );
                     incompleteResources++;
                     break;
+                case QualityProfileSizeOutcome x
+                    when QualitySizeOutcomeMapper.Map(x.Inner) is { } sizeOutcome:
+                    outcomes.Add(
+                        new QualityProfileQualitySizeOutcome(CreateIdentity(x.Profile), sizeOutcome)
+                    );
+                    if (QualitySizeOutcomeMapper.IsIncomplete(sizeOutcome))
+                    {
+                        incompleteResources++;
+                    }
+
+                    break;
+                case ProfileQualityDefinitionIgnoredOutcome x:
+                    outcomes.Add(
+                        new QualityProfileQualityDefinitionIgnoredOutcome(CreateIdentity(x.Profile))
+                    );
+                    break;
+                case QualityDefinitionUnusedOutcome:
+                    outcomes.Add(new QualityProfileQualityDefinitionUnusedOutcome());
+                    break;
             }
         }
 
@@ -523,7 +543,7 @@ internal class QualityProfileSyncOperation(
             Qualities = config.Qualities.Count > 0 ? MapQualityLayout(desired.Items) : [],
             CustomFormatScores = MapControlledScores(profile),
         };
-        return serviceFields.DescribeCreate(shared, desired);
+        return serviceFields.DescribeCreate(shared, desired, planned);
     }
 
     private List<QualityProfileUpdateComponent> BuildUpdateComponents(

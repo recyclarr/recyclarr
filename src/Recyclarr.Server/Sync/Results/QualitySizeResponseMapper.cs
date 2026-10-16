@@ -9,17 +9,6 @@ internal static class QualitySizeResponseMapper
     {
         var outcomes = MapOutcomes(result.Outcomes);
         var updates = result.Deltas.Select(MapUpdate).ToList();
-        ResultValueMapper.EnsureAllMapped(
-            "Quality Size outcome",
-            result.Outcomes.Count,
-            outcomes.DefinitionReferenceMismatches.Count,
-            outcomes.ReferenceMismatches.Count,
-            outcomes.ServiceQualitiesNotFound.Count,
-            outcomes.PreferredRatiosClamped.Count,
-            outcomes.MinimumGreaterThanPreferred.Count,
-            outcomes.UnlimitedPreferredGreaterThanMaximum.Count,
-            outcomes.PreferredGreaterThanMaximum.Count
-        );
 
         return new QualitySizePipelineResponse
         {
@@ -30,7 +19,28 @@ internal static class QualitySizeResponseMapper
         };
     }
 
-    private static QualitySizeUpdateResponse MapUpdate(QualitySizeDelta delta)
+    public static QualitySizeOutcomesResponse MapOutcomes(
+        IReadOnlyList<QualitySizeOutcome> outcomes
+    )
+    {
+        var response = MapOutcomeLists(outcomes);
+        ResultValueMapper.EnsureAllMapped(
+            "Quality Size outcome",
+            outcomes.Count,
+            response.DefinitionReferenceMismatches.Count,
+            response.ReferenceMismatches.Count,
+            response.ServiceQualitiesNotFound.Count,
+            response.PreferredRatiosClamped.Count,
+            response.MinimumGreaterThanPreferred.Count,
+            response.UnlimitedPreferredGreaterThanMaximum.Count,
+            response.PreferredGreaterThanMaximum.Count,
+            response.GuideReferenceMismatches.Count,
+            response.AmbiguousGuideReferences.Count
+        );
+        return response;
+    }
+
+    public static QualitySizeUpdateResponse MapUpdate(QualitySizeDelta delta)
     {
         var response = new QualitySizeUpdateResponse
         {
@@ -58,7 +68,7 @@ internal static class QualitySizeResponseMapper
         return response;
     }
 
-    private static QualitySizeOutcomesResponse MapOutcomes(
+    private static QualitySizeOutcomesResponse MapOutcomeLists(
         IReadOnlyList<QualitySizeOutcome> outcomes
     ) =>
         new()
@@ -102,6 +112,14 @@ internal static class QualitySizeResponseMapper
                     ResultValueMapper.MapQualitySize(x.Preferred),
                     ResultValueMapper.MapQualitySize(x.Maximum)
                 ))
+                .ToList(),
+            GuideReferenceMismatches = outcomes
+                .OfType<QualitySizeGuideReferenceMismatchOutcome>()
+                .Select(x => new QualitySizeGuideReferenceResponse(x.Label, x.TrashId))
+                .ToList(),
+            AmbiguousGuideReferences = outcomes
+                .OfType<QualitySizeAmbiguousGuideReferenceOutcome>()
+                .Select(x => new QualitySizeGuideLabelsResponse(x.Labels))
                 .ToList(),
         };
 }

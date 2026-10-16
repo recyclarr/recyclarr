@@ -1673,12 +1673,6 @@
           "$ref": "#/components/schemas/QualityProfileAmbiguousMatchResponse"
         }
       },
-      "IReadOnlyListOfQualityProfileCreateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileCreateResponse"
-        }
-      },
       "IReadOnlyListOfQualityProfileIdentityOutcomeResponse": {
         "type": "array",
         "items": {
@@ -1715,6 +1709,12 @@
           "$ref": "#/components/schemas/QualityProfileQualityNameResponse"
         }
       },
+      "IReadOnlyListOfQualityProfileQualitySizeOutcomesResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileQualitySizeOutcomesResponse"
+        }
+      },
       "IReadOnlyListOfQualityProfileRenameBlockedResponse": {
         "type": "array",
         "items": {
@@ -1745,10 +1745,16 @@
           "$ref": "#/components/schemas/QualityProfileScoreResponse"
         }
       },
-      "IReadOnlyListOfQualityProfileUpdateResponse": {
+      "IReadOnlyListOfQualitySizeGuideLabelsResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/QualityProfileUpdateResponse"
+          "$ref": "#/components/schemas/QualitySizeGuideLabelsResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeGuideReferenceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeGuideReferenceResponse"
         }
       },
       "IReadOnlyListOfQualitySizeMaximumComparisonResponse": {
@@ -1767,6 +1773,12 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/QualitySizeReferenceResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeResponse"
         }
       },
       "IReadOnlyListOfQualitySizeTypeResponse": {
@@ -1803,6 +1815,18 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/SonarrNamingUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfSonarrQualityProfileCreateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SonarrQualityProfileCreateResponse"
+        }
+      },
+      "IReadOnlyListOfSonarrQualityProfileUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SonarrQualityProfileUpdateResponse"
         }
       },
       "IReadOnlyListOfString": {
@@ -2267,79 +2291,6 @@
           }
         }
       },
-      "QualityProfileControlledStateResponse": {
-        "required": [
-          "name",
-          "upgradeAllowed",
-          "upgradeUntilQuality",
-          "upgradeUntilScore",
-          "minimumFormatScore",
-          "minimumUpgradeFormatScore",
-          "qualities",
-          "customFormatScores"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "upgradeAllowed": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "upgradeUntilQuality": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upgradeUntilScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumUpgradeFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "qualities": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
-          }
-        },
-        "description": "The profile fields Recyclarr sets when it creates a profile. A null field means neither the\n            configuration nor the guide gives a value."
-      },
-      "QualityProfileCreateResponse": {
-        "required": [
-          "identity",
-          "state"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "state": {
-            "$ref": "#/components/schemas/QualityProfileControlledStateResponse"
-          }
-        }
-      },
       "QualityProfileFormatReferenceResponse": {
         "required": [
           "name",
@@ -2545,6 +2496,18 @@
           "updateRejected": {
             "description": "Profiles the service refused to update.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          },
+          "qualitySizeOutcomes": {
+            "description": "Problems with the quality sizes resolved for a profile, on services that store sizes per\n            quality profile (Sonarr v5). Affected qualities keep their service sizes; the rest of the\n            profile still syncs.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualitySizeOutcomesResponse"
+          },
+          "qualityDefinitionsIgnored": {
+            "description": "Profiles whose `quality_definition` was ignored because the service stores quality sizes\n            globally.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          },
+          "qualityDefinitionUnused": {
+            "type": "boolean",
+            "description": "True when the instance `quality_definition` applied to nothing: the service stores sizes\n            per quality profile and no profile is listed under `quality_profiles`."
           }
         }
       },
@@ -2560,6 +2523,21 @@
           },
           "qualityName": {
             "type": "string"
+          }
+        }
+      },
+      "QualityProfileQualitySizeOutcomesResponse": {
+        "required": [
+          "identity",
+          "outcomes"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/QualitySizeOutcomesResponse"
           }
         }
       },
@@ -2672,87 +2650,29 @@
           }
         }
       },
-      "QualityProfileUpdateResponse": {
+      "QualitySizeGuideLabelsResponse": {
         "required": [
-          "identity"
+          "labels"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          "labels": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "QualitySizeGuideReferenceResponse": {
+        "required": [
+          "label",
+          "trashId"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
           },
-          "name": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeAllowed": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
-              }
-            ]
-          },
-          "upgradeUntilQuality": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeUntilScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumUpgradeFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "qualityLayout": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
-              }
-            ]
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
+          "trashId": {
+            "type": "string"
           }
         }
       },
@@ -2832,6 +2752,14 @@
           "preferredGreaterThanMaximum": {
             "description": "Qualities not synced because the preferred size is larger than the maximum.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
+          },
+          "guideReferenceMismatches": {
+            "description": "A guide quality profile links a quality size set (by trash ID) that the guide does not\n            have. Reported only for services that store sizes per quality profile.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeGuideReferenceResponse"
+          },
+          "ambiguousGuideReferences": {
+            "description": "A guide quality profile links more than one quality size set, so none is applied. Reported\n            only for services that store sizes per quality profile.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeGuideLabelsResponse"
           }
         }
       },
@@ -2879,6 +2807,30 @@
             "type": "string"
           }
         }
+      },
+      "QualitySizeResponse": {
+        "required": [
+          "quality",
+          "minimum",
+          "preferred",
+          "maximum"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "minimum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "maximum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          }
+        },
+        "description": "The size limits Recyclarr assigns to one quality."
       },
       "QualitySizeTypeResponse": {
         "required": [
@@ -3525,6 +3477,83 @@
         },
         "description": "One result for each pipeline. A pipeline is absent when the configuration does not use it or\n            the instance stopped before it ran."
       },
+      "SonarrQualityProfileControlledStateResponse": {
+        "required": [
+          "qualitySizes",
+          "name",
+          "upgradeAllowed",
+          "upgradeUntilQuality",
+          "upgradeUntilScore",
+          "minimumFormatScore",
+          "minimumUpgradeFormatScore",
+          "qualities",
+          "customFormatScores"
+        ],
+        "type": "object",
+        "properties": {
+          "qualitySizes": {
+            "description": "Sizes assigned to the profile's qualities. Only Sonarr v5 stores sizes per quality profile;\n            empty on earlier versions.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeResponse"
+          },
+          "name": {
+            "type": "string"
+          },
+          "upgradeAllowed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "upgradeUntilQuality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "upgradeUntilScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumUpgradeFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "qualities": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
+          }
+        }
+      },
+      "SonarrQualityProfileCreateResponse": {
+        "required": [
+          "identity",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SonarrQualityProfileControlledStateResponse"
+          }
+        }
+      },
       "SonarrQualityProfilePipelineResponse": {
         "required": [
           "creates",
@@ -3535,10 +3564,10 @@
         "type": "object",
         "properties": {
           "creates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileCreateResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileCreateResponse"
           },
           "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileUpdateResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileUpdateResponse"
           },
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
@@ -3556,6 +3585,94 @@
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
+          }
+        }
+      },
+      "SonarrQualityProfileUpdateResponse": {
+        "required": [
+          "identity"
+        ],
+        "type": "object",
+        "properties": {
+          "qualitySizes": {
+            "description": "Per-quality size changes. Only Sonarr v5 stores sizes per quality profile; empty on earlier\n            versions.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeUpdateResponse"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeAllowed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+              }
+            ]
+          },
+          "upgradeUntilQuality": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeUntilScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumUpgradeFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "qualityLayout": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+              }
+            ]
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
           }
         }
       },

@@ -99,9 +99,20 @@ internal sealed record RadarrQualityProfileControlledStateResponse
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileCreateResponse(
+internal sealed record SonarrQualityProfileControlledStateResponse
+    : QualityProfileControlledStateResponse
+{
+    /// <summary>
+    /// Sizes assigned to the profile's qualities. Only Sonarr v5 stores sizes per quality profile;
+    /// empty on earlier versions.
+    /// </summary>
+    public required IReadOnlyList<QualitySizeResponse> QualitySizes { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record SonarrQualityProfileCreateResponse(
     QualityProfileIdentityResponse Identity,
-    QualityProfileControlledStateResponse State
+    SonarrQualityProfileControlledStateResponse State
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -140,6 +151,22 @@ internal sealed record RadarrQualityProfileUpdateResponse : QualityProfileUpdate
 {
     public ValueChangeResponse<string?>? Language { get; init; }
 }
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record SonarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
+{
+    /// <summary>
+    /// Per-quality size changes. Only Sonarr v5 stores sizes per quality profile; empty on earlier
+    /// versions.
+    /// </summary>
+    public IReadOnlyList<QualitySizeUpdateResponse> QualitySizes { get; init; } = [];
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record QualityProfileQualitySizeOutcomesResponse(
+    QualityProfileIdentityResponse Identity,
+    QualitySizeOutcomesResponse Outcomes
+);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileIdentityOutcomeResponse(
@@ -276,6 +303,27 @@ internal sealed record QualityProfileOutcomesResponse
 
     /// <summary>Profiles the service refused to update.</summary>
     public IReadOnlyList<QualityProfileIdentityOutcomeResponse> UpdateRejected { get; init; } = [];
+
+    /// <summary>
+    /// Problems with the quality sizes resolved for a profile, on services that store sizes per
+    /// quality profile (Sonarr v5). Affected qualities keep their service sizes; the rest of the
+    /// profile still syncs.
+    /// </summary>
+    public IReadOnlyList<QualityProfileQualitySizeOutcomesResponse> QualitySizeOutcomes { get; init; } =
+    [];
+
+    /// <summary>
+    /// Profiles whose `quality_definition` was ignored because the service stores quality sizes
+    /// globally.
+    /// </summary>
+    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> QualityDefinitionsIgnored { get; init; } =
+    [];
+
+    /// <summary>
+    /// True when the instance `quality_definition` applied to nothing: the service stores sizes
+    /// per quality profile and no profile is listed under `quality_profiles`.
+    /// </summary>
+    public bool QualityDefinitionUnused { get; init; }
 }
 
 /// <summary>
@@ -295,8 +343,8 @@ internal abstract record QualityProfilePipelineResponse
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
 {
-    public required IReadOnlyList<QualityProfileCreateResponse> Creates { get; init; }
-    public required IReadOnlyList<QualityProfileUpdateResponse> Updates { get; init; }
+    public required IReadOnlyList<SonarrQualityProfileCreateResponse> Creates { get; init; }
+    public required IReadOnlyList<SonarrQualityProfileUpdateResponse> Updates { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

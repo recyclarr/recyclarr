@@ -1,6 +1,10 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.Compatibility;
+using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Pipelines.Plan.Components;
@@ -8,10 +12,26 @@ namespace Recyclarr.Pipelines.Plan.Components;
 internal class QualitySizePlanComponent(
     QualitySizeResourceQuery guide,
     IServiceConfiguration config,
+    DetectedService detectedService,
     ILogger log
 ) : IPlanComponent
 {
     public void Process(PipelinePlan plan)
+    {
+        if (
+            config.ServiceType == SupportedServices.Sonarr
+            && new SonarrCapabilities(detectedService.Version).QualitySizesPerProfile
+        )
+        {
+            PlanPerProfileSizes(plan);
+            return;
+        }
+
+        ReportIgnoredProfileSizeSources(plan);
+        PlanGlobalSizes(plan);
+    }
+
+    private void PlanGlobalSizes(PipelinePlan plan)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
@@ -20,7 +40,92 @@ internal class QualitySizePlanComponent(
             return;
         }
 
-        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, plan);
+        plan.QualitySizes = ResolveSizes(configSizeData, plan.Add);
+    }
+
+    // Sizes live on quality profile items; only profiles listed under `quality_profiles` receive
+    // them. Precedence: profile YAML, then the guide profile's `trash_quality_definition`
+    // reference (a quality size trash_id), then the instance `quality_definition`.
+    private void PlanPerProfileSizes(PipelinePlan plan)
+    {
+        var explicitProfiles = plan.QualityProfiles.Where(x => x.ShouldCreate).ToList();
+
+        if (config.QualityDefinition is not null && explicitProfiles.Count == 0)
+        {
+            plan.Add(new QualityDefinitionUnusedOutcome());
+        }
+
+        foreach (var profile in explicitProfiles)
+        {
+            void Report(SyncOutcome outcome) =>
+                plan.Add(new QualityProfileSizeOutcome(profile, outcome));
+
+            var source = SelectSizeSource(profile, Report);
+            if (source is null)
+            {
+                continue;
+            }
+
+            plan.AddQualityProfile(profile with { QualitySizes = ResolveSizes(source, Report) });
+        }
+    }
+
+    private QualityDefinitionConfig? SelectSizeSource(
+        PlannedQualityProfile profile,
+        Action<SyncOutcome> report
+    )
+    {
+        if (profile.Config.QualityDefinition is not null)
+        {
+            return profile.Config.QualityDefinition;
+        }
+
+        var guideReference = profile.GuideResource?.TrashQualityDefinition;
+        if (guideReference is null || guideReference.Count == 0)
+        {
+            return config.QualityDefinition;
+        }
+
+        if (guideReference.Count > 1)
+        {
+            report(new AmbiguousGuideQualityDefinitionOutcome(guideReference.Keys.ToList()));
+            return null;
+        }
+
+        var (label, guideTrashId) = guideReference.First();
+        var guideSizes = guide
+            .Get(config.ServiceType)
+            .LastOrDefault(x => x.TrashId.EqualsIgnoreCase(guideTrashId));
+
+        if (guideSizes is null)
+        {
+            report(new GuideQualityDefinitionNotFoundOutcome(label, guideTrashId));
+            return null;
+        }
+
+        return new QualityDefinitionConfig { Type = guideSizes.Type };
+    }
+
+    // Only user YAML is reported; guide references are ignored silently because users cannot
+    // change guide data.
+    private static void ReportIgnoredProfileSizeSources(PipelinePlan plan)
+    {
+        var profiles = plan.QualityProfiles.Where(x =>
+            x.ShouldCreate && x.Config.QualityDefinition is not null
+        );
+
+        foreach (var profile in profiles)
+        {
+            plan.Add(new ProfileQualityDefinitionIgnoredOutcome(profile));
+        }
+    }
+
+    private PlannedQualitySizes ResolveSizes(
+        QualityDefinitionConfig configSizeData,
+        Action<SyncOutcome> report
+    )
+    {
+        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, report);
 
         var guideSizeData = guide
             .Get(config.ServiceType)
@@ -28,14 +133,13 @@ internal class QualitySizePlanComponent(
 
         if (guideSizeData is null)
         {
-            plan.Add(new QualityDefinitionNotFoundOutcome(configSizeData.Type));
-            plan.QualitySizes = new PlannedQualitySizes
+            report(new QualityDefinitionNotFoundOutcome(configSizeData.Type));
+            return new PlannedQualitySizes
             {
                 Type = configSizeData.Type,
                 PreferredRatio = preferredRatio,
                 Qualities = [],
             };
-            return;
         }
 
         var overrideLookup = configSizeData.Qualities.ToDictionary(
@@ -51,7 +155,7 @@ internal class QualitySizePlanComponent(
         var validQualities = new List<PlannedQualityItem>();
         foreach (var quality in plannedQualities)
         {
-            if (ValidateQualitySizeOrder(quality, plan))
+            if (ValidateQualitySizeOrder(quality, report))
             {
                 validQualities.Add(quality);
             }
@@ -62,11 +166,11 @@ internal class QualitySizePlanComponent(
         {
             if (!guideSizeData.Qualities.Any(x => x.Quality.EqualsIgnoreCase(configQuality.Name)))
             {
-                plan.Add(new QualityNotFoundOutcome(configQuality.Name, configSizeData.Type));
+                report(new QualityNotFoundOutcome(configQuality.Name, configSizeData.Type));
             }
         }
 
-        plan.QualitySizes = new PlannedQualitySizes
+        return new PlannedQualitySizes
         {
             Type = configSizeData.Type,
             PreferredRatio = preferredRatio,
@@ -74,7 +178,7 @@ internal class QualitySizePlanComponent(
         };
     }
 
-    private static decimal? ClampPreferredRatio(decimal? ratio, PipelinePlan diagnostics)
+    private static decimal? ClampPreferredRatio(decimal? ratio, Action<SyncOutcome> report)
     {
         if (ratio is not (< 0 or > 1))
         {
@@ -82,7 +186,7 @@ internal class QualitySizePlanComponent(
         }
 
         var clamped = Math.Clamp(ratio.Value, min: 0, max: 1);
-        diagnostics.Add(new PreferredRatioClampedOutcome(ratio.Value, clamped));
+        report(new PreferredRatioClampedOutcome(ratio.Value, clamped));
         return clamped;
     }
 
@@ -129,13 +233,13 @@ internal class QualitySizePlanComponent(
 
     private static bool ValidateQualitySizeOrder(
         PlannedQualityItem quality,
-        PipelinePlan diagnostics
+        Action<SyncOutcome> report
     )
     {
         // preferred null = unlimited, so min is always ≤ preferred when preferred is unlimited
         if (quality.Preferred is not null && quality.Min > quality.Preferred)
         {
-            diagnostics.Add(
+            report(
                 new MinGreaterThanPreferredOutcome(
                     quality.Quality,
                     quality.Min,
@@ -149,9 +253,7 @@ internal class QualitySizePlanComponent(
         // But if preferred is unlimited (null) and max is not, that's invalid
         if (quality.Preferred is null && quality.Max is not null)
         {
-            diagnostics.Add(
-                new UnlimitedPreferredGreaterThanMaxOutcome(quality.Quality, quality.Max.Value)
-            );
+            report(new UnlimitedPreferredGreaterThanMaxOutcome(quality.Quality, quality.Max.Value));
             return false;
         }
 
@@ -161,7 +263,7 @@ internal class QualitySizePlanComponent(
             && quality.Preferred > quality.Max
         )
         {
-            diagnostics.Add(
+            report(
                 new PreferredGreaterThanMaxOutcome(
                     quality.Quality,
                     quality.Preferred.Value,
