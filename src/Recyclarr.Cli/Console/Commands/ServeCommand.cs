@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Recyclarr.Cli.Server;
@@ -24,6 +25,7 @@ internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
     [UsedImplicitly]
     internal class Settings : BaseCommandSettings;
 
+    [SuppressMessage("Style", "REC001", Justification = "Explicit None marks ct as ignored")]
     protected override async Task<int> ExecuteAsync(
         CommandContext context,
         Settings settings,

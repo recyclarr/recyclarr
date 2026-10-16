@@ -29,6 +29,19 @@
     <Using Include="JetBrains.Annotations" />
   </ItemGroup>
 
+  <!-- Repository rules apply everywhere except the analyzer and its tests, which reference it
+       directly. -->
+  <ItemGroup
+    Condition="'$(MSBuildProjectName)' != 'Recyclarr.Analyzers'
+      and '$(MSBuildProjectName)' != 'Recyclarr.Analyzers.Tests'"
+  >
+    <ProjectReference
+      Include="$(RepositoryRoot)src/Recyclarr.Analyzers/Recyclarr.Analyzers.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
+  </ItemGroup>
+
   <!-- For only NON-TEST projects -->
   <ItemGroup
     Condition="!$(MSBuildProjectName.EndsWith('Tests'))
