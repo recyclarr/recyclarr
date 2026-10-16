@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Repository-specific Roslyn rules. Directory.Build.props wires this project into every other
+       project as an analyzer, so new rules apply solution-wide without per-project setup. -->
+  <PropertyGroup>
+    <!-- Compilers load analyzers only from netstandard2.0 assemblies -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <!-- RS2008: release tracking documents rule changes for shipped packages; these rules ship
+         only to this repository's own build. -->
+    <NoWarn>$(NoWarn);RS2008</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Must not exceed the Roslyn version of the oldest SDK or IDE that builds this repository -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" />
+  </ItemGroup>
+</Project>
