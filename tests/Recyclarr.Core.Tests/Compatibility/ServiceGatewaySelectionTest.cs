@@ -39,8 +39,8 @@ internal sealed class ServiceGatewaySelectionTest : CoreIntegrationTestFixture
 
         await detected.Resolve<ICustomFormatService>().GetCustomFormats(CancellationToken.None);
 
-        await _sonarrV5Api.ReceivedWithAnyArgs().CustomformatGet(default);
-        await _sonarrApi.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+        await _sonarrV5Api.ReceivedWithAnyArgs().CustomformatGet();
+        await _sonarrApi.DidNotReceiveWithAnyArgs().CustomformatGet();
     }
 
     [Test]
@@ -53,8 +53,8 @@ internal sealed class ServiceGatewaySelectionTest : CoreIntegrationTestFixture
 
         await detected.Resolve<ICustomFormatService>().GetCustomFormats(CancellationToken.None);
 
-        await _sonarrApi.ReceivedWithAnyArgs().CustomformatGet(default);
-        await _radarrApi.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+        await _sonarrApi.ReceivedWithAnyArgs().CustomformatGet();
+        await _radarrApi.DidNotReceiveWithAnyArgs().CustomformatGet();
     }
 
     [Test]
@@ -67,8 +67,8 @@ internal sealed class ServiceGatewaySelectionTest : CoreIntegrationTestFixture
 
         await detected.Resolve<ICustomFormatService>().GetCustomFormats(CancellationToken.None);
 
-        await _radarrApi.ReceivedWithAnyArgs().CustomformatGet(default);
-        await _sonarrApi.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+        await _radarrApi.ReceivedWithAnyArgs().CustomformatGet();
+        await _sonarrApi.DidNotReceiveWithAnyArgs().CustomformatGet();
     }
 
     // Sonarr v5 has no quality definition gateway, so building the pipeline executor must not

@@ -69,7 +69,7 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
             }
             catch (GitCmdException e)
             {
-                log.Debug("Failed to fetch reference {Reference}: {Error}", reference, e.Message);
+                log.Debug(e, "Failed to fetch reference {Reference}", reference);
                 errors.Add(e);
             }
         }

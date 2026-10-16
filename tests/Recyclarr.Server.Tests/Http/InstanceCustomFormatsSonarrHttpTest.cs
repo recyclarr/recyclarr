@@ -64,13 +64,13 @@ internal sealed class InstanceCustomFormatsSonarrHttpTest(string version, bool e
         response.EnsureSuccessStatusCode();
         if (expectV5)
         {
-            await _v5.ReceivedWithAnyArgs().CustomformatGet(default);
-            await _v3.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+            await _v5.ReceivedWithAnyArgs().CustomformatGet();
+            await _v3.DidNotReceiveWithAnyArgs().CustomformatGet();
         }
         else
         {
-            await _v3.ReceivedWithAnyArgs().CustomformatGet(default);
-            await _v5.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+            await _v3.ReceivedWithAnyArgs().CustomformatGet();
+            await _v5.DidNotReceiveWithAnyArgs().CustomformatGet();
         }
     }
 
@@ -86,13 +86,13 @@ internal sealed class InstanceCustomFormatsSonarrHttpTest(string version, bool e
         response.EnsureSuccessStatusCode();
         if (expectV5)
         {
-            await _v5.ReceivedWithAnyArgs().CustomformatDelete(default, default);
-            await _v3.DidNotReceiveWithAnyArgs().CustomformatDelete(default, default);
+            await _v5.ReceivedWithAnyArgs().CustomformatDelete(default);
+            await _v3.DidNotReceiveWithAnyArgs().CustomformatDelete(default);
         }
         else
         {
-            await _v3.ReceivedWithAnyArgs().CustomformatDelete(default, default);
-            await _v5.DidNotReceiveWithAnyArgs().CustomformatDelete(default, default);
+            await _v3.ReceivedWithAnyArgs().CustomformatDelete(default);
+            await _v5.DidNotReceiveWithAnyArgs().CustomformatDelete(default);
         }
     }
 }
