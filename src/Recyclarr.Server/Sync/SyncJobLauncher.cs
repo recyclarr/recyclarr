@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Sync.Results;
 using TickerQ.Utilities.Entities;
 using TickerQ.Utilities.Interfaces.Managers;
@@ -18,6 +19,11 @@ internal sealed class SyncJobLauncher(
 {
     // Not cancellable: a job left pending without a ticker would never run, and as an active job
     // it would cause every scheduled occurrence to be skipped until restart.
+    [SuppressMessage(
+        "Style",
+        "REC001",
+        Justification = "Explicit None marks this as uncancellable"
+    )]
     public async Task LaunchAsync(JobId jobId)
     {
         var result = await tickers.AddAsync<SyncJobTickerFunction, SyncJobTickerRequest>(
