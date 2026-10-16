@@ -463,6 +463,20 @@ internal sealed class NotificationService(
                 $"The service rejected update of quality profile "
                     + $"'{GetQualityProfileName(x.Identity)}'"
             ),
+            QualityProfileQualitySizeOutcome x => WithProfilePrefix(
+                x.Identity,
+                FormatQualitySizeOutcome(x.Outcome)
+            ),
+            QualityProfileQualityDefinitionIgnoredOutcome x => Warning(
+                $"Quality profile '{GetQualityProfileName(x.Identity)}': this service version "
+                    + "does not store quality sizes per profile, so the profile's "
+                    + "quality_definition is ignored"
+            ),
+            QualityProfileQualityDefinitionUnusedOutcome => Warning(
+                "This service version stores quality sizes per quality profile. "
+                    + "quality_definition only applies to profiles listed under "
+                    + "quality_profiles, and none are configured"
+            ),
             _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
         };
 
@@ -491,6 +505,14 @@ internal sealed class NotificationService(
             QualitySizePreferredGreaterThanMaximumOutcome x => Error(
                 $"Quality '{x.Quality}' preferred {x.Preferred} exceeds maximum {x.Maximum}"
             ),
+            QualitySizeGuideReferenceMismatchOutcome x => Error(
+                $"The guide profile references a quality definition that does not exist: "
+                    + $"{x.Label} ({x.TrashId})"
+            ),
+            QualitySizeAmbiguousGuideReferenceOutcome x => Error(
+                $"The guide profile references more than one quality definition: "
+                    + FormatNames(x.Labels)
+            ),
             _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
         };
 
@@ -512,6 +534,15 @@ internal sealed class NotificationService(
                     + $"'{x.ConfiguredKey}'"
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
+        };
+
+    private static NotificationReport WithProfilePrefix(
+        QualityProfileIdentity identity,
+        NotificationReport report
+    ) =>
+        report with
+        {
+            Message = $"Quality profile '{GetQualityProfileName(identity)}': {report.Message}",
         };
 
     private static string GetQualityProfileName(QualityProfileDelta delta) =>

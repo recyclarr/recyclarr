@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Autofac;
 using NSubstitute.ExceptionExtensions;
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
@@ -112,25 +113,60 @@ internal sealed class InstanceSyncProcessorTest
         result.Failure.Should().BeOfType(expectedType);
     }
 
+    [Test]
+    public async Task Incompatible_service_fails_instance_without_running_pipelines()
+    {
+        var serviceInfo = Substitute.For<IServiceInformation>();
+        serviceInfo.GetAppName(default).ReturnsForAnyArgs("Sonarr");
+        serviceInfo.GetVersion(default).ReturnsForAnyArgs(new Version(3, 0));
+        var sut = CreateSut(
+            Substitute.For<ILogger>(),
+            serviceInfo,
+            new RecordingPipelineExecutor(),
+            new Recyclarr.Config.Models.SonarrConfiguration { InstanceName = "instance" }
+        );
+
+        var result = await sut.Process(
+            Substitute.For<ISyncSettings>(),
+            CreateState(),
+            CancellationToken.None
+        );
+
+        result.Failure.Should().BeOfType<ServiceIncompatibleFailure>();
+    }
+
     private static InstanceSyncProcessor CreateSut(
         ILogger log,
         IServiceInformation serviceInfo,
-        IPipelineExecutor pipelines
+        IPipelineExecutor pipelines,
+        Recyclarr.Config.Models.IServiceConfiguration? config = null
     )
     {
         IPlanComponent[] components = [];
-        var planBuilder = new PlanBuilder(components.OrderBy(_ => 0), log);
+        // Only the Sonarr test reaches this fetcher; it reports a version below the minimum.
+        var capabilityFetcher = Substitute.For<ISonarrCapabilityFetcher>();
+        capabilityFetcher
+            .GetCapabilities(default)
+            .ReturnsForAnyArgs(new SonarrCapabilities(new Version(3, 0)));
+        var radarrFetcher = Substitute.For<IRadarrCapabilityFetcher>();
+        radarrFetcher
+            .GetCapabilities(default)
+            .ReturnsForAnyArgs(new RadarrCapabilities(new Version(6, 0)));
         var enforcer = new ServiceAgnosticCapabilityEnforcer(
             serviceInfo,
-            new SonarrCapabilityEnforcer(Substitute.For<ISonarrCapabilityFetcher>()),
-            new RadarrCapabilityEnforcer(Substitute.For<IRadarrCapabilityFetcher>())
+            new SonarrCapabilityEnforcer(capabilityFetcher),
+            new RadarrCapabilityEnforcer(radarrFetcher)
         );
+
+        var builder = new ContainerBuilder();
+        builder.RegisterInstance(new PlanBuilder(components.OrderBy(_ => 0), log));
+        builder.RegisterInstance(pipelines).As<IPipelineExecutor>();
+
         return new InstanceSyncProcessor(
             log,
-            new Recyclarr.Config.Models.RadarrConfiguration { InstanceName = "instance" },
-            planBuilder,
-            pipelines,
-            enforcer
+            config ?? new Recyclarr.Config.Models.RadarrConfiguration { InstanceName = "instance" },
+            enforcer,
+            builder.Build()
         );
     }
 

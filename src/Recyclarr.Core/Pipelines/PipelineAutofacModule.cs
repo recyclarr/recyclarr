@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Recyclarr.Common;
+using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.CustomFormat.State;
@@ -51,11 +52,11 @@ public class PipelineAutofacModule : Module
             )
             .As<IPlanComponent>()
             .OrderByRegistration();
-        builder.RegisterServiceGateway<
-            IMediaNamingPlanner,
-            SonarrMediaNamingPlanner,
-            RadarrMediaNamingPlanner
-        >();
+        builder
+            .RegisterServiceGateway<IMediaNamingPlanner>()
+            .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV3)
+            .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV5)
+            .For<RadarrMediaNamingPlanner>(ServiceApiTarget.RadarrV3);
     }
 
     private static void RegisterPipelineExecutor(ContainerBuilder builder)
@@ -76,7 +77,11 @@ public class PipelineAutofacModule : Module
                 typeof(MediaManagementSyncOperation)
             )
             .As<ISyncOperation>();
-        builder.RegisterServiceGateway<IMediaNamingSync, SonarrNamingSync, RadarrNamingSync>();
+        builder
+            .RegisterServiceGateway<IMediaNamingSync>()
+            .For<SonarrNamingSync>(ServiceApiTarget.SonarrV3)
+            .For<SonarrNamingSync>(ServiceApiTarget.SonarrV5)
+            .For<RadarrNamingSync>(ServiceApiTarget.RadarrV3);
     }
 
     private static void RegisterCustomFormatSupport(ContainerBuilder builder)
@@ -88,11 +93,11 @@ public class PipelineAutofacModule : Module
 
     private static void RegisterQualityProfileSupport(ContainerBuilder builder)
     {
-        builder.RegisterServiceGateway<
-            IQualityProfileServiceFields,
-            SonarrQualityProfileFields,
-            RadarrQualityProfileFields
-        >();
+        builder
+            .RegisterServiceGateway<IQualityProfileServiceFields>()
+            .For<SonarrV3QualityProfileFields>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5QualityProfileFields>(ServiceApiTarget.SonarrV5)
+            .For<RadarrQualityProfileFields>(ServiceApiTarget.RadarrV3);
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
         builder.RegisterType<QualityProfileStatePersister>().As<IQualityProfileStatePersister>();

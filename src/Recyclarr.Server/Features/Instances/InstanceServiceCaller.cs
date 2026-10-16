@@ -1,3 +1,5 @@
+using Autofac;
+using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Server.Sync;
@@ -23,7 +25,8 @@ internal sealed class InstanceServiceCaller(
 {
     public async Task<InstanceCallResult<T>> Call<TService, T>(
         string instanceName,
-        Func<TService, Task<T>> call
+        Func<TService, Task<T>> call,
+        CancellationToken ct
     )
         where TService : notnull
     {
@@ -33,10 +36,16 @@ internal sealed class InstanceServiceCaller(
             return new InstanceCallResult<T>(InstanceFound: false);
         }
 
-        using var scope = scopes.Start<TService>(config);
+        using var instance = scopes.Start<ILifetimeScope>(config);
         try
         {
-            return new InstanceCallResult<T>(InstanceFound: true, Value: await call(scope.Entry));
+            // Gateways are selected by the detected API version, so they resolve only from the
+            // scope created after detection.
+            var enforcer = instance.Entry.Resolve<ServiceAgnosticCapabilityEnforcer>();
+            var detected = await enforcer.Check(config, ct);
+            await using var detectedScope = instance.Entry.BeginDetectedServiceScope(detected);
+            var value = await call(detectedScope.Resolve<TService>());
+            return new InstanceCallResult<T>(InstanceFound: true, Value: value);
         }
         catch (Exception e) when (OperationalFailureClassifier.Classify(e) is { } failure)
         {

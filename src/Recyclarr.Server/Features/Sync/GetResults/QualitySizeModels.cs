@@ -29,8 +29,24 @@ internal sealed record QualitySizeUpdateResponse
     public ValueChangeResponse<QualitySizeValueResponse>? Maximum { get; init; }
 }
 
+/// <summary>The size limits Recyclarr assigns to one quality.</summary>
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record QualitySizeResponse
+{
+    public required string Quality { get; init; }
+    public required QualitySizeValueResponse Minimum { get; init; }
+    public required QualitySizeValueResponse Preferred { get; init; }
+    public required QualitySizeValueResponse Maximum { get; init; }
+}
+
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeTypeResponse(string Type);
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record QualitySizeGuideReferenceResponse(string Label, string TrashId);
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record QualitySizeGuideLabelsResponse(IReadOnlyList<string> Labels);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeReferenceResponse(string Quality, string Type);
@@ -85,6 +101,20 @@ internal sealed record QualitySizeOutcomesResponse
     /// Qualities not synced because the preferred size is larger than the maximum.
     /// </summary>
     public IReadOnlyList<QualitySizeMaximumComparisonResponse> PreferredGreaterThanMaximum { get; init; } =
+    [];
+
+    /// <summary>
+    /// A guide quality profile links a quality size set (by trash ID) that the guide does not
+    /// have. Reported only for services that store sizes per quality profile.
+    /// </summary>
+    public IReadOnlyList<QualitySizeGuideReferenceResponse> GuideReferenceMismatches { get; init; } =
+    [];
+
+    /// <summary>
+    /// A guide quality profile links more than one quality size set, so none is applied. Reported
+    /// only for services that store sizes per quality profile.
+    /// </summary>
+    public IReadOnlyList<QualitySizeGuideLabelsResponse> AmbiguousGuideReferences { get; init; } =
     [];
 }
 

@@ -54,7 +54,8 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
                 {
                     return false;
                 }
-            }
+            },
+            ct
         );
 
         if (!result.InstanceFound)

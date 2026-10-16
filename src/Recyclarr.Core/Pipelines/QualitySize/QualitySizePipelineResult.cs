@@ -61,6 +61,20 @@ public sealed record QualitySizeReferenceMismatchOutcome(string Quality, string 
 
 public sealed record QualitySizeServiceQualityNotFoundOutcome(string Quality) : QualitySizeOutcome;
 
+/// <summary>
+/// A guide quality profile links a quality size file (by trash_id) that the guide does not
+/// contain. Only reported for services that store sizes per quality profile.
+/// </summary>
+public sealed record QualitySizeGuideReferenceMismatchOutcome(string Label, string TrashId)
+    : QualitySizeOutcome;
+
+/// <summary>
+/// A guide quality profile links more than one quality size file, so no size source can be chosen.
+/// Only reported for services that store sizes per quality profile.
+/// </summary>
+public sealed record QualitySizeAmbiguousGuideReferenceOutcome(IReadOnlyList<string> Labels)
+    : QualitySizeOutcome;
+
 public sealed record QualitySizePreferredRatioClampedOutcome(ValueDelta<decimal> Value)
     : QualitySizeOutcome;
 

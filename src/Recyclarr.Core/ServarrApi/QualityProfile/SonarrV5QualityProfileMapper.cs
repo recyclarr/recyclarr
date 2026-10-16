@@ -1,3 +1,4 @@
+using Recyclarr.Common.Extensions;
 using Recyclarr.Servarr.QualityProfile;
 using Riok.Mapperly.Abstractions;
 using SonarrApi = Recyclarr.Api.Sonarr.V5;
@@ -7,9 +8,26 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
 internal static partial class SonarrV5QualityProfileMapper
 {
-    public static partial QualityProfileData ToDomain(SonarrApi.QualityProfileResource dto);
+    public static SonarrV5QualityProfileData ToDomain(SonarrApi.QualityProfileResource dto)
+    {
+        var sizes = new Dictionary<string, QualityItemSize>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in (dto.Items ?? []).Flatten(x => x.Items ?? []))
+        {
+            if (item.Quality?.Name is { } name && SizeToDomain(item) is { } size)
+            {
+                sizes.TryAdd(name, size);
+            }
+        }
 
-    public static partial ProfileLanguage ToDomain(SonarrApi.LanguageResource dto);
+        return ProfileToDomain(dto) with
+        {
+            QualitySizes = sizes,
+        };
+    }
+
+    private static partial SonarrV5QualityProfileData ProfileToDomain(
+        SonarrApi.QualityProfileResource dto
+    );
 
     [MapProperty(
         nameof(SonarrApi.ProfileFormatItemResource.Format),
@@ -30,7 +48,6 @@ internal static partial class SonarrV5QualityProfileMapper
                 ? new QualityProfileItemQuality { Id = dto.Quality.Id, Name = dto.Quality.Name }
                 : null,
             Items = (dto.Items ?? []).Select(ItemToDomain).ToList(),
-            Size = SizeToDomain(dto),
         };
     }
 

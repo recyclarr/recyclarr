@@ -61,7 +61,8 @@ internal class RadarrQualityProfileFields(IRadarrLanguageService languageService
 
     public QualityProfileControlledState DescribeCreate(
         QualityProfileControlledState shared,
-        QualityProfileData desired
+        QualityProfileData desired,
+        PlannedQualityProfile planned
     ) => new RadarrQualityProfileControlledState(shared, AsRadarr(desired).Language?.Name);
 
     private static RadarrQualityProfileData AsRadarr(QualityProfileData profile)

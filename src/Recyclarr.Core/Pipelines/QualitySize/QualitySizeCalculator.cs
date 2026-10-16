@@ -1,8 +1,8 @@
-using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.TrashGuide.QualitySize;
 
-namespace Recyclarr.Cli.Pipelines.QualitySize;
+namespace Recyclarr.Pipelines.QualitySize;
 
 // Turns planned guide sizes into concrete values within the service's limits. Shared by the global
 // quality definition pipeline and per-profile sizes so both produce identical values.

@@ -78,7 +78,7 @@ dictionary keyed by resource ID. This eliminates the need for `[JsonExtensionDat
 while preserving lossless round-trips.
 
 ```csharp
-internal class SonarrQualityDefinitionGateway(IQualityDefinitionApiService api)
+internal class SonarrV3QualityDefinitionGateway(IQualityDefinitionApiService api)
     : IQualityDefinitionService
 {
     private readonly Dictionary<int, ServiceQualityDefinitionItem> _stashedDtos = [];
@@ -112,21 +112,27 @@ DTOs. See the Custom Format passthrough exception below.
 
 ## DI Resolution
 
-Keyed registration per service, plus a non-keyed lambda that selects the correct gateway based on
-`IServiceConfiguration.ServiceType` at resolve time:
+Gateways are keyed by `ServiceApiTarget` (`SonarrV3`, `SonarrV5`, `RadarrV3`), the API generation a
+service instance speaks. A non-keyed registration resolves the port by the detected target:
 
 ```csharp
-// Shared port: keyed + non-keyed resolution
-builder.RegisterServiceGateway<
-    IQualityDefinitionService,
-    SonarrQualityDefinitionGateway,
-    RadarrQualityDefinitionGateway>();
-
-// Per-service port: direct registration (one gateway per port)
-builder.RegisterType<SonarrNamingGateway>()
-    .As<ISonarrNamingService>()
-    .InstancePerLifetimeScope();
+builder
+    .RegisterServiceGateway<IQualityProfileService>()
+    .For<SonarrV3QualityProfileGateway>(ServiceApiTarget.SonarrV3)
+    .For<SonarrV5QualityProfileGateway>(ServiceApiTarget.SonarrV5)
+    .For<RadarrQualityProfileGateway>(ServiceApiTarget.RadarrV3);
 ```
+
+The target comes from `DetectedService`, produced by the capability check from the server version
+(see [ADR-028](../decisions/architecture/028-api-version-selection-by-server-major.md)).
+`InstanceSyncProcessor` and the server's `InstanceServiceCaller` run the check, then begin a child
+scope with `BeginDetectedServiceScope` that registers `DetectedService`; planning, sync operations,
+and instance calls resolve from that scope. Resolving a port before detection fails with
+`DependencyResolutionException` instead of defaulting. `ISystemService` is the exception: it
+performs detection, so it stays keyed by `SupportedServices`.
+
+A sync operation whose port has no gateway on some target resolves it lazily and is skipped by its
+plan there (the quality size operation on Sonarr v5).
 
 Sync operations and per-service components inject the port directly; they have no idea keying is
 involved.
@@ -136,20 +142,24 @@ involved.
 [ADR-023][adr-023] sets the rule: each field lives on a shared type or on the type of the one
 service that owns it, and each pipeline has one operation with per-service components resolved
 through DI with `RegisterServiceGateway`. Quality profiles (`IQualityProfileServiceFields`) and
-media naming (`IMediaNamingPlanner`, `IMediaNamingSync`) follow it.
+media naming (`IMediaNamingPlanner`, `IMediaNamingSync`) follow it. Components are keyed by API
+target, so a field one API generation owns gets its own component (Sonarr v5 per-profile quality
+sizes in `SonarrV5QualityProfileFields`).
 
 Shared logic lives in helper classes that both services' components depend on (e.g.
 `NamingFormatLookup`).
 
 ## Gateway multiplicity
 
-Every pipeline gets one gateway per service (Sonarr + Radarr), regardless of whether its port is
-shared.
+Every pipeline gets one gateway per API target it applies to, regardless of whether its port is
+shared. Sonarr has one gateway per API generation (`SonarrV3*`, `SonarrV5*`).
 
-- **Shared ports:** Both gateways implement the same port. DI resolves the correct one via
-  keyed/non-keyed pattern.
-- **Per-service ports:** Each service's component injects its own port and single gateway (e.g.
-  `ISonarrNamingService` implemented by `SonarrNamingGateway`).
+- **Shared ports:** All gateways implement the same port. DI resolves the correct one by target.
+- **Per-service ports:** Each service's component injects its own port, with one gateway per target
+  of that service (e.g. `ISonarrNamingService` implemented by `SonarrV3NamingGateway` and
+  `SonarrV5NamingGateway`).
+- **Target-specific ports:** `IQualityDefinitionService` has no Sonarr v5 gateway; v5 stores sizes
+  on quality profile items, so the quality profile gateway owns them.
 
 There is never a single "shared" gateway that handles both services. Even when schemas are identical
 (e.g. custom formats, system status), separate gateways per service are required because each
@@ -203,7 +213,7 @@ concerns live in `DelegatingHandler` subclasses, configured once per named clien
 ### Named clients
 
 | Client      | Handlers             | Primary handler config   |
-|-------------|----------------------|--------------------------|
+| ----------- | -------------------- | ------------------------ |
 | `"servarr"` | `HttpLoggingHandler` | SSL bypass (conditional) |
 | `"apprise"` | `HttpLoggingHandler` | (default)                |
 
@@ -252,7 +262,7 @@ Comparison of Sonarr and Radarr OpenAPI specs for endpoints Recyclarr consumes. 
 which fields are shared and which are service-owned for new features.
 
 | Endpoint            | Divergence           | Notes                                                  |
-|---------------------|----------------------|--------------------------------------------------------|
+| ------------------- | -------------------- | ------------------------------------------------------ |
 | Custom Formats      | Identical            | Truly shareable                                        |
 | Quality Definitions | Identical            | Nested `Quality` model differs but main schema matches |
 | Language            | Identical            |                                                        |

@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Core;
 using Recyclarr.Compatibility;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.CustomFormat;
 using RadarrApi = Recyclarr.Api.Radarr;
 using SonarrApi = Recyclarr.Api.Sonarr.V3;
@@ -9,7 +10,7 @@ using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
 
 namespace Recyclarr.Core.Tests.Compatibility;
 
-internal sealed class ServiceGatewaySelectionTest : IntegrationTestFixture
+internal sealed class ServiceGatewaySelectionTest : CoreIntegrationTestFixture
 {
     private readonly SonarrApi.ICustomFormatApi _sonarrApi =
         Substitute.For<SonarrApi.ICustomFormatApi>();
@@ -68,6 +69,22 @@ internal sealed class ServiceGatewaySelectionTest : IntegrationTestFixture
 
         await _radarrApi.ReceivedWithAnyArgs().CustomformatGet(default);
         await _sonarrApi.DidNotReceiveWithAnyArgs().CustomformatGet(default);
+    }
+
+    // Sonarr v5 has no quality definition gateway, so building the pipeline executor must not
+    // require one.
+    [TestCase(ServiceApiTarget.SonarrV3)]
+    [TestCase(ServiceApiTarget.SonarrV5)]
+    public void Pipeline_executor_resolves_for_every_sonarr_target(ServiceApiTarget target)
+    {
+        using var instance = ResolveWithConfig<ILifetimeScope>(NewConfig.Sonarr());
+        using var detected = instance.Entry.BeginDetectedServiceScope(
+            new DetectedService(new Version(5, 0), target)
+        );
+
+        var act = () => detected.Resolve<IPipelineExecutor>();
+
+        act.Should().NotThrow();
     }
 
     [Test]

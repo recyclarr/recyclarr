@@ -6,6 +6,7 @@ using NSubstitute.ExceptionExtensions;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.CustomFormat;
+using Recyclarr.Server.TestLibrary;
 using Refit;
 
 namespace Recyclarr.Cli.Tests.Console.Commands;
@@ -21,6 +22,7 @@ internal sealed class ServerBackedCommandsHttpTest : CliServerHttpFixture
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterInstance(_customFormats).As<ICustomFormatService>();
+        builder.RegisterRadarrDetection();
     }
 
     private void AddGuide()

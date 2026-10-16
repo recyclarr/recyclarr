@@ -16,9 +16,21 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 UPSTREAM = "https://raw.githubusercontent.com/{repo}/develop/src/{project}/openapi.json"
 
 TARGETS = {
-    "sonarr-v3": ("Sonarr/Sonarr", "Sonarr.Api.V3", "src/Recyclarr.Api.Sonarr/V3/openapi.json"),
-    "sonarr-v5": ("Sonarr/Sonarr", "Sonarr.Api.V5", "src/Recyclarr.Api.Sonarr/V5/openapi.json"),
-    "radarr-v3": ("Radarr/Radarr", "Radarr.Api.V3", "src/Recyclarr.Api.Radarr/openapi.json"),
+    "sonarr-v3": (
+        "Sonarr/Sonarr",
+        "Sonarr.Api.V3",
+        "src/Recyclarr.Api.Sonarr/V3/openapi.json",
+    ),
+    "sonarr-v5": (
+        "Sonarr/Sonarr",
+        "Sonarr.Api.V5",
+        "src/Recyclarr.Api.Sonarr/V5/openapi.json",
+    ),
+    "radarr-v3": (
+        "Radarr/Radarr",
+        "Radarr.Api.V3",
+        "src/Recyclarr.Api.Radarr/openapi.json",
+    ),
 }
 
 
@@ -48,6 +60,26 @@ def allow_unknown_fields(node: object) -> None:
             allow_unknown_fields(value)
 
 
+# Swashbuckle lists each body under text/json, text/plain, and application/*+json beside
+# application/json. Keeping only application/json removes noise from every sync diff without
+# losing information.
+def keep_json_media_type_only(spec: dict) -> None:
+    def json_only(content: dict) -> None:
+        if "application/json" in content:
+            for media_type in ("text/json", "text/plain", "application/*+json"):
+                content.pop(media_type, None)
+
+    for path_item in spec.get("paths", {}).values():
+        for operation in path_item.values():
+            if not isinstance(operation, dict) or "responses" not in operation:
+                continue
+            if content := operation.get("requestBody", {}).get("content"):
+                json_only(content)
+            for response in operation["responses"].values():
+                if content := response.get("content"):
+                    json_only(content)
+
+
 def update(target: str) -> None:
     repo, project, local = TARGETS[target]
     url = UPSTREAM.format(repo=repo, project=project)
@@ -58,6 +90,7 @@ def update(target: str) -> None:
         spec = json.load(response)
 
     allow_unknown_fields(spec)
+    keep_json_media_type_only(spec)
     path.write_text(json.dumps(spec, indent=2) + "\n", encoding="utf-8")
     run_prettier(path)
 
