@@ -13,7 +13,7 @@ internal sealed class SonarrV5CustomFormatGatewayTest
         SonarrV5CustomFormatGateway sut
     )
     {
-        api.CustomformatGet(default)
+        api.CustomformatGet()
             .ReturnsForAnyArgs([
                 new SonarrApi.CustomFormatResource
                 {
@@ -60,7 +60,7 @@ internal sealed class SonarrV5CustomFormatGatewayTest
         SonarrV5CustomFormatGateway sut
     )
     {
-        api.Schema(default)
+        api.Schema()
             .ReturnsForAnyArgs([
                 new SonarrApi.CustomFormatSpecificationSchema
                 {
@@ -105,7 +105,7 @@ internal sealed class SonarrV5CustomFormatGatewayTest
         SonarrV5CustomFormatGateway sut
     )
     {
-        api.Schema(default)
+        api.Schema()
             .ReturnsForAnyArgs([
                 new SonarrApi.CustomFormatSpecificationSchema
                 {
@@ -114,7 +114,7 @@ internal sealed class SonarrV5CustomFormatGatewayTest
                     InfoLink = "https://wiki.example/cf",
                 },
             ]);
-        api.CustomformatPost(default!, default)
+        api.CustomformatPost(default!)
             .ReturnsForAnyArgs(
                 new SonarrApi.CustomFormatResource
                 {
