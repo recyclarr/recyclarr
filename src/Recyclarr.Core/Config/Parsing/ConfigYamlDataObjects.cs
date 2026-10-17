@@ -6,7 +6,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Parsing;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityScoreConfigYaml
 {
     public string? TrashId { get; init; }
@@ -14,7 +13,6 @@ public record QualityScoreConfigYaml
     public int? Score { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatConfigYaml
 {
     public IReadOnlyCollection<string>? TrashIds { get; init; }
@@ -22,14 +20,12 @@ public record CustomFormatConfigYaml
     public IReadOnlyCollection<QualityScoreConfigYaml>? AssignScoresTo { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CfGroupAssignScoresToConfigYaml
 {
     public string? TrashId { get; init; }
     public string? Name { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatGroupConfigYaml
 {
     public string? TrashId { get; init; }
@@ -39,14 +35,12 @@ public record CustomFormatGroupConfigYaml
     public IReadOnlyCollection<string>? Exclude { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatGroupsConfigYaml
 {
     public IReadOnlyCollection<string>? Skip { get; init; }
     public IReadOnlyCollection<CustomFormatGroupConfigYaml>? Add { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeItemConfigYaml
 {
     public string? Name { get; init; }
@@ -55,7 +49,6 @@ public record QualitySizeItemConfigYaml
     public string? Preferred { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeConfigYaml
 {
     public string? Type { get; init; }
@@ -63,7 +56,6 @@ public record QualitySizeConfigYaml
     public IReadOnlyCollection<QualitySizeItemConfigYaml>? Qualities { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileFormatUpgradeYaml
 {
     public bool? Allowed { get; init; }
@@ -71,7 +63,6 @@ public record QualityProfileFormatUpgradeYaml
     public string? UntilQuality { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileQualityConfigYaml
 {
     public string? Name { get; init; }
@@ -79,7 +70,6 @@ public record QualityProfileQualityConfigYaml
     public IReadOnlyCollection<string>? Qualities { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ResetUnmatchedScoresConfigYaml
 {
     public bool? Enabled { get; init; }
@@ -87,7 +77,6 @@ public record ResetUnmatchedScoresConfigYaml
     public IReadOnlyCollection<string>? ExceptPatterns { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileConfigYaml
 {
     public string? TrashId { get; init; }
@@ -102,7 +91,6 @@ public record QualityProfileConfigYaml
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record MediaManagementConfigYaml
 {
     public string? PropersAndRepacks { get; init; }
@@ -125,7 +113,6 @@ public record ServiceConfigYaml
     public MediaManagementConfigYaml? MediaManagement { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record RootConfigYaml
 {
     public IReadOnlyDictionary<string, RadarrConfigYaml?>? Radarr { get; set; }

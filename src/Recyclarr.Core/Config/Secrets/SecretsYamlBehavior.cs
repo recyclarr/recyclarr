@@ -3,7 +3,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Secrets;
 
-[UsedImplicitly]
 public class SecretsYamlBehavior(ISecretsProvider secretsProvider) : IYamlBehavior
 {
     public void Setup(DeserializerBuilder builder)

@@ -32,7 +32,6 @@ internal enum QualityProfileScoreReason
     Reset,
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileIdentityResponse
 {
     public required QualityProfileIdentityKind Kind { get; init; }
@@ -41,7 +40,6 @@ internal sealed record QualityProfileIdentityResponse
 }
 
 /// <summary>A quality or quality group in a profile, in profile order.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileLayoutResponse
 {
     public required QualityProfileLayoutKind Kind { get; init; }
@@ -52,7 +50,6 @@ internal sealed record QualityProfileLayoutResponse
     public IReadOnlyList<string>? Qualities { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileScoreResponse
 {
     public required string Name { get; init; }
@@ -66,7 +63,6 @@ internal sealed record QualityProfileScoreResponse
 /// The profile fields Recyclarr sets when it creates a profile. A null field means neither the
 /// configuration nor the guide gives a value.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal record QualityProfileControlledStateResponse
 {
     public required string Name { get; init; }
@@ -90,7 +86,6 @@ internal record QualityProfileControlledStateResponse
     public required IReadOnlyList<QualityProfileScoreResponse> CustomFormatScores { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrQualityProfileControlledStateResponse
     : QualityProfileControlledStateResponse
 {
@@ -98,7 +93,6 @@ internal sealed record RadarrQualityProfileControlledStateResponse
     public required string? Language { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrQualityProfileControlledStateResponse
     : QualityProfileControlledStateResponse
 {
@@ -109,19 +103,16 @@ internal sealed record SonarrQualityProfileControlledStateResponse
     public required IReadOnlyList<QualitySizeResponse> QualitySizes { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrQualityProfileCreateResponse(
     QualityProfileIdentityResponse Identity,
     SonarrQualityProfileControlledStateResponse State
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrQualityProfileCreateResponse(
     QualityProfileIdentityResponse Identity,
     RadarrQualityProfileControlledStateResponse State
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileScoreChangeResponse
 {
     public required string Name { get; init; }
@@ -130,7 +121,6 @@ internal sealed record QualityProfileScoreChangeResponse
     public string? TrashId { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal record QualityProfileUpdateResponse
 {
     public required QualityProfileIdentityResponse Identity { get; init; }
@@ -146,13 +136,11 @@ internal record QualityProfileUpdateResponse
     public IReadOnlyList<QualityProfileScoreChangeResponse> CustomFormatScores { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
 {
     public ValueChangeResponse<string?>? Language { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
 {
     /// <summary>
@@ -162,27 +150,22 @@ internal sealed record SonarrQualityProfileUpdateResponse : QualityProfileUpdate
     public IReadOnlyList<QualitySizeUpdateResponse> QualitySizes { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileQualitySizeOutcomesResponse(
     QualityProfileIdentityResponse Identity,
     QualitySizeOutcomesResponse Outcomes
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileIdentityOutcomeResponse(
     QualityProfileIdentityResponse Identity
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileNamedOutcomeResponse(string Name);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileAdoptedResponse(
     QualityProfileIdentityResponse Identity,
     int ServiceId
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileMinimumScoreResponse(
     QualityProfileIdentityResponse Identity,
     int MinimumScore,
@@ -190,48 +173,40 @@ internal sealed record QualityProfileMinimumScoreResponse(
     int MaximumScore
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileQualityNameResponse(
     QualityProfileIdentityResponse Identity,
     string QualityName
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileNamesResponse(
     QualityProfileIdentityResponse Identity,
     IReadOnlyList<string> Names
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileResetReferencesResponse(
     QualityProfileIdentityResponse Identity,
     IReadOnlyList<string> Names,
     IReadOnlyList<string> Patterns
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileRenameBlockedResponse(
     QualityProfileIdentityResponse Identity,
     NamedServiceResourceResponse Conflict
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileAmbiguousMatchResponse(
     QualityProfileIdentityResponse Identity,
     IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileFormatReferenceResponse(string Name, string TrashId);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileScoreCollisionResponse(
     QualityProfileFormatReferenceResponse Existing,
     QualityProfileFormatReferenceResponse Rejected,
     int ServiceId
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileOutcomesResponse
 {
     /// <summary>Configured trash IDs that match no guide quality profile.</summary>
@@ -330,7 +305,6 @@ internal sealed record QualityProfileOutcomesResponse
 /// Fields both services' quality profile results share. Each service's pipelines response names
 /// its concrete type, so no discriminator is needed (ADR-023).
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal abstract record QualityProfilePipelineResponse
 {
     public required PipelineStatus Status { get; init; }
@@ -340,14 +314,12 @@ internal abstract record QualityProfilePipelineResponse
     public BlockingPipeline? BlockedBy { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
 {
     public required IReadOnlyList<SonarrQualityProfileCreateResponse> Creates { get; init; }
     public required IReadOnlyList<SonarrQualityProfileUpdateResponse> Updates { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
 {
     public required IReadOnlyList<RadarrQualityProfileCreateResponse> Creates { get; init; }

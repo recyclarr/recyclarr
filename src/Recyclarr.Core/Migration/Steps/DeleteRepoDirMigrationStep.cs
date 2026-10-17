@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Migration.Steps;
 
-[UsedImplicitly]
 [MigrationOrder(1)]
 internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {

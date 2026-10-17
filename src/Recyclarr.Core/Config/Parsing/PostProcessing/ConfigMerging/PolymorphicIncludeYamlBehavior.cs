@@ -4,7 +4,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-[UsedImplicitly]
 [ForYamlFileTypes(YamlFileType.Config)]
 public class PolymorphicIncludeYamlBehavior : IYamlBehavior
 {

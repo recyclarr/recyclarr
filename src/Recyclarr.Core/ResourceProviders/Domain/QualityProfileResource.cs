@@ -4,7 +4,6 @@ using Recyclarr.SyncState;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileQualityItem
 {
     public string Name { get; init; } = "";
@@ -12,7 +11,6 @@ public record QualityProfileQualityItem
     public IReadOnlyCollection<string> Items { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 [SuppressMessage(
     "Design",
     "CA1056:URI properties should not be strings",
@@ -56,11 +54,9 @@ public record QualityProfileResource : IGuideResource
 /// A Radarr guide profile. Only Radarr profiles have a language (ADR-023); Sonarr guide JSON may
 /// still contain one, and it is ignored.
 /// </summary>
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record RadarrQualityProfileResource : QualityProfileResource
 {
     public string Language { get; init; } = "";
 }
 
-[UsedImplicitly]
 public record SonarrQualityProfileResource : QualityProfileResource;

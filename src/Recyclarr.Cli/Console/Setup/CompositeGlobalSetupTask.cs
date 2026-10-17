@@ -2,7 +2,6 @@ using Recyclarr.Cli.Console.Commands;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-[UsedImplicitly]
 internal class CompositeGlobalSetupTask(IOrderedEnumerable<Lazy<IGlobalSetupTask>> tasks)
     : IGlobalSetupTask
 {

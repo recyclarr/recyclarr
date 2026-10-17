@@ -4,7 +4,6 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Server.Features.Sync.CreateJob;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CreateSyncJobRequest
 {
     /// <summary>
@@ -25,7 +24,6 @@ internal sealed record CreateSyncJobRequest
     public bool Preview { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CreateSyncJobResponse
 {
     public required Guid Id { get; init; }
@@ -40,7 +38,6 @@ internal sealed record CreateSyncJobResponse
 /// Problem Details for a rejected sync request. A request that names unknown instances also
 /// lists the unknown and the available instance names.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed class CreateSyncJobProblemDetails : HttpValidationProblemDetails
 {
     /// <summary>Requested instance names that no configured instance has.</summary>
@@ -50,7 +47,6 @@ internal sealed class CreateSyncJobProblemDetails : HttpValidationProblemDetails
     public IReadOnlyList<string>? AvailableInstances { get; init; }
 }
 
-[UsedImplicitly]
 internal sealed class Validator : Validator<CreateSyncJobRequest>
 {
     public Validator()

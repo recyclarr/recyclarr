@@ -8,7 +8,6 @@ internal class ListCommandSettings : BaseCommandSettings
 {
     [CommandOption("--raw")]
     [Description("Output in TSV format for scripting (mutually exclusive with --log)")]
-    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     public bool Raw { get; init; }
 
     public override ValidationResult Validate()

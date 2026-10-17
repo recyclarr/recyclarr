@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Migration.Steps;
 
-[UsedImplicitly]
 [MigrationOrder(2)]
 internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
 {

@@ -1,6 +1,5 @@
 namespace Recyclarr.ResourceProviders.Domain;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileGroupResource
 {
     public string Name { get; init; } = "";
@@ -8,8 +7,6 @@ public record QualityProfileGroupResource
         new Dictionary<string, string>();
 }
 
-[UsedImplicitly]
 public record RadarrQualityProfileGroupResource : QualityProfileGroupResource;
 
-[UsedImplicitly]
 public record SonarrQualityProfileGroupResource : QualityProfileGroupResource;

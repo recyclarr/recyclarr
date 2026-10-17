@@ -15,7 +15,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } = [];
     public CustomFormatGroupsConfig CustomFormatGroups { get; init; } = new();
 
-    public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
+    public bool DeleteOldCustomFormats { get; init; }
 
     public MediaManagementConfig MediaManagement { get; init; } = new();
 
@@ -24,7 +24,6 @@ public abstract record ServiceConfiguration : IServiceConfiguration
     public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatConfig
 {
     public ICollection<string> TrashIds { get; init; } = [];
@@ -32,7 +31,6 @@ public record CustomFormatConfig
     public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record AssignScoresToConfig
 {
     public string? TrashId { get; init; }
@@ -40,7 +38,6 @@ public record AssignScoresToConfig
     public int? Score { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatGroupConfig
 {
     public string TrashId { get; init; } = "";
@@ -50,14 +47,12 @@ public record CustomFormatGroupConfig
     public ICollection<string> Exclude { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatGroupsConfig
 {
     public ICollection<string> Skip { get; init; } = [];
     public ICollection<CustomFormatGroupConfig> Add { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityDefinitionItemConfig
 {
     public string Name { get; init; } = "";
@@ -66,7 +61,6 @@ public record QualityDefinitionItemConfig
     public QualitySizeValue? Preferred { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityDefinitionConfig
 {
     public string Type { get; init; } = "";
@@ -74,7 +68,6 @@ public record QualityDefinitionConfig
     public IReadOnlyCollection<QualityDefinitionItemConfig> Qualities { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileQualityConfig
 {
     public string Name { get; init; } = "";

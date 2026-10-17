@@ -4,7 +4,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.EnvironmentVariables;
 
-[UsedImplicitly]
 public class EnvironmentVariablesYamlBehavior(IEnvironment environment) : IYamlBehavior
 {
     public void Setup(DeserializerBuilder builder)
