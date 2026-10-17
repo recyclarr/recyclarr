@@ -1,10 +1,10 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
 
-$recyclarrYaml = "$PSScriptRoot/../docker-compose.yml"
+$recyclarrYaml = "$PSScriptRoot/../compose.yaml"
 $configDir = $env:RECYCLARR_CONFIG_DIR
 if (-not $configDir) {
-    throw "RECYCLARR_CONFIG_DIR is not set (source: mise.toml)"
+    throw "RECYCLARR_CONFIG_DIR is not set (set it with mise)"
 }
 $env:DOCKER_UID = $(id -u)
 $env:DOCKER_GID = $(id -g)
