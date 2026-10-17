@@ -5,6 +5,7 @@ using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.TestLibrary;
+using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Refit;
@@ -18,7 +19,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     public async Task Results_are_unavailable_while_job_is_running()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), []);
+        var job = store.CreateManualJob([]);
         store.Update(job.Id, x => x.Status = SyncJobStatus.Running);
 
         using var client = CreateClient();
@@ -34,7 +35,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
         var settings = new ServerSyncSettings(null, [], Preview: false);
-        store.Create(settings, []);
+        store.CreateManualJob([], settings);
         var skipped = store.CreateScheduled(settings, [], DateTimeOffset.UnixEpoch);
 
         using var client = CreateClient();
@@ -365,10 +366,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private SyncJob CreateCompletedJob(SyncRunResult result)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(
-            new ServerSyncSettings(null, [], Preview: false),
-            result.Instances.Select(x => x.InstanceName).ToList()
-        );
+        var job = store.CreateManualJob(result.Instances.Select(x => x.InstanceName).ToList());
         store.Update(job.Id, x => x.Status = SyncJobStatus.Running);
         Services.GetRequiredService<SyncJobFinalizer>().Complete(job.Id, result);
         return job;

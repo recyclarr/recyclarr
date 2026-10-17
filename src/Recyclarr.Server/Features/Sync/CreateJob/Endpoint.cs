@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FastEndpoints;
 using Recyclarr.Server.Sync;
 using Recyclarr.TrashGuide;
@@ -73,7 +74,11 @@ internal sealed class Endpoint(
             return;
         }
 
-        var job = store.Create(settings, [.. selected.Select(x => x.InstanceName)]);
+        var job = store.Create(
+            settings,
+            [.. selected.Select(x => x.InstanceName)],
+            Activity.Current?.Id
+        );
         await launcher.Value.LaunchAsync(job.Id);
 
         Response = new CreateSyncJobResponse

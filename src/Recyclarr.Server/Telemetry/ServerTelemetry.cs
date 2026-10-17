@@ -27,7 +27,8 @@ internal static class ServerTelemetry
     public static string ServiceVersion { get; } =
         typeof(ServerTelemetry)
             .Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion ?? "unknown";
+            ?.InformationalVersion
+        ?? "unknown";
 
     public static bool ExportsOtlp(IConfiguration configuration)
     {

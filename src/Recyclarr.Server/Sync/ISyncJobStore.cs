@@ -6,7 +6,11 @@ namespace Recyclarr.Server.Sync;
 /// </summary>
 internal interface ISyncJobStore
 {
-    SyncJob Create(ServerSyncSettings request, IReadOnlyList<string> instanceNames);
+    SyncJob Create(
+        ServerSyncSettings request,
+        IReadOnlyList<string> instanceNames,
+        string? traceParent
+    );
 
     /// <summary>
     /// Creates the job for one schedule occurrence. When another job is pending or running, the

@@ -20,6 +20,12 @@ internal sealed class SyncJob
     // For a skipped scheduled occurrence: the active job that caused the skip.
     public JobId? SkippedBy { get; init; }
 
+    /// <summary>
+    /// W3C <c>traceparent</c> of the request that created the job; null for scheduled jobs. The
+    /// job runs in its own trace, which links back to this context.
+    /// </summary>
+    public string? TraceParent { get; init; }
+
     public required SyncJobStatus Status { get; set; }
     public DateTimeOffset? StartedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }

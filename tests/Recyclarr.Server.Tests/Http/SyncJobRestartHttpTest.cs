@@ -7,6 +7,7 @@ using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.TestLibrary;
+using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
 using GeneratedProgressStatus = Recyclarr.Client.V1.InstanceProgressStatusResponse;
@@ -44,7 +45,7 @@ internal sealed class SyncJobRestartHttpTest
         {
             using var _ = first.CreateClient();
             var store = first.Services.GetRequiredService<ISyncJobStore>();
-            id = store.Create(new ServerSyncSettings(null, [], Preview: false), ["movies"]).Id;
+            id = store.CreateManualJob(["movies"]).Id;
             store.Update(id, job => job.Status = SyncJobStatus.Running);
             first
                 .Services.GetRequiredService<SyncJobFinalizer>()
@@ -82,12 +83,7 @@ internal sealed class SyncJobRestartHttpTest
         {
             using var _ = first.CreateClient();
             var store = first.Services.GetRequiredService<ISyncJobStore>();
-            id = store
-                .Create(
-                    new ServerSyncSettings(null, [], Preview: false),
-                    ["finished", "running", "waiting"]
-                )
-                .Id;
+            id = store.CreateManualJob(["finished", "running", "waiting"]).Id;
             var finished = SyncJobResultsResponseMapper.MapInstance(
                 new SyncInstanceResult("finished", SupportedServices.Radarr, [])
             );
