@@ -6,8 +6,9 @@
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
 [![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
-Automatically synchronizes recommended settings from the [TRaSH guides](https://trash-guides.info/)
-to your Sonarr/Radarr instances, on a schedule or on demand from the command line.
+Recyclarr is a configuration sync tool for Sonarr and Radarr. It applies the recommended settings
+from the [TRaSH Guides](https://trash-guides.info/) to your instances and keeps them current as the
+guides change, so you don't have to copy settings by hand.
 
 ## Features
 
