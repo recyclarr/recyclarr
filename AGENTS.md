@@ -1,6 +1,7 @@
 # AGENTS
 
-.NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr. Mainline branch: `master`.
+.NET HTTP server and CLI client for synchronizing TRaSH Guides to Sonarr/Radarr. Mainline branch:
+`master`.
 
 ## Linear
 
@@ -42,13 +43,13 @@ parallel with the action arrives too late.
 
 ## Project Context
 
-Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `TrashGuide/`,
-`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (hand-written
-Refit contracts; model only used fields, no enums, every DTO derives from `ExtensibleResource`; see
-ADR-006). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
-typed client from the server's OpenAPI spec) and `Recyclarr.Platform` (process and environment
-primitives only, also referenced by Core; ADR-020). The CLI MUST NOT reference Core. Solution is
-SLNX (`Recyclarr.slnx`), not SLN.
+Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `Pipelines/`,
+`Sync/`, `TrashGuide/`, `ServarrApi/`, `Config/`, `SyncState/` folders) ->
+`Recyclarr.Api.{Sonarr,Radarr}` (hand-written Refit contracts; model only used fields, no enums,
+every DTO derives from `ExtensibleResource`; see ADR-006). `Recyclarr.Cli` (HTTP client of the
+server) -> `Recyclarr.Client` (Refitter-generated typed client from the server's OpenAPI spec) and
+`Recyclarr.Platform` (process and environment primitives only, also referenced by Core; ADR-020).
+The CLI MUST NOT reference Core. Solution is SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
@@ -168,10 +169,10 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 ## YAML Schema Maintenance
 
 The JSON schemas in `schemas/` are the single source of truth for the structure and validation of
-`recyclarr.yml` and `settings.yml`. When adding, removing, or renaming properties, changing types,
-defaults, or constraints, or modifying enum values, you MUST update the relevant schema in
-`schemas/` alongside the code change. Consult the schemas directly when you need to understand or
-generate valid YAML; there is no separate reference document to keep in sync.
+`recyclarr.yml`, `settings.yml`, and `cli.yml`. When adding, removing, or renaming properties,
+changing types, defaults, or constraints, or modifying enum values, you MUST update the relevant
+schema in `schemas/` alongside the code change. Consult the schemas directly when you need to
+understand or generate valid YAML; there is no separate reference document to keep in sync.
 
 ## Sync Philosophy
 
@@ -188,10 +189,8 @@ All sync operations must be deterministic.
 - Failure cascades to skip dependent operations (CF failure → QP skipped)
 - Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
 
-**Diagnostics:**
-
-- `AddError()`: Issues that cause items or operations to be skipped
-- `AddWarning()`: Deprecations and informational messages only
+Pipelines report skips and failures as typed outcomes and statuses, never diagnostic messages
+(ADR-015).
 
 ## YAML Error Handling
 
@@ -209,36 +208,19 @@ YAML names. Handlers that need property context MUST operate inside the pipeline
 
 ## Console and Logging Output
 
-The `--log` flag controls which output channel is visible to users:
-
-- `--log` **omitted**: IAnsiConsole -> console (visible); ILogger -> file only
-- `--log [level]`: IAnsiConsole -> void (hidden); ILogger -> file + console
-
-Output channel usage:
-
-- `IAnsiConsole`: User-facing output (progress, results, prompts). Visible by default.
-- `ILogger`: Diagnostic information. Always written to log files; visible on console only with
-  --log.
-- NEVER use `Console.WriteLine`
-
-### Dual Output Pattern
-
-User-visible information must go to both console and log:
-
-- Sync command: Diagnostics flow through a publisher/subscriber system that handles both channels
-  automatically. Use `AddError()`/`AddWarning()` on the publisher; the framework routes to console
-  and log.
-- Other commands: Must output to both channels manually:
+- Server: logs only through `ILogger` to its log files. Deprecations are logged as warnings at
+  startup (ADR-019).
+- CLI: writes no log files (ADR-022). Without `--log`, `IAnsiConsole` shows output and `ILogger` is
+  silent; with `--log [level]`, `ILogger` writes to the console and `IAnsiConsole` is hidden. CLI
+  commands MUST send user-visible information to both channels:
 
 ```csharp
-// User-visible information
 console.WriteLine(message);
 log.Information(message);
-
-// Deprecations
-console.MarkupLine("[darkorange bold][[DEPRECATED]][/] " + message);
-log.Warning(message);
 ```
+
+- NEVER use `Console.WriteLine`. Exception: the ephemeral server's `READY:{port}` stdout handshake
+  (ADR-010).
 
 ## Repository Structure
 
@@ -253,7 +235,8 @@ log.Warning(message);
     - `architecture/`: Technical implementation decisions (ADRs)
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
-- `schemas/`: JSON Schemas for `recyclarr.yml` and `settings.yml`
+- `http/`: httpyac requests against the server API
+- `schemas/`: JSON Schemas for `recyclarr.yml`, `settings.yml` (server), and `cli.yml` (CLI)
 - `Directory.Packages.props`: NuGet central package management
 
 ## Tooling Requirements
@@ -356,10 +339,10 @@ A scope names a durable boundary a user or maintainer would filter the log by, n
 never a directory. MUST use one of these or omit the scope entirely:
 
 - `deps` -> dependency updates (Renovate)
-- `sync` -> `src/Recyclarr.Cli/Pipelines/*`, sync orchestration
+- `sync` -> `src/Recyclarr.Core/{Pipelines,Sync}/*`, sync orchestration
 - `config` -> `src/Recyclarr.Core/Config/*`
 - `yaml` -> `schemas/*`
-- `cli` -> `src/Recyclarr.Cli/*` outside `Pipelines/`
+- `cli` -> `src/Recyclarr.Cli/*`
 - `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`, `src/Recyclarr.Core/ServarrApi/*`
 - `server` -> `src/Recyclarr.Server/*`
 - `client` -> `src/Recyclarr.Client/*`
