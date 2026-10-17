@@ -28,20 +28,28 @@ $startInfo.ArgumentList.Add("--urls=http://127.0.0.1:0")
 $startInfo.RedirectStandardOutput = $true
 $startInfo.RedirectStandardError = $true
 $startInfo.UseShellExecute = $false
+# The server refuses to start without an API key; any value satisfies startup.
+$startInfo.Environment["RECYCLARR_API_KEY"] = "smoke-test"
 
 $process = [System.Diagnostics.Process]::Start($startInfo)
 $deadline = [DateTime]::UtcNow.AddSeconds(30)
+# The server logs to stdout, so keep consumed lines to report why it exited.
+$output = [System.Collections.Generic.List[string]]::new()
 
 try {
     while ([DateTime]::UtcNow -lt $deadline) {
         if ($process.HasExited) {
-            $errorOutput = $process.StandardError.ReadToEnd()
-            throw "Recyclarr server exited before startup: $errorOutput"
+            $output.Add($process.StandardOutput.ReadToEnd())
+            $output.Add($process.StandardError.ReadToEnd())
+            throw "Recyclarr server exited before startup:`n$($output -join "`n")"
         }
 
         $readTask = $process.StandardOutput.ReadLineAsync()
         $timeout = $deadline - [DateTime]::UtcNow
         $line = $readTask.WaitAsync($timeout).GetAwaiter().GetResult()
+        if ($null -ne $line) {
+            $output.Add($line)
+        }
 
         if ($line -like "READY:*") {
             "Recyclarr server started successfully: $line"
