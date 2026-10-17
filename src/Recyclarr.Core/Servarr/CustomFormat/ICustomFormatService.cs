@@ -2,8 +2,8 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Servarr.CustomFormat;
 
-// Passthrough exception: uses CustomFormatResource directly as the domain type
-// instead of a separate domain/DTO split. See ADR-007 for rationale.
+// Uses the guide resource type as the domain type. CF sync is one-way (the guide is the complete
+// desired state), so gateways map generated DTOs to it without stashing.
 public interface ICustomFormatService
 {
     Task<IReadOnlyList<CustomFormatResource>> GetCustomFormats(CancellationToken ct);

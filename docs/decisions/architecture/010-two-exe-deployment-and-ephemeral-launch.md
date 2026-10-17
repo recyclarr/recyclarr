@@ -1,66 +1,44 @@
 # ADR-010: Two-exe deployment and ephemeral launch
 
-- **Status:** Accepted
-- **Date:** 2026-05-20
+- **Scope:** `src/Recyclarr.Cli/Server/`, `src/Recyclarr.Server/Program.cs`, lifeline monitoring,
+  packaging
 
-## Context and Problem Statement
+## Context
 
-Recyclarr needs an HTTP server for Kubernetes deployments and as the transport layer between the CLI
-and the sync engine (per ADR-008). ADR-008 established the two-layer project structure (Cli + Core,
-Server + Core) and the strangler fig migration, but left the relationship between the CLI and server
-binaries ambiguous: it shows "Recyclarr.Server (exe -- thin adapter, future)" without specifying
-whether the CLI embeds the server in-process or treats it as a separate process.
+The CLI is an HTTP client of the server. It must work with no server running and against a
+persistent server (Kubernetes, Docker). On Linux, macOS, and Windows, a server that the CLI starts
+must not outlive it, even when the CLI crashes. ASP.NET Core types must not reach the CLI.
 
-The CLI must work in two modes: standalone (no server running) and against a persistent server
-(Kubernetes, Docker). The question is how the CLI gets a server when one isn't already running.
+## Decision
 
-## Decision Drivers
+The CLI and the server are separate executables. The CLI never links the server; its build-only
+project reference (`ReferenceOutputAssembly="false"`) only places the server binary beside it. The
+CLI finds the server binary in its own directory by a build-time name.
 
-- Cross-platform: Linux, macOS, Windows (all .NET 10 targets)
-- No ASP.NET Core types should leak into the CLI project
-- The CLI eventually becomes a pure HTTP client (Phase 3), severing its Core dependency
-- Orphan prevention: if the CLI crashes, the server must not linger
-- Simple MVP first; complex models (idle timeout, shared daemon) only if needed later
+### Launch models
 
-## Considered Options
+**Centralized**: a server address is configured (`cli.yml` or `RECYCLARR_SERVER_URL`, ADR-021). The
+CLI connects to it and manages no process. The Docker image sets `RECYCLARR_SERVER_URL` to its own
+server, so `docker exec` commands never start an ephemeral server.
 
-1. Embed server in the CLI binary (single exe, server as library)
-2. Two separate executables with attached ephemeral launch (stdin pipe lifeline)
-3. Two separate executables with detached ephemeral launch (idle timeout daemon)
+**Ephemeral (attached)**: no address is configured. For each command:
 
-## Decision Outcome
+1. The CLI starts `recyclarr-server --urls=http://127.0.0.1:0 --parent-pid={ownPid}
+   --ephemeral=true` with stdin, stdout, and stderr redirected. The literal loopback address is
+   required because Kestrel rejects a dynamic port on `localhost`.
+2. The server binds, then writes `READY:{port}` to stdout.
+3. The CLI reads that line and uses the port for the rest of the command.
+4. When the CLI exits or crashes, the lifeline stops the server.
 
-Chosen option: "Two separate executables with attached ephemeral launch", because it keeps the CLI
-and server fully independent at build time while providing a simple, cross-platform mechanism for
-the CLI to manage the server's lifecycle when no persistent server exists.
-
-### Two launch models
-
-**Centralized**: User configures a server address in `cli.yml` (ADR-021). CLI commands connect to
-that address via the generated HTTP client (REC-151). No process management. This is the Kubernetes
-/ Docker / long-lived deployment model. The Docker image sets `RECYCLARR_SERVER_URL` to its own
-server, so `docker exec` CLI commands never start an ephemeral server.
-
-**Ephemeral (attached)**: No server configured. The CLI spawns the server binary as a child process,
-uses it for the duration of the command, and the server dies with the CLI. The flow:
-
-1. CLI starts `recyclarr-server --parent-pid={ownPid} --ephemeral=true` with redirected stdin,
-   stdout, and stderr
-2. Server binds `localhost:0` (OS assigns port), writes `READY:{port}` to stdout
-3. CLI reads the handshake line, stores the base address for the generated client
-4. CLI makes HTTP calls for the duration of the command
-5. CLI exits (or crashes) -- lifeline monitor detects it -- graceful shutdown
-
-The stdout handshake replaces health-check polling for readiness detection. The `READY` line means
-the server is listening; no HTTP round-trip needed. An ephemeral server writes nothing else to
-stdout and only error log events to stderr, so a server that exits before `READY` (for example,
-invalid configuration) can tell the CLI why. Its log files hold everything else; the CLI does not
-forward server logs.
+The `READY` line replaces health-check polling. An ephemeral server writes nothing else to stdout
+and only error log events to stderr, so a server that exits before `READY` (for example, invalid
+configuration) can tell the CLI why. The CLI does not forward server logs; the server's own log
+files hold them.
 
 ### Lifeline and mode are separate flags
 
 `--parent-pid={pid}` makes the server stop when the process that launched it ends.
-`--ephemeral=true` selects ephemeral mode: no durable state on disk and no sync schedule. They vary
+`--ephemeral=true` selects ephemeral mode: an in-memory database and no sync schedule. They vary
 independently:
 
 | Launcher                         | `--parent-pid` | `--ephemeral` |
@@ -69,71 +47,39 @@ independently:
 | `recyclarr serve`                | yes            | no            |
 | Docker, systemd, direct launch   | no             | no            |
 
-`recyclarr serve` is a foreground wrapper around a persistent server. Without the lifeline, ending
-the CLI any way other than Ctrl+C (SIGTERM, a crash, a `dotnet watch` restart) left the server
-running with no parent. Without `--parent-pid` (Docker, systemd), no monitoring runs and the server
-stays up until SIGTERM. This avoids false shutdowns when stdin is `/dev/null` or a non-TTY pipe in
-container environments.
+`recyclarr serve` is a foreground wrapper around a persistent server; the lifeline stops that server
+when the CLI ends any way other than Ctrl+C (SIGTERM, a crash, a `dotnet watch` restart). Without
+`--parent-pid` (Docker, systemd), no monitoring runs and the server stays up until SIGTERM, so a
+`/dev/null` or non-TTY stdin in a container never causes a false shutdown.
 
-When the flag is present, the server runs two concurrent watchdogs (belt-and-suspenders):
+With the flag, the server runs two watchdogs; either one calls
+`IHostApplicationLifetime.StopApplication()`:
 
-- **Stdin EOF**: the parent holds the child's stdin pipe open. When the parent exits (cleanly or via
-  crash), the OS closes the pipe and the server reads EOF.
-- **Parent PID polling**: the server polls `Process.GetProcessById(parentPid)` every 2 seconds. If
-  the parent no longer exists, the server shuts down.
+- **Stdin EOF**: the parent holds the child's stdin pipe open; the OS closes it when the parent
+  exits or crashes.
+- **Parent PID polling**: every 2 seconds, for cases where the pipe does not close cleanly.
 
-Either watchdog firing triggers `IHostApplicationLifetime.StopApplication()`. The stdin pipe handles
-the common case (parent exits normally or crashes); PID polling covers edge cases where the pipe
-doesn't close cleanly.
+MUST NOT infer the lifeline from `Console.IsInputRedirected`: it gives false positives in Docker
+without `-t`, Git Bash on Windows, and CI runners. The explicit flag follows LSP servers
+(`--clientProcessId`) and HashiCorp go-plugin.
 
-The `--parent-pid` pattern follows LSP servers (`--clientProcessId`) and HashiCorp go-plugin (env
-var gate). `Console.IsInputRedirected` was rejected as unreliable: false positives in Docker (no
-`-t`), Git Bash on Windows, and CI runners that redirect stdin.
+## Rejected Options
 
-### Why not embedded (option 1)
+- Server embedded in the CLI as a library: puts ASP.NET Core types or a wrapper abstraction into
+  the CLI.
+- Detached ephemeral server with an idle timeout, shared by rapid invocations: needs port
+  discovery, stale-process detection, idle tracking, and per-platform detach semantics to avoid a
+  cold start that has not proven to matter. Revisit if cold start becomes a measured problem; the
+  handshake and HTTP interface would not change.
 
-Embedding the server as a library (`Recyclarr.Server` as a lib referenced by the CLI) creates a
-build-time dependency from CLI to Server. The CLI project would need
-`FrameworkReference Include="Microsoft.AspNetCore.App"` or a wrapper abstraction to hide ASP.NET
-Core types. This dependency gets removed in Phase 3 anyway when the CLI becomes a pure HTTP client.
-Separate exes from day one avoids both the temporary coupling and the later decoupling work.
+## Consequences
 
-### Why not detached with idle timeout (option 3)
+- The two binaries ship together (packages, Docker image, CI artifacts).
+- Every ephemeral command pays a server cold start.
 
-Detached ephemeral (server outlives the CLI, self-terminates after idle timeout) would let multiple
-rapid CLI invocations share one server. But it adds complexity: port discovery via temp file or
-socket, stale process detection, idle tracking, and platform-varying detach semantics. The benefit
-(avoiding cold start on repeated commands) isn't proven to matter for Recyclarr's usage patterns.
-Start simple; upgrade to detached if cold start becomes a real problem. The stdout handshake and
-HTTP interface don't change, so the migration is additive.
+## History
 
-### Project structure
-
-```text
-Recyclarr.Cli (exe, Microsoft.NET.Sdk)
-    no project ref to Server
-    refs -> Recyclarr.Core [today; drops in Phase 3]
-
-Recyclarr.Server (exe, Microsoft.NET.Sdk.Web)
-    refs -> Recyclarr.Core
-```
-
-The CLI discovers the server binary by convention: same directory as the CLI executable. The server
-binary name is a build-time constant in the CLI project.
-
-### Supersedes ADR-008
-
-ADR-008's target structure diagram showed `Recyclarr.Server (exe -- thin adapter, future)` but did
-not specify the launch model or the relationship between the two binaries. This ADR fills that gap.
-ADR-008's project boundary decisions (two-layer, Core as shared library, adapter constraint) remain
-valid and unchanged.
-
-### Consequences
-
-- Good, because CLI and Server are fully independent at build time from day one
-- Good, because the lifeline is opt-in, cross-platform, and handles crash recovery
-- Good, because Phase 3 extraction requires no structural changes to the server
-- Good, because the stdout handshake avoids HTTP polling for readiness
-- Bad, because two binaries must be distributed together (packaging, Docker image, CI artifacts)
-- Bad, because the attached model means cold start on every CLI invocation (acceptable for MVP;
-  detached model is a future option if this matters)
+- 2026-05-20: Separate executables; the CLI launches an attached ephemeral server with a lifeline.
+- 2026-10-08: The Docker image targets its own server over IPv4 through `RECYCLARR_SERVER_URL`.
+- 2026-10-11: `recyclarr serve` uses the lifeline; ephemeral servers stop forwarding logs to the
+  CLI.

@@ -1,30 +1,17 @@
 # ADR-022: The CLI logs only to the console
 
-- **Status:** accepted
-- **Date:** 2026-09-27
+- **Scope:** `src/Recyclarr.Cli/Logging/`, `src/Recyclarr.Cli/Server/HttpTrafficLogHandler.cs`
 
-## Context and Problem Statement
+## Context
 
-The CLI wrote debug and verbose log files and pruned them with the log janitor. As an HTTP client of
-the server, its own log events are few; most of its log files held forwarded server log lines, which
-the server already writes to its own files. The CLI still needs a record of its exchange with the
-server for bug reports, for example when it cannot use a response.
+As an HTTP client of the server, the CLI has few log events of its own; CLI log files mostly
+duplicated server log lines that the server already writes. Bug reports still need the requests and
+responses as the CLI saw them. API client tools such as kubectl and gh write no log files and print
+diagnostics on request.
 
-## Decision Drivers
+## Decision
 
-- Diagnostic output must not duplicate what the server already records
-- Bug reports need the requests and responses as the CLI saw them
-- API client tools such as kubectl and gh write no log files; they print diagnostics on request
-
-## Considered Options
-
-1. Keep CLI log files with their own retention setting
-2. Remove CLI log files and log HTTP traffic to the console under `--log`
-
-## Decision Outcome
-
-Chosen option: "Remove CLI log files", because the console is enough for an HTTP client and the
-server keeps the durable record.
+The CLI MUST NOT write log files; it logs only to the console. The server keeps the durable record.
 
 - Without `--log`, `ILogger` is silent and `IAnsiConsole` carries all user output. An errors-only
   console logger stays active until command setup, so early failures still show.
@@ -33,8 +20,16 @@ server keeps the durable record.
   bodies log at Verbose (`--log verbose`). Headers are never logged, because they carry the API key.
 - `log_janitor` in `settings.yml` applies to server logs only.
 
-### Consequences
+## Rejected Options
 
-- Good, because the CLI has no log directory or retention setting
-- Good, because a user can capture a full exchange with `--log verbose` and a redirect
-- Bad, because a failed CLI run leaves no log unless the user runs it again with `--log`
+- CLI log files with their own retention setting: duplicates the server's record.
+
+## Consequences
+
+- The CLI has no log directory or retention setting.
+- A user captures a full exchange with `--log verbose` and a redirect.
+- A failed CLI run leaves no log unless the user reruns it with `--log`.
+
+## History
+
+- 2026-09-27: Remove CLI log files; log HTTP traffic to the console under `--log`.

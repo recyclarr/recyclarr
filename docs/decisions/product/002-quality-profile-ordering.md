@@ -1,27 +1,26 @@
 # PDR-002: Quality Profile Ordering Inversion
 
-- **Status:** Accepted
-- **Date:** 2025-12-30
-- **Upstream:** [Discord discussion](../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-2-quality-profile-ordering)
+- **Upstream:** [Discord discussion][upstream]
+
+[upstream]: ../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-2-quality-profile-ordering
 
 ## Context
 
-TRaSH Guides quality profile JSON files order quality items bottom-to-top, matching the Sonarr/
-Radarr API response format. This is counterintuitive for human maintainers who expect top-to-bottom
-ordering.
+The Sonarr and Radarr APIs order quality profile items bottom-to-top. Guide maintainers expect
+top-to-bottom, the order the UI shows.
 
 ## Decision
 
-Invert quality ordering in TRaSH Guides JSON files to top-to-bottom (human-readable). Sync tooling
-will reverse the order before sending to APIs.
-
-## Affected Areas
-
-- Config: None
-- Commands: None
-- Migration: Not required - Recyclarr already uses top-to-bottom internally and reverses before API
+Guide quality profile JSON lists qualities top-to-bottom. Recyclarr works top-to-bottom internally
+and its gateways reverse the item order (recursively) after each GET and before each POST or PUT
+(`QualityProfileApiExtensions`). MUST NOT expose API order outside the gateways.
 
 ## Consequences
 
-- TRaSH Guides quality profile JSON becomes easier to maintain
-- No change needed in Recyclarr - already handles ordering internally
+- Config: None
+- Migration: not required
+- Guide quality profile JSON is easier to maintain.
+
+## History
+
+- 2025-12-30: Guide quality profiles switch to top-to-bottom order.

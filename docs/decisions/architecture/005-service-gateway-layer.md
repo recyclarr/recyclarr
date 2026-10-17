@@ -1,94 +1,49 @@
 # ADR-005: Service Gateway Layer for Sonarr/Radarr API Abstraction
 
-- **Status:** Accepted
-- **Date:** 2026-02-26
+- **Scope:** `src/Recyclarr.Core/Servarr/` (ports), `src/Recyclarr.Core/ServarrApi/` (gateways)
 
-## Context and Problem Statement
+## Context
 
-Recyclarr treats Sonarr and Radarr as a single "Servarr" API through a unified abstraction
-(`IServarrRequestBuilder`). This assumption is increasingly inaccurate. Media naming required three
-dispatch mechanisms (enum switch, keyed DI, pattern matching) to handle divergent schemas. Quality
-profiles will need similar workarounds when Radarr language support is added. Each new
-service-specific feature accretes exception handling onto a unified abstraction until the exceptions
-outnumber the rule.
+Sonarr and Radarr share a heritage but their APIs diverge. A single "Servarr" abstraction forced
+dispatch hacks into shared pipeline code for every service-specific feature, and hand-written DTOs
+with `[JsonExtensionData]` hid upstream schema changes: renames and removals produced no compile
+error and silently lost data on PUT.
 
-A secondary concern is the read-modify-write round-trip: current DTOs use `[JsonExtensionData]` to
-capture unknown API fields for lossless PUT operations. This works but makes the DTOs change-blind
--- upstream schema changes (renames, removals) produce no compile errors and cause silent data loss.
+## Decision
 
-## Decision Drivers
+Pipelines talk to services only through ports; each port has one gateway per service API target.
 
-- Sonarr and Radarr APIs share a common heritage but are diverging over time
-- Service-specific features (media naming, Radarr profile languages) should not require dispatch
-  hacks in shared pipeline code
-- The pipeline architecture (fetch, config, transaction, preview, persist) is sound and should be
-  preserved
-- Future migration to generated API clients (Refitter/Refit from OpenAPI specs) requires a clean
-  boundary between service-specific types and domain types
-- Round-trip safety: PUT operations must not silently drop fields the service expects
+- **Port**: a domain interface that speaks only domain types (for example
+  `IQualityProfileService`). Pipeline code injects ports, never API clients.
+- **Gateway**: implements a port for one service API target (for example
+  `SonarrV5QualityProfileGateway`). It owns the generated API client and maps between API DTOs and
+  domain types in private methods. MUST NOT extract the mapping into a separate translator class;
+  it has one caller and is tested through the gateway.
+- **Hydrated resource**: for read-modify-write resources, the gateway stashes each fetched DTO by
+  resource ID, applies domain changes to the stashed DTO on persist, and PUTs the complete object.
+  Domain types carry no `[JsonExtensionData]`.
+- Gateways are registered per lifetime scope (`RegisterServiceGateway`), so stashed state lives for
+  one instance sync and is never shared.
 
-## Considered Options
+ADR-023 owns which fields live on shared versus service-specific types. ADR-028 owns how the API
+target is selected.
 
-1. Introduce a Port + Gateway layer between pipelines and HTTP clients
-2. Continue extending the unified Servarr abstraction with per-feature dispatch
-3. Replace the unified abstraction with fully separate Sonarr/Radarr codepaths (no sharing)
+## Rejected Options
 
-## Decision Outcome
+- Extend the unified Servarr abstraction: exceptions keep accreting in shared code.
+- Separate Sonarr and Radarr codepaths with no sharing: duplicates the pipeline flow that is common.
+- Re-fetch the resource during persist instead of stashing: adds network calls and failure modes
+  for staleness that cannot occur within one sync.
 
-Chosen option: "Port + Gateway layer", because it preserves pipeline sharing for genuinely common
-features while giving service-specific features clean separation.
+## Consequences
 
-The architecture introduces two components per feature:
+- Pipeline code has no service awareness.
+- Upstream API changes surface as compile errors in gateway mappers.
+- Gateways for near-identical schemas (custom formats) are thin mapping code.
+- The stash is implicit state that readers of gateway code must know about.
 
-- **Port**: Domain interface defined in the pipeline/domain layer, speaks only domain types (e.g.
-  `IQualityProfileService`). This is what pipeline phases inject.
-- **Gateway**: Infrastructure class implementing the port for a specific service. Owns the HTTP
-  client, contains to/from-domain mapping as private methods, and manages read-modify-write state
-  (e.g. `SonarrQualityProfileGateway`).
+## History
 
-A separate translator class was considered and rejected. The mapping logic is private to one
-gateway, called from one place, and tested through the gateway's public surface. Extracting it adds
-a file and indirection with no benefit to testability, reuse, or readability.
-
-### Gateway state management
-
-Gateways use the Hydrated Resource pattern: during fetch, the gateway stashes the original service
-DTO in an internal dictionary keyed by resource ID. During persist, the gateway retrieves the
-stashed DTO, applies domain changes via its private mapping methods, and PUTs the complete object
-back. This eliminates the need for `[JsonExtensionData]` on domain types while preserving lossless
-round-trips.
-
-Gateway instances are scoped to one sync operation (`InstancePerLifetimeScope`), matching the
-existing API service lifetime. State is created during fetch, consumed during persist, and discarded
-when the sync completes. No cross-sync state, no shared caches, no concurrency concerns.
-
-The alternative (fetch-in-update: the gateway re-GETs the resource during persist instead of
-stashing it) was rejected because it adds failure modes and network calls to solve a staleness
-problem that does not exist within a single sync operation.
-
-### Shared vs. service-specific pipeline boundary
-
-Superseded by ADR-023, which places fields by service ownership and keeps one operation per
-pipeline.
-
-The litmus test for whether a feature uses a shared pipeline with gateways or gets service-specific
-pipelines: **Is there a meaningful shared domain concept, or just a shared endpoint path?**
-
-- Same resource with service-specific properties: shared pipeline + gateway. The gateway maps
-  service-specific fields into optional properties on the domain type. Example: quality profiles
-  (Radarr adds language; the domain type has nullable `Language`; the Sonarr gateway leaves it
-  null).
-- Different resource concepts behind a shared path: service-specific pipelines. Example: media
-  naming (Sonarr episode naming and Radarr movie naming are unrelated domain concepts that happen to
-  live at `/api/v3/config/naming`).
-
-### Consequences
-
-- Good, because pipeline phases code against domain types with no service awareness
-- Good, because service-specific features get their own pipelines without dispatch hacks
-- Good, because gateways are the natural seam for future Refit/Refitter migration
-- Good, because upstream API changes surface as compile errors in gateway mapping methods, not
-  silent data loss
-- Bad, because gateways for identical schemas (custom formats) are thin pass-through boilerplate
-- Bad, because the stashed DTO dictionary is implicit state that must be understood when reading
-  gateway code
+- 2026-02-26: Introduce ports and per-service gateways with hydrated resources.
+- 2026-02-27: Keep mapping private to the gateway; no translator class.
+- 2026-10-03: Pipeline shape rules move to ADR-023.

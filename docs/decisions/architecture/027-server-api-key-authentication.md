@@ -1,39 +1,20 @@
 # ADR-027: Server API key authentication
 
-- **Status:** accepted
-- **Date:** 2026-10-12
+- **Scope:** `src/Recyclarr.Server` authentication, CLI server connection
 
-## Context and Problem Statement
+## Context
 
-The HTTP server can sync and delete resources in every configured Sonarr and Radarr instance. Before
-this decision, any process that could reach the server could call its API. A persistent server often
-listens on a LAN or in a Kubernetes cluster, and even an ephemeral server listens on a loopback port
-that other local users can reach. The server needs one authentication model that works in both
-modes and that Docker, Docker Compose, and Kubernetes deployments can supply without extra tooling.
+The server can sync and delete resources in every configured Sonarr and Radarr instance. A
+persistent server often listens on a LAN or in a Kubernetes cluster, and an ephemeral server
+listens on a loopback port other local users can reach. Clients are machines (the CLI, schedulers,
+scripts). Kubernetes secret tooling such as External Secrets Operator delivers secrets as
+environment variables, and one secret must serve both the server and a CLI in the same container.
+The ephemeral server must need no user configuration.
 
-## Decision Drivers
+## Decision
 
-- Clients are machines (the CLI, schedulers, scripts); there are no interactive users to log in
-- One secret must serve the server and a CLI that runs in the same container
-- Kubernetes secret tooling such as External Secrets Operator delivers secrets as environment
-  variables
-- A server that starts without protection must not be possible by accident
-- The ephemeral server must stay invisible to users: no key to create or configure
-
-## Considered Options
-
-1. Static key in `Authorization: Bearer`, read by the server only from `RECYCLARR_API_KEY`
-2. Static key in an `X-Api-Key` header, as Sonarr and Radarr use
-3. Static key that the server also reads from `settings.yml`
-4. Key that the server generates and writes to disk when none is configured
-5. OAuth2 client credentials
-
-## Decision Outcome
-
-Chosen option: "Static key in `Authorization: Bearer`, read only from `RECYCLARR_API_KEY`", because
-it is the standard header for credentials and one environment variable serves every deployment.
-
-### Rules
+Every `/api` request carries a static key in `Authorization: Bearer`; the server reads the key only
+from `RECYCLARR_API_KEY`.
 
 - Clients send `Authorization: Bearer <key>` (RFC 6750). The key is opaque, not a JWT. The server
   compares it in constant time.
@@ -51,7 +32,7 @@ it is the standard header for credentials and one environment variable serves ev
 - For an ephemeral server, the CLI generates a random 256-bit key for each command, passes it in the
   child's environment, and sends it on every request. The key exists only in memory.
 
-### Rejected options
+## Rejected Options
 
 - `X-Api-Key` is a convention, not a standard. RFC 6648 deprecates new `X-` headers, and proxies,
   log scrubbers, and HTTP clients do not treat it as a credential the way they treat
@@ -64,10 +45,13 @@ it is the standard header for credentials and one environment variable serves ev
 - OAuth2 adds an identity provider and token lifecycle for clients that are all machines on a
   local network.
 
-### Consequences
+## Consequences
 
-- Good, because a misconfigured server fails at startup instead of serving its API to anyone
-- Good, because one environment variable configures Docker, Compose, Kubernetes, and `serve`
-- Good, because ephemeral users configure nothing
-- Bad, because every persistent deployment must now set `RECYCLARR_API_KEY`
-- Bad, because all clients share one key; there are no per-client keys or scopes
+- A misconfigured server fails at startup instead of serving its API to anyone.
+- One environment variable configures Docker, Compose, Kubernetes, and `serve`.
+- Every persistent deployment must set `RECYCLARR_API_KEY`.
+- All clients share one key; there are no per-client keys or scopes.
+
+## History
+
+- 2026-10-12: Require a bearer key from `RECYCLARR_API_KEY` on every `/api` request.
