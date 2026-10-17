@@ -27,14 +27,11 @@ internal sealed class SyncJobTelemetry(IMeterFactory meters)
 
     /// <summary>
     /// Starts the span for one job run, or returns null when nothing listens to the Recyclarr
-    /// source.
+    /// source. A default parent context falls back to the ambient activity, so the caller must run
+    /// in a clean execution context for the span to start its own trace.
     /// </summary>
     public static Activity? StartRun(SyncJob job)
     {
-        // A default parent context falls back to the ambient activity, which on a TickerQ worker
-        // belongs to whatever started that worker. A job always starts its own trace.
-        Activity.Current = null;
-
         ActivityLink[] links = ActivityContext.TryParse(job.TraceParent, null, out var origin)
             ? [new ActivityLink(origin)]
             : [];
