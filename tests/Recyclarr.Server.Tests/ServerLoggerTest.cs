@@ -80,23 +80,29 @@ internal sealed class ServerLoggerTest
             .ContainMatch("[* DBG] next event");
     }
 
-    // Persistent console output is collected by the host, so files are opt-in there; an
-    // ephemeral server's files are the only record of a CLI-launched sync.
-    [TestCase(ServerMode.Persistent, null, false)]
-    [TestCase(ServerMode.Ephemeral, null, true)]
-    [TestCase(ServerMode.Persistent, true, true)]
-    [TestCase(ServerMode.Ephemeral, false, false)]
-    public void Log_files_follow_the_mode_default_unless_set(
-        ServerMode mode,
-        bool? files,
-        bool expectFiles
-    )
+    [TestCase(ServerMode.Persistent)]
+    [TestCase(ServerMode.Ephemeral)]
+    public void Log_files_are_written_by_default(ServerMode mode)
     {
         var paths = CreatePaths();
 
-        WriteLogs(paths, log => log.Information("event"), mode, files);
+        WriteLogs(paths, log => log.Information("event"), mode, new ServerLoggingSettings());
 
-        paths.ServerLogDirectory.GetFiles().Should().HaveCount(expectFiles ? 2 : 0);
+        paths.ServerLogDirectory.GetFiles().Should().HaveCount(2);
+    }
+
+    [Test]
+    public void Log_files_can_be_turned_off()
+    {
+        var paths = CreatePaths();
+
+        WriteLogs(
+            paths,
+            log => log.Information("event"),
+            logging: new ServerLoggingSettings { Files = false }
+        );
+
+        paths.ServerLogDirectory.GetFiles().Should().BeEmpty();
     }
 
     private AppPaths CreatePaths()
@@ -110,13 +116,11 @@ internal sealed class ServerLoggerTest
         IAppPaths paths,
         Action<ILogger> write,
         ServerMode mode = ServerMode.Persistent,
-        bool? files = true
+        ServerLoggingSettings? logging = null
     )
     {
         var settings = Substitute.For<ISettings<ServerSettings>>();
-        settings.Value.Returns(
-            new ServerSettings { Logging = new ServerLoggingSettings { Files = files } }
-        );
+        settings.Value.Returns(new ServerSettings { Logging = logging ?? new() });
 
         using var serverLogger = new ServerLogger(
             paths,

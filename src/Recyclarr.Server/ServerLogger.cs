@@ -46,10 +46,14 @@ internal sealed class ServerLogger(
         var logging = settings.Value.Value.Logging;
         var config = LogSetup.BaseConfiguration();
 
-        if (logging.Files ?? mode == ServerMode.Ephemeral)
+        if (logging.Files)
         {
             AddLogFiles(config);
         }
+
+        var format =
+            logging.Format
+            ?? (Console.IsOutputRedirected ? ServerLogFormat.Json : ServerLogFormat.Text);
 
         if (mode == ServerMode.Ephemeral)
         {
@@ -58,7 +62,7 @@ internal sealed class ServerLogger(
             // everything else is in the log files.
             ErrorsToStderr(config);
         }
-        else if (logging.Format == ServerLogFormat.Json)
+        else if (format == ServerLogFormat.Json)
         {
             config.WriteTo.Console(new JsonLogFormatter(), levelSwitch: levelSwitch);
         }

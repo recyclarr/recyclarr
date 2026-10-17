@@ -82,14 +82,14 @@
             "format": {
               "type": "string",
               "enum": ["json", "text"],
-              "default": "json",
               "title": "Console log format of the persistent server",
-              "description": "`json` writes one JSON object per line for log collectors; `text` writes human-readable lines. The server started by the CLI writes only errors to its console."
+              "description": "`json` writes one JSON object per line for log collectors; `text` writes human-readable lines. When omitted, the server writes text to a terminal and JSON when its output is redirected (Docker, systemd, services). The server started by the CLI writes only errors to its console."
             },
             "files": {
               "type": "boolean",
+              "default": true,
               "title": "Write log files",
-              "description": "Defaults to `true` for the server started by the CLI and `false` for the persistent server (`recyclarr serve` or the Docker image), whose console output is collected instead."
+              "description": "Set to `false` when the console output is collected instead, for example in Kubernetes."
             }
           }
         },
