@@ -28,6 +28,8 @@ internal sealed class ServerBootstrapService(
 {
     public async Task StartingAsync(CancellationToken ct)
     {
+        logger.Reload();
+
         if (logger.ActiveLogFiles.Count > 0)
         {
             logJanitor.DeleteOldestLogFiles(logger.ActiveLogFiles);

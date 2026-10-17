@@ -1,6 +1,8 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -77,6 +79,25 @@ internal sealed class ServerLoggerTest
             .ContainMatch("[* DBG] next event");
     }
 
+    // Persistent console output is collected by the host, so files are opt-in there; an
+    // ephemeral server's files are the only record of a CLI-launched sync.
+    [TestCase(ServerMode.Persistent, null, false)]
+    [TestCase(ServerMode.Ephemeral, null, true)]
+    [TestCase(ServerMode.Persistent, true, true)]
+    [TestCase(ServerMode.Ephemeral, false, false)]
+    public void Log_files_follow_the_mode_default_unless_set(
+        ServerMode mode,
+        bool? files,
+        bool expectFiles
+    )
+    {
+        var paths = CreatePaths();
+
+        WriteLogs(paths, log => log.Information("event"), mode, files);
+
+        paths.ServerLogDirectory.GetFiles().Should().HaveCount(expectFiles ? 2 : 0);
+    }
+
     private AppPaths CreatePaths()
     {
         var paths = new AppPaths(_root.SubDirectory("config"), _root.SubDirectory("data"));
@@ -84,18 +105,27 @@ internal sealed class ServerLoggerTest
         return paths;
     }
 
-    private static void WriteLogs(IAppPaths paths, Action<ILogger> write)
+    private static void WriteLogs(
+        IAppPaths paths,
+        Action<ILogger> write,
+        ServerMode mode = ServerMode.Persistent,
+        bool? files = true
+    )
     {
-        var serverLogger = new ServerLogger(
-            paths,
-            new LoggingLevelSwitch(LogEventLevel.Fatal),
-            ServerMode.Persistent
+        var settings = Substitute.For<ISettings<ServerSettings>>();
+        settings.Value.Returns(
+            new ServerSettings { Logging = new ServerLoggingSettings { Files = files } }
         );
 
-        var config = new LoggerConfiguration();
-        serverLogger.Configure(config);
-        using var log = config.CreateLogger();
-        write(log);
+        using var serverLogger = new ServerLogger(
+            paths,
+            new LoggingLevelSwitch(LogEventLevel.Fatal),
+            mode,
+            new Lazy<ISettings<ServerSettings>>(settings)
+        );
+
+        serverLogger.Reload();
+        write(serverLogger);
     }
 
     private static InvalidOperationException CreateThrownException()

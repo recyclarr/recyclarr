@@ -51,8 +51,18 @@ var isDocumentGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDo
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(b => CompositionRoot.Setup(b, logLevel, mode));
+
+// Events pass through to ServerLogger, which owns sinks and enrichment and is reconfigured once
+// settings.yml has loaded. Only framework category filtering happens here.
 builder.Services.AddSerilog(
-    (services, config) => services.GetRequiredService<ServerLogger>().Configure(config)
+    (services, config) =>
+        config
+            .MinimumLevel.Verbose()
+            .MinimumLevel.Override(
+                "Microsoft.AspNetCore.Hosting.Diagnostics",
+                LogEventLevel.Warning
+            )
+            .WriteTo.Logger(services.GetRequiredService<ServerLogger>())
 );
 builder.Services.AddOutboundHttpClients();
 

@@ -1,22 +1,87 @@
 using System.IO.Abstractions;
 using Recyclarr.Logging;
 using Recyclarr.Platform;
+using Recyclarr.Server.Logging;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
-using LoggingLevelSwitch = Serilog.Core.LoggingLevelSwitch;
 
 namespace Recyclarr.Server;
 
 /// <summary>
-/// Configures logging for the server host after its services are available.
+/// The server's logger, configured in two stages. Until <see cref="Reload"/> it writes only errors
+/// to stderr; afterwards it uses the console format and log files from <c>server.logging</c>.
 /// </summary>
-internal sealed class ServerLogger(IAppPaths paths, LoggingLevelSwitch levelSwitch, ServerMode mode)
+/// <remarks>
+/// Two stages break a dependency cycle: loading settings.yml logs through this logger, so the
+/// final configuration cannot exist until settings have loaded. For the same reason the settings
+/// are resolved lazily; resolving them while this logger is constructed recurses without end. This
+/// is an instance in DI rather than Serilog's static bootstrap logger because tests start many
+/// hosts in one process.
+/// </remarks>
+internal sealed class ServerLogger(
+    IAppPaths paths,
+    LoggingLevelSwitch levelSwitch,
+    ServerMode mode,
+    Lazy<ISettings<ServerSettings>> settings
+) : ILogger, IDisposable
 {
+    private volatile Logger _inner = ErrorsToStderr(LogSetup.BaseConfiguration()).CreateLogger();
+
     public IReadOnlyCollection<IFileInfo> ActiveLogFiles { get; private set; } = [];
 
-    public void Configure(LoggerConfiguration config)
+    public void Write(LogEvent logEvent)
+    {
+        _inner.Write(logEvent);
+    }
+
+    public void Reload()
+    {
+        var logging = settings.Value.Value.Logging;
+        var config = LogSetup.BaseConfiguration();
+
+        if (logging.Files ?? mode == ServerMode.Ephemeral)
+        {
+            AddLogFiles(config);
+        }
+
+        if (mode == ServerMode.Ephemeral)
+        {
+            // An ephemeral server has no terminal, and its stdout carries only the READY handshake.
+            // Errors go to stderr so the launching CLI can explain a failed startup (ADR-019);
+            // everything else is in the log files.
+            ErrorsToStderr(config);
+        }
+        else if (logging.Format == ServerLogFormat.Json)
+        {
+            config.WriteTo.Console(new JsonLogFormatter(), levelSwitch: levelSwitch);
+        }
+        else
+        {
+            config.WriteTo.Console(
+                new ExpressionTemplate(
+                    "[{@l:u3}] " + LogSetup.BaseTemplate,
+                    theme: TemplateTheme.Code
+                ),
+                levelSwitch: levelSwitch
+            );
+        }
+
+        var previous = _inner;
+        _inner = config.CreateLogger();
+        previous.Dispose();
+    }
+
+    public void Dispose()
+    {
+        _inner.Dispose();
+    }
+
+    private void AddLogFiles(LoggerConfiguration config)
     {
         var prefix = $"recyclarr-server_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
         var debugLogFile = paths.ServerLogDirectory.File($"{prefix}.debug.log");
@@ -25,13 +90,6 @@ internal sealed class ServerLogger(IAppPaths paths, LoggingLevelSwitch levelSwit
         var template = new ExpressionTemplate(LogSetup.FileTemplate);
 
         config
-            .MinimumLevel.Verbose()
-            .MinimumLevel.Override(
-                "Microsoft.AspNetCore.Hosting.Diagnostics",
-                LogEventLevel.Warning
-            )
-            .Enrich.FromLogContext()
-            .Enrich.With<ExceptionSanitizingEnricher>()
             .WriteTo.Logger(c =>
                 c.MinimumLevel.Debug().WriteTo.File(template, debugLogFile.FullName)
             )
@@ -39,23 +97,14 @@ internal sealed class ServerLogger(IAppPaths paths, LoggingLevelSwitch levelSwit
                 c.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
                     .WriteTo.File(template, verboseLogFile.FullName)
             );
+    }
 
-        if (mode == ServerMode.Ephemeral)
-        {
-            // An ephemeral server has no terminal, and its stdout carries only the READY handshake.
-            // Errors go to stderr so the launching CLI can explain a failed startup (ADR-019);
-            // everything else is in the log files.
-            config.WriteTo.Console(
-                new ExpressionTemplate(LogSetup.BaseTemplate),
-                restrictedToMinimumLevel: LogEventLevel.Error,
-                standardErrorFromLevel: LogEventLevel.Error
-            );
-            return;
-        }
-
-        config.WriteTo.Console(
-            new ExpressionTemplate("[{@l:u3}] " + LogSetup.BaseTemplate, theme: TemplateTheme.Code),
-            levelSwitch: levelSwitch
+    private static LoggerConfiguration ErrorsToStderr(LoggerConfiguration config)
+    {
+        return config.WriteTo.Console(
+            new ExpressionTemplate(LogSetup.BaseTemplate),
+            restrictedToMinimumLevel: LogEventLevel.Error,
+            standardErrorFromLevel: LogEventLevel.Error
         );
     }
 }
