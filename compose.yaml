@@ -99,6 +99,9 @@ services:
     tmpfs: /tmp
     build:
       context: .
+      args:
+        VERSION: ${RECYCLARR_VERSION:-}
+        INFORMATIONAL_VERSION: ${RECYCLARR_INFORMATIONAL_VERSION:-}
       # platforms:
       #   - linux/arm/v7
       #   - linux/arm64

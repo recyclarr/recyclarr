@@ -56,9 +56,7 @@ internal static class CliSetup
             config.UseStrictParsing();
 
             config.SetApplicationName("recyclarr");
-            config.SetApplicationVersion(
-                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})"
-            );
+            config.SetApplicationVersion(AppVersion.Display);
 
             AddCommands(config);
         });

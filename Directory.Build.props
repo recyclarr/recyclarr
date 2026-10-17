@@ -16,6 +16,8 @@
     <RecyclarrRepositoryRoot>$(RepositoryRoot)</RecyclarrRepositoryRoot>
     <TestDirectory>$(RepositoryRoot)tests\</TestDirectory>
     <GitVersionBaseDirectory>$(RepositoryRoot)</GitVersionBaseDirectory>
+    <!-- GitVersion's informational version already ends with the commit sha -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>

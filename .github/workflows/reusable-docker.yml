@@ -75,6 +75,9 @@ jobs:
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.gitversion.outputs.semVer }}
+            INFORMATIONAL_VERSION=${{ steps.gitversion.outputs.informationalVersion }}
           # Added to prevent tons of untagged images in GHCR.
           # See: https://github.com/docker/build-push-action/issues/894
           provenance: false
