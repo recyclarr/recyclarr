@@ -41,25 +41,6 @@ def run_prettier(path: Path) -> None:
     subprocess.run(cmd, cwd=REPO_ROOT, check=True)
 
 
-# Upstream specs mark nearly every object schema `additionalProperties: false`. That describes the
-# server version the spec came from, not a promise that fields stay fixed: Sonarr and Radarr add
-# fields between releases. With `false`, Refitter generates DTOs without `[JsonExtensionData]`, so
-# fields unknown to the vendored spec are dropped when a resource is read. Gateways update by
-# sending the fetched resource back, so a dropped field is reset on the server (this silently reset
-# Sonarr media management settings). Removing `false` makes Refitter add an extension data property
-# to every DTO, so unknown fields round-trip unchanged. Schema-valued `additionalProperties`
-# (dictionaries) are kept. Remove this once Refitter can force extension data on its own.
-def allow_unknown_fields(node: object) -> None:
-    if isinstance(node, dict):
-        if node.get("additionalProperties") is False:
-            del node["additionalProperties"]
-        for value in node.values():
-            allow_unknown_fields(value)
-    elif isinstance(node, list):
-        for value in node:
-            allow_unknown_fields(value)
-
-
 # Swashbuckle lists each body under text/json, text/plain, and application/*+json beside
 # application/json. Keeping only application/json removes noise from every sync diff without
 # losing information.
@@ -89,7 +70,6 @@ def update(target: str) -> None:
     with urllib.request.urlopen(url, timeout=60) as response:
         spec = json.load(response)
 
-    allow_unknown_fields(spec)
     keep_json_media_type_only(spec)
     path.write_text(json.dumps(spec, indent=2) + "\n", encoding="utf-8")
     run_prettier(path)

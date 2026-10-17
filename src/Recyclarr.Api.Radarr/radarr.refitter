@@ -15,6 +15,7 @@
   "generateContracts": true,
   "useCancellationTokens": true,
   "trimUnusedSchema": true,
+  "forceAdditionalProperties": true,
   "operationNameGenerator": "MultipleClientsFromPathSegments",
   "outputFolder": "Generated",
   "outputFilename": "RadarrApi.g.cs",
