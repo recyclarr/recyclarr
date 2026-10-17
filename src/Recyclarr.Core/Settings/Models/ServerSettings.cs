@@ -12,17 +12,13 @@ public record ServerSettings
 public record ServerLoggingSettings
 {
     /// <summary>
-    /// Console format of the persistent server. The ephemeral server's console carries only
-    /// errors on stderr regardless.
+    /// Console format of the persistent server. Null means text on a terminal and JSON when stdout
+    /// is redirected (containers, systemd, services), where a log collector reads it. The
+    /// ephemeral server's console carries only errors on stderr regardless.
     /// </summary>
-    public ServerLogFormat Format { get; init; } = ServerLogFormat.Json;
+    public ServerLogFormat? Format { get; init; }
 
-    /// <summary>
-    /// Whether to write log files. Null means the mode default: on for the ephemeral server, whose
-    /// files are the only record of a CLI-launched sync, and off for the persistent server, whose
-    /// console output is collected by its host (container runtime, journald).
-    /// </summary>
-    public bool? Files { get; init; }
+    public bool Files { get; init; } = true;
 }
 
 public enum ServerLogFormat
