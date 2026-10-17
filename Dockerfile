@@ -44,6 +44,7 @@ LABEL name="recyclarr" \
 ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_CONFIG_DIR=/config \
     ASPNETCORE_URLS=http://0.0.0.0:7982 \
+    ASPNETCORE_MANAGEMENTPORT=7983 \
     ASPNETCORE_HTTP_PORTS= \
     RECYCLARR_SERVER_URL=http://127.0.0.1:7982 \
     COMPlus_EnableDiagnostics=0
@@ -56,10 +57,10 @@ COPY --link --from=build /app /app/recyclarr/
 
 USER 1000:1000
 VOLUME /config
-EXPOSE 7982
+EXPOSE 7982 7983
 
 # 127.0.0.1, not localhost: busybox wget tries ::1 first, and the server listens on IPv4 only.
-HEALTHCHECK CMD wget -q --spider http://127.0.0.1:7982/health || exit 1
+HEALTHCHECK CMD wget -q --spider http://127.0.0.1:7983/livez || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["recyclarr-server"]

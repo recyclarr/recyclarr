@@ -5,6 +5,17 @@ public record ServerSettings
     public int Port { get; init; } = 7982;
     public string BindAddress { get; init; } = "localhost";
     public ScheduleSettings Schedule { get; init; } = new();
+    public ManagementSettings Management { get; init; } = new();
+}
+
+/// <summary>
+/// The persistent server's management port, which alone serves health probes and Prometheus
+/// metrics (ADR-029). Its default is fixed rather than derived from the API port.
+/// </summary>
+public record ManagementSettings
+{
+    public int Port { get; init; } = 7983;
+    public bool Metrics { get; init; } = true;
 }
 
 /// <summary>

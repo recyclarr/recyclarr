@@ -29,8 +29,8 @@ Rationale and the full resource model live in ADR-011; config representation in 
 - Instance names are globally unique (config validation enforces this); `/instances/{name}` relies
   on it.
 - No DELETE with a request body; bulk deletes are per-item calls in a client loop.
-- `/health` stays outside `/api`: unversioned, anonymous, excluded from the OpenAPI spec. Everything
-  under `/api` requires the API key.
+- Probes and metrics live only on the management port (ADR-029), excluded from the OpenAPI spec.
+  Everything under `/api` requires the API key.
 - All error responses use RFC 9457 Problem Details.
 - Collections return an object wrapping `*SummaryResponse` items; each item has a stable id for a
   future `/{id}` route (ADR-011).
@@ -83,9 +83,6 @@ Features/
     Get/
       Endpoint.cs
       Models.cs
-  Health/
-    Endpoint.cs
-    Models.cs
 ```
 
 No `Mapper.cs` or `Data.cs`; that logic lives in Core.
