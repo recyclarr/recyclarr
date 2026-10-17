@@ -5,6 +5,7 @@
   "environments": {
     "$default": {
       "baseUrl": "http://localhost:7982",
+      "managementUrl": "http://localhost:7983",
       "apiKey": "{{$processEnv RECYCLARR_API_KEY}}",
       "preview": true,
       "destructive": false

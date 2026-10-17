@@ -52,6 +52,28 @@
           "title": "Address for the HTTP server to bind to",
           "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces. Ignored by the Docker image, which always listens on all interfaces."
         },
+        "management": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "title": "Management port of the persistent server",
+          "description": "A separate port that serves health probes (`/livez`, `/readyz`) and Prometheus metrics (`/metrics`) without an API key. These endpoints are never served on the main port. The server started by the CLI opens no management port.",
+          "properties": {
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 7983,
+              "title": "Port number for the management endpoints",
+              "description": "Independent of `server.port` and must differ from it. Ignored by the Docker image, which always uses port 7983; remap it with Docker port mapping."
+            },
+            "metrics": {
+              "type": "boolean",
+              "default": true,
+              "title": "Serve Prometheus metrics at `/metrics`",
+              "description": "Set to `false` to stop serving metrics. Health probes are not affected."
+            }
+          }
+        },
         "schedule": {
           "type": ["null", "object"],
           "additionalProperties": false,

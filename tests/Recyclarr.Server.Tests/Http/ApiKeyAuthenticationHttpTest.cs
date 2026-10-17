@@ -39,8 +39,8 @@ internal sealed class ApiKeyAuthenticationHttpTest : ServerHttpFixture
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [TestCase("/health")]
     [TestCase("/openapi/v1.json")]
+    [TestCase("/scalar")]
     public async Task Routes_outside_api_need_no_key(string route)
     {
         using var client = CreateClient();

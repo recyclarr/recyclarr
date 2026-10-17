@@ -64,7 +64,11 @@ internal static class CompositionRoot
 
         builder.RegisterType<ServerApiKey>().SingleInstance();
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
-        builder.RegisterType<SettingsEndpointSetup>().As<IConfigureOptions<KestrelServerOptions>>();
+        builder
+            .RegisterType<SettingsEndpointSetup>()
+            .AsSelf()
+            .As<IConfigureOptions<KestrelServerOptions>>();
+        builder.RegisterType<ManagementPort>();
 
         RegisterSyncServices(builder);
     }

@@ -1,5 +1,13 @@
-# @name health
-GET {{baseUrl}}/health
+# @name livez
+GET {{managementUrl}}/livez
 
 ?? status == 200
-?? body status == healthy
+?? body == Healthy
+
+###
+
+# @name readyz
+GET {{managementUrl}}/readyz
+
+?? status == 200
+?? body == Healthy
