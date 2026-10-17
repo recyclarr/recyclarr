@@ -80,6 +80,17 @@ internal sealed class ServerBackedCommandsHttpTest : CliServerHttpFixture
     }
 
     [Test]
+    public async Task List_custom_formats_for_an_empty_guide_reports_none()
+    {
+        AddGuide();
+
+        var exitCode = await RunCliAsync("list", "custom-formats", "sonarr");
+
+        exitCode.Should().Be(0);
+        LogOutput.Should().Contain("No custom formats found");
+    }
+
+    [Test]
     public async Task List_naming_keeps_the_radarr_raw_format()
     {
         AddGuide();

@@ -53,6 +53,12 @@ internal class ListCustomFormatsCommand(
         {
             OutputCustomFormatsRaw(items);
         }
+        else if (items.Count == 0)
+        {
+            const string message = "No custom formats found in the guide.";
+            console.WriteLine(message);
+            log.Information(message);
+        }
         else
         {
             OutputCustomFormatsTable(items);
