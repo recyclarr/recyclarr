@@ -27,6 +27,8 @@ Scope separation:
   (`docs/architecture/`, `docs/decisions/`). MUST NOT duplicate between them.
 - Linear project descriptions SHOULD link to relevant ADRs and architecture docs.
 - MUST NOT put design rationale, decision records, or living design reference into Linear.
+- Every record in `docs/decisions/` is in force. When a task conflicts with one, MUST stop and ask
+  whether the task or the record changes.
 
 ## Agents
 
