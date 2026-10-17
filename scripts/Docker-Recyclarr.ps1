@@ -6,6 +6,9 @@ $configDir = $env:RECYCLARR_CONFIG_DIR
 if (-not $configDir) {
     throw "RECYCLARR_CONFIG_DIR is not set (set it with mise)"
 }
+if (-not $env:RECYCLARR_API_KEY) {
+    throw "RECYCLARR_API_KEY is not set"
+}
 $env:DOCKER_UID = $(id -u)
 $env:DOCKER_GID = $(id -g)
 

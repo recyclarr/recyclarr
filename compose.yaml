@@ -105,10 +105,10 @@ services:
       #   - linux/amd64
     ports: [7982:7982]
     volumes:
-      - ${RECYCLARR_CONFIG_DIR:?RECYCLARR_CONFIG_DIR must be set}:/config
+      - ${RECYCLARR_CONFIG_DIR:-./config}:/config
     environment:
       TZ: America/Chicago
-      RECYCLARR_API_KEY: ${RECYCLARR_API_KEY:?RECYCLARR_API_KEY must be set}
+      RECYCLARR_API_KEY: ${RECYCLARR_API_KEY:-}
       RADARR_URL: http://radarr_develop2:7878
       SONARR_URL: http://sonarr_develop2:8989
       SHOWS_URL: http://sonarr_develop1:8989
