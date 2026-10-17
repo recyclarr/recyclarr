@@ -22,4 +22,3 @@ Dockerfile*
 **/*.md
 
 # Ignore these directories inside the docker subdir
-docker/artifacts/
