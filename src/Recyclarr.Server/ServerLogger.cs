@@ -3,6 +3,7 @@ using Recyclarr.Logging;
 using Recyclarr.Platform;
 using Recyclarr.Server.Logging;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Telemetry;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Serilog.Core;
@@ -27,7 +28,8 @@ internal sealed class ServerLogger(
     IAppPaths paths,
     LoggingLevelSwitch levelSwitch,
     ServerMode mode,
-    Lazy<ISettings<ServerSettings>> settings
+    Lazy<ISettings<ServerSettings>> settings,
+    IConfiguration configuration
 ) : ILogger, IDisposable
 {
     private volatile Logger _inner = ErrorsToStderr(LogSetup.BaseConfiguration()).CreateLogger();
@@ -68,6 +70,23 @@ internal sealed class ServerLogger(
                     theme: TemplateTheme.Code
                 ),
                 levelSwitch: levelSwitch
+            );
+        }
+
+        // The sink reads the standard OTEL_EXPORTER_OTLP_* variables itself; they override the
+        // resource attributes given here. It follows the console level: below it, framework
+        // events fire for every request, including each health probe.
+        if (ServerTelemetry.ExportsOtlp(configuration))
+        {
+            config.WriteTo.Logger(c =>
+                c.MinimumLevel.ControlledBy(levelSwitch)
+                    .WriteTo.OpenTelemetry(o =>
+                        o.ResourceAttributes = new Dictionary<string, object>
+                        {
+                            ["service.name"] = ServerTelemetry.ServiceName(configuration),
+                            ["service.version"] = ServerTelemetry.ServiceVersion,
+                        }
+                    )
             );
         }
 

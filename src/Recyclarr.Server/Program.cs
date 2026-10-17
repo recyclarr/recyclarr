@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Text.Json;
@@ -8,6 +9,7 @@ using FastEndpoints;
 using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Hosting.WindowsServices;
@@ -18,6 +20,7 @@ using Recyclarr.Server;
 using Recyclarr.Server.Auth;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Sync.Schedule;
+using Recyclarr.Server.Telemetry;
 using Scalar.AspNetCore;
 using Serilog.Events;
 using TickerQ.DependencyInjection;
@@ -65,6 +68,7 @@ builder.Services.AddSerilog(
             .WriteTo.Logger(services.GetRequiredService<ServerLogger>())
 );
 builder.Services.AddOutboundHttpClients();
+builder.Services.AddServerTelemetry(builder.Configuration, mode);
 
 // Each takes over the host lifetime only when its service manager launched this process (readiness
 // and stop notifications for a systemd unit, the SCM protocol for a Windows service). Under a
@@ -197,9 +201,49 @@ if (mode == ServerMode.Persistent && !isDocumentGeneration)
         ctx => ctx.Connection.LocalPort == managementPort.Number,
         management =>
         {
+            // Probes and scrapes run every few seconds; tracing or counting them would bury real
+            // traffic in exported spans and HTTP server metrics.
+            management.Use(
+                (ctx, next) =>
+                {
+                    if (Activity.Current is { } activity)
+                    {
+                        activity.IsAllDataRequested = false;
+                        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                    }
+
+                    if (ctx.Features.Get<IHttpMetricsTagsFeature>() is { } metrics)
+                    {
+                        metrics.MetricsDisabled = true;
+                    }
+
+                    return next(ctx);
+                }
+            );
+
             var noChecks = new HealthCheckOptions { Predicate = _ => false };
             management.UseHealthChecks("/livez", noChecks);
             management.UseHealthChecks("/readyz", noChecks);
+            // The scraping middleware looks up the Prometheus exporter when its pipeline is built,
+            // and the exporter exists only when settings enable metrics. settings.yml is not
+            // loaded while this pipeline is built, so the metrics pipeline is built on the first
+            // scrape instead. REC-196 makes settings available here and removes the deferral.
+            RequestDelegate? scrape = null;
+            management.Use(
+                (ctx, next) =>
+                {
+                    if (ctx.Request.Path != "/metrics" || !managementPort.ServesMetrics)
+                    {
+                        return next(ctx);
+                    }
+
+                    scrape ??= management
+                        .New()
+                        .UseOpenTelemetryPrometheusScrapingEndpoint(_ => true)
+                        .Build();
+                    return scrape(ctx);
+                }
+            );
 
             // Routing has already matched any API endpoint for this path; ending the branch
             // without executing it would be a server error rather than a 404.

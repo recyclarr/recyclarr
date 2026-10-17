@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Recyclarr.Platform;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Settings;
@@ -121,7 +122,8 @@ internal sealed class ServerLoggerTest
             paths,
             new LoggingLevelSwitch(LogEventLevel.Fatal),
             mode,
-            new Lazy<ISettings<ServerSettings>>(settings)
+            new Lazy<ISettings<ServerSettings>>(settings),
+            new ConfigurationBuilder().Build()
         );
 
         serverLogger.Reload();
