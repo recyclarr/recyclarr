@@ -241,9 +241,19 @@ log.Information(message);
 
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
 - MUST run `pre-commit run --files <file1> <file2> ...` for all changes
-- Use `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
+- Gitignore: add a pattern only for output this repository's tools produce; OS and editor files
+  belong in each developer's global excludes. Ignore by file pattern (`*.pyc`). Use a directory
+  pattern only when its contents share file types with tracked files (`obj/` holds `.json` and
+  `.props`).
+
+### Build and Test
+
+- Run `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
   when a clean rebuild is needed.
-- Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
+- Pass `-v q` to `dotnet test` and `dotnet build`, and MUST limit their output to 200 lines.
+
+### Projects and Packages
+
 - Edit `*.csproj`, `*.props`, and `*.slnx` by hand, including package references. Use the dotnet CLI
   to look up versions (`dotnet package search <id> --exact-match`, plus `--prerelease` when the
   current version is a prerelease), audit packages (`dotnet list package --outdated`), and generate
@@ -253,16 +263,15 @@ log.Information(message);
   synchronized when adding, renaming, removing, or changing package privacy.
 - `InternalsVisibleTo` is granted convention-wide by `Directory.Build.props`. MUST NOT add it to an
   individual csproj; name the consuming project to match the convention, or extend the convention.
-- When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
-**Development and Testing:**
+### Local Processes
 
 Before starting the server or another backend process, check for a running one (e.g. the user's
 `dotnet watch`) with `pgrep -af 'dotnet|recyclarr'` and `ss -ltnp`. Reuse it when it serves the
 task. MUST NOT stop it or start a parallel instance. If it blocks the task (stale build, port
 conflict, shared state), stop and ask the user to shut it down.
 
-All under `./scripts`.
+### Scripts (`scripts/`)
 
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)
@@ -272,11 +281,6 @@ All under `./scripts`.
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 - `update_openapi.py`: Refresh vendored Sonarr/Radarr `openapi.json` specs from upstream
-
-**Gitignore management:**
-
-- `Update-Gitignore.ps1`: Updates the global `.gitignore`.
-- `Commit-Gitignore.ps1`: Commit git ignore changes.
 
 ## Commits and Changelog
 
