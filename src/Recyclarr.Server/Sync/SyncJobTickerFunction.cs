@@ -29,7 +29,21 @@ internal sealed class SyncJobTickerFunction(
     SyncJobTelemetry telemetry
 ) : ITickerFunction<SyncJobTickerRequest>
 {
-    public async Task ExecuteAsync(
+    public Task ExecuteAsync(
+        TickerFunctionContext<SyncJobTickerRequest> context,
+        CancellationToken cancellationToken
+    )
+    {
+        // TickerQ workers inherit the execution context of whatever created them, often an HTTP
+        // request. Without isolation, that request's async-local state (logging scope, activity)
+        // would tag every log line and span of the job. The job runs in a clean context instead.
+        using (ExecutionContext.SuppressFlow())
+        {
+            return Task.Run(() => RunJobAsync(context, cancellationToken), cancellationToken);
+        }
+    }
+
+    private async Task RunJobAsync(
         TickerFunctionContext<SyncJobTickerRequest> context,
         CancellationToken cancellationToken
     )

@@ -18,6 +18,8 @@ namespace Recyclarr.Server.Tests.Sync;
 
 internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
 {
+    private static readonly AsyncLocal<string?> CallerState = new();
+
     [Test]
     public async Task Terminal_job_is_not_run()
     {
@@ -139,6 +141,27 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
             .ContainSingle()
             .Which.Context.Should()
             .Be(new ActivityContext(request.TraceId, request.SpanId, request.ActivityTraceFlags));
+    }
+
+    // TickerQ workers inherit the execution context of whatever created them, often an HTTP
+    // request. Its async-local state (logging scope, activity) must not reach the job.
+    [Test]
+    public async Task Job_does_not_see_the_async_local_state_of_its_caller()
+    {
+        string? seen = "not run";
+        Resolve<ISyncOrchestrator>()
+            .RunAsync(default!, default!, default!, default)
+            .ReturnsForAnyArgs(_ =>
+            {
+                seen = CallerState.Value;
+                return new SyncRunResult([]);
+            });
+        var job = CreateJob(Resolve<ISyncJobStore>(), Config("movies"));
+        CallerState.Value = "request";
+
+        await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
+
+        seen.Should().BeNull();
     }
 
     [Test]
