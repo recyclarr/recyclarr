@@ -9,7 +9,6 @@ namespace Recyclarr.Common.FluentValidation;
 public static class FluentValidationExtensions
 {
     // From: https://github.com/FluentValidation/FluentValidation/issues/1648
-    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IRuleBuilderOptions<T, TProperty?> SetNonNullableValidator<T, TProperty>(
         this IRuleBuilder<T, TProperty?> ruleBuilder,
         IValidator<TProperty> validator,
@@ -24,7 +23,6 @@ public static class FluentValidationExtensions
         return ruleBuilder.SetAsyncValidator(adapter);
     }
 
-    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IRuleBuilderOptions<T, TProperty?> SetNonNullableValidator<
         T,
         TProperty,

@@ -9,13 +9,6 @@
       ],
       "rollForward": false
     },
-    "jetbrains.resharper.globaltools": {
-      "version": "2026.2.3",
-      "commands": [
-        "jb"
-      ],
-      "rollForward": false
-    },
     "gitversion.tool": {
       "version": "6.8.2",
       "commands": [

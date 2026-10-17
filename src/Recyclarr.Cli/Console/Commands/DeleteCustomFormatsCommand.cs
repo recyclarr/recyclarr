@@ -166,7 +166,6 @@ internal class DeleteCustomFormatsCommand(
         return [.. failed];
     }
 
-    [SuppressMessage("ReSharper", "CoVariantArrayConversion")]
     private void PrintPreview(List<InstanceCustomFormatSummaryResponse> candidates)
     {
         console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");

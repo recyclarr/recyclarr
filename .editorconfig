@@ -8,35 +8,10 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{xml,props,csproj}]
-xml_attribute_indent = align_by_first_attribute
-xml_linebreak_before_elements =
-xml_max_blank_lines_between_tags = 1
-xml_pi_attribute_style = do_not_touch
-xml_space_before_self_closing = true
-xml_space_inside_empty_tag = true
-xml_wrap_lines = true
-xml_wrap_tags_and_pi = true
-xml_wrap_text = false
-
 [*.{cs,ps1}]
 indent_size = 4
 
-[*.{json,json5,jsonc}]
-ij_javascript_array_initializer_right_brace_on_new_line = false
-
 [*.cs]
-
-# Don't have an opinion about named args; allow situational usage
-resharper_arguments_style_literal_highlighting = none
-resharper_arguments_style_string_literal_highlighting = none
-resharper_arguments_style_named_expression_highlighting = none
-resharper_arguments_style_other_highlighting = none
-
-# Resharper/Rider specific updates to make it respect rules used by CSharpier
-resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
-resharper_trailing_comma_in_multiline_lists = true
-resharper_trailing_comma_in_singleline_lists = false
 
 ### Style Enforcement
 
@@ -121,9 +96,6 @@ dotnet_diagnostic.CA1032.severity = none
 # Normalize strings to uppercase
 dotnet_diagnostic.CA1308.severity = none
 
-# Prefer `with` for record copies even when all members are set (future-proofs against new fields)
-resharper_with_expression_modifies_all_members_highlighting = none
-
 # CA1034: C# 14 extension blocks compile to nested types, triggering this rule spuriously.
 # Remove once the analyzer is updated to recognize extension blocks.
 dotnet_diagnostic.CA1034.severity = none
@@ -131,9 +103,6 @@ dotnet_diagnostic.CA1034.severity = none
 # CA1515: C# 14 extension blocks generate public marker types, triggering this rule spuriously.
 # Remove once the analyzer is updated to recognize extension blocks.
 dotnet_diagnostic.CA1515.severity = none
-
-# Allow `default` for reference types (no built-in inspection to enforce default over null)
-resharper_prefer_concrete_value_over_default_highlighting = none
 
 # EF Core migrations are tool-generated; regenerate rather than hand-edit. One folder per context:
 #   dotnet ef migrations add <Name> --project src/Recyclarr.Server --context <Context>

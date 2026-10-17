@@ -1,8 +1,6 @@
 using System.Globalization;
 using System.Text;
 
-// ReSharper disable UnusedMember.Global
-
 namespace Recyclarr.Common.Extensions;
 
 public static class StringExtensions
