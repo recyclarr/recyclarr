@@ -16,13 +16,6 @@
       ],
       "rollForward": false
     },
-    "microsoft.openapi.kiota": {
-      "version": "1.32.2",
-      "commands": [
-        "kiota"
-      ],
-      "rollForward": false
-    },
     "dotnet-ef": {
       "version": "10.0.12",
       "commands": [
