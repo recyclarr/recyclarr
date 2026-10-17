@@ -7,7 +7,6 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
 [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 internal sealed class YamlIncludeResolverTest
 {
     internal abstract class TestYamlInclude1 : IYamlInclude;

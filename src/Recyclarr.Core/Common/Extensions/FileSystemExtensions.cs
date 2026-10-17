@@ -1,9 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 
 namespace Recyclarr.Common.Extensions;
 
-[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public static class FileSystemExtensions
 {
     public static void CreateParentDirectory(this IFileInfo f)
