@@ -69,7 +69,7 @@ Run a CLI command. Without a configured server, the CLI starts a temporary serve
 dotnet run --project src/Recyclarr.Cli -- sync --preview
 ```
 
-To work on the server itself, run it with hot reload. Set `RECYCLARR_API_KEY` first:
+To work on the server itself, run it with hot reload. mise sets `RECYCLARR_API_KEY` to `dev`:
 
 ```bash
 dotnet watch --project src/Recyclarr.Server
