@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.ServiceProcess;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
@@ -8,6 +9,7 @@ using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.OpenApi;
 using Recyclarr;
 using Recyclarr.Logging;
@@ -19,7 +21,17 @@ using Scalar.AspNetCore;
 using Serilog.Events;
 using TickerQ.DependencyInjection;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateSlimBuilder(
+    new WebApplicationOptions
+    {
+        Args = args,
+        // A Windows service starts in C:\Windows\System32, which would otherwise be the content
+        // root.
+        ContentRootPath = WindowsServiceHelpers.IsWindowsService()
+            ? AppContext.BaseDirectory
+            : null,
+    }
+);
 
 // A CLI that launches this process passes its own pid so the server stops when the CLI does
 // (ADR-010). Whether the server is ephemeral is a separate choice: `recyclarr serve` launches a
@@ -42,6 +54,12 @@ builder.Services.AddSerilog(
     (services, config) => services.GetRequiredService<ServerLogger>().Configure(config)
 );
 builder.Services.AddOutboundHttpClients();
+
+// Each takes over the host lifetime only when its service manager launched this process (readiness
+// and stop notifications for a systemd unit, the SCM protocol for a Windows service). Under a
+// terminal, Docker, or Kubernetes, the default console lifetime remains.
+builder.Services.AddSystemd();
+builder.Services.AddWindowsService();
 
 // IResult responses (TypedResults.Json), which endpoints use for Problem Details with extension
 // members, serialize with ASP.NET's options rather than FastEndpoints'.
@@ -202,9 +220,32 @@ var boundAddress = addresses?.Addresses.FirstOrDefault();
 var port = boundAddress is not null ? new Uri(boundAddress).Port : -1;
 app.Services.GetRequiredService<IReadySignal>().Ready(port);
 
-await app.WaitForShutdownAsync();
+// A faulted background service stops the host the same way a stop request does. Exiting with 0
+// after one would hide the failure from systemd (Restart=on-failure) and the Windows SCM recovery
+// actions, so the stop is reported as a failure before the host lifetime announces it.
+var stopping = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+app.Lifetime.ApplicationStopping.Register(() => stopping.TrySetResult());
+await stopping.Task;
 
-return 0;
+var failed = app
+    .Services.GetServices<IHostedService>()
+    .OfType<BackgroundService>()
+    .Any(s => s.ExecuteTask is { IsFaulted: true });
+
+if (
+    failed
+    && OperatingSystem.IsWindows()
+    && app.Services.GetRequiredService<IHostLifetime>() is ServiceBase windowsService
+)
+{
+    // The SCM reads the exit code from the SERVICE_STOPPED status, not from the process.
+    const int errorExceptionInService = 1064;
+    windowsService.ExitCode = errorExceptionInService;
+}
+
+await app.StopAsync();
+
+return failed ? 1 : 0;
 
 static void ConfigureWireJson(JsonSerializerOptions options)
 {
