@@ -6,6 +6,29 @@ public record ServerSettings
     public string BindAddress { get; init; } = "localhost";
     public ScheduleSettings Schedule { get; init; } = new();
     public ManagementSettings Management { get; init; } = new();
+    public ServerLoggingSettings Logging { get; init; } = new();
+}
+
+public record ServerLoggingSettings
+{
+    /// <summary>
+    /// Console format of the persistent server. The ephemeral server's console carries only
+    /// errors on stderr regardless.
+    /// </summary>
+    public ServerLogFormat Format { get; init; } = ServerLogFormat.Json;
+
+    /// <summary>
+    /// Whether to write log files. Null means the mode default: on for the ephemeral server, whose
+    /// files are the only record of a CLI-launched sync, and off for the persistent server, whose
+    /// console output is collected by its host (container runtime, journald).
+    /// </summary>
+    public bool? Files { get; init; }
+}
+
+public enum ServerLogFormat
+{
+    Json,
+    Text,
 }
 
 /// <summary>

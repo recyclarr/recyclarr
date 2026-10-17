@@ -233,10 +233,13 @@ internal sealed class ServerProcessTest
 
         using var server = Start($"--parent-pid={Environment.ProcessId}");
         var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
 
+        // Startup fails before settings configure logging, so the reason is on stderr.
         server.ExitCode.Should().NotBe(0);
-        (await output).Should().NotContain("READY:").And.Contain("management port");
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("management port");
     }
 
     private static Uri LocalUri(int port, string path) => new($"http://127.0.0.1:{port}{path}");
