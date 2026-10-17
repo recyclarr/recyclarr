@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO.Abstractions;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Recyclarr.Server.Tests;
 
@@ -15,11 +17,16 @@ internal sealed class ServerProcessTest
 
     private IDirectoryInfo _root = null!;
     private string? _apiKey = "test-server-api-key";
+    private string _apiUrl = "http://127.0.0.1:0";
+    private int _managementPort;
+    private bool _managementPortFromEnvironment = true;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
 
     [SetUp]
     public void CreateRoot()
     {
+        // A fixed management port would collide with parallel tests and a developer's server.
+        _managementPort = FreePort();
         _root = new FileSystem().Directory.CreateTempSubdirectory("recyclarr-server-process-");
         var guides = _root.SubDirectory("guides");
         var templates = _root.SubDirectory("templates");
@@ -161,6 +168,86 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("RECYCLARR_API_KEY");
     }
 
+    /// <summary>
+    /// Probes and metrics are anonymous, so they are served only on the management port, and the
+    /// API only on its own port (ADR-029).
+    /// </summary>
+    [TestCase("/livez", true)]
+    [TestCase("/readyz", true)]
+    [TestCase("/openapi/v1.json", false)]
+    public async Task Each_route_is_served_only_on_its_own_port(string path, bool management)
+    {
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var apiPort = await WaitForReadyAsync(server);
+        using var http = new HttpClient();
+
+        var onManagement = await http.GetAsync(LocalUri(_managementPort, path));
+        var onApi = await http.GetAsync(LocalUri(apiPort, path));
+
+        var (servedBy, refusedBy) = management ? (onManagement, onApi) : (onApi, onManagement);
+        servedBy.StatusCode.Should().Be(HttpStatusCode.OK);
+        refusedBy.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        server.StandardInput.Close();
+        await WaitForExitAsync(server);
+    }
+
+    [Test]
+    public async Task The_management_port_comes_from_settings_without_an_override()
+    {
+        _managementPortFromEnvironment = false;
+        ConfigDirectory
+            .File("settings.yml")
+            .AppendAllText(
+                $"\nserver:\n  management:\n    port: {_managementPort}\n    metrics: false\n"
+            );
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        await WaitForReadyAsync(server);
+        using var http = new HttpClient();
+
+        var response = await http.GetAsync(LocalUri(_managementPort, "/livez"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        server.StandardInput.Close();
+        await WaitForExitAsync(server);
+    }
+
+    [Test]
+    public async Task An_ephemeral_server_opens_no_management_port()
+    {
+        using var server = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        await WaitForReadyAsync(server);
+        using var http = new HttpClient();
+
+        var probe = () => http.GetAsync(LocalUri(_managementPort, "/livez"));
+
+        await probe.Should().ThrowAsync<HttpRequestException>();
+        server.StandardInput.Close();
+        await WaitForExitAsync(server);
+    }
+
+    [Test]
+    public async Task A_management_port_equal_to_the_api_port_stops_startup()
+    {
+        _apiUrl = $"http://127.0.0.1:{_managementPort}";
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().NotBe(0);
+        (await output).Should().NotContain("READY:").And.Contain("management port");
+    }
+
+    private static Uri LocalUri(int port, string path) => new($"http://127.0.0.1:{port}{path}");
+
+    private static int FreePort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        return ((IPEndPoint)listener.LocalEndpoint).Port;
+    }
+
     private IFileInfo StateDatabase => ConfigDirectory.SubDirectory("state").File("server.db");
 
     private Process Start(params string[] arguments)
@@ -180,7 +267,14 @@ internal sealed class ServerProcessTest
             },
         };
 
-        startInfo.ArgumentList.Add("--urls=http://127.0.0.1:0");
+        if (_managementPortFromEnvironment)
+        {
+            startInfo.Environment["ASPNETCORE_MANAGEMENTPORT"] = _managementPort.ToString(
+                CultureInfo.InvariantCulture
+            );
+        }
+
+        startInfo.ArgumentList.Add($"--urls={_apiUrl}");
         foreach (var argument in arguments)
         {
             startInfo.ArgumentList.Add(argument);
@@ -191,20 +285,23 @@ internal sealed class ServerProcessTest
     }
 
     /// <summary>
-    /// A persistent server also logs to stdout, so lines before READY are skipped.
+    /// A persistent server also logs to stdout, so lines before READY are skipped. Returns the API
+    /// port the server reports.
     /// </summary>
-    private static async Task WaitForReadyAsync(Process server)
+    private static async Task<int> WaitForReadyAsync(Process server)
     {
+        const string prefix = "READY:";
         using var timeout = new CancellationTokenSource(ExitTimeout);
         while (await server.StandardOutput.ReadLineAsync(timeout.Token) is { } line)
         {
-            if (line.StartsWith("READY:", StringComparison.Ordinal))
+            if (line.StartsWith(prefix, StringComparison.Ordinal))
             {
-                return;
+                return int.Parse(line[prefix.Length..], CultureInfo.InvariantCulture);
             }
         }
 
         Assert.Fail("The server exited before it was ready");
+        return -1;
     }
 
     private static async Task WaitForExitAsync(Process server, TimeSpan? limit = null)

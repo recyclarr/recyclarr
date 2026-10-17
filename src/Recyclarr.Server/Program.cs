@@ -7,6 +7,7 @@ using Autofac.Extensions.DependencyInjection;
 using FastEndpoints;
 using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Hosting.WindowsServices;
@@ -151,6 +152,7 @@ builder
         configureOptions: null
     );
 builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
 
 // Standalone invocations (e.g. the foreground `serve` command) have no parent to watch and manage
 // their own lifecycle via SIGTERM.
@@ -170,6 +172,35 @@ if (!isDocumentGeneration)
 }
 
 await using var app = builder.Build();
+
+var managementPort = app.Services.GetRequiredService<ManagementPort>();
+
+if (mode == ServerMode.Persistent && !isDocumentGeneration)
+{
+    // Management requests branch off by the port the connection arrived on, never the Host
+    // header, which clients can forge (ADR-029). The branch runs before request logging and
+    // registers no routing endpoints, so probes stay out of the request log and the OpenAPI
+    // document, and the API pipeline never sees them. Unknown paths in the branch get 404.
+    // The port is read per request: settings.yml loads lazily, and a load failure must surface
+    // through the startup failure path below, not while the pipeline is built.
+    app.MapWhen(
+        ctx => ctx.Connection.LocalPort == managementPort.Number,
+        management =>
+        {
+            var noChecks = new HealthCheckOptions { Predicate = _ => false };
+            management.UseHealthChecks("/livez", noChecks);
+            management.UseHealthChecks("/readyz", noChecks);
+
+            // Routing has already matched any API endpoint for this path; ending the branch
+            // without executing it would be a server error rather than a 404.
+            management.Run(ctx =>
+            {
+                ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+                return Task.CompletedTask;
+            });
+        }
+    );
+}
 
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
@@ -199,6 +230,7 @@ try
     {
         // Fail closed: without a key the server would serve its API to anyone (ADR-027).
         app.Services.GetRequiredService<ServerApiKey>();
+        app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureDistinctPorts();
     }
 
     await app.StartAsync();
@@ -216,9 +248,12 @@ catch (Exception e)
 // Emit the READY handshake so callers know the port we actually bound to
 var server = app.Services.GetRequiredService<IServer>();
 var addresses = server.Features.Get<IServerAddressesFeature>();
-var boundAddress = addresses?.Addresses.FirstOrDefault();
-var port = boundAddress is not null ? new Uri(boundAddress).Port : -1;
-app.Services.GetRequiredService<IReadySignal>().Ready(port);
+var apiPort =
+    addresses
+        ?.Addresses.Select(a => new Uri(a).Port)
+        .FirstOrDefault(p => isDocumentGeneration || p != managementPort.Number, -1)
+    ?? -1;
+app.Services.GetRequiredService<IReadySignal>().Ready(apiPort);
 
 // A faulted background service stops the host the same way a stop request does. Exiting with 0
 // after one would hide the failure from systemd (Restart=on-failure) and the Windows SCM recovery
