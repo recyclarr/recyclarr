@@ -83,7 +83,6 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
         var fields = new List<string>();
         var match = TableRegex().Match(line);
 
-        // ReSharper disable once InvertIf
         if (match.Success)
         {
             var tableRow = match.Groups[1].Value;

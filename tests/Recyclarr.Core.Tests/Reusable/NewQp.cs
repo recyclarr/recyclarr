@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualityProfile.Models;
@@ -52,11 +51,6 @@ internal static class NewQp
         };
     }
 
-    [SuppressMessage(
-        "ReSharper",
-        "IntroduceOptionalParameters.Global",
-        Justification = "This is for unit test purposes and we want to be explicit sometimes"
-    )]
     public static QualityProfileQualityConfig QualityConfig(string itemName)
     {
         return QualityConfig(itemName, true);

@@ -10,7 +10,6 @@ internal class RadarrQualityItemLimitFetcher(IRadarrCapabilityFetcher capability
 
     public async Task<QualityItemLimits> GetLimits(CancellationToken ct)
     {
-        // ReSharper disable once InvertIf
         if (_cachedLimits is null)
         {
             var capabilities = await capabilityFetcher.GetCapabilities(ct);

@@ -67,7 +67,6 @@ public abstract class IntegrationTestFixture : IDisposable
         return new LifetimeScopeWrapper<T>(childScope);
     }
 
-    // ReSharper disable once VirtualMemberNeverOverridden.Global
     protected virtual void Dispose(bool disposing)
     {
         if (!disposing || !_container.IsValueCreated)

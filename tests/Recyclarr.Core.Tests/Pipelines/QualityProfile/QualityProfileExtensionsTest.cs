@@ -1,8 +1,6 @@
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
 
-// ReSharper disable CollectionNeverUpdated.Local
-
 namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
 
 internal sealed class QualityProfileExtensionsTest
