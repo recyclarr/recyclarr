@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Recyclarr.Server.Tests;
 
@@ -245,7 +246,74 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("management port");
     }
 
+    [TestCase(0)]
+    [TestCase(70000)]
+    public async Task An_out_of_range_management_port_stops_startup(int port)
+    {
+        _managementPort = port;
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("between 1 and 65535");
+    }
+
+    /// <summary>
+    /// Log correlation needs a current activity, which exists only while a tracer listens, so the
+    /// server must trace even when no exporter is configured.
+    /// </summary>
+    [Test]
+    public async Task Sync_job_log_lines_carry_a_trace_id_without_an_exporter()
+    {
+        ConfigDirectory
+            .File("recyclarr.yml")
+            .WriteAllText(
+                """
+                radarr:
+                  movies:
+                    base_url: http://127.0.0.1:1
+                    api_key: abc
+                """
+            );
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var apiPort = await WaitForReadyAsync(server);
+        using var http = new HttpClient();
+        http.DefaultRequestHeaders.Authorization = new("Bearer", _apiKey);
+
+        using var body = new StringContent("{}", Encoding.UTF8, "application/json");
+        using var created = await http.PostAsync(LocalUri(apiPort, "/api/v1/sync/jobs"), body);
+        created.StatusCode.Should().Be(HttpStatusCode.Accepted);
+
+        var jobLine = await ReadLineAsync(
+            server,
+            line => line.Contains("\"Sync job ", StringComparison.Ordinal)
+        );
+        jobLine.Should().Contain("\"trace_id\":");
+        server.StandardInput.Close();
+        await WaitForExitAsync(server);
+    }
+
     private static Uri LocalUri(int port, string path) => new($"http://127.0.0.1:{port}{path}");
+
+    private static async Task<string> ReadLineAsync(Process server, Func<string, bool> match)
+    {
+        using var timeout = new CancellationTokenSource(ExitTimeout);
+        while (await server.StandardOutput.ReadLineAsync(timeout.Token) is { } line)
+        {
+            if (match(line))
+            {
+                return line;
+            }
+        }
+
+        Assert.Fail("The server exited before writing the expected line");
+        return "";
+    }
 
     private static int FreePort()
     {

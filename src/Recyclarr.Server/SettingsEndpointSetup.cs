@@ -31,7 +31,7 @@ internal sealed class SettingsEndpointSetup(
             endpoints[$"Endpoints:Api{i}:Url"] = apiUrls[i];
         }
 
-        // A conflicting port is reported by EnsureDistinctPorts, not thrown here: the web host
+        // An invalid port is reported by EnsureValidPorts, not thrown here: the web host
         // configures Kestrel while it is built, outside the startup failure path.
         if (managementPort.Number is { } port && !UsesApiPort(apiUrls, port))
         {
@@ -43,11 +43,25 @@ internal sealed class SettingsEndpointSetup(
     }
 
     /// <summary>
-    /// Fails startup when the management port equals an API port (ADR-029).
+    /// Fails startup when the management port is out of range or equals an API port (ADR-029).
+    /// Port 0 is rejected too: probes and scrapers need a known port.
     /// </summary>
-    public void EnsureDistinctPorts()
+    public void EnsureValidPorts()
     {
-        if (managementPort.Number is { } port && UsesApiPort(ApiUrls(), port))
+        if (managementPort.Number is not { } port)
+        {
+            return;
+        }
+
+        if (port is < 1 or > 65535)
+        {
+            throw new FatalException(
+                $"The management port ({port}) must be between 1 and 65535; "
+                    + "change server.management.port in settings.yml"
+            );
+        }
+
+        if (UsesApiPort(ApiUrls(), port))
         {
             throw new FatalException(
                 $"The management port ({port}) must differ from the API port; "

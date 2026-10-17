@@ -3,7 +3,6 @@ using System.Reflection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using Recyclarr.Server.Persistence;
 
 namespace Recyclarr.Server.Telemetry;
 
@@ -48,18 +47,19 @@ internal static class ServerTelemetry
 
     extension(IServiceCollection services)
     {
-        public void AddServerTelemetry(IConfiguration configuration, ServerMode mode)
+        public void AddServerTelemetry(IConfiguration configuration)
         {
             var otlp = ExportsOtlp(configuration);
-            if (!otlp && mode == ServerMode.Ephemeral)
-            {
-                return;
-            }
 
+            // Tracing is always on so log lines carry trace and span ids; configuration only adds
+            // exporters.
             var telemetry = services
                 .AddOpenTelemetry()
                 .ConfigureResource(r =>
                     r.AddService(ServiceName(configuration), serviceVersion: ServiceVersion)
+                )
+                .WithTracing(tracing =>
+                    tracing.AddSource("Microsoft.AspNetCore", "System.Net.Http", SourceName)
                 )
                 .WithMetrics();
 
@@ -94,16 +94,10 @@ internal static class ServerTelemetry
                 }
             );
 
-            if (!otlp)
+            if (otlp)
             {
-                return;
+                telemetry.UseOtlpExporter();
             }
-
-            telemetry
-                .WithTracing(tracing =>
-                    tracing.AddSource("Microsoft.AspNetCore", "System.Net.Http", SourceName)
-                )
-                .UseOtlpExporter();
         }
     }
 }

@@ -68,7 +68,7 @@ builder.Services.AddSerilog(
             .WriteTo.Logger(services.GetRequiredService<ServerLogger>())
 );
 builder.Services.AddOutboundHttpClients();
-builder.Services.AddServerTelemetry(builder.Configuration, mode);
+builder.Services.AddServerTelemetry(builder.Configuration);
 
 // Each takes over the host lifetime only when its service manager launched this process (readiness
 // and stop notifications for a systemd unit, the SCM protocol for a Windows service). Under a
@@ -284,7 +284,7 @@ try
     {
         // Fail closed: without a key the server would serve its API to anyone (ADR-027).
         app.Services.GetRequiredService<ServerApiKey>();
-        app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureDistinctPorts();
+        app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureValidPorts();
     }
 
     await app.StartAsync();
