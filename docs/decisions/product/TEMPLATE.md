@@ -1,25 +1,25 @@
-# PDR-NNN: {short title of decision}
+# PDR-NNN: {short title of the decision}
 
-- **Status:** {proposed | accepted | deprecated | superseded by PDR-NNN}
-- **Date:** YYYY-MM-DD
 - **Upstream:** {link to TRaSH Guides issue/PR, Discord thread, or external driver}
 
 ## Context
 
-{What external change, upstream decision, or user need is driving this decision? Reference the
-upstream source.}
+{What external change, upstream decision, or user need drives this decision?}
 
 ## Decision
 
-{What are we doing in response? State the decision clearly.}
+{What Recyclarr does in response, stated as the rule currently in force.}
 
-## Affected Areas
+## Rejected Options
 
-- Config: {YAML keys affected, or "None"}
-- Commands: {CLI commands affected, or "None"}
-- Migration: {required | not required} - {brief migration notes if required}
+- {option}: {reason it was rejected}
 
 ## Consequences
 
-- {consequence 1}
-- {consequence 2}
+- Config: {YAML keys affected, or "None"}
+- Migration: {required | not required}: {brief migration notes if required}
+- {other user-visible or implementation consequence}
+
+## History
+
+- YYYY-MM-DD: {one-line summary of the decision or the change to it}
