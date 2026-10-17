@@ -1,28 +1,24 @@
-# ADR-NNN: {short title of problem and solution}
+# ADR-NNN: {short title of the decision}
 
-- **Status:** {proposed | accepted | deprecated | superseded by ADR-NNN}
-- **Date:** YYYY-MM-DD
+- **Scope:** {components, projects, or paths this decision governs}
 
-## Context and Problem Statement
+## Context
 
-{2-3 sentences describing the technical problem. Articulate forces at play and why a decision is
-needed.}
+{2-5 sentences: the problem, the forces at play, and why a decision is needed.}
 
-## Decision Drivers
+## Decision
 
-- {force or constraint 1}
-- {force or constraint 2}
+{The rule currently in force, stated imperatively (MUST / MUST NOT). Name the anti-pattern it
+prevents. Enough rationale to apply the rule to cases the text does not list.}
 
-## Considered Options
+## Rejected Options
 
-1. {option 1}
-2. {option 2}
+- {option}: {reason it was rejected, stated so it applies to similar proposals}
 
-## Decision Outcome
+## Consequences
 
-Chosen option: "{option N}", because {justification}.
+- {what implementers must do, or what this makes harder}
 
-### Consequences
+## History
 
-- Good, because {benefit}
-- Bad, because {tradeoff accepted}
+- YYYY-MM-DD: {one-line summary of the decision or the change to it}

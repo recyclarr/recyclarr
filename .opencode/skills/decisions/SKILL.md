@@ -1,16 +1,10 @@
 ---
 name: decisions
 description: >-
-  Use when creating, editing, superseding, or reviewing Architecture Decision
-  Records (ADRs) or Product Decision Records (PDRs) under `docs/decisions/`
-  (including `docs/decisions/architecture/` and `docs/decisions/product/`);
-  writing MADR-formatted decision documents; recording rationale for an
-  architectural or upstream-driven choice; linking a decision to a TRaSH
-  Guides upstream source; changing a decision's status (proposed, accepted,
-  deprecated, superseded). Triggers on phrases like "write an ADR", "new
-  PDR", "document this decision", "decision record", "add an architecture
-  decision", or any edit to files matching `docs/decisions/**/*.md`. Do NOT
-  use for general architecture documentation under `docs/architecture/`.
+  Use when creating, editing, or reviewing Architecture or Product Decision Records (ADRs, PDRs):
+  recording why an architectural or upstream-driven choice was made, linking it to a TRaSH Guides
+  source, or changing, replacing, or removing one. Triggers on "write an ADR", "new PDR",
+  "decision record", or any edit to `docs/decisions/**/*.md`.
 ---
 
 # Decision Records
@@ -27,13 +21,35 @@ Records) in `docs/decisions/`.
 
 ## Rules
 
-**One decision per record.** Do not bundle multiple decisions into a single ADR/PDR. Each decision
-should be independently trackable, referenceable, and supersedable.
+Records carry no status. Every record on `master` is in force; Git history is the full record of
+past versions.
 
-**Naming**: `NNN-kebab-case-title.md` (sequential per category)
+**One decision per record.** Do not bundle multiple decisions into a single ADR/PDR. State each rule
+once, in the record that owns it, and link to it from other records instead of restating it.
 
-**Date accuracy**: Use the date the decision was made, not when documented. For existing decisions,
-verify against git history (`git log --format="%ai" <commit> -1`).
+**Naming**: `NNN-kebab-case-title.md`, sequential per category. MUST NOT reuse a number, including
+numbers of deleted records; check `git log --diff-filter=D --name-only -- docs/decisions/` when the
+highest number may have been deleted.
+
+**Body is the current decision.** Write every section as if the decision was always this way. MUST
+NOT add amendment prose ("previously", "updated to", "originally"), superseded options presented as
+history, or "Status" lines. Former choices that a reader could propose again belong in Rejected
+Options.
+
+**History**: one line per decision change, oldest first: `- YYYY-MM-DD: {what changed}`. The first
+line records the original decision. Edits that do not change the decision (typos, links,
+formatting, wording) get no line.
+
+**Date accuracy**: Use the date the decision was made or changed, not when documented. For existing
+decisions, verify against git history (`git log --format="%ai" <commit> -1`).
+
+## Changing a Decision
+
+- Decision modified: rewrite the affected sections in place and append a History line. Rename the
+  file and title when the old title no longer describes the decision; keep the number.
+- Decision replaced by a different approach: rewrite the same record to the new decision.
+- Decision dropped with no replacement: delete the record and update every reference to it
+  (`rg -n 'ADR-NNN|NNN-' docs src tests .opencode AGENTS.md`).
 
 **Reference-style links**: Use reference-style links for long URLs to respect line length limits:
 
@@ -42,16 +58,6 @@ verify against git history (`git log --format="%ai" <commit> -1`).
 
 [upstream]: https://discordapp.com/channels/@me/...
 ```
-
-## Status Values
-
-- `proposed` - Under consideration, not yet decided
-- `accepted` - Decision made and finalized
-- `deprecated` - No longer applies (context changed)
-- `superseded by {ADR,PDR}-NNN` - Replaced by another decision
-
-For accepted decisions with pending implementation details, use `accepted` and note the pending
-aspects in the document body.
 
 ## When to Create
 
