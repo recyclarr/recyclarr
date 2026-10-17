@@ -20,15 +20,6 @@
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- TreatAsUsed: blanket ref; not every project uses its attributes -->
-    <PackageReference Include="JetBrains.Annotations" TreatAsUsed="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="JetBrains.Annotations" />
-  </ItemGroup>
-
   <!-- Repository rules apply everywhere except the analyzer and its tests, which reference it
        directly. -->
   <ItemGroup

@@ -50,13 +50,11 @@ internal sealed class DataSizeYamlTypeConverterTest
         result.Limit.Should().Be(DataSize.Default);
     }
 
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class TestConfig
     {
         public DataSize Limit { get; set; }
     }
 
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class TestConfigWithDefault
     {
         public DataSize Limit { get; set; } = DataSize.Default;

@@ -1,6 +1,5 @@
 namespace Recyclarr.Server.Features.Instances.CustomFormats.Delete;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record DeleteInstanceCustomFormatRequest
 {
     /// <summary>The instance name from configuration; matching ignores case.</summary>

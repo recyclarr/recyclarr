@@ -1,11 +1,9 @@
 namespace Recyclarr.Server.Features.Guide.CustomFormats;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListGuideCustomFormatsResponse(
     IReadOnlyList<GuideCustomFormatSummaryResponse> Items
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideCustomFormatSummaryResponse
 {
     public required string TrashId { get; init; }

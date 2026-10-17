@@ -4,7 +4,6 @@ namespace Recyclarr.Server.Features;
 
 // 502 response for a Sonarr or Radarr call that failed outside a sync job (ADR-019). The failure
 // category is the same one sync results report for the same cause.
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed class ServiceFailureProblemDetails : HttpValidationProblemDetails
 {
     public const string ResponseDescription =

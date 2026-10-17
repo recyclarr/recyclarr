@@ -7,7 +7,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Parsing;
 
-[UsedImplicitly]
 public class ConfigParser(IYamlSerializerFactory yamlFactory)
 {
     private readonly IDeserializer _deserializer = yamlFactory.CreateDeserializer(

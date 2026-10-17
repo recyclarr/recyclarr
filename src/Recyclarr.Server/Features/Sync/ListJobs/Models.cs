@@ -4,7 +4,6 @@ using Recyclarr.Server.Sync;
 
 namespace Recyclarr.Server.Features.Sync.ListJobs;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListSyncJobsRequest
 {
     /// <summary>
@@ -21,7 +20,6 @@ internal sealed record ListSyncJobsRequest
     public string? Trigger { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SyncJobSummaryResponse
 {
     public required Guid Id { get; init; }
@@ -38,10 +36,8 @@ internal sealed record SyncJobSummaryResponse
     public required DateTimeOffset CreatedAt { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListSyncJobsResponse(IReadOnlyList<SyncJobSummaryResponse> Jobs);
 
-[UsedImplicitly]
 internal sealed class Validator : Validator<ListSyncJobsRequest>
 {
     public Validator()

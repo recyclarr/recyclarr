@@ -16,10 +16,8 @@ internal enum RadarrNamingField
 }
 
 /// <summary>A configured naming key that matches no guide format for the field.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record NamingReferenceMismatchResponse<TField>(TField Field, string ConfiguredKey);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrNamingUpdateResponse
 {
     public ValueChangeResponse<bool?>? RenameEpisodes { get; init; }
@@ -30,7 +28,6 @@ internal sealed record SonarrNamingUpdateResponse
     public ValueChangeResponse<string?>? AnimeEpisodeFormat { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrNamingUpdateResponse
 {
     public ValueChangeResponse<bool?>? RenameMovies { get; init; }
@@ -38,17 +35,14 @@ internal sealed record RadarrNamingUpdateResponse
     public ValueChangeResponse<string?>? MovieFolderFormat { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrNamingOutcomesResponse(
     IReadOnlyList<NamingReferenceMismatchResponse<SonarrNamingField>> ReferenceMismatches
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrNamingOutcomesResponse(
     IReadOnlyList<NamingReferenceMismatchResponse<RadarrNamingField>> ReferenceMismatches
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrNamingPipelineResponse
 {
     public required PipelineStatus Status { get; init; }
@@ -59,7 +53,6 @@ internal sealed record SonarrNamingPipelineResponse
     public BlockingPipeline? BlockedBy { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrNamingPipelineResponse
 {
     public required PipelineStatus Status { get; init; }

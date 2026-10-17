@@ -16,13 +16,11 @@ namespace Recyclarr.Cli.Console.Commands;
 /// must set <c>RECYCLARR_API_KEY</c> (ADR-027).
 /// </summary>
 [Description("Run the Recyclarr HTTP server in the foreground")]
-[UsedImplicitly]
 internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
     : AsyncCommand<ServeCommand.Settings>
 {
     private int _interrupted;
 
-    [UsedImplicitly]
     internal class Settings : BaseCommandSettings;
 
     [SuppressMessage("Style", "REC001", Justification = "Explicit None marks ct as ignored")]

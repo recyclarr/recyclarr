@@ -8,7 +8,6 @@ internal class BaseCommandSettings : CommandSettings
 {
     [CommandOption("--log [LEVEL]")]
     [EnumDescription<CliLogLevel>("Enable log output mode.")]
-    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     [DefaultValue(CliLogLevel.Info)]
     public FlagValue<CliLogLevel> LogLevel { get; init; } = null!;
 

@@ -1,6 +1,5 @@
 namespace Recyclarr.Settings.Models;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record RecyclarrSettings
 {
     public IReadOnlyCollection<ResourceProvider> ResourceProviders { get; init; } = [];
