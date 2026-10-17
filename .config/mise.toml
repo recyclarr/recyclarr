@@ -1,6 +1,4 @@
 [env]
-RECYCLARR_CONFIG_DIR = "{{ [config_root, '..', 'dev-configs', 'appdata'] | join_path | canonicalize }}"
-LINEAR_CLIENT_ID = "356e0c82210f6ddb8641c5aa96e63b22"
 DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
 
 [tools]
@@ -8,5 +6,8 @@ dotnet = "10"
 "github:santhosh-tekuri/jsonschema" = "latest"
 "npm:@microsoft/learn-cli" = "latest"
 "npm:httpyac" = "latest"
+powershell = "latest"
+pre-commit = "latest"
 python = "latest"
+uv = "latest"
 wrangler = "latest"
