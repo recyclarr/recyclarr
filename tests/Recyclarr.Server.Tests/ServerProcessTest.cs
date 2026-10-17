@@ -174,6 +174,7 @@ internal sealed class ServerProcessTest
     /// </summary>
     [TestCase("/livez", true)]
     [TestCase("/readyz", true)]
+    [TestCase("/metrics", true)]
     [TestCase("/openapi/v1.json", false)]
     public async Task Each_route_is_served_only_on_its_own_port(string path, bool management)
     {
@@ -192,7 +193,7 @@ internal sealed class ServerProcessTest
     }
 
     [Test]
-    public async Task The_management_port_comes_from_settings_without_an_override()
+    public async Task Management_settings_choose_the_port_and_can_turn_metrics_off()
     {
         _managementPortFromEnvironment = false;
         ConfigDirectory
@@ -205,9 +206,11 @@ internal sealed class ServerProcessTest
         await WaitForReadyAsync(server);
         using var http = new HttpClient();
 
-        var response = await http.GetAsync(LocalUri(_managementPort, "/livez"));
+        var probe = await http.GetAsync(LocalUri(_managementPort, "/livez"));
+        var metrics = await http.GetAsync(LocalUri(_managementPort, "/metrics"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        probe.StatusCode.Should().Be(HttpStatusCode.OK);
+        metrics.StatusCode.Should().Be(HttpStatusCode.NotFound);
         server.StandardInput.Close();
         await WaitForExitAsync(server);
     }
