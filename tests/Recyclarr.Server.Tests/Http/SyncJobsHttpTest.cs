@@ -10,6 +10,7 @@ using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.TestLibrary;
+using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
 using CreateJobEndpoint = Recyclarr.Server.Features.Sync.CreateJob.Endpoint;
@@ -66,10 +67,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     public async Task Generated_client_reads_cumulative_instance_only_progress()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(
-            new ServerSyncSettings(null, [], Preview: false),
-            ["completed", "running", "pending", "partial", "failed"]
-        );
+        var job = store.CreateManualJob(["completed", "running", "pending", "partial", "failed"]);
         var completed = new SyncInstanceResult("completed", SupportedServices.Radarr, []);
         var partial = new SyncInstanceResult(
             "partial",
@@ -127,7 +125,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
         var settings = new ServerSyncSettings(null, [], Preview: false);
-        var active = store.Create(settings, []);
+        var active = store.CreateManualJob([], settings);
         var occurrence = new DateTimeOffset(2026, 10, 5, 0, 0, 0, TimeSpan.Zero);
         var skipped = store.CreateScheduled(settings, [], occurrence);
 
@@ -160,7 +158,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     public async Task Active_job_answers_ok_with_its_status_and_retry_after(SyncJobStatus status)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), ["active"]);
+        var job = store.CreateManualJob(["active"]);
         store.Update(job.Id, current => current.Status = status);
 
         using var client = CreateClient();
@@ -178,10 +176,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     public async Task Slow_poll_observes_completed_and_stopped_instance_states()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(
-            new ServerSyncSettings(null, [], Preview: false),
-            ["completed", "interrupted", "not-run"]
-        );
+        var job = store.CreateManualJob(["completed", "interrupted", "not-run"]);
         var completed = new SyncInstanceResult("completed", SupportedServices.Sonarr, []);
         store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
         store.Update(

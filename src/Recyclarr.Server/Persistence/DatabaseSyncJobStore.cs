@@ -16,7 +16,11 @@ internal sealed class DatabaseSyncJobStore(
     // Serializes read-modify-write cycles; the database is local to this process.
     private readonly Lock _gate = new();
 
-    public SyncJob Create(ServerSyncSettings request, IReadOnlyList<string> instanceNames)
+    public SyncJob Create(
+        ServerSyncSettings request,
+        IReadOnlyList<string> instanceNames,
+        string? traceParent
+    )
     {
         lock (_gate)
         {
@@ -26,7 +30,8 @@ internal sealed class DatabaseSyncJobStore(
                 instanceNames,
                 SyncJobTrigger.Manual,
                 scheduledFor: null,
-                skippedBy: null
+                skippedBy: null,
+                traceParent
             );
             db.SyncJobs.Add(SyncJobRecordMapper.ToRecord(job));
             db.SaveChanges();
@@ -57,7 +62,8 @@ internal sealed class DatabaseSyncJobStore(
                 instanceNames,
                 SyncJobTrigger.Scheduled,
                 scheduledFor,
-                skippedBy: active is { } activeId ? new JobId { Value = activeId } : null
+                skippedBy: active is { } activeId ? new JobId { Value = activeId } : null,
+                traceParent: null
             );
 
             if (job.SkippedBy is not null)
@@ -165,7 +171,8 @@ internal sealed class DatabaseSyncJobStore(
         IReadOnlyList<string> instanceNames,
         SyncJobTrigger trigger,
         DateTimeOffset? scheduledFor,
-        JobId? skippedBy
+        JobId? skippedBy,
+        string? traceParent
     ) =>
         new()
         {
@@ -175,6 +182,7 @@ internal sealed class DatabaseSyncJobStore(
             CreatedAt = time.GetUtcNow(),
             ScheduledFor = scheduledFor,
             SkippedBy = skippedBy,
+            TraceParent = traceParent,
             Status = SyncJobStatus.Pending,
             Progress = new ProgressSnapshot(instanceNames),
         };

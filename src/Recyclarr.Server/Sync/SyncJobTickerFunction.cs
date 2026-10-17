@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config;
+using Recyclarr.Server.Telemetry;
 using Recyclarr.Sync.Results;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;
@@ -23,7 +25,8 @@ internal sealed class SyncJobTickerFunction(
     ServerConfigurationStore configuration,
     SyncExecutionGate gate,
     SyncRunScopeFactory scopeFactory,
-    SyncJobFinalizer finalizer
+    SyncJobFinalizer finalizer,
+    SyncJobTelemetry telemetry
 ) : ITickerFunction<SyncJobTickerRequest>
 {
     public async Task ExecuteAsync(
@@ -44,11 +47,22 @@ internal sealed class SyncJobTickerFunction(
         // Canceled while waiting (shutdown): the job stays pending, and startup recovery marks it
         // interrupted on the next start.
         using var admission = await gate.EnterAsync(job, cancellationToken);
-        await RunAsync(job, cancellationToken);
+        using var activity = SyncJobTelemetry.StartRun(job);
+        var started = Stopwatch.GetTimestamp();
+
+        await RunAsync(job, activity, cancellationToken);
+
+        var finalStatus = store.Get(job.Id)?.Status ?? SyncJobStatus.Failed;
+        if (finalStatus == SyncJobStatus.Failed)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, "sync job failed");
+        }
+
+        telemetry.RecordRun(job, finalStatus, Stopwatch.GetElapsedTime(started));
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private async Task RunAsync(SyncJob job, CancellationToken ct)
+    private async Task RunAsync(SyncJob job, Activity? activity, CancellationToken ct)
     {
         try
         {
@@ -62,12 +76,14 @@ internal sealed class SyncJobTickerFunction(
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Information(e, "Sync job {JobId} was canceled ({Reference})", job.Id, reference);
+            activity?.SetStatus(ActivityStatusCode.Error, "canceled");
             finalizer.Fail(job.Id, new SyncFault(reference));
         }
         catch (Exception e)
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync job fault {Reference}", reference);
+            activity?.SetStatus(ActivityStatusCode.Error, e.GetType().FullName);
             finalizer.Fail(job.Id, new SyncFault(reference));
         }
     }

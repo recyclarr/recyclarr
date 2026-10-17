@@ -8,6 +8,7 @@ using Recyclarr.Server.Features.Sync.ListJobs;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.TestLibrary;
+using Recyclarr.Server.Tests.Reusable;
 using ISyncApi = Recyclarr.Client.V1.ISyncApi;
 using RestService = Refit.RestService;
 
@@ -107,9 +108,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     {
         AddInstance();
         using var client = CreateClient();
-        var active = Services
-            .GetRequiredService<ISyncJobStore>()
-            .Create(new ServerSyncSettings(null, [], Preview: false), ["movies"]);
+        var active = Services.GetRequiredService<ISyncJobStore>().CreateManualJob(["movies"]);
 
         await _time.SchedulerWaiting;
         _time.SetUtcNow(Midnight);
