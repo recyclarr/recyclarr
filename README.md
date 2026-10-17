@@ -1,10 +1,10 @@
 # Recyclarr
 
-[![GitHub License](https://img.shields.io/github/license/recyclarr/recyclarr)](https://github.com/recyclarr/recyclarr/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Build Workflow Status](https://img.shields.io/github/actions/workflow/status/recyclarr/recyclarr/build.yml?branch=master&logo=githubactions)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml?query=branch%3Amaster)
-[![CodeQL](https://github.com/recyclarr/recyclarr/actions/workflows/codeql.yml/badge.svg)](https://github.com/recyclarr/recyclarr/actions/workflows/codeql.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
-[![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
+[![GitHub Downloads](https://img.shields.io/github/downloads/recyclarr/recyclarr/total?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/recyclarr/recyclarr?logo=docker)](https://hub.docker.com/r/recyclarr/recyclarr)
 
 Recyclarr is a configuration sync tool for Sonarr and Radarr. It applies the recommended settings
 from the [TRaSH Guides](https://trash-guides.info/) to your instances and keeps them current as the
@@ -42,6 +42,8 @@ The full documentation is at [recyclarr.dev](https://recyclarr.dev/). Main topic
 - [Upgrade Guides](https://recyclarr.dev/guide/upgrade-guide/)
 
 ## Getting Support
+
+[![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
 For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] and ask in the
 `#recyclarr` channel. Read [Getting Help](https://recyclarr.dev/guide/troubleshooting/help/) first
