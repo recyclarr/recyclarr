@@ -281,6 +281,8 @@ conflict, shared state), stop and ask the user to shut it down.
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 - `update_openapi.py`: Refresh vendored Sonarr/Radarr `openapi.json` specs from upstream
+- `record-demo.sh` (`mise run demo`): Re-record the README demo from
+  `.github/assets/sync-preview.tape`
 
 ## Commits and Changelog
 
