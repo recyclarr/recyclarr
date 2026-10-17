@@ -7,18 +7,12 @@ and expectations for all contributors.
 
 ### Design before code
 
-All non-trivial contributions require an issue with design discussion **before** any code is
-written. Open a new issue or comment on an existing one, and wait for maintainer approval of the
-approach before starting a PR. Maintainers need to agree on the design before implementation
-begins.
+New features, behavior changes, configuration or schema changes, and architectural changes need an
+issue with an approved design **before** you open a PR. PRs for these without prior approval will be
+closed; this is not personal, and the PR can follow the discussion.
 
-**PRs submitted without prior design approval will be closed.** This is not personal. Feel free to
-open an issue and discuss the approach; the PR can come after.
-
-### Trivial contributions
-
-Typo fixes, broken links, and minor documentation corrections don't need design discussion. Just
-open the PR with a clear description of what you're fixing.
+Bug fixes, small enhancements, and documentation fixes can go straight to a PR with a clear
+description.
 
 ### Review expectations
 
@@ -36,160 +30,63 @@ what tools people use. It holds all contributions to the same quality and compre
 contributor who used AI to draft code they fully understand and can defend is treated no differently
 from one who typed every character by hand.
 
-### Development setup
+### AI instructions
 
-Recyclarr's AI-augmented development environment uses [OpenCode][opencode] as the primary agentic
-coding tool, configured with Claude Opus and extended thinking enabled. The repository's `AGENTS.md`
-file contains project conventions, architecture context, coding standards, and pipeline
-documentation. Contributors using AI agents should point them at this file; it's the instruction set
-for any AI working in the codebase and is also useful reading for human contributors who want to
-understand the project's conventions quickly.
+`AGENTS.md` holds the project's conventions, architecture, and coding standards. Most AI coding
+tools read it, and it is also a quick introduction for human contributors. `.opencode/` adds
+optional skills for [OpenCode] users; no tool is required.
 
-[opencode]: https://opencode.ai
+[OpenCode]: https://opencode.ai
 
-## Code & Documentation Standards
+## Development Setup
 
-### Markdown Changes
+1. Install [mise] and [Docker].
+1. Run `mise install` in the repository root to install the tools in `.config/mise.toml`.
+1. Run `pre-commit install`. The hooks run every formatter and linter on commit.
+1. Use an editor with C# and [EditorConfig] support. A [CSharpier plugin][csharpier_plugins] with
+   format on save is optional; the hooks format C# code too.
 
-- All changes must pass configured [markdownlint] rules
-- See the `.markdownlint.json` files in this repository for project-specific rule adjustments
+## Code Standards
 
-### C# Code Requirements
+Rules the hooks do not enforce:
 
-- Code must be free of warnings and analysis issues (zero tolerance policy)
-- Compiler and analyzer diagnostics are enforced during builds; [CodeQL] scans for security issues
-- All new code must use the "Recyclarr Cleanup" [Code Cleanup] profile for code quality and
-  redundancy fixes
-- All new code must be formatted with [CSharpier] for consistent code style
-- When using Jetbrains Rider, select the "Recyclarr Cleanup" profile for code cleanup
-- Visual Studio users should use the Resharper extension
+- C# code must build with zero warnings. Compiler and analyzer diagnostics are errors; [CodeQL]
+  scans for security issues.
+- Commits must follow [Conventional Commits][commits]. `AGENTS.md` describes how to choose the type
+  and scope.
 
-#### Using CSharpier
+## Running Recyclarr Locally
 
-There are two recommended ways to use CSharpier:
+Start the Sonarr, Radarr, and notification services defined in `compose.yaml`:
 
-1. **IDE Integration (preferred)**<br/>
-   CSharpier supports [many IDEs and editors][csharpier_plugins]. Configure your plugin to format on
-   save for automatic reformatting.
-
-1. **CLI Tool**<br/>
-   Install tooling: `dotnet tool restore` at the repo root. Format all C# files with `dotnet
-   csharpier .`, or format specific areas with `dotnet csharpier path/to/directory`.
-
-## Required Tools
-
-### Essential
-
-- .NET SDK 10.0 and tooling (including dotnet CLI)
-- PowerShell 7+
-- Python 3.12+
-- Docker CLI (Docker Desktop on Windows)
-
-### Highly Recommended
-
-- Jetbrains Rider (IDE for editing C# code)
-- Visual Studio Code (with workspace-recommended extensions)
-
-## Conventional Commits
-
-This project uses and enforces [Conventional Commits][commits] with the following commit types:
-
-| Type       | Description                                                   |
-| ---------- | ------------------------------------------------------------- |
-| `build`    | Update project files, settings, etc.                          |
-| `chore`    | Anything not code related or that falls into other categories |
-| `ci`       | Changes to CI/CD scripts or configuration                     |
-| `docs`     | Updates to non-code documentation (markdown, readme, etc)     |
-| `feat`     | A new feature implementation                                  |
-| `fix`      | A defect or security issue fix                                |
-| `perf`     | Code changes related to improving performance                 |
-| `refactor` | Code changes that don't impact observable functionality       |
-| `revert`   | Prefix for commits made by the `git revert` command           |
-| `style`    | Whitespace or code cleanup changes                            |
-| `test`     | Updates to unit test code only                                |
-
-## Docker Development
-
-The project includes utility scripts to simplify development and debugging workflows using Docker,
-supporting both local and containerized execution of Recyclarr.
-
-### Debug Services Stack
-
-The root `docker-compose.yml` provides configuration for services used when debugging Recyclarr:
-
-- Radarr (develop and stable builds)
-- Sonarr (develop and stable builds)
-- Apprise (for testing notifications)
-- SQLite (for database inspection)
-
-To start these services:
-
-```powershell
+```bash
 docker compose up -d
 ```
 
-Each service sets `pull_policy: always` in `docker-compose.yml`, so `up -d` refreshes images on
-every start.
+Run a CLI command. Without a configured server, the CLI starts a temporary server for the command:
 
-Service endpoints are mapped to:
-
-- Radarr develop: <http://localhost:7890>
-- Sonarr develop: <http://localhost:8990>
-- Apprise: <http://localhost:8000>
-
-### Apprise Notification Testing
-
-To test Recyclarr notifications locally:
-
-1. Create a configuration file in `docker/debugging/apprise/` named `{key}.cfg` (e.g.,
-   `discord.cfg`)
-
-1. Add your notification URL in [Apprise format][apprise_url]:
-
-   ```txt
-   discord://WEBHOOK_ID/WEBHOOK_TOKEN
-   ```
-
-1. Configure `~/.config/recyclarr/settings.yml`:
-
-   ```yaml
-   notifications:
-     apprise:
-       mode: stateful
-       base_url: http://localhost:8000
-       key: discord
-   ```
-
-The `key` must match the filename (without `.cfg`). The `docker/debugging/` directory is gitignored,
-so your webhook credentials stay local.
-
-[apprise_url]: https://github.com/caronc/apprise/wiki#notification-services
-
-### Recyclarr Container
-
-To run Recyclarr inside a Docker container with your local code changes:
-
-```powershell
-# Example: Run the sync command
-./scripts/Docker-Recyclarr.ps1 sync
-
-# Pass additional arguments to Recyclarr
-./scripts/Docker-Recyclarr.ps1 sync radarr --preview
+```bash
+dotnet run --project src/Recyclarr.Cli -- sync --preview
 ```
 
-This script:
+To work on the server itself, run it with hot reload. Set `RECYCLARR_API_KEY` first:
 
-1. Runs `docker compose up -d` to ensure dependent services are running
-1. Builds a local Recyclarr image with your current code
-1. Uses `docker compose run` with the `recyclarr` profile
-1. Forwards all arguments to the Recyclarr container
-1. Removes the container after completion
+```bash
+dotnet watch --project src/Recyclarr.Server
+```
 
-The path `docker/debugging/recyclarr` is mapped to `/config` inside the container for configuration
-and log access.
+### Testing Notifications
 
-> **Note**: By default, the image builds for your local architecture only. Multi-platform builds
-> using buildx are outside the scope of this documentation.
+The Apprise service forwards notifications to the ntfy service. Add this to `settings.yml`, run a
+sync, then open <http://localhost:8090/recyclarr>:
+
+```yml
+notifications:
+  apprise:
+    mode: stateful
+    base_url: http://localhost:8000
+    key: recyclarr
+```
 
 ## Release Process
 
@@ -214,10 +111,10 @@ The GitHub workflows handle:
 
 1. Compiling .NET projects
 1. Creating a [Github Release][release] with artifacts
-1. Building and publishing Docker images to [Github Container Registry][ghcr] and [Docker
-   Hub][dockerhub]
-1. Sending notifications to the `#related-announcements` channel in the [TRaSH Guides
-   Discord][discord]
+1. Building and publishing Docker images to [Github Container Registry][ghcr] and
+   [Docker Hub][dockerhub]
+1. Sending notifications to the `#related-announcements` channel in the
+   [TRaSH Guides Discord][discord]
 
 ## Additional Development Tasks
 
@@ -229,8 +126,8 @@ branch.
 
 ### Testing Discord Notifier
 
-1. Make a GET request to `https://api.github.com/recyclarr/recyclarr/releases/tags/v4.0.0` (or any
-   version)
+1. Make a GET request to `https://api.github.com/repos/recyclarr/recyclarr/releases/tags/v8.0.0` (or
+   any version)
 
 1. Save the response JSON to `ci/notify/release.json`
 
@@ -245,17 +142,17 @@ branch.
 
    ```bash
    python ./discord_notify.py \
-     --version v4.0.0 \
+     --version v8.0.0 \
      --repo recyclarr/recyclarr \
      --webhook-url https://discord.com/api/webhooks/your_webhook_url \
      --changelog ./changelog.txt \
      --assets ./assets.txt
    ```
 
-[markdownlint]: https://github.com/DavidAnson/markdownlint
+[mise]: https://mise.jdx.dev/
+[Docker]: https://docs.docker.com/get-started/get-docker/
 [CodeQL]: https://codeql.github.com/
-[Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
-[CSharpier]: https://csharpier.com/
+[EditorConfig]: https://editorconfig.org/
 [csharpier_plugins]: https://csharpier.com/docs/Editors
 [commits]: https://www.conventionalcommits.org/en/v1.0.0/
 [semver]: https://semver.org/
