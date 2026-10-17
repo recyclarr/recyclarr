@@ -10,6 +10,8 @@ Recyclarr is a configuration sync tool for Sonarr and Radarr. It applies the rec
 from the [TRaSH Guides](https://trash-guides.info/) to your instances and keeps them current as the
 guides change, so you don't have to copy settings by hand.
 
+![Recyclarr previewing a sync to Radarr](.github/assets/sync-preview.webp)
+
 ## Features
 
 Recyclarr supports Radarr and Sonarr (Sonarr v4 or newer). The following information can be synced

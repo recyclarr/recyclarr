@@ -1,0 +1,14 @@
+# Targets the radarr_develop1 service in compose.yaml
+radarr:
+  movies:
+    base_url: http://localhost:7890
+    api_key: testkey
+    quality_definition:
+      type: movie
+    quality_profiles:
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9 # HD Bluray + WEB
+    media_naming:
+      folder: plex-tmdb
+      movie:
+        rename: true
+        standard: plex-tmdb

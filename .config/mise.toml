@@ -3,11 +3,18 @@ DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
 
 [tools]
 dotnet = "10"
+ffmpeg = "latest"
 "github:santhosh-tekuri/jsonschema" = "latest"
 "npm:@microsoft/learn-cli" = "latest"
 "npm:httpyac" = "latest"
 powershell = "latest"
 pre-commit = "latest"
 python = "latest"
+ttyd = "latest"
 uv = "latest"
+vhs = "latest"
 wrangler = "latest"
+
+[tasks.demo]
+description = "Record the README sync demo (.github/assets/sync-preview.webp)"
+file = "scripts/record-demo.sh"
