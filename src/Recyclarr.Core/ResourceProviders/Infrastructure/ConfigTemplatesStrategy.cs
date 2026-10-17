@@ -12,8 +12,11 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
 {
     public string Type => "config-templates";
 
-    public IReadOnlyList<string> DefaultReferences =>
-        [$"v{GitVersionInformation.Major}", "master", "main"];
+    // The templates repository tags a branch per Recyclarr major version.
+    private static readonly int MajorVersion =
+        typeof(ConfigTemplatesStrategy).Assembly.GetName().Version?.Major ?? 0;
+
+    public IReadOnlyList<string> DefaultReferences => [$"v{MajorVersion}", "master", "main"];
 
     public IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers

@@ -10,6 +10,9 @@ outputs:
   semVer:
     description: The SemVer value
     value: ${{ steps.gitversion.outputs.semVer }}
+  informationalVersion:
+    description: The InformationalVersion value
+    value: ${{ steps.gitversion.outputs.informationalVersion }}
 
 runs:
   using: composite

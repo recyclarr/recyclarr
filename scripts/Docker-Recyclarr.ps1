@@ -9,6 +9,13 @@ if (-not $configDir) {
 if (-not $env:RECYCLARR_API_KEY) {
     throw "RECYCLARR_API_KEY is not set"
 }
+$version = dotnet gitversion -output json | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet gitversion failed"
+}
+$env:RECYCLARR_VERSION = $version.SemVer
+$env:RECYCLARR_INFORMATIONAL_VERSION = $version.InformationalVersion
+
 $env:DOCKER_UID = $(id -u)
 $env:DOCKER_GID = $(id -g)
 
