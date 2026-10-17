@@ -69,7 +69,7 @@ services:
       - ./docker/apprise/recyclarr.yml:/config/recyclarr.yml
     environment:
       TZ: America/Chicago
-      APPRISE_DEFAULT_THEM: dark
+      APPRISE_DEFAULT_THEME: dark
       APPRISE_STATEFUL_MODE: simple
       DEBUG: yes
 
