@@ -38,7 +38,7 @@ namespace ServerDatabaseMigrations
 
                     b.HasKey("JobId", "Ordinal");
 
-                    b.ToTable("SyncJobInstances", (string)null);
+                    b.ToTable("SyncJobInstances");
                 });
 
             modelBuilder.Entity("Recyclarr.Server.Persistence.SyncJobRecord", b =>
@@ -82,6 +82,9 @@ namespace ServerDatabaseMigrations
                     b.Property<Guid?>("TickerId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TraceParent")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Trigger")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -92,16 +95,18 @@ namespace ServerDatabaseMigrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("SyncJobs", (string)null);
+                    b.ToTable("SyncJobs");
                 });
 
             modelBuilder.Entity("Recyclarr.Server.Persistence.SyncJobInstanceRecord", b =>
                 {
-                    b.HasOne("Recyclarr.Server.Persistence.SyncJobRecord", null)
+                    b.HasOne("Recyclarr.Server.Persistence.SyncJobRecord", "Job")
                         .WithMany("Progress")
                         .HasForeignKey("JobId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("Recyclarr.Server.Persistence.SyncJobRecord", b =>

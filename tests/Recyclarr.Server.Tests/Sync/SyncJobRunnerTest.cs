@@ -31,7 +31,10 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var settings = new ServerSyncSettings(Service: null, Instances: [], Preview: false);
 
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(settings, configs.Select(config => config.InstanceName).ToList());
+        var job = store.CreateManualJob(
+            configs.Select(config => config.InstanceName).ToList(),
+            settings
+        );
 
         using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>();
         await scope.Entry.RunAsync(job.Id, configs, settings, CancellationToken.None);
@@ -185,7 +188,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var configs = new[] { Config("first"), Config("second", SupportedServices.Sonarr) };
         var settings = new ServerSyncSettings(null, [], Preview: false);
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(settings, ["first", "second"]);
+        var job = store.CreateManualJob(["first", "second"], settings);
 
         using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>();
         var run = scope.Entry.RunAsync(job.Id, configs, settings, CancellationToken.None);

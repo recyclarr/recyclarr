@@ -49,6 +49,7 @@ internal static partial class SyncJobRecordMapper
     [MapperIgnoreSource(nameof(SyncJob.Id))]
     [MapperIgnoreSource(nameof(SyncJob.Request))]
     [MapperIgnoreSource(nameof(SyncJob.SkippedBy))]
+    [MapperIgnoreSource(nameof(SyncJob.TraceParent))]
     [MapperIgnoreSource(nameof(SyncJob.Progress))]
     private static partial void ApplyState(SyncJob job, [MappingTarget] SyncJobRecord record);
 

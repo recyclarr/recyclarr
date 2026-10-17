@@ -19,6 +19,7 @@ using Recyclarr.Server.Sync.Notifications.Apprise;
 using Recyclarr.Server.Sync.Progress;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.Sync.Schedule;
+using Recyclarr.Server.Telemetry;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
@@ -95,6 +96,7 @@ internal static class CompositionRoot
             )
             .SingleInstance();
         builder.RegisterType<SyncJobFinalizer>();
+        builder.RegisterType<SyncJobTelemetry>().SingleInstance();
         builder.RegisterType<NotificationService>().InstancePerMatchingLifetimeScope("run");
         builder
             .Register<INotificationService>(c =>

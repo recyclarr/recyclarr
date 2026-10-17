@@ -32,6 +32,9 @@ internal sealed class SyncJobRecord
 
     public string? FaultReference { get; set; }
 
+    // W3C traceparent of the request that created the job; null for scheduled jobs.
+    public string? TraceParent { get; set; }
+
     // The TickerQ time ticker that executes this job; null for jobs that never run (skipped).
     public Guid? TickerId { get; set; }
 

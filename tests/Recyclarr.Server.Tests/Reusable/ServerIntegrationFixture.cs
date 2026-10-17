@@ -1,4 +1,6 @@
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Server.TestLibrary;
 
@@ -19,5 +21,10 @@ internal abstract class ServerIntegrationFixture : IntegrationTestFixture
     {
         base.RegisterStubsAndMocks(builder);
         builder.RegisterModule<ServerSyncStubsModule>();
+
+        // The web host provides IMeterFactory in production; this container has no host.
+        var services = new ServiceCollection();
+        services.AddMetrics();
+        builder.Populate(services);
     }
 }

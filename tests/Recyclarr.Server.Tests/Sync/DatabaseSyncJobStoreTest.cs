@@ -23,12 +23,25 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
         job.SkippedBy.Should().BeNull();
     }
 
+    [Test]
+    public void Manual_job_keeps_the_trace_context_of_its_request()
+    {
+        var store = Resolve<ISyncJobStore>();
+        const string traceParent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01";
+
+        var manual = store.Create(Settings, ["movies"], traceParent);
+        var scheduled = store.CreateScheduled(Settings, ["movies"], Occurrence);
+
+        store.Get(manual.Id)?.TraceParent.Should().Be(traceParent);
+        store.Get(scheduled.Id)?.TraceParent.Should().BeNull();
+    }
+
     [TestCase(SyncJobStatus.Pending)]
     [TestCase(SyncJobStatus.Running)]
     public void Scheduled_occurrence_during_an_active_job_is_skipped(SyncJobStatus activeStatus)
     {
         var store = Resolve<ISyncJobStore>();
-        var active = store.Create(Settings, ["movies"]);
+        var active = store.CreateManualJob(["movies"]);
         store.Update(active.Id, job => job.Status = activeStatus);
 
         var skipped = store.CreateScheduled(Settings, ["movies"], Occurrence);
@@ -47,7 +60,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Scheduled_occurrence_after_jobs_finish_is_pending()
     {
         var store = Resolve<ISyncJobStore>();
-        Finish(store, store.Create(Settings, []).Id, SyncJobStatus.Succeeded);
+        Finish(store, store.CreateManualJob([]).Id, SyncJobStatus.Succeeded);
 
         store.CreateScheduled(Settings, [], Occurrence).Status.Should().Be(SyncJobStatus.Pending);
     }
@@ -78,7 +91,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Allowed_transition_is_persisted(SyncJobStatus from, SyncJobStatus to)
     {
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(Settings, []);
+        var job = store.CreateManualJob([]);
         Reach(store, job.Id, from);
 
         store.Update(job.Id, x => x.Status = to);
@@ -97,7 +110,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     )
     {
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(Settings, []);
+        var job = store.CreateManualJob([]);
         Reach(store, job.Id, from);
 
         var act = () => store.Update(job.Id, x => x.Status = to);
@@ -111,7 +124,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Terminal_job_is_never_mutated(SyncJobStatus terminal)
     {
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(Settings, ["movies"]);
+        var job = store.CreateManualJob(["movies"]);
         Finish(store, job.Id, terminal);
 
         store.Update(job.Id, x => x.Status = SyncJobStatus.Running);
@@ -123,7 +136,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Skipped_job_is_never_mutated()
     {
         var store = Resolve<ISyncJobStore>();
-        store.Create(Settings, []);
+        store.CreateManualJob([]);
         var skipped = store.CreateScheduled(Settings, [], Occurrence);
 
         store.Update(skipped.Id, x => x.Status = SyncJobStatus.Running);
@@ -135,8 +148,8 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Interrupting_stops_active_jobs_and_leaves_finished_jobs_alone()
     {
         var store = Resolve<ISyncJobStore>();
-        var pending = store.Create(Settings, ["waiting"]);
-        var running = store.Create(Settings, ["running"]);
+        var pending = store.CreateManualJob(["waiting"]);
+        var running = store.CreateManualJob(["running"]);
         store.Update(
             running.Id,
             job =>
@@ -145,7 +158,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
                 job.Progress = job.Progress.Start("running");
             }
         );
-        var finished = store.Create(Settings, []);
+        var finished = store.CreateManualJob([]);
         Finish(store, finished.Id, SyncJobStatus.Succeeded);
 
         store.InterruptActive();
@@ -170,12 +183,12 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Retention_evicts_oldest_terminal_jobs_but_never_active_ones()
     {
         var store = Resolve<ISyncJobStore>();
-        var active = store.Create(Settings, []);
+        var active = store.CreateManualJob([]);
         var terminal = Enumerable
             .Range(0, 51)
             .Select(_ =>
             {
-                var job = store.Create(Settings, []);
+                var job = store.CreateManualJob([]);
                 Finish(store, job.Id, SyncJobStatus.Succeeded);
                 return job.Id;
             })
@@ -190,7 +203,7 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
     public void Jobs_are_listed_oldest_first_and_filtered_by_trigger()
     {
         var store = Resolve<ISyncJobStore>();
-        var manual = store.Create(Settings, []);
+        var manual = store.CreateManualJob([]);
         var scheduled = store.CreateScheduled(Settings, [], Occurrence);
 
         store.GetAll(null, null).Select(x => x.Id).Should().Equal(manual.Id, scheduled.Id);
