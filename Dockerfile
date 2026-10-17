@@ -13,11 +13,23 @@ COPY --link --parents *.props src/*/*.csproj ./
 RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH \
  && dotnet restore src/Recyclarr.Server -a $TARGETARCH
 
+# The build context has no usable Git repository (a linked worktree's .git is a pointer outside
+# the context), so GitVersion runs on the host and its results arrive as build arguments.
+ARG VERSION
+ARG INFORMATIONAL_VERSION
+RUN test -n "$VERSION" && test -n "$INFORMATIONAL_VERSION" \
+ || { echo "Pass VERSION and INFORMATIONAL_VERSION from dotnet gitversion" >&2; exit 1; }
+
 # copy and publish app and libraries
 COPY --link . .
-RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app \
- && dotnet publish src/Recyclarr.Server -a $TARGETARCH --no-restore -o /app \
-    -p:OpenApiGenerateDocuments=false
+RUN publish() { \
+      dotnet publish "src/$1" -a $TARGETARCH --no-restore -o /app \
+        -p:DisableGitVersionTask=true -p:Version=$VERSION \
+        -p:InformationalVersion=$INFORMATIONAL_VERSION \
+        -p:OpenApiGenerateDocuments=false; \
+    } \
+ && publish Recyclarr.Cli \
+ && publish Recyclarr.Server
 
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
