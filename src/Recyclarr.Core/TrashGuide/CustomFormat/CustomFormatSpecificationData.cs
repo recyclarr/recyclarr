@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.TrashGuide.CustomFormat;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatSpecificationData
 {
     public string Name { get; init; } = "";
@@ -41,7 +40,6 @@ public record CustomFormatSpecificationData
     public override int GetHashCode() => throw new NotImplementedException();
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatFieldData
 {
     public string Name { get; init; } = "";

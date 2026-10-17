@@ -5,7 +5,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.File;
 
-[UsedImplicitly]
 public class FileYamlBehavior(IFileSystem fs, IAppPaths paths) : IYamlBehavior
 {
     public void Setup(DeserializerBuilder builder)

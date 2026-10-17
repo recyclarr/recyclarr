@@ -16,7 +16,6 @@
     <PackageVersion Include="FastEndpoints.OpenApi" Version="8.4.0-beta.26" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" />
-    <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />

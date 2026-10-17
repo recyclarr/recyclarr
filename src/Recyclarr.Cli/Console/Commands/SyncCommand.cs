@@ -9,11 +9,9 @@ using Spectre.Console.Cli;
 namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
-[UsedImplicitly]
 internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandler handler)
     : AsyncCommand<SyncCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage(
         "Performance",
         "CA1819:Properties should not return arrays",
@@ -25,19 +23,16 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
         [EnumDescription<SupportedServices>(
             "The service to sync. If not specified, all services are synced."
         )]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices? Service { get; init; }
 
         [CommandOption("-p|--preview")]
         [Description("Perform a dry run: preview the results without syncing.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool Preview { get; init; }
 
         [CommandOption("-i|--instance")]
         [Description(
             "One or more instance names to sync. If not specified, all instances will be synced."
         )]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string[] Instances { get; init; } = [];
     }
 

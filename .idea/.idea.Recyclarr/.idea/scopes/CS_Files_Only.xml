@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="CS Files Only" pattern="file:*.cs&amp;&amp;!file:*//obj//*" />
-</component>

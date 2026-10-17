@@ -9,7 +9,6 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List custom format groups available in the guide.")]
 internal class ListCustomFormatGroupsCommand(
     ILogger log,
@@ -17,23 +16,19 @@ internal class ListCustomFormatGroupsCommand(
     ServerConnectionFactory connections
 ) : AsyncCommand<ListCustomFormatGroupsCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
 
         [CommandOption("--filter")]
         [Description("Filter groups by name (case-insensitive substring match)")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string? Filter { get; init; }
 
         [CommandOption("--details")]
         [Description("Show member custom formats and their required/default status")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool Details { get; init; }
     }
 

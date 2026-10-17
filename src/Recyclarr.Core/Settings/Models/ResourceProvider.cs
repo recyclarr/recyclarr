@@ -2,7 +2,6 @@ using Recyclarr.Common;
 
 namespace Recyclarr.Settings.Models;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public abstract record ResourceProvider
 {
     public required string Name { get; init; }
@@ -11,7 +10,6 @@ public abstract record ResourceProvider
     public string? Service { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record GitResourceProvider : ResourceProvider
 {
     public required Uri CloneUrl { get; init; }
@@ -19,7 +17,6 @@ public record GitResourceProvider : ResourceProvider
     public DataSize CacheLimit { get; init; } = DataSize.Default;
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record LocalResourceProvider : ResourceProvider
 {
     public required string Path { get; init; }

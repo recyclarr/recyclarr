@@ -9,7 +9,6 @@ namespace Recyclarr.Migration.Steps;
 /// Renames the top-level JSON property in state mapping files from the old per-type names
 /// ("trash_id_mappings", "TrashIdMappings") to the canonical name ("mappings").
 /// </summary>
-[UsedImplicitly]
 [MigrationOrder(3)]
 internal class NormalizeStateMappingsPropertyStep(IAppPaths paths) : IMigrationStep
 {

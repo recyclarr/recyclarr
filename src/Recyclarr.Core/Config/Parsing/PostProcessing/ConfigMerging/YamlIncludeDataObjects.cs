@@ -9,13 +9,11 @@ namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 )]
 public interface IYamlInclude;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ConfigYamlInclude : IYamlInclude
 {
     public string? Config { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record TemplateYamlInclude : IYamlInclude
 {
     public string? Template { get; init; }

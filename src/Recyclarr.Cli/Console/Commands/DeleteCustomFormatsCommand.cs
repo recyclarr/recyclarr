@@ -10,14 +10,12 @@ using Spectre.Console.Cli;
 namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Delete things from services like Radarr and Sonarr")]
-[UsedImplicitly]
 internal class DeleteCustomFormatsCommand(
     ServerConnectionFactory connections,
     IAnsiConsole console,
     ILogger log
 ) : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage(
         "Performance",
         "CA1819:Properties should not return arrays",

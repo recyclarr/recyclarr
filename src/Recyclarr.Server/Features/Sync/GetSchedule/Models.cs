@@ -1,7 +1,6 @@
 namespace Recyclarr.Server.Features.Sync.GetSchedule;
 
 /// <summary>The built-in sync schedule.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SyncScheduleResponse
 {
     /// <summary>True when the schedule creates sync jobs.</summary>

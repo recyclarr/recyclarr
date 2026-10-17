@@ -35,7 +35,6 @@ internal enum CustomFormatInclusionReason
 }
 
 /// <summary>How the configuration selected a custom format.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatSelectionResponse(
     CustomFormatSource Source,
     string? GroupName,
@@ -43,13 +42,11 @@ internal sealed record CustomFormatSelectionResponse(
     IReadOnlyList<string> ProfileNames
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatCreateResponse(
     TrashIdNameResponse Identity,
     CustomFormatSelectionResponse SelectionProvenance
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatUpdateResponse
 {
     public required TrashIdNameResponse Identity { get; init; }
@@ -71,20 +68,17 @@ internal sealed record CustomFormatUpdateResponse
 /// `identity` is the stale stored entry; `managedIdentity` is the custom format that uses
 /// `serviceId` now.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatStateConflictResponse(
     TrashIdNameResponse Identity,
     TrashIdNameResponse ManagedIdentity,
     int ServiceId
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatAmbiguousMatchResponse(
     TrashIdNameResponse Identity,
     IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatOutcomesResponse
 {
     /// <summary>
@@ -128,10 +122,8 @@ internal sealed record CustomFormatOutcomesResponse
     public IReadOnlyList<TrashIdNameResponse> DeleteRejected { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record NamedIdentityResponse(TrashIdNameResponse Identity, int ServiceId);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record CustomFormatPipelineResponse
 {
     public required PipelineStatus Status { get; init; }

@@ -4,7 +4,6 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Server.Features.Sync.GetJob;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobRequest
 {
     /// <summary>The job ID from the create response or the job list.</summary>
@@ -36,20 +35,17 @@ internal enum InstanceProgressStatusResponse
     NotRun,
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record InstanceSnapshotResponse(string Name, InstanceProgressStatusResponse Status);
 
 /// <summary>
 /// Why a scheduled job did not run: another job was active at its scheduled time.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SkippedBecauseResponse
 {
     /// <summary>The ID of the job that was active.</summary>
     public required Guid JobId { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobResponse
 {
     public required Guid Id { get; init; }

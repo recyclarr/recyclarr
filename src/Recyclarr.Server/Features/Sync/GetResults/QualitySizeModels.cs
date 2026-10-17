@@ -11,7 +11,6 @@ internal enum QualitySizeKind
     Unlimited,
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeValueResponse
 {
     public required QualitySizeKind Kind { get; init; }
@@ -20,7 +19,6 @@ internal sealed record QualitySizeValueResponse
     public decimal? Value { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeUpdateResponse
 {
     public required string Quality { get; init; }
@@ -30,7 +28,6 @@ internal sealed record QualitySizeUpdateResponse
 }
 
 /// <summary>The size limits Recyclarr assigns to one quality.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeResponse
 {
     public required string Quality { get; init; }
@@ -39,33 +36,26 @@ internal sealed record QualitySizeResponse
     public required QualitySizeValueResponse Maximum { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeTypeResponse(string Type);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeGuideReferenceResponse(string Label, string TrashId);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeGuideLabelsResponse(IReadOnlyList<string> Labels);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeReferenceResponse(string Quality, string Type);
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeMinimumComparisonResponse(
     string Quality,
     QualitySizeValueResponse Minimum,
     QualitySizeValueResponse Preferred
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeMaximumComparisonResponse(
     string Quality,
     QualitySizeValueResponse Preferred,
     QualitySizeValueResponse Maximum
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizeOutcomesResponse
 {
     /// <summary>A configured `quality_definition.type` that the guide does not have.</summary>
@@ -118,7 +108,6 @@ internal sealed record QualitySizeOutcomesResponse
     [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualitySizePipelineResponse
 {
     public required PipelineStatus Status { get; init; }

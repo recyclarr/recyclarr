@@ -22,5 +22,4 @@ Dockerfile*
 **/*.md
 
 # Ignore these directories inside the docker subdir
-docker/debugging/
 docker/artifacts/

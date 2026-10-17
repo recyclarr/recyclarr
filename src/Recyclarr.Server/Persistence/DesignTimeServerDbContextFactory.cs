@@ -7,7 +7,6 @@ namespace Recyclarr.Server.Persistence;
 // config directory. Select one with `--context`. The in-memory database lives as long as the
 // short-lived tool process, so it is never disposed.
 
-[UsedImplicitly]
 internal sealed class DesignTimeServerDbContextFactory
     : IDesignTimeDbContextFactory<ServerDbContext>
 {
@@ -16,7 +15,6 @@ internal sealed class DesignTimeServerDbContextFactory
         DatabaseContextFactory.Server(ServerDatabase.InMemory()).CreateDbContext();
 }
 
-[UsedImplicitly]
 internal sealed class DesignTimeTickerQueueDbContextFactory
     : IDesignTimeDbContextFactory<TickerQueueDbContext>
 {

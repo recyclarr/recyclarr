@@ -1,6 +1,5 @@
 namespace Recyclarr.Settings.Models;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record ServerSettings
 {
     public int Port { get; init; } = 7982;
@@ -12,7 +11,6 @@ public record ServerSettings
 /// The built-in sync schedule of a persistent server. The server parses the cron expression at
 /// startup and evaluates it in the system time zone.
 /// </summary>
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record ScheduleSettings
 {
     public bool Enabled { get; init; } = true;

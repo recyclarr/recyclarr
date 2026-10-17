@@ -1,12 +1,10 @@
 namespace Recyclarr.Server.Features.Guide.CustomFormatGroups;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListGuideCustomFormatGroupsResponse(
     IReadOnlyList<GuideCustomFormatGroupSummaryResponse> Items
 );
 
 /// <summary>A guide custom format group: a set of custom formats that sync together.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideCustomFormatGroupSummaryResponse
 {
     public required string TrashId { get; init; }
@@ -24,7 +22,6 @@ internal sealed record GuideCustomFormatGroupSummaryResponse
     public required IReadOnlyList<string> QualityProfiles { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideCustomFormatGroupMemberResponse
 {
     public required string TrashId { get; init; }

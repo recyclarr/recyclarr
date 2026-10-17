@@ -1,11 +1,9 @@
 namespace Recyclarr.Server.Features.Guide.QualityProfiles;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListGuideQualityProfilesResponse(
     IReadOnlyList<GuideQualityProfileSummaryResponse> Items
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideQualityProfileSummaryResponse
 {
     public required string TrashId { get; init; }
@@ -25,7 +23,6 @@ internal sealed record GuideQualityProfileSummaryResponse
 }
 
 /// <summary>A quality or quality group in a guide quality profile.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GuideProfileQualityResponse
 {
     public required string Name { get; init; }

@@ -115,8 +115,6 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   source-generated `JsonSerializerContext`). Check for existing options before creating new
   instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
   convention.
-- Use `[UsedImplicitly]` only for verified JetBrains inspection false positives caused by runtime
-  use through deserialization, reflection, or DI.
 - Suppress warnings at the narrowest practical scope and include a justification. Use
   `[SuppressMessage]` for symbol-scoped analyzer findings and `#pragma warning` for unavoidable
   line- or region-scoped compiler diagnostics.

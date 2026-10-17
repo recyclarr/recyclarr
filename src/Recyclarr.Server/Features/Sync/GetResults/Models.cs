@@ -3,14 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.Server.Features.Sync.GetResults;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobResultsRequest
 {
     /// <summary>The job ID from the create response or the job list.</summary>
     public Guid Id { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SyncJobResultsResponse
 {
     public required Guid Id { get; init; }
@@ -73,13 +71,11 @@ internal enum BlockingPipeline
 }
 
 /// <summary>An unexpected error. The server log has the details under the same reference.</summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SyncFaultResponse(string Reference);
 
 /// <summary>
 /// The result of one instance. The `service` property selects the pipeline shape.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "service")]
 [JsonDerivedType(typeof(SonarrInstanceResultsResponse), "sonarr")]
 [JsonDerivedType(typeof(RadarrInstanceResultsResponse), "radarr")]
@@ -104,13 +100,11 @@ internal abstract record SyncInstanceResultsResponse
     public IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrInstanceResultsResponse : SyncInstanceResultsResponse
 {
     public required SonarrPipelinesResponse Pipelines { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrInstanceResultsResponse : SyncInstanceResultsResponse
 {
     public required RadarrPipelinesResponse Pipelines { get; init; }
@@ -120,7 +114,6 @@ internal sealed record RadarrInstanceResultsResponse : SyncInstanceResultsRespon
 /// One result for each pipeline. A pipeline is absent when the configuration does not use it or
 /// the instance stopped before it ran.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrPipelinesResponse
 {
     public CustomFormatPipelineResponse? CustomFormats { get; init; }
@@ -134,7 +127,6 @@ internal sealed record SonarrPipelinesResponse
 /// One result for each pipeline. A pipeline is absent when the configuration does not use it or
 /// the instance stopped before it ran.
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record RadarrPipelinesResponse
 {
     public CustomFormatPipelineResponse? CustomFormats { get; init; }

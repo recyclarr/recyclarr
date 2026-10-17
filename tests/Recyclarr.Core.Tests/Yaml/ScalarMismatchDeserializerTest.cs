@@ -73,13 +73,11 @@ internal sealed class ScalarMismatchDeserializerTest
         result.Items.Should().BeEquivalentTo("plain_string", "another_string");
     }
 
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class TestListOfStrings
     {
         public List<string> Items { get; set; } = [];
     }
 
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class TestScalarValue
     {
         public string? Value { get; set; }

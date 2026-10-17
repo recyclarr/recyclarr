@@ -7,12 +7,10 @@ internal enum PropersAndRepacksModeResponse
     DoNotPrefer,
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record MediaManagementUpdateResponse(
     ValueChangeResponse<PropersAndRepacksModeResponse?> PropersAndRepacks
 );
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record MediaManagementPipelineResponse
 {
     public required PipelineStatus Status { get; init; }

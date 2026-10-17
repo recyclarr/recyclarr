@@ -8,7 +8,6 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List score sets available for custom formats.")]
 internal class ListScoreSetsCommand(
     ILogger log,
@@ -16,13 +15,11 @@ internal class ListScoreSetsCommand(
     ServerConnectionFactory connections
 ) : AsyncCommand<ListScoreSetsCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
     }
 

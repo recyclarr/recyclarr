@@ -4,7 +4,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Settings;
 
-[UsedImplicitly]
 [ForYamlFileTypes(YamlFileType.Settings)]
 public class PolymorphicResourceProviderYamlBehavior : IYamlBehavior
 {

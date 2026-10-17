@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.Json;
 
-[UsedImplicitly]
 public sealed class ReadOnlyCollectionJsonConverter<TElement>
     : JsonConverter<IReadOnlyCollection<TElement>>
 {
