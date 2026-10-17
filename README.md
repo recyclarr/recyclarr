@@ -6,8 +6,8 @@
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
 [![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
-A command-line application that will automatically synchronize recommended settings from the
-[TRaSH guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
+Automatically synchronizes recommended settings from the [TRaSH guides](https://trash-guides.info/)
+to your Sonarr/Radarr instances, on a schedule or on demand from the command line.
 
 ## Features
 
@@ -29,16 +29,7 @@ your first TRaSH Guides quality profile from a ready-made template.
 
 [Getting Started]: https://recyclarr.dev/guide/getting-started/
 
-> [!WARNING]
-> The `latest` Docker tag is not available on Docker Hub or GHCR. Use a major version tag (e.g. `8`)
-> instead. See the [Docker tags](https://recyclarr.dev/guide/installation/docker/#tags) docs.
-
-## Read the Documentation
-
-[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://recyclarr.dev/)
-
-Main documentation is located at [recyclarr.dev](https://recyclarr.dev/). Links provided below for
-some main topics.
+The full documentation is at [recyclarr.dev](https://recyclarr.dev/). Main topics:
 
 - [Installation](https://recyclarr.dev/guide/installation/)
 - [Command Line Reference](https://recyclarr.dev/cli/)
@@ -76,12 +67,8 @@ Thank you to all who have supported Recyclarr!
 <!-- sponsors --><a href="https://github.com/mvanbaak"><img src="https:&#x2F;&#x2F;github.com&#x2F;mvanbaak.png" width="60px" alt="User avatar: Michiel van Baak Jansen" /></a><a href="https://github.com/tiemonl"><img src="https:&#x2F;&#x2F;github.com&#x2F;tiemonl.png" width="60px" alt="User avatar: Liam Tiemon" /></a><a href="https://github.com/yammes08"><img src="https:&#x2F;&#x2F;github.com&#x2F;yammes08.png" width="60px" alt="User avatar: yammes08" /></a><a href="https://github.com/fabricionaweb"><img src="https:&#x2F;&#x2F;github.com&#x2F;fabricionaweb.png" width="60px" alt="User avatar: Fabricio" /></a><a href="https://github.com/jporto24"><img src="https:&#x2F;&#x2F;github.com&#x2F;jporto24.png" width="60px" alt="User avatar: jporto24" /></a><a href="https://github.com/daithi-coyle"><img src="https:&#x2F;&#x2F;github.com&#x2F;daithi-coyle.png" width="60px" alt="User avatar: daithi-coyle" /></a><a href="https://github.com/buroa"><img src="https:&#x2F;&#x2F;github.com&#x2F;buroa.png" width="60px" alt="User avatar: Steven Kreitzer" /></a><a href="https://github.com/BaukeZwart"><img src="https:&#x2F;&#x2F;github.com&#x2F;BaukeZwart.png" width="60px" alt="User avatar: Bauke" /></a><a href="https://github.com/kitizz"><img src="https:&#x2F;&#x2F;github.com&#x2F;kitizz.png" width="60px" alt="User avatar: Kit Ham" /></a><a href="https://github.com/svikartrok"><img src="https:&#x2F;&#x2F;github.com&#x2F;svikartrok.png" width="60px" alt="User avatar: Rok Švikart" /></a><a href="https://github.com/pedorich-n"><img src="https:&#x2F;&#x2F;github.com&#x2F;pedorich-n.png" width="60px" alt="User avatar: Nikita Pedorich" /></a><a href="https://github.com/bmikaili"><img src="https:&#x2F;&#x2F;github.com&#x2F;bmikaili.png" width="60px" alt="User avatar: Berzan" /></a><!-- sponsors -->
 <!-- markdownlint-enable MD033 MD013 -->
 
-## Powered By
+## License
 
-<!-- markdownlint-disable MD033 MD013 -->
-
-<a href="https://www.jetbrains.com/rider/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg" alt="Jetbrains Rider" style="margin-right: 10px;"></a>
-
-<!-- markdownlint-enable MD033 MD013 -->
+Recyclarr is licensed under the [MIT License](LICENSE), copyright Robert Dailey.
 
 [discord]: https://discord.com/invite/Vau8dZ3
