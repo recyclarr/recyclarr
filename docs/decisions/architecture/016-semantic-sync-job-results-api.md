@@ -69,6 +69,11 @@ Each pipeline response contains explicit create, update, and delete collections 
 Outcomes are grouped under one pipeline-specific `outcomes` object with named typed collections.
 Empty or inapplicable collections may be omitted.
 
+An outcome appears under each resource it affects, even when that repeats it. A response never
+refers to a resource elsewhere in the response by identity. One instance-level source of a problem
+that affects several quality profiles, such as the instance `quality_definition` on Sonarr v5,
+appears under each affected profile; profiles that use their own source show nothing.
+
 The response does not include request settings, progress snapshots, diagnostic messages, unchanged
 resource counts, full Sonarr or Radarr resources, or raw Core models.
 
@@ -103,6 +108,8 @@ messages, stack traces, or C# type names.
 - Results embedded in the polled job resource: serializes a large static payload on every poll.
 - One endpoint per pipeline or resource: the CLI needs every operation at once, so this multiplies
   round trips.
+- Reporting a shared problem once with a list of affected resource identities: adds cross-references
+  that no other part of the response uses.
 - An empty successful result while the job runs: hides that results do not exist yet.
 
 ## Consequences
@@ -118,3 +125,4 @@ messages, stack traces, or C# type names.
 - 2026-08-19: Results become semantic DTOs; 409 until the job is terminal.
 - 2026-09-17: Faults attach to instances and jobs (ADR-017).
 - 2026-09-26: Job creation no longer validates configuration (ADR-019).
+- 2026-10-18: Outcomes appear under each affected resource; no cross-references by identity.
