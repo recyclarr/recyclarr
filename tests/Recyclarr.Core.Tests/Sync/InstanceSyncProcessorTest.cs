@@ -142,7 +142,6 @@ internal sealed class InstanceSyncProcessorTest
         Recyclarr.Config.Models.IServiceConfiguration? config = null
     )
     {
-        IPlanComponent[] components = [];
         // Only the Sonarr test reaches this fetcher; it reports a version below the minimum.
         var capabilityFetcher = Substitute.For<ISonarrCapabilityFetcher>();
         capabilityFetcher
@@ -159,7 +158,7 @@ internal sealed class InstanceSyncProcessorTest
         );
 
         var builder = new ContainerBuilder();
-        builder.RegisterInstance(new PlanBuilder(components.OrderBy(_ => 0), log));
+        builder.RegisterInstance(new PlanBuilder(new PipelineGraph([]), log));
         builder.RegisterInstance(pipelines).As<IPipelineExecutor>();
 
         return new InstanceSyncProcessor(

@@ -10,30 +10,30 @@ namespace Recyclarr.Pipelines.Plan.Components;
 /// store sizes per quality profile (Sonarr v5) it plans nothing; the quality profile planner
 /// assigns sizes there.
 /// </summary>
-internal class QualitySizePlanComponent(
+internal class QualitySizePlanner(
     QualitySizeResolver resolver,
     IServiceConfiguration config,
     DetectedService detectedService,
     ILogger log
-) : IPlanComponent
+) : IPipelinePlanner<PlannedQualitySizes>
 {
-    public void Process(PipelinePlan plan)
+    public PlannedQualitySizes? Plan(PlanningContext context)
     {
         if (
             config.ServiceType == SupportedServices.Sonarr
             && new SonarrCapabilities(detectedService.Version).QualitySizesPerProfile
         )
         {
-            return;
+            return null;
         }
 
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
         {
             log.Debug("No quality_definition configured, skipping quality sizes");
-            return;
+            return null;
         }
 
-        plan.QualitySizes = resolver.Resolve(configSizeData, plan.Add);
+        return resolver.Resolve(configSizeData, context.Add);
     }
 }

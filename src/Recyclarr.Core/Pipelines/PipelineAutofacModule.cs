@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extras.Ordering;
 using FluentValidation;
 using Recyclarr.Common;
 using Recyclarr.Compatibility;
@@ -16,6 +15,7 @@ using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualityProfile.State;
 using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -27,63 +27,74 @@ public class PipelineAutofacModule : Module
     {
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
 
-        RegisterPipelineExecutor(builder);
-        RegisterPlan(builder);
-        RegisterSyncOperations(builder);
+        RegisterPipelines(builder);
         RegisterCustomFormatSupport(builder);
         RegisterQualityProfileSupport(builder);
         RegisterQualitySizeSupport(builder);
+        RegisterMediaNamingSupport(builder);
     }
 
-    private static void RegisterPlan(ContainerBuilder builder)
+    // Planning and execution order come from declared dependencies (PipelineGraph). Registration
+    // order only breaks ties between independent pipelines.
+    private static void RegisterPipelines(ContainerBuilder builder)
     {
+        // One graph per detected-service scope, shared by planning and execution
+        builder.RegisterType<PipelineGraph>().InstancePerLifetimeScope();
         builder.RegisterType<PlanBuilder>();
-        builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
+        builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
 
-        builder.RegisterType<QualitySizeResolver>();
+        RegisterPipeline<PlannedCustomFormats, CustomFormatPlanner, CustomFormatSyncOperation>(
+            builder,
+            PipelineType.CustomFormat
+        );
+        RegisterPipeline<
+            PlannedQualityProfiles,
+            QualityProfilePlanner,
+            QualityProfileSyncOperation
+        >(builder, PipelineType.QualityProfile, PipelineType.CustomFormat);
+        RegisterPipeline<PlannedQualitySizes, QualitySizePlanner, QualitySizeSyncOperation>(
+            builder,
+            PipelineType.QualitySize
+        );
+        RegisterPipeline<PlannedMediaNaming, MediaNamingPlanner, MediaNamingSyncOperation>(
+            builder,
+            PipelineType.MediaNaming
+        );
+        RegisterPipeline<
+            PlannedMediaManagement,
+            MediaManagementPlanner,
+            MediaManagementSyncOperation
+        >(builder, PipelineType.MediaManagement);
+    }
 
-        // ORDER HERE IS IMPORTANT!
-        // CF must run before QP (QP references CFs from plan)
+    private static void RegisterPipeline<TPlan, TPlanner, TOperation>(
+        ContainerBuilder builder,
+        PipelineType type,
+        params PipelineType[] dependencies
+    )
+        where TPlan : class
+        where TPlanner : IPipelinePlanner<TPlan>
+        where TOperation : ISyncOperation<TPlan>
+    {
+        builder.RegisterType<TPlanner>();
+        builder.RegisterType<TOperation>();
         builder
-            .RegisterTypes(
-                typeof(CustomFormatPlanComponent),
-                typeof(QualityProfilePlanComponent),
-                typeof(QualitySizePlanComponent),
-                typeof(MediaNamingPlanComponent),
-                typeof(MediaManagementPlanComponent)
-            )
-            .As<IPlanComponent>()
-            .OrderByRegistration();
+            .Register(c => new Pipeline<TPlan>(
+                type,
+                dependencies,
+                c.Resolve<TPlanner>(),
+                c.Resolve<TOperation>()
+            ))
+            .As<IPipeline>();
+    }
+
+    private static void RegisterMediaNamingSupport(ContainerBuilder builder)
+    {
         builder
             .RegisterServiceGateway<IMediaNamingPlanner>()
             .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV3)
             .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV5)
             .For<RadarrMediaNamingPlanner>(ServiceApiTarget.RadarrV3);
-        builder
-            .RegisterServiceGateway<IQualityProfileSizePlanner>()
-            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.SonarrV3)
-            .For<SonarrV5QualityProfileSizePlanner>(ServiceApiTarget.SonarrV5)
-            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.RadarrV3);
-    }
-
-    private static void RegisterPipelineExecutor(ContainerBuilder builder)
-    {
-        builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
-    }
-
-    // Execution order is derived from operation dependencies via topological sort in
-    // CompositeSyncPipeline, not registration order. See ISyncOperation.Dependencies.
-    private static void RegisterSyncOperations(ContainerBuilder builder)
-    {
-        builder
-            .RegisterTypes(
-                typeof(CustomFormatSyncOperation),
-                typeof(QualityProfileSyncOperation),
-                typeof(QualitySizeSyncOperation),
-                typeof(MediaNamingSyncOperation),
-                typeof(MediaManagementSyncOperation)
-            )
-            .As<ISyncOperation>();
         builder
             .RegisterServiceGateway<IMediaNamingSync>()
             .For<SonarrNamingSync>(ServiceApiTarget.SonarrV3)
@@ -93,6 +104,7 @@ public class PipelineAutofacModule : Module
 
     private static void RegisterCustomFormatSupport(ContainerBuilder builder)
     {
+        builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
         builder.RegisterType<CategorizedCustomFormatProvider>();
         builder.RegisterType<CustomFormatStatePersister>().As<ICustomFormatStatePersister>();
         builder.RegisterType<CustomFormatTransactionLogger>();
@@ -105,6 +117,11 @@ public class PipelineAutofacModule : Module
             .For<SonarrV3QualityProfileFields>(ServiceApiTarget.SonarrV3)
             .For<SonarrV5QualityProfileFields>(ServiceApiTarget.SonarrV5)
             .For<RadarrQualityProfileFields>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<IQualityProfileSizePlanner>()
+            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5QualityProfileSizePlanner>(ServiceApiTarget.SonarrV5)
+            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.RadarrV3);
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
         builder.RegisterType<QualityProfileStatePersister>().As<IQualityProfileStatePersister>();
@@ -112,6 +129,7 @@ public class PipelineAutofacModule : Module
 
     private static void RegisterQualitySizeSupport(ContainerBuilder builder)
     {
+        builder.RegisterType<QualitySizeResolver>();
         builder.RegisterType<QualityItemLimitFactory>().As<IQualityItemLimitFactory>();
         builder
             .RegisterType<RadarrQualityItemLimitFetcher>()

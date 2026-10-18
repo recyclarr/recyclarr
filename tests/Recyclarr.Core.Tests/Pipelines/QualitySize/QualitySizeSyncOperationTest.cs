@@ -5,6 +5,7 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Servarr.QualitySize;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -48,19 +49,16 @@ internal sealed class QualitySizeSyncOperationTest
             limitFactory,
             NewConfig.Radarr()
         );
-        var plan = new TestPlan
+        var plan = new PlannedQualitySizes
         {
-            QualitySizes = new PlannedQualitySizes
-            {
-                Type = "movie",
-                Qualities =
-                [
-                    new PlannedQualityItem("Bluray-1080p", 5, null, null),
-                    new PlannedQualityItem("WEB-1080p", 3, 80, 40),
-                    new PlannedQualityItem("HDTV-1080p", 2, null, null),
-                    new PlannedQualityItem("Missing", 5, 100, 50),
-                ],
-            },
+            Type = "movie",
+            Qualities =
+            [
+                new PlannedQualityItem("Bluray-1080p", 5, null, null),
+                new PlannedQualityItem("WEB-1080p", 3, 80, 40),
+                new PlannedQualityItem("HDTV-1080p", 2, null, null),
+                new PlannedQualityItem("Missing", 5, 100, 50),
+            ],
         };
 
         var result = await Execute(sut, plan);
@@ -110,15 +108,17 @@ internal sealed class QualitySizeSyncOperationTest
             limitFactory,
             NewConfig.Radarr()
         );
-        var plan = new TestPlan { QualitySizes = NewPlan.Qs("movie") };
-        plan.Add(new QualityDefinitionNotFoundOutcome("movie"));
-        plan.Add(new QualityNotFoundOutcome("Unknown", "movie"));
-        plan.Add(new MinGreaterThanPreferredOutcome("Bluray-1080p", 75, 50));
-        plan.Add(new UnlimitedPreferredGreaterThanMaxOutcome("WEB-1080p", 100));
-        plan.Add(new PreferredGreaterThanMaxOutcome("HDTV-1080p", 75, 50));
-        plan.Add(new PreferredRatioClampedOutcome(2, 1));
+        SyncOutcome[] planOutcomes =
+        [
+            new QualityDefinitionNotFoundOutcome("movie"),
+            new QualityNotFoundOutcome("Unknown", "movie"),
+            new MinGreaterThanPreferredOutcome("Bluray-1080p", 75, 50),
+            new UnlimitedPreferredGreaterThanMaxOutcome("WEB-1080p", 100),
+            new PreferredGreaterThanMaxOutcome("HDTV-1080p", 75, 50),
+            new PreferredRatioClampedOutcome(2, 1),
+        ];
 
-        var result = await Execute(sut, plan);
+        var result = await Execute(sut, NewPlan.Qs("movie"), planOutcomes);
         result.Status.Should().Be(SyncResultStatus.Failed);
         result
             .Outcomes.Should()
@@ -157,13 +157,10 @@ internal sealed class QualitySizeSyncOperationTest
             limitFactory,
             NewConfig.Radarr()
         );
-        var plan = new TestPlan
+        var plan = new PlannedQualitySizes
         {
-            QualitySizes = new PlannedQualitySizes
-            {
-                Type = "movie",
-                Qualities = [new PlannedQualityItem("Bluray-1080p", 5, 100, 50)],
-            },
+            Type = "movie",
+            Qualities = [new PlannedQualityItem("Bluray-1080p", 5, 100, 50)],
         };
         var result = await Execute(sut, plan);
 
@@ -177,12 +174,14 @@ internal sealed class QualitySizeSyncOperationTest
 
     private static async Task<QualitySizePipelineResult> Execute(
         QualitySizeSyncOperation sut,
-        PipelinePlan plan
+        PlannedQualitySizes plan,
+        IReadOnlyList<SyncOutcome>? planOutcomes = null
     )
     {
-        var result = await ((ISyncOperation)sut).Execute(
+        var result = await ((ISyncOperation<PlannedQualitySizes>)sut).Execute(
             preview: true,
             plan,
+            planOutcomes ?? [],
             _ => { },
             CancellationToken.None
         );

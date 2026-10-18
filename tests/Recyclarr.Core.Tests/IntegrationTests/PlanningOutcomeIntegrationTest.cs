@@ -7,6 +7,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
+using Recyclarr.Pipelines.Plan.Components;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync;
@@ -35,8 +36,20 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
         builder.RegisterInstance(Substitute.For<ISonarrCapabilityFetcher>());
         builder.RegisterInstance(Substitute.For<ISyncFaultReporter>());
 
-        ISyncOperation[] operations = [new TestSyncOperation()];
-        builder.RegisterInstance(operations.AsEnumerable()).As<IEnumerable<ISyncOperation>>();
+        // Real custom format planning, with a test operation in place of service calls
+        builder
+            .Register(c =>
+                new IPipeline[]
+                {
+                    new Pipeline<PlannedCustomFormats>(
+                        PipelineType.CustomFormat,
+                        [],
+                        c.Resolve<CustomFormatPlanner>(),
+                        new TestSyncOperation()
+                    ),
+                }.AsEnumerable()
+            )
+            .As<IEnumerable<IPipeline>>();
     }
 
     [Test]
@@ -256,22 +269,17 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
             ],
         };
 
-    private sealed class TestSyncOperation : ISyncOperation
+    private sealed class TestSyncOperation : ISyncOperation<PlannedCustomFormats>
     {
-        public PipelineType Type => PipelineType.CustomFormat;
-        public string Description => "Test";
-        public IReadOnlyList<PipelineType> Dependencies => [];
-
-        public bool ShouldSkip(PipelinePlan plan) => false;
-
         public Task<PipelineResult> Execute(
             bool preview,
-            PipelinePlan plan,
+            PlannedCustomFormats plan,
+            IReadOnlyList<SyncOutcome> planOutcomes,
             Action<PipelineResult> capture,
             CancellationToken ct
         )
         {
-            if (plan.GetCustomFormat("failing-cf") is not null)
+            if (plan.Items.Any(x => x.Resource.TrashId == "failing-cf"))
             {
                 throw new HttpRequestException("Service unavailable");
             }

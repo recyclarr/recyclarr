@@ -24,25 +24,22 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         builder.RegisterInstance(config).As<IServiceConfiguration>();
     }
 
-    private ISyncOperation CreateStubOperation(
+    private IPipeline CreateStubOperation(
         PipelineType type,
         IReadOnlyList<PipelineType> dependencies,
         bool shouldSkip = false,
         SyncResultStatus? structuredStatus = null
     )
     {
-        var operation = Substitute.For<ISyncOperation>();
+        var operation = Substitute.For<IPipeline>();
         operation.Type.Returns(type);
         operation.Dependencies.Returns(dependencies);
-        operation.ShouldSkip(default!).ReturnsForAnyArgs(shouldSkip);
+        // Each pipeline needs its own plan type; the stubbed HasPlan never reads the plan
+        operation.PlanType.Returns(typeof(TestPlanValue).MakeArrayType((int)type + 1));
+        operation.HasPlan(default!).ReturnsForAnyArgs(!shouldSkip);
         operation
-            .Execute(
-                Arg.Any<bool>(),
-                Arg.Any<PipelinePlan>(),
-                Arg.Any<Action<SemanticPipelineResult>>(),
-                Arg.Any<CancellationToken>()
-            )
-            .Returns(callInfo =>
+            .Execute(default, default!, default!, default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 _executionOrder.Add(type);
                 var result = new TestPipelineResult(structuredStatus ?? SyncResultStatus.Succeeded);
@@ -65,13 +62,20 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         return operation;
     }
 
-    private IPipelineExecutor CreateExecutor(IEnumerable<ISyncOperation> ops)
+    private IPipelineExecutor CreateExecutor(IEnumerable<IPipeline> pipelines)
     {
         var scope = Container.BeginLifetimeScope(builder =>
         {
-            builder.RegisterInstance(ops).As<IEnumerable<ISyncOperation>>();
+            builder.RegisterInstance(pipelines).As<IEnumerable<IPipeline>>();
         });
         return scope.Resolve<IPipelineExecutor>();
+    }
+
+    private static PipelinePlan PlanWith(SyncOutcome outcome)
+    {
+        var plan = new PipelinePlan();
+        plan.Add(new PlannedPipeline<TestPlanValue>(null, [outcome]));
+        return plan;
     }
 
     [Test]
@@ -87,7 +91,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var settings = Substitute.For<ISyncSettings>();
         await sut.Execute(
             settings,
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -116,7 +120,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
             settings,
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -145,7 +149,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
 
         var result = await sut.Execute(
             Substitute.For<ISyncSettings>(),
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -168,7 +172,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
 
         var results = await sut.Execute(
             Substitute.For<ISyncSettings>(),
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -184,9 +188,11 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
     [Test]
     public async Task Unexpected_failure_retains_a_failed_pipeline_snapshot()
     {
-        var operation = Substitute.For<ISyncOperation>();
+        var operation = Substitute.For<IPipeline>();
         operation.Type.Returns(PipelineType.CustomFormat);
         operation.Dependencies.Returns([]);
+        operation.PlanType.Returns(typeof(TestPlanValue));
+        operation.HasPlan(default!).ReturnsForAnyArgs(true);
         operation
             .Execute(default, default!, default!, default)
             .ReturnsForAnyArgs(
@@ -203,7 +209,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var act = () =>
             sut.Execute(
                 Substitute.For<ISyncSettings>(),
-                new TestPlan(),
+                new PipelinePlan(),
                 buffer,
                 CancellationToken.None
             );
@@ -229,7 +235,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
             settings,
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -249,7 +255,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
             settings,
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -265,8 +271,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
 
         var sut = CreateExecutor([cfOp, qpOp]);
 
-        var plan = new TestPlan();
-        plan.Add(new InvalidNamingFormatOutcome("test", "invalid"));
+        var plan = PlanWith(new InvalidNamingFormatOutcome("test", "invalid"));
 
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
@@ -286,8 +291,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
         var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
         var sut = CreateExecutor([cfOp, qpOp]);
-        var plan = new TestPlan();
-        plan.Add(
+        var plan = PlanWith(
             new RuleValidationOutcome(
                 SyncDiagnosticLevel.Error,
                 "test",
@@ -323,7 +327,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
             settings,
-            new TestPlan(),
+            new PipelinePlan(),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -332,25 +336,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         result.Should().ContainSingle();
     }
 
-    [Test]
-    public void Circular_dependency_throws_InvalidOperationException()
-    {
-        var cfOp = CreateStubOperation(PipelineType.CustomFormat, [PipelineType.QualityProfile]);
-        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
-
-        var sut = CreateExecutor([cfOp, qpOp]);
-
-        var settings = Substitute.For<ISyncSettings>();
-        var act = () =>
-            sut.Execute(
-                settings,
-                new TestPlan(),
-                new PipelineExecutionBuffer(),
-                CancellationToken.None
-            );
-
-        act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Cycle*");
-    }
+    private sealed record TestPlanValue;
 
     private sealed record TestPipelineResult : SemanticPipelineResult
     {

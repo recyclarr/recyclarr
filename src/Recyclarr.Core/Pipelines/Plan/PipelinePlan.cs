@@ -3,22 +3,26 @@ using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan;
 
-internal class PipelinePlan
+/// <summary>
+/// The planning output for one instance: each pipeline's typed plan and outcomes, keyed by plan
+/// type, plus the instance-level planning outcomes (ADR-015). An instance-blocking error from any
+/// pipeline fails every pipeline in the instance.
+/// </summary>
+internal sealed class PipelinePlan
 {
-    private readonly List<SyncOutcome> _outcomes = [];
+    private readonly Dictionary<Type, object> _pipelines = [];
     private readonly List<PlanningOutcome> _planningOutcomes = [];
 
-    public bool HasErrors { get; private set; }
     public bool HasInstanceBlockingErrors { get; private set; }
-    public IReadOnlyList<SyncOutcome> Outcomes => _outcomes;
     public IReadOnlyList<PlanningOutcome> PlanningOutcomes => _planningOutcomes;
 
-    public void Add(SyncOutcome outcome)
+    public void Add<TPlan>(PlannedPipeline<TPlan> planned)
+        where TPlan : class
     {
-        _outcomes.Add(outcome);
-        var isError = outcome.Level == SyncDiagnosticLevel.Error;
-        HasErrors |= isError;
-        HasInstanceBlockingErrors |= isError && outcome.Scope == SyncOutcomeScope.InstanceBlocking;
+        _pipelines.Add(typeof(TPlan), planned);
+        HasInstanceBlockingErrors |= planned.Outcomes.Any(x =>
+            x is { Level: SyncDiagnosticLevel.Error, Scope: SyncOutcomeScope.InstanceBlocking }
+        );
     }
 
     public void AddPlanningOutcome(PlanningOutcome outcome)
@@ -26,70 +30,13 @@ internal class PipelinePlan
         _planningOutcomes.Add(outcome);
     }
 
-    private readonly Dictionary<string, PlannedCustomFormat> _customFormats = new(
-        StringComparer.OrdinalIgnoreCase
-    );
-
-    private readonly Dictionary<string, PlannedQualityProfile> _qualityProfiles = new(
-        StringComparer.OrdinalIgnoreCase
-    );
-
-    private PlannedQualitySizes? _qualitySizes;
-    public bool QualitySizesAvailable => _qualitySizes is not null;
-    public PlannedQualitySizes QualitySizes
-    {
-        get =>
-            _qualitySizes
-            ?? throw new InvalidOperationException(
-                "QualitySizes accessed but quality_definition not configured"
-            );
-        set => _qualitySizes = value;
-    }
-
-    private PlannedMediaNaming? _mediaNaming;
-    public bool MediaNamingAvailable => _mediaNaming is not null;
-    public PlannedMediaNaming MediaNaming
-    {
-        get =>
-            _mediaNaming
-            ?? throw new InvalidOperationException(
-                "MediaNaming accessed but media_naming not configured"
-            );
-        set => _mediaNaming = value;
-    }
-
-    private PlannedMediaManagement? _mediaManagement;
-    public bool MediaManagementAvailable => _mediaManagement is not null;
-    public PlannedMediaManagement MediaManagement
-    {
-        get =>
-            _mediaManagement
-            ?? throw new InvalidOperationException(
-                "MediaManagement accessed but media_management not configured"
-            );
-        set => _mediaManagement = value;
-    }
-
-    public IReadOnlyCollection<PlannedCustomFormat> CustomFormats => _customFormats.Values;
-    public IReadOnlyCollection<PlannedQualityProfile> QualityProfiles => _qualityProfiles.Values;
-
-    public void AddCustomFormat(PlannedCustomFormat cf)
-    {
-        _customFormats[cf.Resource.TrashId] = cf;
-    }
-
-    public void AddQualityProfile(PlannedQualityProfile profile)
-    {
-        _qualityProfiles[profile.Name] = profile;
-    }
-
-    public PlannedCustomFormat? GetCustomFormat(string trashId)
-    {
-        return _customFormats.GetValueOrDefault(trashId);
-    }
-
-    public PlannedQualityProfile? GetQualityProfile(string name)
-    {
-        return _qualityProfiles.GetValueOrDefault(name);
-    }
+    public PlannedPipeline<TPlan> Get<TPlan>()
+        where TPlan : class => (PlannedPipeline<TPlan>)_pipelines[typeof(TPlan)];
 }
+
+/// <summary>
+/// One pipeline's plan and the sync outcomes its planner reported. A null value means the
+/// instance configures nothing for the pipeline.
+/// </summary>
+internal sealed record PlannedPipeline<TPlan>(TPlan? Value, IReadOnlyList<SyncOutcome> Outcomes)
+    where TPlan : class;
