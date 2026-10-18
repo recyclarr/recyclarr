@@ -187,7 +187,7 @@ internal class UpdatedProfileBuilder(
         switch (nameMatches.Count)
         {
             case 0:
-                if (planned.ShouldCreate)
+                if (planned.IsManaged)
                 {
                     AddNewProfile(planned);
                 }
@@ -229,7 +229,7 @@ internal class UpdatedProfileBuilder(
         switch (nameMatches.Count)
         {
             case 0:
-                if (planned.ShouldCreate)
+                if (planned.IsManaged)
                 {
                     AddNewProfile(planned);
                 }

@@ -46,7 +46,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         {
             Name = "Test Profile",
             Config = new QualityProfileConfig { Name = "Test Profile" },
-            ShouldCreate = false,
+            IsManaged = false,
             CfScores = [new PlannedCfScore(cf, Score: 100)],
         };
         plan.AddQualityProfile(qp);

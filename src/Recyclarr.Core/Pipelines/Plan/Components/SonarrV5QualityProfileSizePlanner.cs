@@ -22,7 +22,7 @@ internal class SonarrV5QualityProfileSizePlanner(
         PipelinePlan plan
     )
     {
-        if (config.QualityDefinition is not null && !profiles.Any(x => x.ShouldCreate))
+        if (config.QualityDefinition is not null && !profiles.Any(x => x.IsManaged))
         {
             plan.Add(new QualityDefinitionUnusedOutcome());
         }
@@ -31,7 +31,7 @@ internal class SonarrV5QualityProfileSizePlanner(
 
         return profiles
             .Select(profile =>
-                profile.ShouldCreate ? AssignSizes(profile, instanceSizes, plan) : profile
+                profile.IsManaged ? AssignSizes(profile, instanceSizes, plan) : profile
             )
             .ToList();
     }
