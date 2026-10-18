@@ -246,12 +246,6 @@ log.Information(message);
   pattern only when its contents share file types with tracked files (`obj/` holds `.json` and
   `.props`).
 
-### Build and Test
-
-- Run `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
-  when a clean rebuild is needed.
-- Pass `-v q` to `dotnet test` and `dotnet build`, and MUST limit their output to 200 lines.
-
 ### Projects and Packages
 
 - Edit `*.csproj`, `*.props`, and `*.slnx` by hand, including package references. Use the dotnet CLI
@@ -264,6 +258,26 @@ log.Information(message);
 - `InternalsVisibleTo` is granted convention-wide by `Directory.Build.props`. MUST NOT add it to an
   individual csproj; name the consuming project to match the convention, or extend the convention.
 
+### Scripts (`scripts/`)
+
+- `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
+  `lowest`)
+- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
+  `docker compose up -d`
+- `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
+  - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
+- `record-demo.sh` (`mise run demo`): Re-record the README demo from
+  `.github/assets/sync-preview.tape`
+
+## Verification
+
+Test conventions live in the `testing` skill.
+
+- Run `dotnet test -v q` at solution level; it excludes E2E tests. Use
+  `dotnet build --no-incremental -v q` for a clean rebuild. MUST limit build and test output to 200
+  lines.
+- E2E: MUST run `./scripts/Run-E2ETests.ps1`, never `dotnet test`. Search its log with `rg`.
+
 ### Local Processes
 
 Before starting the server or another backend process, check for a running one (e.g. the user's
@@ -271,17 +285,27 @@ Before starting the server or another backend process, check for a running one (
 task. MUST NOT stop it or start a parallel instance. If it blocks the task (stale build, port
 conflict, shared state), stop and ask the user to shut it down.
 
-### Scripts (`scripts/`)
+Run long-lived processes (server, `dotnet watch`) as background shell tasks; read their output there
+and stop them through the same tool when done. NEVER use `pkill -f`; it can match and kill your own
+shell.
 
-- `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
-  `lowest`)
-- `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
-- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
-  `docker compose up -d`
-- `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
-  - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
-- `record-demo.sh` (`mise run demo`): Re-record the README demo from
-  `.github/assets/sync-preview.tape`
+### Smoke Test
+
+Before reporting a `feat`, `fix`, `perf`, or `src/` refactor complete, MUST run E2E tests and this
+smoke test unprompted:
+
+1. Run `git -C ../dev-configs pull`. Prefix server and CLI commands with `mise exec --`, which sets
+   `RECYCLARR_CONFIG_DIR` to `../dev-configs/appdata`.
+2. Run `docker compose up -d` to start the whole `compose.yaml` stack.
+3. Unless Local Processes finds a server to reuse, start `dotnet run --project src/Recyclarr.Server`
+   as a background task and wait for `READY:` in its output. It has no `--help`; any invocation
+   starts the server. `cli.yml` points the CLI at this server. Use the CLI's ephemeral server only
+   when testing ephemeral mode itself.
+4. Run `dotnet run --project src/Recyclarr.Cli -- sync --preview`. A run with no changes proves
+   little; also run a config that exercises the changed behavior.
+5. Revert dev-configs edits unless they stay useful. Report useful edits to the user and commit them
+   in `../dev-configs` only after approval.
+6. Stop the processes and containers you started.
 
 ## Commits and Changelog
 
