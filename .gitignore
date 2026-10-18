@@ -8,5 +8,8 @@ obj/
 *.pyc
 mise.local.toml
 
+# JetBrains Rider project state
+.idea/
+
 # ci/build-schemas.py output; holds .json like the tracked schemas/
 /schemas-dist/
