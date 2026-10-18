@@ -57,19 +57,21 @@ service models.
 
 ### Skipping operations
 
-Each operation declares whether it should skip via `ShouldSkip(plan)`, based on config presence in
-the plan (no `quality_sizes` section means the quality size operation skips). The orchestrator
-checks it while running the sorted operations; a skipped operation reports no result.
+A planner returns no plan when the instance configures nothing for its pipeline (no
+`quality_definition` means the quality size planner returns none). The orchestrator skips a pipeline
+without a plan, and a skipped pipeline reports no result.
 
-On Sonarr v5 the planner assigns quality sizes to quality profiles instead of planning global sizes,
-so the quality size operation always skips there. That operation resolves its quality definition
-gateway lazily because Sonarr v5 has none; operations are otherwise built for every API target.
+On Sonarr v5 the quality profile planner assigns quality sizes to profiles, and the quality size
+planner returns no plan, so the quality size operation always skips there. That operation resolves
+its quality definition gateway lazily because Sonarr v5 has none; operations are otherwise built for
+every API target.
 
 ## Dependency management
 
-Operations declare dependencies via `ISyncOperation.Dependencies`. The orchestrator uses topological
-sort to determine execution order. `Partial`, `Failed`, and `Blocked` results give dependents a
-typed `Blocked` result. Blocking is transitive, while independent operations continue.
+Each pipeline registers its dependencies once, and `PipelineGraph` orders both planning and
+execution from them ([ADR-030][adr-030]). The graph rejects missing dependencies and cycles before
+planning starts. `Partial`, `Failed`, and `Blocked` results give dependents a typed `Blocked`
+result. Blocking is transitive, while independent operations continue.
 
 - CF fails: QP skipped (depends on CF), QS/MN/MM continue (independent)
 - QS fails: all others continue (nothing depends on QS)
@@ -90,9 +92,10 @@ Plan, then Transaction (fetch + diff), then Persistence
 ### Plan (pre-sync)
 
 The plan validates configuration against TRaSH Guides data, catching invalid TrashIds and resource
-conflicts before any server interaction. Plan components execute sequentially because some depend on
-others (QP planning reads from the CF plan to build score assignments). The output is a
-`PipelinePlan` consumed by sync operations.
+conflicts before any server interaction. Planners run in graph order, and a planner reads another
+pipeline's plan only from a declared dependency (QP planning reads the CF plan to build score
+assignments). The output is a `PipelinePlan` holding each pipeline's typed plan and outcomes; each
+sync operation receives only its own.
 
 QP planning also owns per-profile quality sizes on Sonarr v5 (PDR-008). The quality size planner
 plans only global sizes. Both turn a size source into sizes through the shared
@@ -143,18 +146,19 @@ Sonarr and Radarr are similar but have differences in areas like Media Naming fo
 Definition size limits. These differences are handled through service-specific implementations
 behind domain interfaces (see [service-gateway-layer.md](service-gateway-layer.md)).
 
-Each pipeline has one plan component and one sync operation ([ADR-023][adr-023]). Behavior that
-depends on service-owned fields lives in per-service components that DI selects for the instance.
-Media naming shares no fields, so its planner (`IMediaNamingPlanner`) and sync (`IMediaNamingSync`)
-components hold all of its logic.
+Each pipeline has one planner and one sync operation ([ADR-023][adr-023]). Behavior that depends on
+service-owned fields lives in per-service components that DI selects for the instance. Media naming
+shares no fields, so its planner (`IMediaNamingPlanner`) and sync (`IMediaNamingSync`) components
+hold all of its logic.
 
 [adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
+[adr-030]: ../decisions/architecture/030-registered-pipeline-graph.md
 
 ## Extensibility
 
-Adding a new sync category: implement a plan component (`IPlanComponent`) and an `ISyncOperation`
-class. Declare dependencies in the operation. The orchestrator handles ordering automatically via
-topological sort.
+Adding a new sync category: implement a plan type, an `IPipelinePlanner<TPlan>`, and an
+`ISyncOperation<TPlan>`, then register them with `RegisterPipeline` and their dependencies. The
+graph orders planning and execution.
 
 Handling service differences: use dependency injection for service-specific implementations rather
 than duplicating processing paths.

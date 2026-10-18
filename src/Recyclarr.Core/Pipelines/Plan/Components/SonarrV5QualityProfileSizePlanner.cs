@@ -19,31 +19,32 @@ internal class SonarrV5QualityProfileSizePlanner(
 {
     public IReadOnlyCollection<PlannedQualityProfile> Plan(
         IReadOnlyCollection<PlannedQualityProfile> profiles,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         if (config.QualityDefinition is not null && !profiles.Any(x => x.IsManaged))
         {
-            plan.Add(new QualityDefinitionUnusedOutcome());
+            context.Add(new QualityDefinitionUnusedOutcome());
         }
 
         var instanceSizes = new Lazy<ResolvedSizes>(ResolveInstanceSizes);
 
-        return profiles
-            .Select(profile =>
-                profile.IsManaged ? AssignSizes(profile, instanceSizes, plan) : profile
-            )
-            .ToList();
+        return
+        [
+            .. profiles.Select(profile =>
+                profile.IsManaged ? AssignSizes(profile, instanceSizes, context) : profile
+            ),
+        ];
     }
 
     private PlannedQualityProfile AssignSizes(
         PlannedQualityProfile profile,
         Lazy<ResolvedSizes> instanceSizes,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         void Report(SyncOutcome outcome) =>
-            plan.Add(new QualityProfileSizeOutcome(profile, outcome));
+            context.Add(new QualityProfileSizeOutcome(profile, outcome));
 
         var source = SelectProfileSource(profile, Report);
         if (source is ProfileSource.None)

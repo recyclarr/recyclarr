@@ -23,16 +23,13 @@ internal sealed class RadarrMediaNamingSyncTest
                 }
             );
         var sut = CreateSut(api);
-        var plan = new TestPlan
+        var plan = new PlannedRadarrMediaNaming
         {
-            MediaNaming = new PlannedRadarrMediaNaming
+            Data = new RadarrNamingData
             {
-                Data = new RadarrNamingData
-                {
-                    RenameMovies = false,
-                    StandardMovieFormat = "standard-current",
-                    MovieFolderFormat = "",
-                },
+                RenameMovies = false,
+                StandardMovieFormat = "standard-current",
+                MovieFolderFormat = "",
             },
         };
 
@@ -60,13 +57,10 @@ internal sealed class RadarrMediaNamingSyncTest
             RadarrNamingFormatField.StandardMovieFormat,
             "unknown"
         );
-        var plan = new TestPlan
+        var plan = new PlannedRadarrMediaNaming
         {
-            MediaNaming = new PlannedRadarrMediaNaming
-            {
-                Data = new RadarrNamingData { RenameMovies = false },
-                Mismatches = [mismatch],
-            },
+            Data = new RadarrNamingData { RenameMovies = false },
+            Mismatches = [mismatch],
         };
 
         var result = await Execute(sut, plan, preview: false);
@@ -85,12 +79,9 @@ internal sealed class RadarrMediaNamingSyncTest
         api.UpdateNaming(default!, default)
             .ReturnsForAnyArgs(Task.FromException(new InvalidOperationException("rejected")));
         var sut = CreateSut(api);
-        var plan = new TestPlan
+        var plan = new PlannedRadarrMediaNaming
         {
-            MediaNaming = new PlannedRadarrMediaNaming
-            {
-                Data = new RadarrNamingData { RenameMovies = false },
-            },
+            Data = new RadarrNamingData { RenameMovies = false },
         };
         var act = () => Execute(sut, plan, preview: false);
 
@@ -103,13 +94,14 @@ internal sealed class RadarrMediaNamingSyncTest
 
     private static async Task<RadarrNamingPipelineResult> Execute(
         MediaNamingSyncOperation sut,
-        PipelinePlan plan,
+        PlannedMediaNaming plan,
         bool preview
     )
     {
-        var result = await ((ISyncOperation)sut).Execute(
+        var result = await ((ISyncOperation<PlannedMediaNaming>)sut).Execute(
             preview,
             plan,
+            [],
             _ => { },
             CancellationToken.None
         );

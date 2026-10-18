@@ -1,15 +1,15 @@
 namespace Recyclarr.Pipelines.Plan;
 
-internal class PlanBuilder(IOrderedEnumerable<IPlanComponent> components, ILogger log)
+internal class PlanBuilder(PipelineGraph graph, ILogger log)
 {
     public PipelinePlan Build()
     {
         var plan = new PipelinePlan();
 
-        foreach (var component in components)
+        foreach (var pipeline in graph.Pipelines)
         {
-            log.Debug("Running plan component: {Component}", component.GetType().Name);
-            component.Process(plan);
+            log.Debug("Planning pipeline: {Pipeline}", pipeline.Type);
+            pipeline.Plan(plan, graph);
         }
 
         return plan;

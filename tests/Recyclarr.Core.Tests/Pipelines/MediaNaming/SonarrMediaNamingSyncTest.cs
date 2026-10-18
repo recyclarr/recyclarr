@@ -30,18 +30,15 @@ internal sealed class SonarrMediaNamingSyncTest
             SonarrNamingFormatField.AnimeEpisodeFormat,
             "unknown"
         );
-        var plan = new TestPlan
+        var plan = new PlannedSonarrMediaNaming
         {
-            MediaNaming = new PlannedSonarrMediaNaming
+            Data = new SonarrNamingData
             {
-                Data = new SonarrNamingData
-                {
-                    RenameEpisodes = false,
-                    StandardEpisodeFormat = "standard-desired",
-                    DailyEpisodeFormat = "daily-current",
-                },
-                Mismatches = [mismatch],
+                RenameEpisodes = false,
+                StandardEpisodeFormat = "standard-desired",
+                DailyEpisodeFormat = "daily-current",
             },
+            Mismatches = [mismatch],
         };
 
         var result = await Execute(sut, plan, preview: true);
@@ -67,19 +64,16 @@ internal sealed class SonarrMediaNamingSyncTest
     {
         var api = Substitute.For<ISonarrNamingService>();
         var sut = CreateSut(api);
-        var plan = new TestPlan
+        var plan = new PlannedSonarrMediaNaming
         {
-            MediaNaming = new PlannedSonarrMediaNaming
-            {
-                Data = new SonarrNamingData(),
-                Mismatches =
-                [
-                    new SonarrNamingReferenceMismatchOutcome(
-                        SonarrNamingFormatField.SeriesFolderFormat,
-                        "unknown"
-                    ),
-                ],
-            },
+            Data = new SonarrNamingData(),
+            Mismatches =
+            [
+                new SonarrNamingReferenceMismatchOutcome(
+                    SonarrNamingFormatField.SeriesFolderFormat,
+                    "unknown"
+                ),
+            ],
         };
 
         var result = await Execute(sut, plan, preview: false);
@@ -130,21 +124,21 @@ internal sealed class SonarrMediaNamingSyncTest
         await act.Should().ThrowAsync<TaskCanceledException>();
     }
 
-    private static TestPlan Plan(SonarrNamingData data) =>
-        new() { MediaNaming = new PlannedSonarrMediaNaming { Data = data } };
+    private static PlannedSonarrMediaNaming Plan(SonarrNamingData data) => new() { Data = data };
 
     private static MediaNamingSyncOperation CreateSut(ISonarrNamingService api) =>
         new(new SonarrNamingSync(Substitute.For<ILogger>(), api));
 
     private static async Task<SonarrNamingPipelineResult> Execute(
         MediaNamingSyncOperation sut,
-        PipelinePlan plan,
+        PlannedMediaNaming plan,
         bool preview
     )
     {
-        var result = await ((ISyncOperation)sut).Execute(
+        var result = await ((ISyncOperation<PlannedMediaNaming>)sut).Execute(
             preview,
             plan,
+            [],
             _ => { },
             CancellationToken.None
         );

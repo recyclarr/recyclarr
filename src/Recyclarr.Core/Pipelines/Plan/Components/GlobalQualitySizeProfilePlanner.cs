@@ -9,7 +9,7 @@ internal class GlobalQualitySizeProfilePlanner : IQualityProfileSizePlanner
 {
     public IReadOnlyCollection<PlannedQualityProfile> Plan(
         IReadOnlyCollection<PlannedQualityProfile> profiles,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         foreach (
@@ -18,7 +18,7 @@ internal class GlobalQualitySizeProfilePlanner : IQualityProfileSizePlanner
             )
         )
         {
-            plan.Add(new ProfileQualityDefinitionIgnoredOutcome(profile));
+            context.Add(new ProfileQualityDefinitionIgnoredOutcome(profile));
         }
 
         return profiles;

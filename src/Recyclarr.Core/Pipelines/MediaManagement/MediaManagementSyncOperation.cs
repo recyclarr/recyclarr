@@ -7,11 +7,8 @@ using Recyclarr.Sync.Results;
 namespace Recyclarr.Pipelines.MediaManagement;
 
 internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService api)
-    : SyncOperation<MediaManagementComputeResult>
+    : SyncOperation<PlannedMediaManagement, MediaManagementComputeResult>
 {
-    public override PipelineType Type => PipelineType.MediaManagement;
-    public override string Description => "Media Management";
-
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
@@ -21,15 +18,13 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
             blockedBy
         );
 
-    public override bool ShouldSkip(PipelinePlan plan) => !plan.MediaManagementAvailable;
-
     protected override async Task<MediaManagementComputeResult> Compute(
-        PipelinePlan plan,
+        PlannedMediaManagement planned,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         CancellationToken ct
     )
     {
         var current = await api.GetMediaManagement(ct);
-        var planned = plan.MediaManagement;
         var desired = current with { PropersAndRepacks = planned.PropersAndRepacks };
         var delta =
             current.PropersAndRepacks != desired.PropersAndRepacks
