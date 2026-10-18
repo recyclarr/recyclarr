@@ -40,6 +40,8 @@ public class PipelineAutofacModule : Module
         builder.RegisterType<PlanBuilder>();
         builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
 
+        builder.RegisterType<QualitySizeResolver>();
+
         // ORDER HERE IS IMPORTANT!
         // CF must run before QP (QP references CFs from plan)
         builder
@@ -57,6 +59,11 @@ public class PipelineAutofacModule : Module
             .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV3)
             .For<SonarrMediaNamingPlanner>(ServiceApiTarget.SonarrV5)
             .For<RadarrMediaNamingPlanner>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<IQualityProfileSizePlanner>()
+            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.SonarrV3)
+            .For<SonarrV5QualityProfileSizePlanner>(ServiceApiTarget.SonarrV5)
+            .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.RadarrV3);
     }
 
     private static void RegisterPipelineExecutor(ContainerBuilder builder)
