@@ -255,7 +255,7 @@ internal sealed class QualityProfileSyncOperationTest
     [Test]
     public async Task Missing_and_adopted_profiles_retain_identity()
     {
-        var missing = NewPlan.Qp("Missing", shouldCreate: false);
+        var missing = NewPlan.Qp("Missing", isManaged: false);
         var adopted = GuideProfile("Adopted", "adopted-id");
         var harness = CreateHarness(
             [missing, adopted],

@@ -14,10 +14,13 @@ internal abstract record PlannedQualityProfile
 {
     public required string Name { get; init; }
 
-    // True when profile is explicitly declared under `quality_profiles:` in YAML config.
-    // False when profile is only referenced via `assign_scores_to:` (implicit).
-    // Transaction phase uses this to decide: create missing profile (true) or warn and skip (false).
-    public bool ShouldCreate { get; init; } = true;
+    /// <summary>
+    /// True when the profile is listed under <c>quality_profiles</c>: Recyclarr owns the whole
+    /// profile, creating it when missing and syncing its qualities, settings, and sizes. False
+    /// when it is only named in <c>assign_scores_to</c>: it receives custom format scores only,
+    /// and a missing profile is reported and skipped.
+    /// </summary>
+    public bool IsManaged { get; init; } = true;
 
     // Config overrides from user YAML
     public required QualityProfileConfig Config { get; init; }

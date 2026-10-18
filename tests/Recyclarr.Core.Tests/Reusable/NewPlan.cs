@@ -15,11 +15,11 @@ internal static class NewPlan
 
     public static PlannedQualityProfile Qp(
         string name,
-        bool shouldCreate,
+        bool isManaged,
         params PlannedCfScore[] scores
     )
     {
-        return Qp(new QualityProfileConfig { Name = name }, shouldCreate, scores);
+        return Qp(new QualityProfileConfig { Name = name }, isManaged, scores);
     }
 
     public static PlannedQualityProfile Qp(
@@ -32,11 +32,11 @@ internal static class NewPlan
 
     public static PlannedQualityProfile Qp(
         QualityProfileConfig config,
-        bool shouldCreate,
+        bool isManaged,
         params PlannedCfScore[] scores
     )
     {
-        return Qp(config, shouldCreate, null, scores);
+        return Qp(config, isManaged, null, scores);
     }
 
     public static PlannedQualityProfile Qp(
@@ -50,7 +50,7 @@ internal static class NewPlan
 
     public static PlannedQualityProfile Qp(
         QualityProfileConfig config,
-        bool shouldCreate,
+        bool isManaged,
         QualityProfileResource? resource,
         params PlannedCfScore[] scores
     )
@@ -60,7 +60,7 @@ internal static class NewPlan
             {
                 Name = resource.Name,
                 Config = config,
-                ShouldCreate = shouldCreate,
+                IsManaged = isManaged,
                 Resource = resource,
                 CfScores = scores.ToList(),
             }
@@ -68,7 +68,7 @@ internal static class NewPlan
             {
                 Name = config.Name,
                 Config = config,
-                ShouldCreate = shouldCreate,
+                IsManaged = isManaged,
                 CfScores = scores.ToList(),
             };
     }

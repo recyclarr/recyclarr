@@ -14,7 +14,7 @@ internal class GlobalQualitySizeProfilePlanner : IQualityProfileSizePlanner
     {
         foreach (
             var profile in profiles.Where(x =>
-                x.ShouldCreate && x.Config.QualityDefinition is not null
+                x.IsManaged && x.Config.QualityDefinition is not null
             )
         )
         {
