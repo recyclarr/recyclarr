@@ -103,6 +103,7 @@ internal static class SyncResultScenarios
             new CustomFormatGroupReferenceMismatchOutcome("missing-group"),
             new IncompatibleCustomFormatGroupOutcome("Wrong Group", "wrong-group"),
             new EmptyCustomFormatGroupOutcome("Empty Group", "empty-group"),
+            new CustomFormatDuplicateNameOutcome("Shared", ["cf-a", "cf-b"]),
             new CustomFormatAdoptedOutcome(identity, 10),
             new CustomFormatAmbiguousMatchOutcome(
                 identity,
@@ -145,14 +146,11 @@ internal static class SyncResultScenarios
         var guide = new GuideBackedQualityProfileIdentity(new MappingKey("qp-one", "Guide"));
         var user = new UserDefinedQualityProfileIdentity("User");
         var serviceMatch = new QualityProfileServiceMatch("Existing", 20);
-        var existing = new QualityProfileCustomFormatReference("Existing CF", "cf-existing");
-        var rejected = new QualityProfileCustomFormatReference("Rejected CF", "cf-rejected");
 
         QualityProfileOutcome[] outcomes =
         [
             new QualityProfileReferenceMismatchOutcome("missing-qp"),
             new QualityProfileDuplicateNameOutcome("Duplicate"),
-            new QualityProfileScoreCollisionOutcome(existing, rejected, 21),
             new QualityProfileNotFoundOutcome(guide),
             new QualityProfileAdoptedOutcome(user, 22),
             new QualityProfileMinimumScoreUnsatisfiedOutcome(guide, 10, 5, 9),

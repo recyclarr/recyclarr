@@ -385,6 +385,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.GroupReferenceMismatches?.Count,
             outcomes.IncompatibleGroups?.Count,
             outcomes.EmptyGroups?.Count,
+            outcomes.DuplicateNames?.Count,
             outcomes.Adopted?.Count,
             outcomes.AmbiguousMatches?.Count,
             outcomes.StateConflicts?.Count,
@@ -392,7 +393,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.UpdateRejected?.Count,
             outcomes.DeleteRejected?.Count,
         ];
-        counts.Should().HaveCount(10).And.OnlyContain(x => x == 1);
+        counts.Should().HaveCount(11).And.OnlyContain(x => x == 1);
     }
 
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
@@ -471,7 +472,6 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         [
             outcomes.ReferenceMismatches?.Count,
             outcomes.DuplicateNames?.Count,
-            outcomes.ScoreCollisions?.Count,
             outcomes.NotFound?.Count,
             outcomes.Adopted?.Count,
             outcomes.MinimumScoresUnsatisfied?.Count,
@@ -485,7 +485,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.CreateRejected?.Count,
             outcomes.UpdateRejected?.Count,
         ];
-        counts.Should().HaveCount(15).And.OnlyContain(x => x == 1);
+        counts.Should().HaveCount(14).And.OnlyContain(x => x == 1);
     }
 
     private static void AssertQualitySizes(QualitySizePipelineResponse? pipeline)

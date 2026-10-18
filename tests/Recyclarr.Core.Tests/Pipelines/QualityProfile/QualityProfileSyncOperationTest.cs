@@ -172,22 +172,12 @@ internal sealed class QualityProfileSyncOperationTest
         var harness = CreateHarness([], [], Schema());
         harness.PlanOutcomes.Add(new InvalidQualityProfileTrashIdOutcome("missing-qp"));
         harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
-        harness.PlanOutcomes.Add(
-            new CustomFormatServiceIdCollisionOutcome(
-                "Existing CF",
-                "existing-id",
-                "Rejected CF",
-                "rejected-id",
-                10
-            )
-        );
 
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Failed);
         compute.Outcomes.Should().Contain(x => x is QualityProfileReferenceMismatchOutcome);
         compute.Outcomes.Should().Contain(x => x is QualityProfileDuplicateNameOutcome);
-        compute.Outcomes.Should().Contain(x => x is QualityProfileScoreCollisionOutcome);
     }
 
     [Test]
@@ -222,15 +212,6 @@ internal sealed class QualityProfileSyncOperationTest
     {
         var harness = CreateHarness([], [], Schema());
         harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
-        harness.PlanOutcomes.Add(
-            new CustomFormatServiceIdCollisionOutcome(
-                "Existing CF",
-                "existing-id",
-                "Rejected CF",
-                "rejected-id",
-                10
-            )
-        );
         var executor = NewPipeline.Executor(PipelineType.QualityProfile, harness.Sut);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
@@ -249,7 +230,6 @@ internal sealed class QualityProfileSyncOperationTest
             .BeOfType<QualityProfilePipelineResult>()
             .Which;
         result.Outcomes.Should().Contain(x => x is QualityProfileDuplicateNameOutcome);
-        result.Outcomes.Should().Contain(x => x is QualityProfileScoreCollisionOutcome);
     }
 
     [Test]

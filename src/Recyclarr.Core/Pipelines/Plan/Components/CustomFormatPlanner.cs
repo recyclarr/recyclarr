@@ -59,7 +59,31 @@ internal class CustomFormatPlanner(
             );
         }
 
-        return new PlannedCustomFormats(planned);
+        return new PlannedCustomFormats(ExcludeDuplicateNames(planned, context));
+    }
+
+    // Services reject a second custom format with an existing name, or match both to one service
+    // custom format. All of them are skipped so the result does not depend on config order.
+    private static List<PlannedCustomFormat> ExcludeDuplicateNames(
+        List<PlannedCustomFormat> planned,
+        PlanningContext context
+    )
+    {
+        var byName = planned
+            .GroupBy(x => x.Resource.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var duplicates in byName.Where(g => g.Count() > 1))
+        {
+            context.Add(
+                new DuplicateCustomFormatNameOutcome(
+                    duplicates.Key,
+                    duplicates.Select(x => x.Resource.TrashId).ToList()
+                )
+            );
+        }
+
+        return byName.Where(g => g.Count() == 1).Select(g => g.Single()).ToList();
     }
 
     private static PlanningOutcome GetPlanningOutcome(ValidationFailure failure)

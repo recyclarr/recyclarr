@@ -82,13 +82,12 @@ public record DuplicateQualityProfileNameOutcome(string Name) : SyncOutcome
     public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
 }
 
-public record CustomFormatServiceIdCollisionOutcome(
-    string ExistingName,
-    string ExistingTrashId,
-    string NewName,
-    string NewTrashId,
-    int ServiceId
-) : SyncOutcome
+/// <summary>
+/// Custom formats with different trash IDs but the same name (ignoring case). Services require
+/// unique custom format names, so none of these custom formats are synced.
+/// </summary>
+public record DuplicateCustomFormatNameOutcome(string Name, IReadOnlyList<string> TrashIds)
+    : SyncOutcome
 {
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
     public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;

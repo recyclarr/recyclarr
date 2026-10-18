@@ -199,14 +199,6 @@ internal sealed record QualityProfileAmbiguousMatchResponse(
     IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
 );
 
-internal sealed record QualityProfileFormatReferenceResponse(string Name, string TrashId);
-
-internal sealed record QualityProfileScoreCollisionResponse(
-    QualityProfileFormatReferenceResponse Existing,
-    QualityProfileFormatReferenceResponse Rejected,
-    int ServiceId
-);
-
 internal sealed record QualityProfileOutcomesResponse
 {
     /// <summary>Configured trash IDs that match no guide quality profile.</summary>
@@ -214,12 +206,6 @@ internal sealed record QualityProfileOutcomesResponse
 
     /// <summary>Profile names configured more than once; none of them sync.</summary>
     public IReadOnlyList<QualityProfileNamedOutcomeResponse> DuplicateNames { get; init; } = [];
-
-    /// <summary>
-    /// Two custom formats in one profile that resolve to the same service custom format. The
-    /// `existing` score is kept and the `rejected` score is dropped.
-    /// </summary>
-    public IReadOnlyList<QualityProfileScoreCollisionResponse> ScoreCollisions { get; init; } = [];
 
     /// <summary>
     /// Profiles that only receive scores (Recyclarr does not create them) and do not exist in the
