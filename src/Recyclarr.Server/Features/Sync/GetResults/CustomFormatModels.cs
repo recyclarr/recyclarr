@@ -79,6 +79,11 @@ internal sealed record CustomFormatAmbiguousMatchResponse(
     IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
 );
 
+internal sealed record CustomFormatDuplicateNameResponse(
+    string Name,
+    IReadOnlyList<string> TrashIds
+);
+
 internal sealed record CustomFormatOutcomesResponse
 {
     /// <summary>
@@ -94,6 +99,12 @@ internal sealed record CustomFormatOutcomesResponse
 
     /// <summary>Groups that contribute no custom formats.</summary>
     public IReadOnlyList<TrashIdNameResponse> EmptyGroups { get; init; } = [];
+
+    /// <summary>
+    /// Names shared by more than one configured custom format (ignoring case). Services require
+    /// unique names, so none of these custom formats are synced.
+    /// </summary>
+    public IReadOnlyList<CustomFormatDuplicateNameResponse> DuplicateNames { get; init; } = [];
 
     /// <summary>
     /// Custom formats that already existed in the service with the same name. Recyclarr now

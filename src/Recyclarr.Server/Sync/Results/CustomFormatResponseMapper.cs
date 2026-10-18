@@ -23,6 +23,7 @@ internal static partial class CustomFormatResponseMapper
             outcomes.GroupReferenceMismatches.Count,
             outcomes.IncompatibleGroups.Count,
             outcomes.EmptyGroups.Count,
+            outcomes.DuplicateNames.Count,
             outcomes.Adopted.Count,
             outcomes.AmbiguousMatches.Count,
             outcomes.StateConflicts.Count,
@@ -69,6 +70,10 @@ internal static partial class CustomFormatResponseMapper
             EmptyGroups = outcomes
                 .OfType<EmptyCustomFormatGroupOutcome>()
                 .Select(x => new TrashIdNameResponse(x.TrashId, x.Name))
+                .ToList(),
+            DuplicateNames = outcomes
+                .OfType<CustomFormatDuplicateNameOutcome>()
+                .Select(x => new CustomFormatDuplicateNameResponse(x.Name, x.TrashIds))
                 .ToList(),
             Adopted = outcomes.OfType<CustomFormatAdoptedOutcome>().Select(MapAdopted).ToList(),
             AmbiguousMatches = outcomes

@@ -190,6 +190,12 @@ internal static class SyncDiagnostics
             .. (o.EmptyGroups ?? []).Select(x =>
                 Warning($"Custom Format group {Identity(x)} contains no selected formats")
             ),
+            .. (o.DuplicateNames ?? []).Select(x =>
+                Error(
+                    $"Custom Format name '{x.Name}' is used by multiple trash IDs: "
+                        + string.Join(", ", x.TrashIds ?? [])
+                )
+            ),
             .. (o.Adopted ?? []).Select(x =>
                 Warning(
                     $"Adopted Custom Format {Identity(x.Identity)} from service ID {x.ServiceId}"
@@ -231,13 +237,6 @@ internal static class SyncDiagnostics
             ),
             .. (o.DuplicateNames ?? []).Select(x =>
                 Error($"Quality profile name '{x.Name}' is configured more than once")
-            ),
-            .. (o.ScoreCollisions ?? []).Select(x =>
-                Error(
-                    $"Custom Formats '{x.Existing.Name}' ({x.Existing.TrashId}) and "
-                        + $"'{x.Rejected.Name}' ({x.Rejected.TrashId}) both resolve to service "
-                        + $"ID {x.ServiceId}"
-                )
             ),
             .. (o.NotFound ?? []).Select(x =>
                 Error($"Quality profile {Profile(x.Identity)} was not found")

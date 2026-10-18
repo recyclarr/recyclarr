@@ -161,6 +161,38 @@ internal sealed class CustomFormatSyncOperationTest
     }
 
     [Test]
+    public async Task Duplicate_names_without_completed_resources_fail()
+    {
+        var harness = CreateHarness([], []);
+        harness.PlanOutcomes.Add(new DuplicateCustomFormatNameOutcome("Shared", ["cf-a", "cf-b"]));
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute
+            .Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(new CustomFormatDuplicateNameOutcome("Shared", ["cf-a", "cf-b"]));
+    }
+
+    [Test]
+    public async Task Synced_custom_format_skipped_for_duplicate_name_is_not_deleted()
+    {
+        var harness = CreateHarness(
+            [],
+            [NewCf.Data("Shared", "", 7)],
+            [NewSyncState.Mapping("cf-a", "Shared", 7)],
+            deleteOldCustomFormats: true
+        );
+        harness.PlanOutcomes.Add(new DuplicateCustomFormatNameOutcome("Shared", ["cf-a", "cf-b"]));
+
+        var compute = await Compute(harness);
+
+        compute.Deltas.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task Disabled_deletion_produces_no_delta()
     {
         var serviceCf = NewCf.Data("Orphan", "", 7);

@@ -184,6 +184,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                                     [new("x264", 1), new("x264 copy", 2)]
                                 ),
                                 new CustomFormatAdoptedOutcome(identity, 7),
+                                new CustomFormatDuplicateNameOutcome("Shared", ["cf-a", "cf-b"]),
                             ],
                             [],
                             failed: 1
@@ -203,6 +204,8 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             + "'x264' (ID 1), 'x264 copy' (ID 2)";
         const string adopted =
             "[real-instance] Adopted Custom Format 'x264' (cf-x264) from service ID 7";
+        const string duplicateName =
+            "[real-instance] Custom Format name 'Shared' is used by multiple trash IDs: cf-a, cf-b";
         const string unreachable =
             "[other-instance] The service could not be reached. Check base_url and that the "
             + "service is up.";
@@ -213,6 +216,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .Contain("Sync Diagnostics")
             .And.Contain(ambiguous)
             .And.Contain(adopted)
+            .And.Contain(duplicateName)
             .And.Contain(unreachable)
             .And.Contain("[real-instance] Unexpected sync fault. Reference: instance-ref")
             .And.Contain("• Unexpected sync fault. Reference: run-ref")

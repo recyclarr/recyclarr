@@ -403,66 +403,6 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     }
 
     [Test]
-    public void Custom_formats_sharing_service_id_retain_collision_context()
-    {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
-        RadarrCustomFormatResource[] resources =
-        [
-            new()
-            {
-                Id = 42,
-                Name = "First CF",
-                TrashId = "cf-one",
-                TrashScores = new Dictionary<string, int> { ["default"] = 100 },
-            },
-            new()
-            {
-                Id = 42,
-                Name = "Second CF",
-                TrashId = "cf-two",
-                TrashScores = new Dictionary<string, int> { ["default"] = 200 },
-            },
-        ];
-        foreach (var resource in resources)
-        {
-            var json = JsonSerializer.Serialize(resource, GlobalJsonSerializerSettings.Guide);
-            var path = $"/guide/radarr/cf/{resource.TrashId}.json";
-            Fs.AddFile(path, new MockFileData(json));
-            registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
-        }
-
-        var config = NewConfig.Radarr() with
-        {
-            CustomFormats =
-            [
-                new CustomFormatConfig
-                {
-                    TrashIds = ["cf-one", "cf-two"],
-                    AssignScoresTo = [new AssignScoresToConfig { Name = "WEB" }],
-                },
-            ],
-            QualityProfiles = [new QualityProfileConfig { Name = "WEB" }],
-        };
-        var sut = CreatePlanBuilder(config);
-
-        var plan = sut.Build();
-
-        plan.HasErrors.Should().BeTrue();
-        plan.Outcomes.Should()
-            .ContainSingle()
-            .Which.Should()
-            .Be(
-                new CustomFormatServiceIdCollisionOutcome(
-                    "First CF",
-                    "cf-one",
-                    "Second CF",
-                    "cf-two",
-                    ServiceId: 42
-                )
-            );
-    }
-
-    [Test]
     public void Same_trash_id_different_names_both_in_plan()
     {
         SetupQualityProfileGuideData("qp-shared", "Guide Default Name", ("HDTV-1080p", true, null));

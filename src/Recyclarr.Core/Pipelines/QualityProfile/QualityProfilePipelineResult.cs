@@ -88,14 +88,6 @@ public sealed record QualityProfileReferenceMismatchOutcome(string TrashId) : Qu
 
 public sealed record QualityProfileDuplicateNameOutcome(string Name) : QualityProfileOutcome;
 
-public sealed record QualityProfileCustomFormatReference(string Name, string TrashId);
-
-public sealed record QualityProfileScoreCollisionOutcome(
-    QualityProfileCustomFormatReference Existing,
-    QualityProfileCustomFormatReference Rejected,
-    int ServiceId
-) : QualityProfileOutcome;
-
 public sealed record QualityProfileNotFoundOutcome(QualityProfileIdentity Identity)
     : QualityProfileOutcome;
 

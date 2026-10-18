@@ -905,6 +905,21 @@
           }
         }
       },
+      "CustomFormatDuplicateNameResponse": {
+        "required": [
+          "name",
+          "trashIds"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "trashIds": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
       "CustomFormatInclusionReason": {
         "enum": [
           "none",
@@ -939,6 +954,10 @@
           "emptyGroups": {
             "description": "Groups that contribute no custom formats.",
             "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "duplicateNames": {
+            "description": "Names shared by more than one configured custom format (ignoring case). Services require\nunique names, so none of these custom formats are synced.",
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatDuplicateNameResponse"
           },
           "adopted": {
             "description": "Custom formats that already existed in the service with the same name. Recyclarr now\nmanages them.",
@@ -1584,6 +1603,12 @@
           "$ref": "#/components/schemas/CustomFormatCreateResponse"
         }
       },
+      "IReadOnlyListOfCustomFormatDuplicateNameResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CustomFormatDuplicateNameResponse"
+        }
+      },
       "IReadOnlyListOfCustomFormatStateConflictResponse": {
         "type": "array",
         "items": {
@@ -1762,12 +1787,6 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/QualityProfileScoreChangeResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileScoreCollisionResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileScoreCollisionResponse"
         }
       },
       "IReadOnlyListOfQualityProfileScoreResponse": {
@@ -2328,21 +2347,6 @@
           }
         }
       },
-      "QualityProfileFormatReferenceResponse": {
-        "required": [
-          "name",
-          "trashId"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "trashId": {
-            "type": "string"
-          }
-        }
-      },
       "QualityProfileIdentityKind": {
         "enum": [
           "guideBacked",
@@ -2486,10 +2490,6 @@
           "duplicateNames": {
             "description": "Profile names configured more than once; none of them sync.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamedOutcomeResponse"
-          },
-          "scoreCollisions": {
-            "description": "Two custom formats in one profile that resolve to the same service custom format. The\n`existing` score is kept and the `rejected` score is dropped.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreCollisionResponse"
           },
           "notFound": {
             "description": "Profiles that only receive scores (Recyclarr does not create them) and do not exist in the\nservice.",
@@ -2639,26 +2639,6 @@
               "null",
               "string"
             ]
-          }
-        }
-      },
-      "QualityProfileScoreCollisionResponse": {
-        "required": [
-          "existing",
-          "rejected",
-          "serviceId"
-        ],
-        "type": "object",
-        "properties": {
-          "existing": {
-            "$ref": "#/components/schemas/QualityProfileFormatReferenceResponse"
-          },
-          "rejected": {
-            "$ref": "#/components/schemas/QualityProfileFormatReferenceResponse"
-          },
-          "serviceId": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },

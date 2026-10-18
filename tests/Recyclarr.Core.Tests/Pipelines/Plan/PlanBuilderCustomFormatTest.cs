@@ -54,6 +54,27 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Custom_formats_sharing_a_name_are_all_skipped()
+    {
+        SetupCustomFormatGuideData(("Same Name", "cf1"), ("same name", "cf2"), ("Unique", "cf3"));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2", "cf3"] }],
+        };
+
+        var sut = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().ContainSingle().Which.Resource.TrashId.Should().Be("cf3");
+        plan.Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(new DuplicateCustomFormatNameOutcome("Same Name", ["cf1", "cf2"]));
+    }
+
+    [Test]
     public void Build_with_no_config_produces_empty_plan()
     {
         var config = NewConfig.Radarr();
