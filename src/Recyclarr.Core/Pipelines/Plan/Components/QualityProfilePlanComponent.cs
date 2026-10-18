@@ -6,6 +6,7 @@ namespace Recyclarr.Pipelines.Plan.Components;
 
 internal class QualityProfilePlanComponent(
     QualityProfileResourceQuery guide,
+    IQualityProfileSizePlanner sizePlanner,
     IServiceConfiguration config,
     ILogger log
 ) : IPlanComponent
@@ -59,8 +60,7 @@ internal class QualityProfilePlanComponent(
             AddCustomFormatScore(profile, scoreConfig, cf, plan);
         }
 
-        // Add all profiles to the plan
-        foreach (var profile in allProfiles.Values)
+        foreach (var profile in sizePlanner.Plan(allProfiles.Values, plan))
         {
             plan.AddQualityProfile(profile);
         }
@@ -267,4 +267,17 @@ internal class QualityProfilePlanComponent(
             Qualities = convertedQualities,
         };
     }
+}
+
+/// <summary>
+/// Handles quality sizes on planned profiles for the instance's API target: assigns them where
+/// sizes live on profiles (Sonarr v5) and reports profile sizes that will be ignored elsewhere.
+/// Returns the profiles to add to the plan; outcomes are added to the plan.
+/// </summary>
+internal interface IQualityProfileSizePlanner
+{
+    IReadOnlyCollection<PlannedQualityProfile> Plan(
+        IReadOnlyCollection<PlannedQualityProfile> profiles,
+        PipelinePlan plan
+    );
 }

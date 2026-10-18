@@ -191,6 +191,45 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Sonarr_v5_unknown_instance_size_type_is_attributed_only_to_falling_back_profiles()
+    {
+        SetupSonarrSizeTypes();
+        var config = NewConfig.Sonarr() with
+        {
+            QualityDefinition = Qd("missing"),
+            QualityProfiles =
+            [
+                new QualityProfileConfig { Name = "Fallback" },
+                new QualityProfileConfig { Name = "Own Source", QualityDefinition = Qd("anime") },
+            ],
+        };
+
+        var plan = CreatePlanBuilder(config, SonarrV5).Build();
+
+        plan.QualityProfiles.Should()
+            .BeEquivalentTo(
+                [
+                    new { Name = "Fallback", QualitySizes = new { Type = "missing" } },
+                    new { Name = "Own Source", QualitySizes = new { Type = "anime" } },
+                ],
+                o => o.ExcludingMissingMembers()
+            );
+        plan.Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfileSizeOutcome>()
+            .Which.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Profile = new { Name = "Fallback" },
+                    Inner = new QualityDefinitionNotFoundOutcome("missing"),
+                },
+                o => o.ExcludingMissingMembers()
+            );
+    }
+
+    [Test]
     public void Sonarr_v5_unknown_guide_size_reference_is_attributed_to_the_profile()
     {
         SetupSonarrSizeTypes();

@@ -9,7 +9,8 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Pipelines.QualitySize;
 
 // The quality definition gateway is resolved lazily because Sonarr v5 has none: sizes live on
-// quality profiles there, so the planner never sets plan.QualitySizes and ShouldSkip keeps this
+// quality profiles there (the quality profile planner assigns them), so plan.QualitySizes is
+// never set and ShouldSkip keeps this
 // operation from touching the gateway.
 internal class QualitySizeSyncOperation(
     ILogger log,
