@@ -36,6 +36,8 @@ Rationale and the full resource model live in ADR-011; config representation in 
   future `/{id}` route (ADR-011).
 - Response DTOs are domain-shaped, never YAML-shaped. Secrets (e.g. `api_key`) are absent from DTOs,
   not masked.
+- An outcome appears under the resource it affects, even when repeated; responses never reference
+  resources elsewhere by identity (ADR-016).
 
 ## Long-Running Operations
 
