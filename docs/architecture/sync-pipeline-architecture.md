@@ -94,6 +94,10 @@ conflicts before any server interaction. Plan components execute sequentially be
 others (QP planning reads from the CF plan to build score assignments). The output is a
 `PipelinePlan` consumed by sync operations.
 
+QP planning also owns per-profile quality sizes on Sonarr v5 (PDR-008). The quality size planner
+plans only global sizes. Both turn a size source into sizes through the shared
+`QualitySizeResolver`, so neither planner reads the other's plan.
+
 ### Transaction
 
 Fetches current state from the Servarr API (non-deterministic, changes independently) and computes
