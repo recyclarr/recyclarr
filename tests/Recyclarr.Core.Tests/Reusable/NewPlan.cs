@@ -4,8 +4,6 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.Reusable;
 
-internal class TestPlan : PipelinePlan;
-
 internal static class NewPlan
 {
     public static PlannedQualityProfile Qp(string name, params PlannedCfScore[] scores)

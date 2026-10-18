@@ -19,18 +19,16 @@ internal class CustomFormatSyncOperation(
     ICustomFormatStatePersister statePersister,
     CustomFormatTransactionLogger cfLogger,
     IServiceConfiguration config
-) : SyncOperation<CustomFormatComputeResult>
+) : SyncOperation<PlannedCustomFormats, CustomFormatComputeResult>
 {
-    public override PipelineType Type => PipelineType.CustomFormat;
-    public override string Description => "Custom Format";
-
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
     ) => new CustomFormatPipelineResult(0, 0, [], []).WithStatus(status, blockedBy);
 
     protected override async Task<CustomFormatComputeResult> Compute(
-        PipelinePlan plan,
+        PlannedCustomFormats plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         CancellationToken ct
     )
     {
@@ -39,11 +37,11 @@ internal class CustomFormatSyncOperation(
         var apiFetchOutput = await api.GetCustomFormats(ct);
 
         // Transaction phase
-        var plannedCfs = plan.CustomFormats;
+        var plannedCfs = plan.Items;
         var transactions = new CustomFormatTransactionData();
-        var outcomes = MapPlanOutcomes(plan).ToList();
+        var outcomes = MapPlanOutcomes(planOutcomes).ToList();
         var deltas = new List<CustomFormatDelta>();
-        var incompleteResources = plan.Outcomes.OfType<InvalidCustomFormatTrashIdOutcome>().Count();
+        var incompleteResources = planOutcomes.OfType<InvalidCustomFormatTrashIdOutcome>().Count();
 
         var sourceInfo = plannedCfs.ToDictionary(
             cf => cf.Resource.TrashId,
@@ -427,9 +425,11 @@ internal class CustomFormatSyncOperation(
         return components;
     }
 
-    private static IEnumerable<CustomFormatOutcome> MapPlanOutcomes(PipelinePlan plan)
+    private static IEnumerable<CustomFormatOutcome> MapPlanOutcomes(
+        IReadOnlyList<SyncOutcome> planOutcomes
+    )
     {
-        foreach (var outcome in plan.Outcomes)
+        foreach (var outcome in planOutcomes)
         {
             switch (outcome)
             {

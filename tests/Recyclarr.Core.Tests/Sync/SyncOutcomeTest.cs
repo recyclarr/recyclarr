@@ -1,20 +1,26 @@
 using Recyclarr.Pipelines.Plan;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Core.Tests.Sync;
 
 internal sealed class SyncOutcomeTest
 {
     [Test]
-    public void Plan_retains_structured_outcomes_and_derives_error_state()
+    public void Only_instance_blocking_errors_from_any_pipeline_block_the_instance()
     {
         var plan = new PipelinePlan();
         var warning = new PreferredRatioClampedOutcome(Original: 2, Clamped: 1);
-        var error = new InvalidNamingFormatOutcome("Movie Folder Format", "missing");
+        var localError = new InvalidNamingFormatOutcome("Movie Folder Format", "missing");
 
-        plan.Add(warning);
-        plan.Add(error);
+        plan.Add(new PlannedPipeline<PlannedQualitySizes>(null, [warning, localError]));
+        plan.HasInstanceBlockingErrors.Should().BeFalse();
 
-        plan.Outcomes.Should().Equal(warning, error);
-        plan.HasErrors.Should().BeTrue();
+        plan.Add(
+            new PlannedPipeline<PlannedMediaManagement>(
+                null,
+                [new RuleValidationOutcome(SyncDiagnosticLevel.Error, "a", "b", null, "c")]
+            )
+        );
+        plan.HasInstanceBlockingErrors.Should().BeTrue();
     }
 }

@@ -10,22 +10,18 @@ namespace Recyclarr.Pipelines.MediaNaming;
 /// (ADR-023).
 /// </summary>
 internal class MediaNamingSyncOperation(IMediaNamingSync sync)
-    : SyncOperation<IPipelineResultSource>
+    : SyncOperation<PlannedMediaNaming, IPipelineResultSource>
 {
-    public override PipelineType Type => PipelineType.MediaNaming;
-    public override string Description => "Media Naming";
-
-    public override bool ShouldSkip(PipelinePlan plan) => !plan.MediaNamingAvailable;
-
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
     ) => sync.CreateEmptyResult().WithStatus(status, blockedBy);
 
     protected override Task<IPipelineResultSource> Compute(
-        PipelinePlan plan,
+        PlannedMediaNaming plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         CancellationToken ct
-    ) => sync.Compute(plan.MediaNaming, ct);
+    ) => sync.Compute(plan, ct);
 
     protected override Task Persist(IPipelineResultSource computeResult, CancellationToken ct) =>
         sync.Persist(computeResult, ct);

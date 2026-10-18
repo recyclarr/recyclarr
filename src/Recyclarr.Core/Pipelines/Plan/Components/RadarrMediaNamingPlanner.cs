@@ -11,12 +11,12 @@ internal class RadarrMediaNamingPlanner(
     IServiceConfiguration config
 ) : IMediaNamingPlanner
 {
-    public PlannedMediaNaming? Plan(PipelinePlan plan)
+    public PlannedMediaNaming? Plan(PlanningContext context)
     {
         // DI resolves this planner only for Radarr instances
         var radarrConfig = (RadarrConfiguration)config;
         var mismatches = new List<RadarrNamingReferenceMismatchOutcome>();
-        var data = BuildData(radarrConfig, guide, mismatches, plan);
+        var data = BuildData(radarrConfig, guide, mismatches, context);
 
         if (!data.HasValues() && mismatches.Count == 0)
         {
@@ -30,7 +30,7 @@ internal class RadarrMediaNamingPlanner(
         RadarrConfiguration config,
         MediaNamingResourceQuery guide,
         List<RadarrNamingReferenceMismatchOutcome> mismatches,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         var guideData = guide.GetRadarr();
@@ -49,7 +49,7 @@ internal class RadarrMediaNamingPlanner(
             }
 
             mismatches.Add(new RadarrNamingReferenceMismatchOutcome(field, configuredKey));
-            plan.Add(new InvalidNamingFormatOutcome(DisplayName(field), configuredKey));
+            context.Add(new InvalidNamingFormatOutcome(DisplayName(field), configuredKey));
             return null;
         }
 

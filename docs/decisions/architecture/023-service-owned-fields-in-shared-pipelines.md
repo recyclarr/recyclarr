@@ -7,9 +7,9 @@
 
 Sonarr and Radarr resources always share some fields, so a rule based on how much they share needs
 judgment and produced two shapes. With shared types end to end, Radarr's quality profile `Language`
-was a nullable property that only the Radarr gateway wrote, so every Sonarr sync reported a
-language change it could never apply. With one operation per service under one pipeline identity
-(media naming), orchestration had to filter skipped operations before ordering them.
+was a nullable property that only the Radarr gateway wrote, so every Sonarr sync reported a language
+change it could never apply. With one operation per service under one pipeline identity (media
+naming), orchestration had to filter skipped operations before ordering them.
 
 ## Decision
 
@@ -29,8 +29,8 @@ components.
 
 ### Behavior
 
-- Each pipeline has exactly one sync operation and one plan component. Orchestration never sees more
-  than one operation for a pipeline identity.
+- Each pipeline has exactly one sync operation and one planner. Orchestration never sees more than
+  one operation for a pipeline identity.
 - The operation owns the flow shared by both services. Behavior that depends on service-owned fields
   lives in per-service components behind one interface, resolved by the instance's API target
   through DI (`RegisterServiceGateway`, ADR-028).

@@ -1,27 +1,21 @@
-using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using SemanticPipelineResult = Recyclarr.Sync.Results.PipelineResult;
 
 namespace Recyclarr.Pipelines;
 
-internal abstract class SyncOperation<TResult> : ISyncOperation
+internal abstract class SyncOperation<TPlan, TResult> : ISyncOperation<TPlan>
     where TResult : IPipelineResultSource
 {
-    public abstract PipelineType Type { get; }
-    public abstract string Description { get; }
-    public virtual IReadOnlyList<PipelineType> Dependencies => [];
-
-    public virtual bool ShouldSkip(PipelinePlan plan) => false;
-
-    async Task<SemanticPipelineResult> ISyncOperation.Execute(
+    async Task<SemanticPipelineResult> ISyncOperation<TPlan>.Execute(
         bool preview,
-        PipelinePlan plan,
+        TPlan plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         Action<SemanticPipelineResult> capture,
         CancellationToken ct
     )
     {
-        var computeResult = await Compute(plan, ct);
+        var computeResult = await Compute(plan, planOutcomes, ct);
         capture(computeResult.Result);
 
         if (!preview)
@@ -33,10 +27,12 @@ internal abstract class SyncOperation<TResult> : ISyncOperation
         return computeResult.Result;
     }
 
-    SemanticPipelineResult ISyncOperation.CreateBlockedResult(PipelineType dependency) =>
+    SemanticPipelineResult ISyncOperation<TPlan>.CreateBlockedResult(PipelineType dependency) =>
         CreateEmptyResult(SyncResultStatus.Blocked, dependency);
 
-    SemanticPipelineResult ISyncOperation.CreateFailedResult(SemanticPipelineResult? current) =>
+    SemanticPipelineResult ISyncOperation<TPlan>.CreateFailedResult(
+        SemanticPipelineResult? current
+    ) =>
         current?.WithStatus(SyncResultStatus.Failed)
         ?? CreateEmptyResult(SyncResultStatus.Failed, null);
 
@@ -45,7 +41,11 @@ internal abstract class SyncOperation<TResult> : ISyncOperation
         PipelineType? blockedBy
     );
 
-    protected abstract Task<TResult> Compute(PipelinePlan plan, CancellationToken ct);
+    protected abstract Task<TResult> Compute(
+        TPlan plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
+        CancellationToken ct
+    );
 
     protected abstract Task Persist(TResult computeResult, CancellationToken ct);
 }

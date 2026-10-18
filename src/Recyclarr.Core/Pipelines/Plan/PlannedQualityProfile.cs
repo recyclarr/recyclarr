@@ -3,6 +3,9 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Pipelines.Plan;
 
+/// <summary>The quality profile pipeline's plan: one entry per distinct profile name.</summary>
+internal sealed record PlannedQualityProfiles(IReadOnlyCollection<PlannedQualityProfile> Items);
+
 // Discriminated union over the two kinds of quality profiles we plan:
 //   GuideBacked: sourced from a TRaSH Guides resource (trash_id). Resource is always present.
 //   UserDefined: user-authored, no guide backing.

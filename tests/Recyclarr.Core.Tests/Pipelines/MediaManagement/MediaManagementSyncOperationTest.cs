@@ -192,10 +192,10 @@ internal sealed class MediaManagementSyncOperationTest
     public async Task Execute_omits_unconfigured_media_management()
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
-        var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [sut]);
+        var executor = CreateExecutor(sut);
         var results = await executor.Execute(
             Substitute.For<ISyncSettings>(),
-            new TestPlan(),
+            PipelinePlanFor(null),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -221,7 +221,13 @@ internal sealed class MediaManagementSyncOperationTest
         CancellationToken ct = default
     )
     {
-        var result = await ((ISyncOperation)sut).Execute(preview, Plan(desired), _ => { }, ct);
+        var result = await ((ISyncOperation<PlannedMediaManagement>)sut).Execute(
+            preview,
+            new PlannedMediaManagement(desired),
+            [],
+            _ => { },
+            ct
+        );
         return result.Should().BeOfType<MediaManagementPipelineResult>().Which;
     }
 
@@ -231,13 +237,13 @@ internal sealed class MediaManagementSyncOperationTest
     )> Execute(bool preview)
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
-        var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [sut]);
+        var executor = CreateExecutor(sut);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(preview);
 
         var results = await executor.Execute(
             settings,
-            Plan(PropersAndRepacksMode.DoNotPrefer),
+            PipelinePlanFor(new PlannedMediaManagement(PropersAndRepacksMode.DoNotPrefer)),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -246,6 +252,9 @@ internal sealed class MediaManagementSyncOperationTest
         return (result.Should().BeOfType<MediaManagementPipelineResult>().Which, api);
     }
 
-    private static TestPlan Plan(PropersAndRepacksMode desired) =>
-        new() { MediaManagement = new PlannedMediaManagement(desired) };
+    private static CompositeSyncPipeline CreateExecutor(MediaManagementSyncOperation sut) =>
+        NewPipeline.Executor(PipelineType.MediaManagement, sut);
+
+    private static PipelinePlan PipelinePlanFor(PlannedMediaManagement? planned) =>
+        NewPipeline.Plan(planned);
 }

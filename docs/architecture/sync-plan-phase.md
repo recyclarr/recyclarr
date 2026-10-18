@@ -1,17 +1,13 @@
 # Sync Plan Phase
 
 The plan phase runs before sync operations execute, validating configuration against TRaSH Guides
-and building the data structures that drive synchronization. Plan components execute sequentially
-because later components depend on earlier ones.
+and building the data structures that drive synchronization. Each pipeline has one planner.
 
 ## Execution Order
 
-```txt
-CF Plan Component → QP Plan Component → Quality Size Plan Component → Media Naming Plan Component → Media Management Plan Component
-```
-
-The CF and QP components have a direct dependency: QP planning reads from the CF plan to build score
-assignments.
+Planners run in the order of `PipelineGraph`, which comes from registered pipeline dependencies
+([ADR-030](../decisions/architecture/030-registered-pipeline-graph.md)). The only dependency is CF
+to QP: QP planning reads the CF plan to build score assignments.
 
 ## Custom Format Planning
 
@@ -75,19 +71,19 @@ profile is created. Implicit profiles:
 These components have simpler planning:
 
 **Quality Size**: Validates configured quality definitions exist in guides, resolves preferred ratio
-calculations. On services that store sizes per profile (Sonarr v5), it assigns sizes to each
-profile listed under `quality_profiles` instead of planning global sizes (see
+calculations. On services that store sizes per profile (Sonarr v5), it assigns sizes to each profile
+listed under `quality_profiles` instead of planning global sizes (see
 [PDR-008](../decisions/product/008-sonarr-v5-per-profile-quality-sizes.md)).
 
 **Media Naming**: Validates naming format references exist in guides for the service type.
 
 **Media Management**: Validates propers/repacks mode configuration.
 
-None of these depend on other plan components.
+None of these depend on other planners.
 
 ## Error Collection
 
-Plan components collect errors rather than failing fast:
+Planners collect errors rather than failing fast:
 
 - Invalid trash_ids → warnings (resource continues with valid ones)
 - Missing guide resources → errors (profile skipped)

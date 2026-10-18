@@ -38,9 +38,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     [Test]
     public void Cf_id_hydration_visible_to_qp_scores()
     {
-        var plan = new TestPlan();
         var cf = new PlannedCustomFormat(NewCf.Data("Test", "cf1"));
-        plan.AddCustomFormat(cf);
 
         var qp = new PlannedQualityProfile.UserDefined
         {
@@ -49,13 +47,13 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             IsManaged = false,
             CfScores = [new PlannedCfScore(cf, Score: 100)],
         };
-        plan.AddQualityProfile(qp);
+        var plan = new PlannedQualityProfiles([qp]);
 
         // Simulate persistence setting the ID
         cf.Resource.Id = 42;
 
         // QP score sees hydrated ID via reference (ServiceId must track Resource.Id)
-        plan.QualityProfiles.First().CfScores.First().ServiceId.Should().Be(42);
+        plan.Items.First().CfScores.First().ServiceId.Should().Be(42);
     }
 
     [Test]

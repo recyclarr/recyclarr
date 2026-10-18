@@ -23,19 +23,16 @@ internal class QualityProfileSyncOperation(
     IQualityProfileStatePersister statePersister,
     QualityProfileStatCalculator statCalculator,
     QualityProfileLogger logger
-) : SyncOperation<QualityProfileComputeResult>
+) : SyncOperation<PlannedQualityProfiles, QualityProfileComputeResult>
 {
-    public override PipelineType Type => PipelineType.QualityProfile;
-    public override string Description => "Quality Profile";
-    public override IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
-
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
     ) => new QualityProfilePipelineResult(0, 0, [], []).WithStatus(status, blockedBy);
 
     protected override async Task<QualityProfileComputeResult> Compute(
-        PipelinePlan plan,
+        PlannedQualityProfiles plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         CancellationToken ct
     )
     {
@@ -55,7 +52,7 @@ internal class QualityProfileSyncOperation(
         // existing profiles are returned for change detection
         var existingProfiles = BuildExistingProfiles(
             transactions,
-            plan.QualityProfiles,
+            plan.Items,
             apiFetchOutput,
             state
         );
@@ -70,7 +67,7 @@ internal class QualityProfileSyncOperation(
         existingProfiles = FilterValidProfiles(existingProfiles, transactions.InvalidProfiles);
         AssignExistingProfiles(transactions, existingProfiles);
 
-        var outcomes = BuildOutcomes(plan, transactions, out var incompleteResources);
+        var outcomes = BuildOutcomes(planOutcomes, transactions, out var incompleteResources);
         var deltas = BuildDeltas(transactions);
         var completedResources =
             transactions.NewProfiles.Count
@@ -319,7 +316,7 @@ internal class QualityProfileSyncOperation(
     }
 
     private static List<QualityProfileOutcome> BuildOutcomes(
-        PipelinePlan plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         QualityProfileTransactionData transactions,
         out int incompleteResources
     )
@@ -327,7 +324,7 @@ internal class QualityProfileSyncOperation(
         var outcomes = new List<QualityProfileOutcome>();
         incompleteResources = 0;
 
-        foreach (var outcome in plan.Outcomes)
+        foreach (var outcome in planOutcomes)
         {
             switch (outcome)
             {

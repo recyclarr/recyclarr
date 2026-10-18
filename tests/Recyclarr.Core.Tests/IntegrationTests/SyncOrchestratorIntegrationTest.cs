@@ -465,13 +465,14 @@ internal sealed class SyncOrchestratorIntegrationTest
             builder.RegisterInstance(cancellation).ExternallyOwned();
         }
         builder
-            .Register(c =>
-                new IPlanComponent[]
-                {
-                    new TestPlanningComponent(c.Resolve<IServiceConfiguration>()),
-                }.OrderBy(_ => 0)
-            )
-            .As<IOrderedEnumerable<IPlanComponent>>();
+            .Register(c => new Pipeline<TestPlan>(
+                PipelineType.CustomFormat,
+                [],
+                new TestPlanner(c.Resolve<IServiceConfiguration>()),
+                Substitute.For<ISyncOperation<TestPlan>>()
+            ))
+            .As<IPipeline>();
+        builder.RegisterType<PipelineGraph>();
         builder.RegisterInstance(reporter).As<ISyncFaultReporter>();
         builder.RegisterType<RadarrCapabilityEnforcer>();
         builder.RegisterType<SonarrCapabilityEnforcer>();
@@ -577,16 +578,21 @@ internal sealed class SyncOrchestratorIntegrationTest
         }
     }
 
-    private sealed class TestPlanningComponent(IServiceConfiguration config) : IPlanComponent
+    private sealed class TestPlanner(IServiceConfiguration config) : IPipelinePlanner<TestPlan>
     {
-        public void Process(PipelinePlan plan)
+        public TestPlan? Plan(PlanningContext context)
         {
             if (config.InstanceName == "planning-fault")
             {
-                plan.AddPlanningOutcome(new TestPlanningOutcome());
+                context.AddPlanningOutcome(new TestPlanningOutcome());
             }
+
+            return null;
         }
     }
+
+    // Proxied by NSubstitute, so it cannot be private
+    internal sealed record TestPlan;
 
     private sealed record TestPlanningOutcome : PlanningOutcome;
 

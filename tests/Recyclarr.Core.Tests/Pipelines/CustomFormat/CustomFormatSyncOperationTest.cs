@@ -147,7 +147,7 @@ internal sealed class CustomFormatSyncOperationTest
     public async Task Reference_mismatch_without_completed_resources_fails()
     {
         var harness = CreateHarness([], []);
-        harness.Plan.Add(new InvalidCustomFormatTrashIdOutcome("missing-id"));
+        harness.PlanOutcomes.Add(new InvalidCustomFormatTrashIdOutcome("missing-id"));
 
         var compute = await Compute(harness);
 
@@ -310,13 +310,13 @@ internal sealed class CustomFormatSyncOperationTest
     {
         var cf = NewCf.Data("Preview", "trash-id");
         var harness = CreateHarness([new PlannedCustomFormat(cf)], []);
-        var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
+        var executor = NewPipeline.Executor(PipelineType.CustomFormat, harness.Sut);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
-            harness.Plan,
+            NewPipeline.Plan(harness.Plan, harness.PlanOutcomes),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -359,23 +359,20 @@ internal sealed class CustomFormatSyncOperationTest
         var config = Substitute.For<IServiceConfiguration>();
         config.DeleteOldCustomFormats.Returns(deleteOldCustomFormats);
 
-        var plan = new TestPlan();
-        foreach (var cf in planned)
-        {
-            plan.AddCustomFormat(cf);
-        }
+        var plan = new PlannedCustomFormats(planned);
 
         var log = Substitute.For<ILogger>();
         var logger = new CustomFormatTransactionLogger(log);
         var sut = new CustomFormatSyncOperation(log, api, statePersister, logger, config);
-        return new Harness(sut, api, statePersister, state, plan);
+        return new Harness(sut, api, statePersister, state, plan, []);
     }
 
     private static async Task<CustomFormatPipelineResult> Compute(Harness harness)
     {
-        var result = await ((ISyncOperation)harness.Sut).Execute(
+        var result = await ((ISyncOperation<PlannedCustomFormats>)harness.Sut).Execute(
             preview: true,
             harness.Plan,
+            harness.PlanOutcomes,
             _ => { },
             CancellationToken.None
         );
@@ -384,9 +381,10 @@ internal sealed class CustomFormatSyncOperationTest
 
     private static async Task<CustomFormatPipelineResult> Persist(Harness harness)
     {
-        var result = await ((ISyncOperation)harness.Sut).Execute(
+        var result = await ((ISyncOperation<PlannedCustomFormats>)harness.Sut).Execute(
             preview: false,
             harness.Plan,
+            harness.PlanOutcomes,
             _ => { },
             CancellationToken.None
         );
@@ -413,6 +411,7 @@ internal sealed class CustomFormatSyncOperationTest
         ICustomFormatService Api,
         ICustomFormatStatePersister StatePersister,
         TrashIdMappingStore State,
-        TestPlan Plan
+        PlannedCustomFormats Plan,
+        List<SyncOutcome> PlanOutcomes
     );
 }

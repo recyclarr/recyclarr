@@ -1,19 +1,19 @@
-using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using SemanticPipelineResult = Recyclarr.Sync.Results.PipelineResult;
 
 namespace Recyclarr.Pipelines;
 
-internal interface ISyncOperation
+/// <summary>
+/// The Transaction and Persistence stages of one pipeline. The orchestrator calls
+/// <see cref="Execute"/> only when the pipeline has a plan and nothing blocks it.
+/// <c>planOutcomes</c> are the outcomes this pipeline's planner reported.
+/// </summary>
+internal interface ISyncOperation<in TPlan>
 {
-    PipelineType Type { get; }
-    string Description { get; }
-    IReadOnlyList<PipelineType> Dependencies { get; }
-    bool ShouldSkip(PipelinePlan plan);
-
     Task<SemanticPipelineResult> Execute(
         bool preview,
-        PipelinePlan plan,
+        TPlan plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         Action<SemanticPipelineResult> capture,
         CancellationToken ct
     );

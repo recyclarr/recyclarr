@@ -4,14 +4,14 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
-internal class QualityProfilePlanComponent(
+internal class QualityProfilePlanner(
     QualityProfileResourceQuery guide,
     IQualityProfileSizePlanner sizePlanner,
     IServiceConfiguration config,
     ILogger log
-) : IPlanComponent
+) : IPipelinePlanner<PlannedQualityProfiles>
 {
-    public void Process(PipelinePlan plan)
+    public PlannedQualityProfiles Plan(PlanningContext context)
     {
         log.Debug(
             "Planning quality profiles for {Service} {Instance}: {Count} profiles",
@@ -35,14 +35,16 @@ internal class QualityProfilePlanComponent(
             .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Build profile-CF pairs from plan's CustomFormats (which includes both config CFs and QP formatItems)
-        var profileAndCfs = plan.CustomFormats.SelectMany(cf =>
-            cf.AssignScoresTo.Select(scoreConfig => (Profile: scoreConfig, Cf: cf))
-        );
+        // Build profile-CF pairs from the CF plan (which includes both config CFs and QP formatItems)
+        var profileAndCfs = context
+            .Require<PlannedCustomFormats>()
+            .Items.SelectMany(cf =>
+                cf.AssignScoresTo.Select(scoreConfig => (Profile: scoreConfig, Cf: cf))
+            );
 
         // Start with explicitly defined quality profiles.
         // Multiple profiles can share a trash_id as long as they have distinct names.
-        var allProfiles = BuildExplicitProfiles(config.QualityProfiles, guideResources, plan);
+        var allProfiles = BuildExplicitProfiles(config.QualityProfiles, guideResources, context);
 
         foreach (var (scoreConfig, cf) in profileAndCfs)
         {
@@ -57,19 +59,16 @@ internal class QualityProfilePlanComponent(
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf, plan);
+            AddCustomFormatScore(profile, scoreConfig, cf, context);
         }
 
-        foreach (var profile in sizePlanner.Plan(allProfiles.Values, plan))
-        {
-            plan.AddQualityProfile(profile);
-        }
+        return new PlannedQualityProfiles(sizePlanner.Plan(allProfiles.Values, context));
     }
 
     private static Dictionary<string, PlannedQualityProfile> BuildExplicitProfiles(
         IReadOnlyCollection<QualityProfileConfig> profiles,
         Dictionary<string, QualityProfileResource> guideResources,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         var result = new Dictionary<string, PlannedQualityProfile>(
@@ -81,7 +80,7 @@ internal class QualityProfilePlanComponent(
 
         foreach (var config in profiles)
         {
-            var planned = CreatePlannedProfile(config, guideResources, plan);
+            var planned = CreatePlannedProfile(config, guideResources, context);
             if (planned is null)
             {
                 continue;
@@ -92,7 +91,7 @@ internal class QualityProfilePlanComponent(
                 if (duplicateNames.Add(planned.Name))
                 {
                     // First time seeing this duplicate; report error and remove the earlier entry
-                    plan.Add(new DuplicateQualityProfileNameOutcome(planned.Name));
+                    context.Add(new DuplicateQualityProfileNameOutcome(planned.Name));
                     result.Remove(planned.Name);
                 }
 
@@ -109,7 +108,7 @@ internal class QualityProfilePlanComponent(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
         PlannedCustomFormat cf,
-        PipelinePlan plan
+        PlanningContext context
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -152,7 +151,7 @@ internal class QualityProfilePlanComponent(
 
         if (serviceIdConflict is not null)
         {
-            plan.Add(
+            context.Add(
                 new CustomFormatServiceIdCollisionOutcome(
                     serviceIdConflict.Name,
                     serviceIdConflict.TrashId,
@@ -196,7 +195,7 @@ internal class QualityProfilePlanComponent(
     private static PlannedQualityProfile? CreatePlannedProfile(
         QualityProfileConfig config,
         Dictionary<string, QualityProfileResource> guideResources,
-        PipelinePlan diagnostics
+        PlanningContext diagnostics
     )
     {
         QualityProfileResource? resource = null;
@@ -272,12 +271,12 @@ internal class QualityProfilePlanComponent(
 /// <summary>
 /// Handles quality sizes on planned profiles for the instance's API target: assigns them where
 /// sizes live on profiles (Sonarr v5) and reports profile sizes that will be ignored elsewhere.
-/// Returns the profiles to add to the plan; outcomes are added to the plan.
+/// Returns the profiles to plan; outcomes are reported through the context.
 /// </summary>
 internal interface IQualityProfileSizePlanner
 {
     IReadOnlyCollection<PlannedQualityProfile> Plan(
         IReadOnlyCollection<PlannedQualityProfile> profiles,
-        PipelinePlan plan
+        PlanningContext context
     );
 }

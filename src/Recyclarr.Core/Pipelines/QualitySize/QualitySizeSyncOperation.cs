@@ -9,33 +9,27 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Pipelines.QualitySize;
 
 // The quality definition gateway is resolved lazily because Sonarr v5 has none: sizes live on
-// quality profiles there (the quality profile planner assigns them), so plan.QualitySizes is
-// never set and ShouldSkip keeps this
-// operation from touching the gateway.
+// quality profiles there (the quality profile planner assigns them), so the quality size planner
+// produces no plan and this operation never runs.
 internal class QualitySizeSyncOperation(
     ILogger log,
     Lazy<IQualityDefinitionService> api,
     IQualityItemLimitFactory limitFactory,
     IServiceConfiguration config
-) : SyncOperation<QualitySizeComputeResult>
+) : SyncOperation<PlannedQualitySizes, QualitySizeComputeResult>
 {
-    public override PipelineType Type => PipelineType.QualitySize;
-    public override string Description => "Quality Definition";
-
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
     ) => new QualitySizePipelineResult(0, 0, [], []).WithStatus(status, blockedBy);
 
-    public override bool ShouldSkip(PipelinePlan plan) => !plan.QualitySizesAvailable;
-
     protected override async Task<QualitySizeComputeResult> Compute(
-        PipelinePlan plan,
+        PlannedQualitySizes planned,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         CancellationToken ct
     )
     {
-        var planned = plan.QualitySizes;
-        var outcomes = BuildPlanOutcomes(plan, out var incompleteResources);
+        var outcomes = BuildPlanOutcomes(planOutcomes, out var incompleteResources);
         if (planned.Qualities.Count == 0)
         {
             var emptyResult = new QualitySizePipelineResult(0, incompleteResources, outcomes, []);
@@ -148,14 +142,14 @@ internal class QualitySizeSyncOperation(
     }
 
     private static List<QualitySizeOutcome> BuildPlanOutcomes(
-        PipelinePlan plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
         out int incompleteResources
     )
     {
         var outcomes = new List<QualitySizeOutcome>();
         incompleteResources = 0;
 
-        foreach (var outcome in plan.Outcomes)
+        foreach (var outcome in planOutcomes)
         {
             var mapped = QualitySizeOutcomeMapper.Map(outcome);
             if (mapped is null)

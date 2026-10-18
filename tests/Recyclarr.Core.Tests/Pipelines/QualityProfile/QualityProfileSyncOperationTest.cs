@@ -170,9 +170,9 @@ internal sealed class QualityProfileSyncOperationTest
     public async Task Plan_outcomes_retain_quality_profile_context()
     {
         var harness = CreateHarness([], [], Schema());
-        harness.Plan.Add(new InvalidQualityProfileTrashIdOutcome("missing-qp"));
-        harness.Plan.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
-        harness.Plan.Add(
+        harness.PlanOutcomes.Add(new InvalidQualityProfileTrashIdOutcome("missing-qp"));
+        harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
+        harness.PlanOutcomes.Add(
             new CustomFormatServiceIdCollisionOutcome(
                 "Existing CF",
                 "existing-id",
@@ -195,11 +195,11 @@ internal sealed class QualityProfileSyncOperationTest
     {
         var planned = GuideProfile("Series", "qp");
         var harness = CreateHarness([], [], Schema());
-        harness.Plan.Add(
+        harness.PlanOutcomes.Add(
             new QualityProfileSizeOutcome(planned, new QualityDefinitionNotFoundOutcome("x"))
         );
-        harness.Plan.Add(new ProfileQualityDefinitionIgnoredOutcome(planned));
-        harness.Plan.Add(new QualityDefinitionUnusedOutcome());
+        harness.PlanOutcomes.Add(new ProfileQualityDefinitionIgnoredOutcome(planned));
+        harness.PlanOutcomes.Add(new QualityDefinitionUnusedOutcome());
 
         var compute = await Compute(harness);
 
@@ -221,8 +221,8 @@ internal sealed class QualityProfileSyncOperationTest
     public async Task Resource_local_plan_errors_flow_through_normal_orchestration()
     {
         var harness = CreateHarness([], [], Schema());
-        harness.Plan.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
-        harness.Plan.Add(
+        harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
+        harness.PlanOutcomes.Add(
             new CustomFormatServiceIdCollisionOutcome(
                 "Existing CF",
                 "existing-id",
@@ -231,13 +231,13 @@ internal sealed class QualityProfileSyncOperationTest
                 10
             )
         );
-        var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
+        var executor = NewPipeline.Executor(PipelineType.QualityProfile, harness.Sut);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
-            harness.Plan,
+            NewPipeline.Plan(harness.Plan, harness.PlanOutcomes),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -610,13 +610,13 @@ internal sealed class QualityProfileSyncOperationTest
             [],
             Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
         );
-        var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
+        var executor = NewPipeline.Executor(PipelineType.QualityProfile, harness.Sut);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
-            harness.Plan,
+            NewPipeline.Plan(harness.Plan, harness.PlanOutcomes),
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -863,11 +863,7 @@ internal sealed class QualityProfileSyncOperationTest
         var statePersister = Substitute.For<IQualityProfileStatePersister>();
         statePersister.Load().Returns(state);
 
-        var plan = new TestPlan();
-        foreach (var profile in planned)
-        {
-            plan.AddQualityProfile(profile);
-        }
+        var plan = new PlannedQualityProfiles(planned);
 
         // Unless a test supplies Radarr's, Sonarr's (empty) service-owned field behavior applies.
         var log = Substitute.For<ILogger>();
@@ -880,14 +876,15 @@ internal sealed class QualityProfileSyncOperationTest
             new QualityProfileStatCalculator(log, serviceFields),
             new QualityProfileLogger(log)
         );
-        return new Harness(sut, service, statePersister, state, plan);
+        return new Harness(sut, service, statePersister, state, plan, []);
     }
 
     private static async Task<QualityProfilePipelineResult> Compute(Harness harness)
     {
-        var result = await ((ISyncOperation)harness.Sut).Execute(
+        var result = await ((ISyncOperation<PlannedQualityProfiles>)harness.Sut).Execute(
             preview: true,
             harness.Plan,
+            harness.PlanOutcomes,
             _ => { },
             CancellationToken.None
         );
@@ -896,9 +893,10 @@ internal sealed class QualityProfileSyncOperationTest
 
     private static async Task<QualityProfilePipelineResult> Persist(Harness harness)
     {
-        var result = await ((ISyncOperation)harness.Sut).Execute(
+        var result = await ((ISyncOperation<PlannedQualityProfiles>)harness.Sut).Execute(
             preview: false,
             harness.Plan,
+            harness.PlanOutcomes,
             _ => { },
             CancellationToken.None
         );
@@ -925,6 +923,7 @@ internal sealed class QualityProfileSyncOperationTest
         IQualityProfileService Service,
         IQualityProfileStatePersister StatePersister,
         TrashIdMappingStore State,
-        TestPlan Plan
+        PlannedQualityProfiles Plan,
+        List<SyncOutcome> PlanOutcomes
     );
 }

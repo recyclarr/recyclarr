@@ -8,24 +8,24 @@ using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
-internal class CustomFormatPlanComponent(
+internal class CustomFormatPlanner(
     ConfiguredCustomFormatProvider cfProvider,
     CustomFormatResourceQuery cfQuery,
     IValidator<CustomFormatGroupConfig> cfGroupValidator,
     IServiceConfiguration config,
     ILogger log
-) : IPlanComponent
+) : IPipelinePlanner<PlannedCustomFormats>
 {
-    public void Process(PipelinePlan plan)
+    public PlannedCustomFormats Plan(PlanningContext context)
     {
         // Validate explicit CF group config before resolution
         foreach (var groupConfig in config.CustomFormatGroups.Add)
         {
             var validationResult = cfGroupValidator.Validate(groupConfig);
-            validationResult.ForwardTo(plan.Add, log);
+            validationResult.ForwardTo(context.Add, log);
             foreach (var failure in validationResult.Errors)
             {
-                plan.AddPlanningOutcome(GetPlanningOutcome(failure));
+                context.AddPlanningOutcome(GetPlanningOutcome(failure));
             }
         }
 
@@ -35,19 +35,20 @@ internal class CustomFormatPlanComponent(
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll(plan.Add, plan.AddPlanningOutcome)
+            .GetAll(context.Add, context.AddPlanningOutcome)
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
+        var planned = new List<PlannedCustomFormat>();
         foreach (var group in configuredCfs)
         {
             if (!cfResources.TryGetValue(group.Key, out var resource))
             {
-                plan.Add(new InvalidCustomFormatTrashIdOutcome(group.Key));
+                context.Add(new InvalidCustomFormatTrashIdOutcome(group.Key));
                 continue;
             }
 
             var first = group.First();
-            plan.AddCustomFormat(
+            planned.Add(
                 new PlannedCustomFormat(resource)
                 {
                     AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
@@ -57,6 +58,8 @@ internal class CustomFormatPlanComponent(
                 }
             );
         }
+
+        return new PlannedCustomFormats(planned);
     }
 
     private static PlanningOutcome GetPlanningOutcome(ValidationFailure failure)
