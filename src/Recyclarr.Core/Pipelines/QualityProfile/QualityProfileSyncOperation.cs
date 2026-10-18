@@ -336,19 +336,6 @@ internal class QualityProfileSyncOperation(
                     outcomes.Add(new QualityProfileDuplicateNameOutcome(x.Name));
                     incompleteResources++;
                     break;
-                case CustomFormatServiceIdCollisionOutcome x:
-                    outcomes.Add(
-                        new QualityProfileScoreCollisionOutcome(
-                            new QualityProfileCustomFormatReference(
-                                x.ExistingName,
-                                x.ExistingTrashId
-                            ),
-                            new QualityProfileCustomFormatReference(x.NewName, x.NewTrashId),
-                            x.ServiceId
-                        )
-                    );
-                    incompleteResources++;
-                    break;
                 case QualityProfileSizeOutcome x
                     when QualitySizeOutcomeMapper.Map(x.Inner) is { } sizeOutcome:
                     outcomes.Add(

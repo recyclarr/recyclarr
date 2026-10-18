@@ -373,6 +373,10 @@ internal sealed class NotificationService(
             EmptyCustomFormatGroupOutcome x => Warning(
                 $"Custom Format group '{x.Name}' ({x.TrashId}) contains no selected formats"
             ),
+            CustomFormatDuplicateNameOutcome x => Error(
+                $"Custom Format name '{x.Name}' is used by multiple trash IDs: "
+                    + string.Join(", ", x.TrashIds)
+            ),
             CustomFormatAdoptedOutcome x => Information(
                 $"Adopted Custom Format '{x.Identity.Name}' ({x.Identity.TrashId}) from "
                     + $"service ID {x.ServiceId}"
@@ -409,11 +413,6 @@ internal sealed class NotificationService(
             ),
             QualityProfileDuplicateNameOutcome x => Error(
                 $"Quality profile name '{x.Name}' is configured more than once"
-            ),
-            QualityProfileScoreCollisionOutcome x => Error(
-                $"Custom Formats '{x.Existing.Name}' ({x.Existing.TrashId}) and "
-                    + $"'{x.Rejected.Name}' ({x.Rejected.TrashId}) both resolve to service ID "
-                    + $"{x.ServiceId}"
             ),
             QualityProfileNotFoundOutcome x => Error(
                 $"Quality profile '{GetQualityProfileName(x.Identity)}' was not found"

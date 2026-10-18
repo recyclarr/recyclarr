@@ -89,6 +89,9 @@ public sealed record IncompatibleCustomFormatGroupOutcome(string Name, string Tr
 public sealed record EmptyCustomFormatGroupOutcome(string Name, string TrashId)
     : CustomFormatOutcome;
 
+public sealed record CustomFormatDuplicateNameOutcome(string Name, IReadOnlyList<string> TrashIds)
+    : CustomFormatOutcome;
+
 public sealed record CustomFormatAdoptedOutcome(CustomFormatIdentity Identity, int ServiceId)
     : CustomFormatOutcome;
 

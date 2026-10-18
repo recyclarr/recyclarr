@@ -41,7 +41,9 @@ internal class CustomFormatSyncOperation(
         var transactions = new CustomFormatTransactionData();
         var outcomes = MapPlanOutcomes(planOutcomes).ToList();
         var deltas = new List<CustomFormatDelta>();
-        var incompleteResources = planOutcomes.OfType<InvalidCustomFormatTrashIdOutcome>().Count();
+        var incompleteResources =
+            planOutcomes.OfType<InvalidCustomFormatTrashIdOutcome>().Count()
+            + planOutcomes.OfType<DuplicateCustomFormatNameOutcome>().Sum(x => x.TrashIds.Count);
 
         var sourceInfo = plannedCfs.ToDictionary(
             cf => cf.Resource.TrashId,
@@ -94,11 +96,18 @@ internal class CustomFormatSyncOperation(
             }
         }
 
+        // Configured CFs skipped for a shared name are still in the user's config; never delete them
+        var skippedTrashIds = planOutcomes
+            .OfType<DuplicateCustomFormatNameOutcome>()
+            .SelectMany(x => x.TrashIds)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
         var deletionCandidates = state
             .Mappings
             // Custom format must be in the state but NOT in the user's config
             .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
+            .Where(map => !skippedTrashIds.Contains(map.TrashId))
             // Also, that state-only CF must exist in the service (otherwise there is nothing to delete)
             .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
             .ToList();
@@ -444,6 +453,9 @@ internal class CustomFormatSyncOperation(
                     break;
                 case EmptyCfGroupOutcome x:
                     yield return new EmptyCustomFormatGroupOutcome(x.Name, x.TrashId);
+                    break;
+                case DuplicateCustomFormatNameOutcome x:
+                    yield return new CustomFormatDuplicateNameOutcome(x.Name, x.TrashIds);
                     break;
             }
         }

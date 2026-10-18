@@ -155,7 +155,6 @@ internal static partial class QualityProfileResponseMapper
             result.Outcomes.Count,
             outcomes.ReferenceMismatches.Count,
             outcomes.DuplicateNames.Count,
-            outcomes.ScoreCollisions.Count,
             outcomes.NotFound.Count,
             outcomes.Adopted.Count,
             outcomes.MinimumScoresUnsatisfied.Count,
@@ -307,10 +306,6 @@ internal static partial class QualityProfileResponseMapper
                 .OfType<QualityProfileDuplicateNameOutcome>()
                 .Select(x => new QualityProfileNamedOutcomeResponse(x.Name))
                 .ToList(),
-            ScoreCollisions = outcomes
-                .OfType<QualityProfileScoreCollisionOutcome>()
-                .Select(MapScoreCollision)
-                .ToList(),
             NotFound = outcomes
                 .OfType<QualityProfileNotFoundOutcome>()
                 .Select(x => MapIdentityOutcome(x.Identity))
@@ -455,17 +450,4 @@ internal static partial class QualityProfileResponseMapper
     private static partial NamedServiceResourceResponse MapServiceMatch(
         QualityProfileServiceMatch source
     );
-
-    private static partial QualityProfileFormatReferenceResponse MapFormatReference(
-        QualityProfileCustomFormatReference source
-    );
-
-    private static QualityProfileScoreCollisionResponse MapScoreCollision(
-        QualityProfileScoreCollisionOutcome source
-    ) =>
-        new(
-            MapFormatReference(source.Existing),
-            MapFormatReference(source.Rejected),
-            source.ServiceId
-        );
 }

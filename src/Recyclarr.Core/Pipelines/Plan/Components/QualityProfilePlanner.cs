@@ -59,7 +59,7 @@ internal class QualityProfilePlanner(
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf, context);
+            AddCustomFormatScore(profile, scoreConfig, cf);
         }
 
         return new PlannedQualityProfiles(sizePlanner.Plan(allProfiles.Values, context));
@@ -107,8 +107,7 @@ internal class QualityProfilePlanner(
     private void AddCustomFormatScore(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
-        PlannedCustomFormat cf,
-        PlanningContext context
+        PlannedCustomFormat cf
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -137,29 +136,6 @@ internal class QualityProfilePlanner(
                     scoreToUse
                 );
             }
-
-            return;
-        }
-
-        // Different trash_ids that resolved to the same service CF are a conflict.
-        // This happens when a custom provider CF duplicates a TRaSH guide CF by name.
-        // Only check when the CF has been matched to a service CF (Id > 0).
-        var serviceIdConflict =
-            cf.Resource.Id > 0
-                ? profile.CfScores.FirstOrDefault(x => x.ServiceId == cf.Resource.Id)
-                : null;
-
-        if (serviceIdConflict is not null)
-        {
-            context.Add(
-                new CustomFormatServiceIdCollisionOutcome(
-                    serviceIdConflict.Name,
-                    serviceIdConflict.TrashId,
-                    cf.Resource.Name,
-                    cf.Resource.TrashId,
-                    cf.Resource.Id
-                )
-            );
 
             return;
         }
