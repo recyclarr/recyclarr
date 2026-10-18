@@ -53,7 +53,7 @@ internal class QualityProfilePlanComponent(
                 {
                     Name = scoreConfig.Name,
                     Config = new QualityProfileConfig { Name = scoreConfig.Name },
-                    ShouldCreate = false,
+                    IsManaged = false,
                 };
             }
 
