@@ -1,14 +1,12 @@
-using System.IO.Abstractions;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Pipelines.Plan;
-using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Core.Tests.Pipelines.Plan;
 
 internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
 {
-    private GuideResourceTestData GuideData => new(Fs, Resolve<ResourceRegistry<IFileInfo>>());
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
 
     private void SetupCustomFormatGuideData(params (string Name, string TrashId)[] formats) =>
         GuideData.AddCustomFormats(formats);

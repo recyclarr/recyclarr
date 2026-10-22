@@ -17,13 +17,14 @@ public class ResourceProviderAutofacModule : Module
 
     private static void RegisterInfrastructure(ContainerBuilder builder)
     {
-        builder.RegisterGeneric(typeof(ResourceRegistry<>)).AsSelf().SingleInstance();
+        // Bound per request or sync run by the lease holder; see ResourceScope.
+        builder.RegisterType<ResourceScope>().InstancePerLifetimeScope();
 
         builder.RegisterType<TrashGuidesStrategy>().As<IProviderTypeStrategy>();
         builder.RegisterType<ConfigTemplatesStrategy>().As<IProviderTypeStrategy>();
         builder.RegisterType<CustomFormatsStrategy>().As<IProviderTypeStrategy>();
 
-        builder.RegisterType<ProviderInitializationFactory>();
+        builder.RegisterType<ResourceSourceFactory>();
     }
 
     private static void RegisterStorageLayer(ContainerBuilder builder)

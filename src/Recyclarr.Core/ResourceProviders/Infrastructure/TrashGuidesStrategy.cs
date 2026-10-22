@@ -7,8 +7,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Infrastructure;
 
-public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger log)
-    : IProviderTypeStrategy
+public class TrashGuidesStrategy(ILogger log) : IProviderTypeStrategy
 {
     public string Type => "trash-guides";
 
@@ -30,8 +29,10 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
         return myProviders.All(p => !p.ReplaceDefault) ? [official] : [];
     }
 
-    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath)
+    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath, GuideIndex index)
     {
+        var registry = index.Files;
+
         log.Debug(
             "MapResourcePaths called for provider {Name} at {Path}",
             config.Name,

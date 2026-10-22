@@ -1,16 +1,14 @@
-using System.IO.Abstractions;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Core.Tests.Pipelines.Plan;
 
 internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 {
-    private GuideResourceTestData GuideData => new(Fs, Resolve<ResourceRegistry<IFileInfo>>());
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
 
     private void SetupQualityProfileGuideData(
         string trashId,

@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Config.Parsing;
 
@@ -30,6 +31,9 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 
         RuleFor(x => x.QualityDefinition)
             .SetNonNullableValidator(new QualitySizeConfigYamlValidator());
+
+        RuleFor(x => x.MediaManagement)
+            .SetNonNullableValidator(new MediaManagementConfigYamlValidator());
 
         RuleForEach(x => x.QualityProfiles).SetValidator(new QualityProfileConfigYamlValidator());
 
@@ -155,6 +159,44 @@ public class QualitySizeConfigYamlValidator : AbstractValidator<QualitySizeConfi
             .InclusiveBetween(0, 1)
             .When(x => x.PreferredRatio is not null)
             .WithName("preferred_ratio");
+
+        RuleForEach(x => x.Qualities).SetValidator(new QualitySizeItemConfigYamlValidator());
+    }
+}
+
+public class QualitySizeItemConfigYamlValidator : AbstractValidator<QualitySizeItemConfigYaml>
+{
+    public QualitySizeItemConfigYamlValidator()
+    {
+        RuleFor(x => x.Min).Must(BeSizeValue).WithName("min").WithMessage(SizeMessage);
+        RuleFor(x => x.Max).Must(BeSizeValue).WithName("max").WithMessage(SizeMessage);
+        RuleFor(x => x.Preferred).Must(BeSizeValue).WithName("preferred").WithMessage(SizeMessage);
+    }
+
+    private const string SizeMessage =
+        "'{PropertyName}' must be a number or 'unlimited', but was '{PropertyValue}'";
+
+    private static bool BeSizeValue(string? value) => QualitySizeValue.TryParse(value, out _);
+}
+
+public class MediaManagementConfigYamlValidator : AbstractValidator<MediaManagementConfigYaml>
+{
+    private static readonly string[] PropersAndRepacksValues =
+    [
+        "prefer_and_upgrade",
+        "do_not_upgrade",
+        "do_not_prefer",
+    ];
+
+    public MediaManagementConfigYamlValidator()
+    {
+        RuleFor(x => x.PropersAndRepacks)
+            .Must(x => PropersAndRepacksValues.Contains(x, StringComparer.OrdinalIgnoreCase))
+            .When(x => x.PropersAndRepacks is not null)
+            .WithName("propers_and_repacks")
+            .WithMessage(
+                $"'{{PropertyName}}' must be one of {string.Join(", ", PropersAndRepacksValues)}"
+            );
     }
 }
 

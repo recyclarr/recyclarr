@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
@@ -16,8 +17,8 @@ internal sealed record ServerConfigLoadResult(
     IReadOnlyList<IFilterResult> FilterResults
 );
 
-// Loads the server's configuration directory once at startup (ADR-019). Parse failures and filter
-// diagnostics are collected, logged, and turned into a startup failure.
+// Loads the server's configuration directory and resolves it against the guide data bound to the
+// current scope (ADR-019). Parse failures and filter diagnostics are collected and logged.
 internal sealed class ServerConfigLoader(
     ILogger log,
     IConfigurationFinder finder,
@@ -27,30 +28,26 @@ internal sealed class ServerConfigLoader(
 )
 {
     /// <summary>
-    /// Loads every configured instance, logging each configuration problem and deprecation. Any
-    /// configuration error throws, so an invalid configuration never produces a snapshot.
+    /// Loads every configured instance, logging each configuration problem and deprecation.
+    /// Returns null when any configuration error exists, so an invalid configuration never
+    /// produces a snapshot.
     /// </summary>
-    public ServerConfiguration LoadServerConfiguration()
+    public ServerConfiguration? TryLoadServerConfiguration()
     {
         var result = LoadConfigs();
         var diagnostics = ConfigLoadDiagnosticsBuilder.Build(result);
         ConfigLoadDiagnosticsLogger.Log(log, diagnostics);
 
-        if (diagnostics.HasServerConfigurationErrors)
-        {
-            throw new FatalException(
-                "Server configuration is invalid; correct the errors logged above and restart"
-            );
-        }
-
-        return new ServerConfiguration(result.Configs);
+        return diagnostics.HasServerConfigurationErrors
+            ? null
+            : new ServerConfiguration(result.Configs);
     }
 
     private ServerConfigLoadResult LoadConfigs()
     {
         var allConfigs = new List<LoadedConfigYaml>();
         var failures = new List<ConfigParsingException>();
-        foreach (var file in FindConfigFiles())
+        foreach (var file in FindConfigFiles(failures))
         {
             try
             {
@@ -65,6 +62,11 @@ internal sealed class ServerConfigLoader(
             {
                 inner.FilePath = file;
                 failures.Add(inner);
+            }
+            // An include that does not resolve, for example a template a provider update removed.
+            catch (YamlIncludeException e)
+            {
+                failures.Add(new ConfigParsingException(e.Message, line: 0, e) { FilePath = file });
             }
         }
 
@@ -105,7 +107,7 @@ internal sealed class ServerConfigLoader(
     }
 
     // A server without configuration still serves guide data; it has nothing to sync.
-    private IReadOnlyCollection<IFileInfo> FindConfigFiles()
+    private IReadOnlyCollection<IFileInfo> FindConfigFiles(List<ConfigParsingException> failures)
     {
         try
         {
@@ -113,6 +115,11 @@ internal sealed class ServerConfigLoader(
         }
         catch (NoConfigurationFilesException)
         {
+            return [];
+        }
+        catch (ConflictingYamlFilesException e)
+        {
+            failures.Add(new ConfigParsingException(e.Message, line: 0, e));
             return [];
         }
     }

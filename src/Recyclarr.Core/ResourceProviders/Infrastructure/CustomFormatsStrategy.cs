@@ -4,7 +4,7 @@ using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Infrastructure;
 
-public class CustomFormatsStrategy(ResourceRegistry<IFileInfo> registry) : IProviderTypeStrategy
+public class CustomFormatsStrategy : IProviderTypeStrategy
 {
     public string Type => "custom-formats";
 
@@ -17,17 +17,17 @@ public class CustomFormatsStrategy(ResourceRegistry<IFileInfo> registry) : IProv
         return [];
     }
 
-    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath)
+    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath, GuideIndex index)
     {
         var files = rootPath.EnumerateFiles("*.json", SearchOption.AllDirectories);
 
         switch (config.Service)
         {
             case "radarr":
-                registry.Register<RadarrCustomFormatResource>(files);
+                index.Files.Register<RadarrCustomFormatResource>(files);
                 break;
             case "sonarr":
-                registry.Register<SonarrCustomFormatResource>(files);
+                index.Files.Register<SonarrCustomFormatResource>(files);
                 break;
             default:
                 throw new InvalidOperationException(

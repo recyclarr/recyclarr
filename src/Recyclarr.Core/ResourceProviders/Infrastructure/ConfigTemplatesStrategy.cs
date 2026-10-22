@@ -7,8 +7,7 @@ using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Infrastructure;
 
-public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry)
-    : IProviderTypeStrategy
+public class ConfigTemplatesStrategy : IProviderTypeStrategy
 {
     public string Type => "config-templates";
 
@@ -34,7 +33,7 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
         return myProviders.All(p => !p.ReplaceDefault) ? [official] : [];
     }
 
-    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath)
+    public void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath, GuideIndex index)
     {
         var includesFile = rootPath.File("includes.json");
         if (!includesFile.Exists)
@@ -44,10 +43,10 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
 
         var includesData = DeserializeTemplatesData(includesFile);
 
-        registry.Register<RadarrConfigIncludeResource>(
+        index.Templates.Register<RadarrConfigIncludeResource>(
             includesData.Radarr.Select(e => TemplateMetadata.From(e, rootPath))
         );
-        registry.Register<SonarrConfigIncludeResource>(
+        index.Templates.Register<SonarrConfigIncludeResource>(
             includesData.Sonarr.Select(e => TemplateMetadata.From(e, rootPath))
         );
     }

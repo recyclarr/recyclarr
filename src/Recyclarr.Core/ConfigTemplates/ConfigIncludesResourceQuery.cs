@@ -4,7 +4,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ConfigTemplates;
 
-public class ConfigIncludesResourceQuery(ResourceRegistry<TemplateMetadata> registry, ILogger log)
+public class ConfigIncludesResourceQuery(ResourceScope resources, ILogger log)
 {
     public IReadOnlyCollection<ConfigIncludeResource> Get(SupportedServices serviceType)
     {
@@ -20,7 +20,7 @@ public class ConfigIncludesResourceQuery(ResourceRegistry<TemplateMetadata> regi
         where TResource : ConfigIncludeResource, new()
     {
         log.Debug("ConfigIncludes: Querying {Service} config includes", serviceType);
-        var metadata = registry.Get<TResource>();
+        var metadata = resources.Templates.Get<TResource>();
         log.Debug(
             "ConfigIncludes: Found {Count} {Service} includes in registry",
             metadata.Count,

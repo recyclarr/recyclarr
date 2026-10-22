@@ -4,7 +4,6 @@ using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Core.Tests.Pipelines.Plan;
@@ -28,7 +27,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
     )
         where TResource : QualitySizeResource, new()
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var resource = new TResource
         {
             TrashId = $"qs-{type}",
@@ -56,7 +55,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
         params (string Label, string TrashId)[] trashQualityDefinition
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var resource = new SonarrQualityProfileResource
         {
             TrashId = trashId,

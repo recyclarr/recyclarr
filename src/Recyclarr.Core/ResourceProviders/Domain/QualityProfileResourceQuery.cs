@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
@@ -6,7 +5,7 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.ResourceProviders.Domain;
 
 public class QualityProfileResourceQuery(
-    ResourceRegistry<IFileInfo> registry,
+    ResourceScope resources,
     JsonResourceLoader loader,
     ILogger log
 )
@@ -29,7 +28,7 @@ public class QualityProfileResourceQuery(
         where TResource : QualityProfileResource
     {
         log.Debug("QualityProfile: Querying {Service} quality profiles", serviceType);
-        var files = registry.Get<TResource>();
+        var files = resources.Files.Get<TResource>();
         log.Debug("QualityProfile: Found {Count} quality profile files in registry", files.Count);
 
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);

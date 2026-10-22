@@ -13,6 +13,7 @@ using Recyclarr.ResourceProviders;
 using Recyclarr.Server.Auth;
 using Recyclarr.Server.Features.Instances;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Sync.Notifications.Apprise;
@@ -77,7 +78,7 @@ internal static class CompositionRoot
     private static void RegisterSyncServices(ContainerBuilder builder)
     {
         builder.RegisterType<ServerConfigLoader>();
-        builder.RegisterType<ServerConfigurationStore>().SingleInstance();
+        builder.RegisterType<ResourceCoordinator>().SingleInstance();
         builder.RegisterType<InstanceServiceCaller>();
 
         builder.RegisterInstance(TimeProvider.System);

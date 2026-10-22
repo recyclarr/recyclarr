@@ -2,7 +2,7 @@ using Autofac;
 using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.Server.Sync;
+using Recyclarr.Server.Resources;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.Features.Instances;
@@ -19,7 +19,7 @@ internal sealed record InstanceCallResult<T>(
 // classifies expected service failures with the classifier sync results use.
 internal sealed class InstanceServiceCaller(
     ILogger log,
-    ServerConfigurationStore configuration,
+    ResourceCoordinator resources,
     InstanceScopeFactory scopes
 )
 {
@@ -55,7 +55,7 @@ internal sealed class InstanceServiceCaller(
     }
 
     private IServiceConfiguration? Find(string instanceName) =>
-        configuration.Current.Instances.FirstOrDefault(x =>
+        resources.Current.Configuration.Instances.FirstOrDefault(x =>
             x.InstanceName.Equals(instanceName, StringComparison.OrdinalIgnoreCase)
         );
 }

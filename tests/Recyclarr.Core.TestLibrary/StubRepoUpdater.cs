@@ -7,7 +7,10 @@ namespace Recyclarr.Core.TestLibrary;
 
 public class StubRepoUpdater(MockFileSystem fileSystem) : IRepoUpdater
 {
-    public Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
+    public Task<RepoUpdateOutcome> UpdateRepo(
+        GitRepositorySource repositorySource,
+        CancellationToken token
+    )
     {
         var repoPath = repositorySource.Path;
 
@@ -23,7 +26,7 @@ public class StubRepoUpdater(MockFileSystem fileSystem) : IRepoUpdater
                 throw new InvalidOperationException("Unknown repository type");
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(RepoUpdateOutcome.Fetched);
     }
 
     private void SetupTrashGuidesRepo(IDirectoryInfo repoPath)

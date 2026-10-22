@@ -23,9 +23,10 @@ server, so `docker exec` commands never start an ephemeral server.
 
 **Ephemeral (attached)**: no address is configured. For each command:
 
-1. The CLI starts `recyclarr-server --urls=http://127.0.0.1:0 --parent-pid={ownPid}
-   --ephemeral=true` with stdin, stdout, and stderr redirected. The literal loopback address is
-   required because Kestrel rejects a dynamic port on `localhost`.
+1. The CLI starts
+   `recyclarr-server --urls=http://127.0.0.1:0 --parent-pid={ownPid} --ephemeral=true` with stdin,
+   stdout, and stderr redirected. The literal loopback address is required because Kestrel rejects a
+   dynamic port on `localhost`.
 2. The server binds, then writes `READY:{port}` to stdout.
 3. The CLI reads that line and uses the port for the rest of the command.
 4. When the CLI exits or crashes, the lifeline stops the server.
@@ -65,17 +66,18 @@ without `-t`, Git Bash on Windows, and CI runners. The explicit flag follows LSP
 
 ## Rejected Options
 
-- Server embedded in the CLI as a library: puts ASP.NET Core types or a wrapper abstraction into
-  the CLI.
-- Detached ephemeral server with an idle timeout, shared by rapid invocations: needs port
-  discovery, stale-process detection, idle tracking, and per-platform detach semantics to avoid a
-  cold start that has not proven to matter. Revisit if cold start becomes a measured problem; the
-  handshake and HTTP interface would not change.
+- Server embedded in the CLI as a library: puts ASP.NET Core types or a wrapper abstraction into the
+  CLI.
+- Detached ephemeral server with an idle timeout, shared by rapid invocations: needs port discovery,
+  stale-process detection, idle tracking, and per-platform detach semantics to avoid a cold start
+  that has not proven to matter. Revisit if cold start becomes a measured problem; the handshake and
+  HTTP interface would not change.
 
 ## Consequences
 
 - The two binaries ship together (packages, Docker image, CI artifacts).
-- Every ephemeral command pays a server cold start.
+- Every ephemeral command pays a server cold start. Git resource providers are fetched only when
+  their cached data is stale (ADR-031), so most commands start without network access.
 
 ## History
 
@@ -83,3 +85,4 @@ without `-t`, Git Bash on Windows, and CI runners. The explicit flag follows LSP
 - 2026-10-08: The Docker image targets its own server over IPv4 through `RECYCLARR_SERVER_URL`.
 - 2026-10-11: `recyclarr serve` uses the lifeline; ephemeral servers stop forwarding logs to the
   CLI.
+- 2026-10-21: Ephemeral servers skip git fetches while cached provider data is fresh.

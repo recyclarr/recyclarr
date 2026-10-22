@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config;
+using Recyclarr.Server.Resources;
 using Recyclarr.Server.Telemetry;
 using Recyclarr.Sync.Results;
 using TickerQ.Utilities.Base;
@@ -17,12 +18,13 @@ internal sealed record SyncJobTickerRequest(Guid JobId);
 /// <summary>
 /// Runs one queued sync job when TickerQ executes its ticker. Jobs run one at a time in creation
 /// order (<see cref="SyncExecutionGate"/>). A job that is already terminal is not run: a ticker
-/// left over from a previous process finds its job interrupted by startup recovery.
+/// left over from a previous process finds its job interrupted by startup recovery. Each run holds
+/// a resource lease from admission to completion, so guide data cannot change during the run.
 /// </summary>
 internal sealed class SyncJobTickerFunction(
     ILogger log,
     ISyncJobStore store,
-    ServerConfigurationStore configuration,
+    ResourceCoordinator resources,
     SyncExecutionGate gate,
     SyncRunScopeFactory scopeFactory,
     SyncJobFinalizer finalizer,
@@ -80,10 +82,14 @@ internal sealed class SyncJobTickerFunction(
     {
         try
         {
-            // Configuration is fixed for the life of the process, so this selects what the job was
-            // accepted with.
-            var configs = configuration.Current.Select(job.Request.Service, job.Request.Instances);
-            using var runScope = scopeFactory.Start<SyncJobRunner>();
+            // Configuration files are fixed for the life of the process, so the snapshot holds the
+            // instances the job was accepted with, resolved against current guide data.
+            using var lease = await resources.AcquireReadAsync(ct);
+            var configs = lease.Snapshot.Configuration.Select(
+                job.Request.Service,
+                job.Request.Instances
+            );
+            using var runScope = scopeFactory.Start<SyncJobRunner>(lease.Snapshot.Guide);
             await runScope.Entry.RunAsync(job.Id, configs, job.Request, ct);
         }
         catch (OperationCanceledException e)

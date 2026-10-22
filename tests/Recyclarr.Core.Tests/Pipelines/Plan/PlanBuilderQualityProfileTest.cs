@@ -1,17 +1,15 @@
-using System.IO.Abstractions;
 using System.Text.Json;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Core.Tests.Pipelines.Plan;
 
 internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
 {
-    private GuideResourceTestData GuideData => new(Fs, Resolve<ResourceRegistry<IFileInfo>>());
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
 
     private void SetupCustomFormatGuideData(params (string Name, string TrashId)[] formats) =>
         GuideData.AddCustomFormats(formats);
@@ -134,7 +132,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         SetupCustomFormatGuideData(("Test CF", "cf-with-scores"));
 
         // Need to setup the CF with score sets - let me use a more direct approach
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var cf = new RadarrCustomFormatResource
         {
             Name = "CF With Score Set",
@@ -291,7 +289,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     public void Build_with_qp_formatItems_inherits_trash_score_set()
     {
         // Setup CF with score sets
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var cf = new RadarrCustomFormatResource
         {
             Name = "CF With Scores",

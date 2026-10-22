@@ -1,17 +1,15 @@
-using System.IO.Abstractions;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Core.Tests.Pipelines.CustomFormat;
 
 internal sealed class ConfiguredCustomFormatProviderTest : CoreIntegrationTestFixture
 {
-    private GuideResourceTestData GuideData => new(Fs, Resolve<ResourceRegistry<IFileInfo>>());
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
 
     private void SetupQualityProfileGuideData(
         string trashId,

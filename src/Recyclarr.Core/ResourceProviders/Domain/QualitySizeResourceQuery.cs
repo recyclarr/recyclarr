@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
@@ -6,7 +5,7 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.ResourceProviders.Domain;
 
 public class QualitySizeResourceQuery(
-    ResourceRegistry<IFileInfo> registry,
+    ResourceScope resources,
     JsonResourceLoader loader,
     ILogger log
 )
@@ -25,7 +24,7 @@ public class QualitySizeResourceQuery(
         where TResource : QualitySizeResource
     {
         log.Debug("QualitySize: Querying {Service} quality sizes", serviceType);
-        var files = registry.Get<TResource>();
+        var files = resources.Files.Get<TResource>();
         log.Debug("QualitySize: Found {Count} quality size files in registry", files.Count);
 
         var result = loader

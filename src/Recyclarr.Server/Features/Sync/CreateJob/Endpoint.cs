@@ -1,12 +1,13 @@
 using System.Diagnostics;
 using FastEndpoints;
+using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Server.Features.Sync.CreateJob;
 
 internal sealed class Endpoint(
-    ServerConfigurationStore configurationStore,
+    ResourceCoordinator resources,
     ISyncJobStore store,
     // Lazy: endpoints are constructed while routes are mapped, including during build-time OpenAPI
     // generation, where TickerQ (the launcher's queue) is not registered.
@@ -50,7 +51,7 @@ internal sealed class Endpoint(
 
     public override async Task HandleAsync(CreateSyncJobRequest req, CancellationToken ct)
     {
-        var configuration = configurationStore.Current;
+        var configuration = resources.Current.Configuration;
         if (configuration.Instances.Count == 0)
         {
             AddError("No instances are configured on the server");
