@@ -33,6 +33,10 @@ description: >-
 - **Integration**: Complete workflows with mocked externals (Git, HTTP, filesystem)
 - **Unit**: Edge cases integration cannot reach
 
+Cover each code path once, at the highest level that reaches it. MUST NOT add a unit test for a path
+an integration test already exercises. Add one only after `scripts/coverage.py` shows lines the
+integration tests leave uncovered (see Coverage Analysis).
+
 ## Naming
 
 - Classes: `{Component}Test` or `{Component}IntegrationTest`
