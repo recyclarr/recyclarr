@@ -119,13 +119,13 @@ internal sealed class RepoUpdaterTest
 
         repo.Fetch(default!, default!, default)
             .ReturnsForAnyArgs(Task.FromException(new AggregateException("offline")));
+        repo.ResolveCommit("HEAD", default).ReturnsForAnyArgs("abc123");
 
         var sut = new RepoUpdater(log, _ => repo);
-        var act = () => sut.UpdateRepo(source, CancellationToken.None);
+        var outcome = await sut.UpdateRepo(source, CancellationToken.None);
 
-        await act.Should().NotThrowAsync();
+        outcome.Should().Be(RepoUpdateOutcome.FetchFailedUsingCache);
         fs.Directory.Exists(repoPath.FullName).Should().BeTrue();
-        await repo.Received().ResetHard("FETCH_HEAD", Arg.Any<CancellationToken>());
         LoggedWarningContaining(log, "will proceed with existing files").Should().BeTrue();
     }
 

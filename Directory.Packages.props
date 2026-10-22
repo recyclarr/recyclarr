@@ -13,6 +13,7 @@
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
     <PackageVersion Include="CliWrap" Version="3.10.5" />
     <PackageVersion Include="Cronos" Version="0.13.0" />
+    <PackageVersion Include="DotNext.Threading" Version="6.10.0" />
     <PackageVersion Include="FastEndpoints.OpenApi" Version="8.4.0-beta.26" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" />

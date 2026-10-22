@@ -36,7 +36,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
             settings
         );
 
-        using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>();
+        using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>(Guide);
         await scope.Entry.RunAsync(job.Id, configs, settings, CancellationToken.None);
 
         return store.Get(job.Id)!;
@@ -190,7 +190,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var store = Resolve<ISyncJobStore>();
         var job = store.CreateManualJob(["first", "second"], settings);
 
-        using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>();
+        using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>(Guide);
         var run = scope.Entry.RunAsync(job.Id, configs, settings, CancellationToken.None);
 
         await firstStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));

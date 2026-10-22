@@ -106,4 +106,27 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
     {
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
     }
+
+    public async Task<string?> ResolveCommit(string revision, CancellationToken token)
+    {
+        try
+        {
+            return await RunGitCmd(
+                token,
+                "rev-parse",
+                "--verify",
+                "--quiet",
+                $"{revision}^{{commit}}"
+            );
+        }
+        catch (GitCmdException)
+        {
+            return null;
+        }
+    }
+
+    public async Task UpdateRef(string refName, string commit, CancellationToken token)
+    {
+        await RunGitCmd(token, "update-ref", refName, commit);
+    }
 }

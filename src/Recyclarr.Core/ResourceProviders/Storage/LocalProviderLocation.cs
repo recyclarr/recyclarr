@@ -1,41 +1,43 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Storage;
 
+// A directory the user maintains; Recyclarr never changes it, so there is nothing to update or
+// revert. A missing directory contributes no data.
 public class LocalProviderLocation(
     LocalResourceProvider config,
+    IProviderTypeStrategy strategy,
     IFileSystem fileSystem,
     IAppPaths appPaths
-) : IProviderLocation
+) : IResourceSource
 {
-    public delegate LocalProviderLocation Factory(LocalResourceProvider config);
+    public delegate LocalProviderLocation Factory(
+        LocalResourceProvider config,
+        IProviderTypeStrategy strategy
+    );
 
-    public Task<IReadOnlyCollection<IDirectoryInfo>> InitializeAsync(
-        IProgress<ProviderProgress>? progress,
-        CancellationToken ct
-    )
+    public ResourceProvider Config => config;
+    public IProviderTypeStrategy Strategy => strategy;
+    public SourceTracking? Tracking => null;
+
+    public IReadOnlyCollection<IDirectoryInfo> Roots
     {
-        progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Processing));
-
-        var path = ResolvePath(config.Path);
-
-        if (!path.Exists)
+        get
         {
-            progress?.Report(
-                new ProviderProgress(
-                    config.Name,
-                    ProviderStatus.Failed,
-                    $"Path does not exist: {config.Path}"
-                )
-            );
-            return Task.FromResult<IReadOnlyCollection<IDirectoryInfo>>([]);
+            var path = ResolvePath(config.Path);
+            return path.Exists ? [path] : [];
         }
-
-        progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Completed));
-        return Task.FromResult<IReadOnlyCollection<IDirectoryInfo>>([path]);
     }
+
+    public Task<SourceUpdateOutcome> UpdateAsync(CancellationToken ct) =>
+        Task.FromResult(SourceUpdateOutcome.Unchanged);
+
+    public Task MarkGoodAsync(CancellationToken ct) => Task.CompletedTask;
+
+    public Task<bool> RevertToGoodAsync(CancellationToken ct) => Task.FromResult(false);
 
     private IDirectoryInfo ResolvePath(string path)
     {

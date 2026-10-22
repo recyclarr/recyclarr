@@ -13,5 +13,5 @@ public interface IProviderTypeStrategy
         IReadOnlyCollection<ResourceProvider> providers
     );
 
-    void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath);
+    void MapResourcePaths(ResourceProvider config, IDirectoryInfo rootPath, GuideIndex index);
 }

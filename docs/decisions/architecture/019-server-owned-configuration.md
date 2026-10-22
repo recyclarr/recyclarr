@@ -11,13 +11,18 @@ and a remote server, which does not.
 
 ## Decision
 
-The server loads configuration once at startup and treats it as fixed for the life of the process.
+Configuration files are read from the server's config directory and fixed for the life of the
+process. The resolved configuration (files plus the provider data their includes read) follows
+provider data.
 
 ### Configuration lifecycle
 
-- The server loads all configuration files from its config directory during startup, after resource
-  providers are available for template includes. The result is an immutable snapshot of instances.
-- Configuration changes require a restart. There is no hot reload; a gitops deploy rolls the pod.
+- The server validates its configuration files at startup, after resource providers are available
+  for template includes. The result is an immutable snapshot of instances.
+- Each resource refresh that changes provider data resolves the same files again and publishes a new
+  snapshot; one that makes the configuration invalid is reverted (ADR-031).
+- Configuration file changes require a restart. There is no hot reload; a gitops deploy rolls the
+  pod.
 - Clients cannot name configuration files. The `configs` request field and the CLI `--config` option
   are removed in Recyclarr 9. `RECYCLARR_CONFIG_DIR` selects a different config directory for either
   launch model.
@@ -31,7 +36,8 @@ The server loads configuration once at startup and treats it as fixed for the li
 - A server with no configuration files starts. Guide and template resources remain available, and
   sync job creation returns 409.
 - If a git resource provider cannot refresh but data from an earlier run exists, the server logs a
-  warning and uses the cached data. Startup fails only when no provider data exists.
+  warning and uses the cached data. Startup fails only when no provider data exists, or when the
+  configuration is invalid even against the last data that validated.
 
 ### Request-time failures
 
@@ -63,9 +69,11 @@ templates, so the API exposes neither:
 
 - Administrators see configuration problems as soon as the server starts.
 - Sync requests never parse configuration.
-- Any configuration change needs a restart, and one invalid instance blocks all instances.
+- Any configuration file change needs a restart, and one invalid instance blocks all instances.
+- A provider update that breaks the configuration is logged and reverted; the server keeps running.
 - Clients never see deprecations; administrators read the server log.
 
 ## History
 
 - 2026-09-26: Load configuration once at startup; remove client-supplied config paths.
+- 2026-10-21: Resolve configuration again when provider data changes; files stay fixed.

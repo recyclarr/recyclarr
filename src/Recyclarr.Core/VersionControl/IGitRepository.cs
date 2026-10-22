@@ -13,4 +13,11 @@ public interface IGitRepository : IDisposable
 
     Task ResetHard(string toBranchOrSha1, CancellationToken token);
     Task Status(CancellationToken token);
+
+    /// <summary>
+    /// The commit SHA that <paramref name="revision"/> names, or null when it names no commit.
+    /// </summary>
+    Task<string?> ResolveCommit(string revision, CancellationToken token);
+
+    Task UpdateRef(string refName, string commit, CancellationToken token);
 }

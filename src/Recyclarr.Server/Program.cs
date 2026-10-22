@@ -19,6 +19,7 @@ using Recyclarr.Logging;
 using Recyclarr.Server;
 using Recyclarr.Server.Auth;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync.Schedule;
 using Recyclarr.Server.Telemetry;
 using Scalar.AspNetCore;
@@ -183,6 +184,7 @@ if (!isDocumentGeneration)
     builder.Services.AddServerPersistence();
     builder.Services.AddHostedService<ServerBootstrapService>();
     builder.Services.AddHostedService<SyncScheduler>();
+    builder.Services.AddHostedService<ResourceRefreshWorker>();
 }
 
 await using var app = builder.Build();
@@ -259,6 +261,11 @@ if (mode == ServerMode.Persistent && !isDocumentGeneration)
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+if (!isDocumentGeneration)
+{
+    app.UseMiddleware<GuideLeaseMiddleware>();
+}
+
 app.UseFastEndpoints(c =>
 {
     c.Versioning.Prefix = "api/v";

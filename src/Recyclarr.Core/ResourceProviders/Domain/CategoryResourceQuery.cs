@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -6,7 +5,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.ResourceProviders.Domain;
 
 public class CategoryResourceQuery(
-    ResourceRegistry<IFileInfo> registry,
+    ResourceScope resources,
     ICustomFormatCategoryParser parser,
     ILogger log
 )
@@ -25,7 +24,7 @@ public class CategoryResourceQuery(
         where TResource : CategoryMarkdownResource
     {
         log.Debug("Category: Querying {Service} categories", serviceType);
-        var files = registry.Get<TResource>();
+        var files = resources.Files.Get<TResource>();
         log.Debug("Category: Found {Count} category files in registry", files.Count);
         var result = files.SelectMany(parser.Parse).ToList();
         log.Debug("Category: Parsed {Count} {Service} category items", result.Count, serviceType);

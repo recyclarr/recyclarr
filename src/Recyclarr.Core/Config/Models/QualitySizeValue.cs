@@ -18,23 +18,34 @@ public abstract record QualitySizeValue
 
     public static QualitySizeValue? Parse(string? value)
     {
+        return TryParse(value, out var result)
+            ? result
+            : throw new FormatException(
+                $"Invalid quality size value: '{value}'. Expected a number or 'unlimited'."
+            );
+    }
+
+    /// <summary>Succeeds for a number, <c>unlimited</c>, or no value (a null result).</summary>
+    public static bool TryParse(string? value, out QualitySizeValue? result)
+    {
+        result = null;
         if (string.IsNullOrWhiteSpace(value))
         {
-            return null;
+            return true;
         }
 
         if (value.Equals("unlimited", StringComparison.OrdinalIgnoreCase))
         {
-            return new Unlimited();
+            result = new Unlimited();
+            return true;
         }
 
         if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var num))
         {
-            return new Numeric(num);
+            result = new Numeric(num);
+            return true;
         }
 
-        throw new FormatException(
-            $"Invalid quality size value: '{value}'. Expected a number or 'unlimited'."
-        );
+        return false;
     }
 }

@@ -6,7 +6,6 @@ using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Core.Tests.Pipelines.Plan;
 
@@ -17,7 +16,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
         IReadOnlyDictionary<string, string>? fileFormats = null
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var resource = new RadarrMediaNamingResource
         {
             Folder = folderFormats ?? new Dictionary<string, string> { ["default"] = "{Movie}" },
@@ -34,7 +33,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
         IReadOnlyDictionary<string, string>? standardEpisodeFormats = null
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
+        var registry = Guide.Files;
         var resource = new SonarrMediaNamingResource
         {
             Season = new Dictionary<string, string> { ["default"] = "season" },

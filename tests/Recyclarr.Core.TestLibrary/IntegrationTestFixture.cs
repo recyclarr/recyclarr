@@ -4,6 +4,7 @@ using Autofac.Features.ResolveAnything;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
+using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Core.TestLibrary;
 
@@ -42,7 +43,13 @@ public abstract class IntegrationTestFixture : IDisposable
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterModule(_stubs);
+
+        // Every scope reads one test-owned guide index; tests register guide files into it.
+        builder.RegisterInstance(ResourceScope.For(Guide));
     }
+
+    /// <summary>The guide data every scope in this fixture reads.</summary>
+    protected GuideIndex Guide { get; } = new();
 
     protected T Resolve<T>()
         where T : notnull

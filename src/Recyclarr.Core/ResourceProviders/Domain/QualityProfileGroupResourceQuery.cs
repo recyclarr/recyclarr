@@ -6,7 +6,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-public class QualityProfileGroupResourceQuery(ResourceRegistry<IFileInfo> registry, ILogger log)
+public class QualityProfileGroupResourceQuery(ResourceScope resources, ILogger log)
 {
     public IReadOnlyList<QualityProfileGroupResource> Get(SupportedServices serviceType)
     {
@@ -23,7 +23,7 @@ public class QualityProfileGroupResourceQuery(ResourceRegistry<IFileInfo> regist
         where TResource : QualityProfileGroupResource
     {
         log.Debug("QualityProfileGroup: Querying {Service} quality profile groups", serviceType);
-        var files = registry.Get<TResource>();
+        var files = resources.Files.Get<TResource>();
         log.Debug(
             "QualityProfileGroup: Found {Count} quality profile group files in registry",
             files.Count

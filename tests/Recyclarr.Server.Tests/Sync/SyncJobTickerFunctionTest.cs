@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Autofac;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Sync.Progress;
@@ -24,7 +25,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
     public async Task Terminal_job_is_not_run()
     {
         var store = Resolve<ISyncJobStore>();
-        var job = CreateJob(store, Config("left-over"));
+        var job = await CreateJob(store, "left-over");
         store.InterruptActive();
 
         await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
@@ -55,7 +56,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
                 return Task.FromException<SyncRunResult>(new OperationCanceledException());
             });
         var store = Resolve<ISyncJobStore>();
-        var job = CreateJob(store, Config("first"), Config("second"));
+        var job = await CreateJob(store, "first", "second");
 
         await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
         var completed = store.Get(job.Id)!;
@@ -74,7 +75,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
     {
         using var scope = new ContainerBuilder().Build();
         var store = Resolve<ISyncJobStore>();
-        var job = CreateJob(store, Config("not-started"));
+        var job = await CreateJob(store, "not-started");
 
         await Execute(new SyncRunScopeFactory(scope), job.Id);
         var completed = store.Get(job.Id)!;
@@ -107,7 +108,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
             .InstancePerLifetimeScope()
             .OnRelease(_ => throw new InvalidOperationException("cleanup secret"));
         using var scope = builder.Build();
-        var job = CreateJob(store);
+        var job = await CreateJob(store);
 
         await Execute(new SyncRunScopeFactory(scope), job.Id);
         var completed = store.Get(job.Id)!;
@@ -125,7 +126,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
         using var request = new Activity("request");
         request.Start();
         var store = Resolve<ISyncJobStore>();
-        Resolve<ServerConfigurationStore>().Publish(new ServerConfiguration([]));
+        await PublishInstances();
         var job = store.Create(new ServerSyncSettings(null, [], Preview: false), [], request.Id);
         request.Stop();
         using var ambient = new Activity("worker");
@@ -156,7 +157,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
                 seen = CallerState.Value;
                 return new SyncRunResult([]);
             });
-        var job = CreateJob(Resolve<ISyncJobStore>(), Config("movies"));
+        var job = await CreateJob(Resolve<ISyncJobStore>(), "movies");
         CallerState.Value = "request";
 
         await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
@@ -168,7 +169,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
     public async Task Scheduled_job_runs_in_its_own_trace_without_links()
     {
         using var spans = new RecordedSpans();
-        Resolve<ServerConfigurationStore>().Publish(new ServerConfiguration([]));
+        await PublishInstances();
         var job = Resolve<ISyncJobStore>()
             .CreateScheduled(
                 new ServerSyncSettings(null, [], Preview: false),
@@ -188,18 +189,18 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
     {
         using var spans = new RecordedSpans();
         using var scope = new ContainerBuilder().Build();
-        var job = CreateJob(Resolve<ISyncJobStore>(), Config("not-started"));
+        var job = await CreateJob(Resolve<ISyncJobStore>(), "not-started");
 
         await Execute(new SyncRunScopeFactory(scope), job.Id);
 
         spans.For(job).Status.Should().Be(ActivityStatusCode.Error);
     }
 
-    // Publishes the configs as the server configuration and creates a job selecting all of them.
-    private SyncJob CreateJob(ISyncJobStore store, params IServiceConfiguration[] configs)
+    // Publishes the instances as the server configuration and creates a job selecting all of them.
+    private async Task<SyncJob> CreateJob(ISyncJobStore store, params string[] instanceNames)
     {
-        Resolve<ServerConfigurationStore>().Publish(new ServerConfiguration(configs));
-        return store.CreateManualJob([.. configs.Select(x => x.InstanceName)]);
+        await PublishInstances(instanceNames);
+        return store.CreateManualJob(instanceNames);
     }
 
     private Task Execute(SyncRunScopeFactory scopes, JobId id)
@@ -207,7 +208,7 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
         var function = new SyncJobTickerFunction(
             Substitute.For<ILogger>(),
             Resolve<ISyncJobStore>(),
-            Resolve<ServerConfigurationStore>(),
+            Resolve<ResourceCoordinator>(),
             new SyncExecutionGate(),
             scopes,
             Resolve<SyncJobFinalizer>(),
@@ -219,14 +220,6 @@ internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
         );
         return function.ExecuteAsync(context, CancellationToken.None);
     }
-
-    private static RadarrConfiguration Config(string name) =>
-        new()
-        {
-            InstanceName = name,
-            BaseUrl = new Uri("http://localhost"),
-            ApiKey = "api-key",
-        };
 
     // Records spans from the Recyclarr source. Tests run in parallel, so each test looks up only
     // the span of its own job.

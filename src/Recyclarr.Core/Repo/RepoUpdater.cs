@@ -15,9 +15,13 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
 {
     private static readonly string[] ValidGitPaths = [".git/config", ".git/index", ".git/HEAD"];
 
-    public async Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
+    public async Task<RepoUpdateOutcome> UpdateRepo(
+        GitRepositorySource repositorySource,
+        CancellationToken token
+    )
     {
         var rebuilt = MaybeDeleteForRebuild(repositorySource);
+        var outcome = RepoUpdateOutcome.FetchFailedUsingCache;
 
         // Assume failure until it succeeds, to simplify the catch handlers.
         var succeeded = false;
@@ -26,7 +30,7 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         // fresh.
         try
         {
-            await CheckoutAndUpdateRepo(repositorySource, token);
+            outcome = await CheckoutAndUpdateRepo(repositorySource, token);
             succeeded = true;
         }
         catch (GitCmdException e)
@@ -42,13 +46,15 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         {
             log.Warning("Deleting local git repo and retrying git operation due to error");
             repositorySource.Path.DeleteReadOnlyDirectory();
-            await CheckoutAndUpdateRepo(repositorySource, token);
+            outcome = await CheckoutAndUpdateRepo(repositorySource, token);
         }
 
         if (rebuilt)
         {
             CheckRebuildSize(repositorySource);
         }
+
+        return outcome;
     }
 
     private bool MaybeDeleteForRebuild(GitRepositorySource repositorySource)
@@ -130,7 +136,7 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         }
     }
 
-    private async Task CheckoutAndUpdateRepo(
+    private async Task<RepoUpdateOutcome> CheckoutAndUpdateRepo(
         GitRepositorySource repositorySource,
         CancellationToken token
     )
@@ -160,14 +166,28 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         }
         catch (AggregateException e)
         {
+            // A failed fetch empties FETCH_HEAD, so the working tree is left at its previous
+            // checkout rather than reset.
+            if (await repo.ResolveCommit("HEAD", token) is null)
+            {
+                // An empty repository must not look like cached data on the next attempt.
+                repoPath.DeleteReadOnlyDirectory();
+                throw new InvalidOperationException(
+                    $"Repository {repositorySource.Name} could not be fetched and has no cached data",
+                    e
+                );
+            }
+
             log.Warning(
                 e,
                 "All references failed to fetch (will proceed with existing files): {@References}",
                 references
             );
+            return RepoUpdateOutcome.FetchFailedUsingCache;
         }
 
         await repo.ResetHard("FETCH_HEAD", token);
+        return RepoUpdateOutcome.Fetched;
     }
 
     private static void ValidateGitDirectory(IDirectoryInfo repoPath)
