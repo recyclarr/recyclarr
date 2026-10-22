@@ -89,8 +89,8 @@ graph TB
         YC[YAML Config<br/>resource_providers array]
     end
 
-    subgraph "Initialization"
-        Factory[ProviderInitializationFactory]
+    subgraph "Refresh"
+        Factory[ResourceCoordinator]
     end
 
     subgraph "Storage Layer"
@@ -104,8 +104,8 @@ graph TB
         CFStrat[CustomFormatsStrategy]
     end
 
-    subgraph "Registry"
-        Reg[ResourcePathRegistry]
+    subgraph "Snapshot"
+        Reg[GuideIndex]
     end
 
     subgraph "Domain Layer"
@@ -194,8 +194,8 @@ without code duplication:
 **DI Registration**: Open generic registration (`RegisterGeneric(typeof(ResourceRegistry<>))`)
 allows unlimited metadata types without additional registrations.
 
-**Consequence**: Cannot reuse same type for different resources; each resource kind requires its
-own distinct resource type.
+**Consequence**: Cannot reuse same type for different resources; each resource kind requires its own
+distinct resource type.
 
 ### Precedence Via Registration Order
 
@@ -313,13 +313,17 @@ resource_providers:
 
 #### Provider Location (Storage Layer)
 
-Access data from storage and provide root filesystem paths.
+Access data from storage and provide root filesystem paths. Each location implements
+`IResourceSource`: current roots, update, mark good, and revert to last good.
 
-- `GitProviderLocation`: Clones git repos to `cache/resources/{type}/git/{name}`, uses existing
+- `GitProviderLocation`: Clones git repos to `resources/{type}/git/{name}`, uses existing
   `IRepoUpdater` infrastructure. When a fetch fails (for example, offline), the updater logs a
-  warning and uses the cached checkout from an earlier run. Initialization fails only when no
-  cache exists, or when a broken cache is deleted and the fresh clone also fails.
-- `LocalProviderLocation`: Returns user-configured directory paths directly (no caching)
+  warning and keeps the checkout from an earlier run. An update fails only when no cache exists, or
+  when a broken cache is deleted and the fresh clone also fails. Mark good sets
+  `refs/recyclarr/last-good`; revert resets to it. Its refresh state is
+  `resources/{type}/git/{name}.state.json` (ADR-031).
+- `LocalProviderLocation`: Returns user-configured directory paths directly (no caching). It has no
+  refresh state; edits appear only when the next git refresh or a restart rebuilds the index.
 
 #### Provider Type (Structure Layer)
 
@@ -361,12 +365,13 @@ Two usage patterns:
 
 - `ResourceRegistry<IFileInfo>` - For self-contained resources (CustomFormats, QualitySizes,
   MediaNaming). Strategy registers file paths, query deserializes via `JsonResourceLoader`.
-- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigIncludes). Strategy
-  parses external metadata files and registers structured metadata, query
-  transforms to resource objects.
+- `ResourceRegistry<TemplateMetadata>` - For index-based resources (ConfigIncludes). Strategy parses
+  external metadata files and registers structured metadata, query transforms to resource objects.
 
-Open generic DI registration (`RegisterGeneric(typeof(ResourceRegistry<>))`) creates registry
-instances on demand. Preserves registration order for precedence.
+Both registries belong to a `GuideIndex`, built once per refresh from every source's roots in
+precedence order. Registration order is preserved for precedence. Queries read the index bound to
+their lifetime scope through `ResourceScope`; reading guide data in a scope without a bound index
+throws.
 
 **JsonResourceLoader** (Generic Deserialization)
 
@@ -384,67 +389,64 @@ Two patterns based on metadata type:
 - **File-based** (CustomFormats, QualitySizes, MediaNaming): Retrieve files from
   `ResourceRegistry<IFileInfo>`, deserialize via `JsonResourceLoader`, apply post-processing
   (category assignment), deduplicate by TrashId (last wins).
-- **Index-based** (ConfigIncludes): Retrieve metadata from
-  `ResourceRegistry<TemplateMetadata>`, transform to resource objects, deduplicate by Id (last
-  wins).
+- **Index-based** (ConfigIncludes): Retrieve metadata from `ResourceRegistry<TemplateMetadata>`,
+  transform to resource objects, deduplicate by Id (last wins).
 
 Both patterns preserve provider ordering for correct precedence semantics.
 
-**ProviderInitializationFactory** (Orchestration)
+**ResourceSourceFactory** (Source Creation)
 
-Coordinates initialization with progress reporting:
+Creates one source per provider: official providers from strategies first, then user-configured
+providers in YAML order.
 
-1. Collects official providers from strategies (injected first)
-2. Appends user-configured providers (YAML order preserved)
-3. Creates location instances via delegate factories
-4. Initializes locations asynchronously (git clone/fetch)
-5. Calls strategies to register paths with registry
-6. Triggers cache cleanup for orphaned directories
+**ResourceCoordinator** (Server; Orchestration)
+
+The only writer of provider data (ADR-031). It owns the reader-writer lock, the TTL and fetch
+backoff, and the published snapshot (`GuideIndex` plus the configuration resolved against it).
 
 ### Dependency Injection Pattern
 
 **Key Patterns**:
 
-- **Open generic registry**: `RegisterGeneric(typeof(ResourceRegistry<>))` creates instances for any
-  metadata type without additional registrations
+- **Scope-bound index**: `ResourceScope` is registered per lifetime scope. Guide requests bind it in
+  `GuideLeaseMiddleware`; sync runs bind it in `SyncRunScopeFactory`. Guide-data services MUST NOT
+  resolve from the root container, because `JsonResourceLoader` caches parsed files per scope.
 - **Keyed strategies**: `IProviderTypeStrategy` registered by provider type string ("trash-guides",
   "config-templates", "custom-formats")
 - **Delegate factories**: Location classes registered as `AsSelf()` for Autofac auto-generated
   factories
 
-All components registered in `ResourceProviderAutofacModule` as singletons except locations
-(instance per dependency).
+Locations are instance per dependency; `ResourceScope` and `JsonResourceLoader` are per lifetime
+scope.
 
-### Initialization Flow
+### Refresh Flow
 
-Provider initialization occurs during application startup before command execution:
+Startup runs the first refresh before the server reports READY; in persistent mode a background
+worker requests one every minute. Each refresh, under the write lock:
 
-1. **Strategy Collection**: `ProviderInitializationFactory` queries all strategies to collect
-   official providers (filtered by `replace_default` settings)
-2. **Provider Ordering**: Official providers prepended (lowest precedence), user providers appended
-   in YAML order
-3. **Location Creation**: Delegate factories create location instances (`GitProviderLocation` or
-   `LocalProviderLocation`) for each provider
-4. **Async Initialization**: Locations initialize in sequence with progress reporting (git
-   clone/fetch for git providers, path validation for local)
-5. **Resource Registration**: Strategies call `MapResourcePaths()` to parse metadata and register
-   files/metadata in appropriate `ResourceRegistry<TMetadata>` instances
-6. **Cache Cleanup**: Cleanup service scans cache directory, deletes orphaned provider caches not in
-   active set
-7. **Query Availability**: Resource queries can now retrieve registered metadata and serve pipeline
-   code
+1. **Update**: Each git source that is stale (no state, changed identity, or older than the TTL, and
+   not in the fetch backoff) is updated; its state file records the attempt.
+2. **Cache Cleanup** (first refresh only): Deletes orphaned provider caches and their state files.
+3. **Index and Resolve**: When any source changed, strategies call `MapResourcePaths()` into a new
+   `GuideIndex`, and the configuration is resolved against it.
+4. **Publish or Revert**: A valid configuration marks every source good and publishes the snapshot.
+   An invalid one reverts the updated sources and keeps the current snapshot; at startup with no
+   snapshot, it is fatal.
 
-**Error Handling**: Factory catches initialization exceptions per provider, reports via progress,
-continues with remaining providers. Partial initialization succeeds if at least one provider
-completes successfully.
+**Error Handling**: A background refresh logs a failed update and continues with the cached data. At
+startup, a provider with no cached data that cannot be fetched stops the server.
+
+**Known gap**: A repair (cache size limit or corrupt-repository retry) deletes the good mark. If the
+data it fetches makes the configuration invalid, nothing is reverted; the server keeps its in-memory
+snapshot, but the files on disk are the new ones.
 
 ## Extension Guide
 
 ### Adding New Provider Locations
 
-Implement `IProviderLocation` interface, add location-specific settings class, update factory to
-recognize new config type. Achieves near-perfect Open/Closed compliance - no modifications to
-existing locations, strategies, or loaders.
+Implement `IResourceSource` (update, mark good, revert to last good), add location-specific settings
+class, update factory to recognize new config type. Achieves near-perfect Open/Closed compliance -
+no modifications to existing locations, strategies, or loaders.
 
 **Examples**: S3 bucket, HTTP API, database storage.
 

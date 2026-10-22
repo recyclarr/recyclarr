@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.ResourceProviders.Storage;
 using Recyclarr.Settings.Models;
 
@@ -7,7 +8,7 @@ namespace Recyclarr.Core.Tests.IntegrationTests.ResourceProviders;
 internal sealed class LocalProviderLocationTest : CoreIntegrationTestFixture
 {
     [Test]
-    public async Task Resolve_relative_path_against_app_data_directory()
+    public void Resolve_relative_path_against_app_data_directory()
     {
         var expectedDir = Paths.ConfigDirectory.SubDirectory("my-custom-formats");
         Fs.AddDirectory(expectedDir.FullName);
@@ -20,15 +21,13 @@ internal sealed class LocalProviderLocationTest : CoreIntegrationTestFixture
             Service = "radarr",
         };
 
-        var sut = Resolve<LocalProviderLocation.Factory>()(config);
+        var sut = CreateSut(config);
 
-        var result = await sut.InitializeAsync(null, CancellationToken.None);
-
-        result.Should().ContainSingle().Which.FullName.Should().Be(expectedDir.FullName);
+        sut.Roots.Should().ContainSingle().Which.FullName.Should().Be(expectedDir.FullName);
     }
 
     [Test]
-    public async Task Absolute_path_used_directly()
+    public void Absolute_path_used_directly()
     {
         var absoluteDir = Fs.CurrentDirectory().SubDirectory("absolute").SubDirectory("path");
         Fs.AddDirectory(absoluteDir.FullName);
@@ -41,15 +40,13 @@ internal sealed class LocalProviderLocationTest : CoreIntegrationTestFixture
             Service = "radarr",
         };
 
-        var sut = Resolve<LocalProviderLocation.Factory>()(config);
+        var sut = CreateSut(config);
 
-        var result = await sut.InitializeAsync(null, CancellationToken.None);
-
-        result.Should().ContainSingle().Which.FullName.Should().Be(absoluteDir.FullName);
+        sut.Roots.Should().ContainSingle().Which.FullName.Should().Be(absoluteDir.FullName);
     }
 
     [Test]
-    public async Task Nonexistent_relative_path_returns_empty_collection()
+    public void Nonexistent_relative_path_returns_empty_collection()
     {
         var config = new LocalResourceProvider
         {
@@ -59,10 +56,11 @@ internal sealed class LocalProviderLocationTest : CoreIntegrationTestFixture
             Service = "radarr",
         };
 
-        var sut = Resolve<LocalProviderLocation.Factory>()(config);
+        var sut = CreateSut(config);
 
-        var result = await sut.InitializeAsync(null, CancellationToken.None);
-
-        result.Should().BeEmpty();
+        sut.Roots.Should().BeEmpty();
     }
+
+    private LocalProviderLocation CreateSut(LocalResourceProvider config) =>
+        Resolve<LocalProviderLocation.Factory>()(config, Resolve<CustomFormatsStrategy>());
 }

@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Autofac;
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
@@ -9,7 +8,6 @@ using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.Plan.Components;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
@@ -17,7 +15,7 @@ namespace Recyclarr.Core.Tests.IntegrationTests;
 
 internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixture
 {
-    private GuideResourceTestData GuideData => new(Fs, Resolve<ResourceRegistry<IFileInfo>>());
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
@@ -56,7 +54,7 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
     public async Task Planning_validation_reasons_survive_completed_results_and_handled_failures()
     {
         AddGuideData();
-        using var scope = Resolve<SyncRunScopeFactory>().Start<ISyncOrchestrator>();
+        using var scope = Resolve<SyncRunScopeFactory>().Start<ISyncOrchestrator>(Guide);
 
         var result = await scope.Entry.RunAsync(
             [BuildInvalidConfig(), BuildNonBlockingConfig(), BuildHandledFailureConfig()],

@@ -1,15 +1,10 @@
-using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-public class CfGroupResourceQuery(
-    ResourceRegistry<IFileInfo> registry,
-    JsonResourceLoader loader,
-    ILogger log
-)
+public class CfGroupResourceQuery(ResourceScope resources, JsonResourceLoader loader, ILogger log)
 {
     public IReadOnlyList<CfGroupResource> Get(SupportedServices serviceType)
     {
@@ -25,7 +20,7 @@ public class CfGroupResourceQuery(
         where TResource : CfGroupResource
     {
         log.Debug("CfGroup: Querying {Service} CF groups", serviceType);
-        var files = registry.Get<TResource>();
+        var files = resources.Files.Get<TResource>();
         log.Debug("CfGroup: Found {Count} CF group files in registry", files.Count);
 
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Metadata);

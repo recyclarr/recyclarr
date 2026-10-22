@@ -1,3 +1,5 @@
+using Recyclarr.Server.Resources;
+
 namespace Recyclarr.Server.Sync.Schedule;
 
 /// <summary>
@@ -6,14 +8,14 @@ namespace Recyclarr.Server.Sync.Schedule;
 /// </summary>
 internal sealed class ScheduledSyncTrigger(
     ILogger log,
-    ServerConfigurationStore configuration,
+    ResourceCoordinator resources,
     ISyncJobStore store,
     SyncJobLauncher launcher
 )
 {
     public async Task TriggerAsync(DateTimeOffset occurrence)
     {
-        var instances = configuration.Current.InstanceNames;
+        var instances = resources.Current.Configuration.InstanceNames;
         if (instances.Count == 0)
         {
             log.Warning(
