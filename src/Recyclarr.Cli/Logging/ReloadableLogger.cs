@@ -19,7 +19,7 @@ namespace Recyclarr.Cli.Logging;
 internal class ReloadableLogger(IEnvironment env, LoggingLevelSwitch levelSwitch) : ILogger
 {
     private const string Template =
-        "[{@l:u3}] {@m}{#if @x is not null}: {Inspect(@x).Message}{#end}\n";
+        "[{@t:yyyy-MM-dd HH:mm:ss} {@l:u3}] {@m}{#if @x is not null}: {Inspect(@x).Message}{#end}\n";
 
     private volatile ILogger _inner = CreateConsoleLogger(
         env,
