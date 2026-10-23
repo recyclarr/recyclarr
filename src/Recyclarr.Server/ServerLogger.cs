@@ -69,10 +69,7 @@ internal sealed class ServerLogger(
         else
         {
             config.WriteTo.Console(
-                new ExpressionTemplate(
-                    "[{@l:u3}] " + LogSetup.BaseTemplate,
-                    theme: TemplateTheme.Code
-                ),
+                new ExpressionTemplate(LogSetup.ConsoleTemplate, theme: TemplateTheme.Code),
                 levelSwitch: levelSwitch
             );
         }
