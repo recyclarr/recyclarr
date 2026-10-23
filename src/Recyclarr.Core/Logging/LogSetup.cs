@@ -4,12 +4,14 @@ namespace Recyclarr.Logging;
 
 public static class LogSetup
 {
+    private const string HeaderTemplate = "[{@t:yyyy-MM-dd HH:mm:ss} {@l:u3}] ";
+
     public static string BaseTemplate { get; } = GetBaseTemplateString();
 
+    public static string ConsoleTemplate { get; } = HeaderTemplate + BaseTemplate;
+
     public static string FileTemplate { get; } =
-        "[{@t:HH:mm:ss} {@l:u3}] "
-        + BaseTemplate
-        + "{#if @x is not null}{Inspect(@x).StackTrace}\n{#end}";
+        ConsoleTemplate + "{#if @x is not null}{Inspect(@x).StackTrace}\n{#end}";
 
     public static LoggerConfiguration BaseConfiguration()
     {
