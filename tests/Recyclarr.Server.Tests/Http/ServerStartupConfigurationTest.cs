@@ -107,12 +107,24 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             );
     }
 
-    // Fail closed: a server without a key would serve its API to anyone (ADR-027).
-    [TestCase(null)]
-    [TestCase("")]
-    public void Missing_server_api_key_stops_startup(string? key)
+    // Fail closed: a server without a valid key would serve its API to anyone (ADR-027).
+    [TestCase(null, null, "RECYCLARR_API_KEY_FILE", TestName = "Missing key stops startup")]
+    [TestCase("", null, "RECYCLARR_API_KEY_FILE", TestName = "Empty variable stops startup")]
+    [TestCase(null, "", "at least 32", TestName = "Empty key file stops startup")]
+    [TestCase("short-key", null, "at least 32", TestName = "Short key stops startup")]
+    [TestCase(null, "short-key", "at least 32", TestName = "Short key file stops startup")]
+    [TestCase(ApiKey, ApiKey, "both set", TestName = "Variable and file together stop startup")]
+    public void Invalid_server_api_key_stops_startup(
+        string? key,
+        string? fileKey,
+        string expectedMessage
+    )
     {
         Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns(key);
+        if (fileKey is not null)
+        {
+            SetKeyFile(fileKey);
+        }
 
         var start = () => CreateClient();
 
@@ -121,8 +133,33 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             .Contain(evt =>
                 evt.Level == LogEventLevel.Fatal
                 && evt.RenderMessage(CultureInfo.InvariantCulture)
-                    .Contains("RECYCLARR_API_KEY", StringComparison.Ordinal)
+                    .Contains(expectedMessage, StringComparison.Ordinal)
             );
+    }
+
+    [Test]
+    public void Unreadable_key_file_stops_startup()
+    {
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns((string?)null);
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE")
+            .Returns(Fs.CurrentDirectory().File("missing-key").FullName);
+
+        var start = () => CreateClient();
+
+        start.Should().Throw<Exception>();
+        _log.Events.Should()
+            .Contain(evt =>
+                evt.Level == LogEventLevel.Fatal
+                && evt.RenderMessage(CultureInfo.InvariantCulture)
+                    .Contains("Cannot read the API key file", StringComparison.Ordinal)
+            );
+    }
+
+    private void SetKeyFile(string content)
+    {
+        var file = Fs.CurrentDirectory().File("api-key");
+        Fs.AddFile(file, new MockFileData(content));
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE").Returns(file.FullName);
     }
 
     [Test]

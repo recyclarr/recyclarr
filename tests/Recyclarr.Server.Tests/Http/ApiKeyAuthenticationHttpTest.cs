@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Net;
 using System.Net.Http.Headers;
 using Recyclarr.Server.TestLibrary;
@@ -37,6 +38,57 @@ internal sealed class ApiKeyAuthenticationHttpTest : ServerHttpFixture
         var response = await client.GetAsync(ApiRoute);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task Key_file_with_a_trailing_line_break_is_accepted()
+    {
+        UseKeyFile(ApiKey + "\n");
+        using var client = CreateClient();
+
+        var response = await client.GetAsync(ApiRoute);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task Rotated_key_file_applies_without_a_restart()
+    {
+        var file = UseKeyFile(ApiKey);
+        using var client = CreateClient();
+        const string rotatedKey = "rotated-server-api-key-0123456789abcdef";
+
+        file.WriteAllText(rotatedKey);
+        var withOldKey = await client.GetAsync(ApiRoute);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            rotatedKey
+        );
+        var withNewKey = await client.GetAsync(ApiRoute);
+
+        withOldKey.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        withNewKey.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task Key_file_removed_after_startup_rejects_requests()
+    {
+        var file = UseKeyFile(ApiKey);
+        using var client = CreateClient();
+
+        file.Delete();
+        var response = await client.GetAsync(ApiRoute);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private IFileInfo UseKeyFile(string content)
+    {
+        var file = Fs.CurrentDirectory().File("api-key");
+        file.WriteAllText(content);
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns((string?)null);
+        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE").Returns(file.FullName);
+        return file;
     }
 
     [TestCase("/openapi/v1.json")]

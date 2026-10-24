@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
-using Recyclarr.Cli.Settings;
+using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Server;
 
@@ -61,10 +61,14 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
                     $"--urls={LoopbackUrl} "
                     + $"--parent-pid={Environment.ProcessId} "
                     + "--ephemeral=true",
-                // Replaces any inherited value, so the server accepts only this command's key.
-                Environment = { [CliSettingsLoader.ApiKeyVariable] = apiKey },
             },
         };
+
+        // Replaces any inherited key, so the server accepts only this command's key. An inherited
+        // key file would conflict with it and stop the server (ADR-027).
+        var environment = _process.StartInfo.Environment;
+        environment[ServerApiKeyLocator.Variable] = apiKey;
+        environment.Remove(ServerApiKeyLocator.FileVariable);
 
         _process.Start();
         _stdinWriter = _process.StandardInput;
