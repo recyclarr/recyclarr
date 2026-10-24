@@ -45,7 +45,7 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     };
 
     private const string ApiKey = "testkey";
-    private const string ServerApiKey = "e2e-server-api-key";
+    private const string ServerApiKey = "e2e-server-api-key-0123456789abcdef";
 
     private readonly HttpClient _sonarr;
     private readonly HttpClient? _radarr;

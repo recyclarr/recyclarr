@@ -28,7 +28,7 @@ public abstract class ServerHttpFixture : WebApplicationFactory<Program>
     /// The server API key the in-process server requires. Clients from <c>CreateClient</c> send
     /// it; a test that needs a different key or none changes the client's headers.
     /// </summary>
-    public const string ApiKey = "test-server-api-key";
+    public const string ApiKey = "test-server-api-key-0123456789abcdef";
 
     private readonly TestStubsModule _stubs;
 

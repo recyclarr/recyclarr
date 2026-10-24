@@ -12,15 +12,19 @@ namespace Recyclarr.Cli.Settings;
 /// <remarks>
 /// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
 /// YamlDotNet's deserializer names C# types instead. A non-empty <c>RECYCLARR_SERVER_URL</c>
-/// overrides <c>server.base_url</c>, and a non-empty <c>RECYCLARR_API_KEY</c> overrides
-/// <c>server.api_key</c>, so an image can target its own server without a file in the user's
-/// volume. The server reads the same key variable, so one value serves both processes.
+/// overrides <c>server.base_url</c>, and a key from the environment (see
+/// <see cref="ServerApiKeyLocator"/>) overrides <c>server.api_key</c>, so an image can target its
+/// own server without a file in the user's volume. The server resolves its key the same way, so
+/// one value serves both processes.
 /// </remarks>
-internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator, IEnvironment env)
+internal sealed class CliSettingsLoader(
+    ConfigDirectoryLocator configLocator,
+    ServerApiKeyLocator apiKeyLocator,
+    IEnvironment env
+)
 {
     public const string FileName = "cli.yml";
     public const string ServerUrlVariable = "RECYCLARR_SERVER_URL";
-    public const string ApiKeyVariable = "RECYCLARR_API_KEY";
 
     public CliSettings Load()
     {
@@ -32,8 +36,7 @@ internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator, IE
             settings = settings with { ServerBaseUrl = ParseBaseUrl(envUrl, ServerUrlVariable) };
         }
 
-        var envKey = env.GetEnvironmentVariable(ApiKeyVariable);
-        if (!string.IsNullOrEmpty(envKey))
+        if (apiKeyLocator.Locate() is { } envKey)
         {
             settings = settings with { ServerApiKey = envKey };
         }

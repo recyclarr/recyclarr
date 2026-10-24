@@ -1,6 +1,6 @@
 [env]
 DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
-RECYCLARR_API_KEY = "dev"
+RECYCLARR_API_KEY = "dev-server-api-key-0123456789abcdef"
 
 [tools]
 dotnet = "10"

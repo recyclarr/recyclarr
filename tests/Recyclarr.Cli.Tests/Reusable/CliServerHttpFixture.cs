@@ -123,6 +123,14 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     }
 
     /// <summary>
+    /// Adds a file to the CLI's file system and returns its full path.
+    /// </summary>
+    protected string AddCliFile(string name, string content)
+    {
+        return _cli.AddFile(name, content);
+    }
+
+    /// <summary>
     /// Sets an environment variable the CLI reads. The in-process server routes every request
     /// regardless of host, so a test can point the CLI at any address.
     /// </summary>
@@ -208,6 +216,13 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         public void WriteCliSettings(string yaml)
         {
             Fs.AddFile(ConfigDirectory.File("cli.yml"), new MockFileData(yaml));
+        }
+
+        public string AddFile(string name, string content)
+        {
+            var file = Fs.CurrentDirectory().File(name);
+            Fs.AddFile(file, new MockFileData(content));
+            return file.FullName;
         }
 
         public void SetEnvironmentVariable(string name, string value)
