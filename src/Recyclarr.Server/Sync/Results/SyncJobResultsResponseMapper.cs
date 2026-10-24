@@ -4,7 +4,7 @@ using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualitySize;
-using Recyclarr.Server.Features;
+using Recyclarr.Server.Api;
 using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;

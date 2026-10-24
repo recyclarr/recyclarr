@@ -1,6 +1,7 @@
 using System.Net;
 using FastEndpoints;
 using Recyclarr.Servarr.CustomFormat;
+using Recyclarr.Server.Api;
 using Refit;
 
 namespace Recyclarr.Server.Features.Instances.CustomFormats.Delete;

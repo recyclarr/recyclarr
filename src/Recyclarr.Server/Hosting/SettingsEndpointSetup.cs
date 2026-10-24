@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
+using Recyclarr.Server.Observability;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// Binds Kestrel to the API endpoint and, on a persistent server, the management port (ADR-029).

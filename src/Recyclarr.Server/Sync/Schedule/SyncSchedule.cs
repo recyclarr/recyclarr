@@ -1,5 +1,5 @@
 using Cronos;
-using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Hosting;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Sync.Schedule;

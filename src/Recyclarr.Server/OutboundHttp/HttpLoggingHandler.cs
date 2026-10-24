@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Recyclarr.Logging;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.OutboundHttp;
 
 internal sealed class HttpLoggingHandler(ILogger log) : DelegatingHandler
 {

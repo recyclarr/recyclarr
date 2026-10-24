@@ -1,4 +1,4 @@
-namespace Recyclarr.Server.Persistence;
+namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// How this server process was launched (ADR-010). A persistent server (<c>recyclarr serve</c>)

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+using Recyclarr.Server.Api;
 
 namespace Recyclarr.Server.Features.Sync.GetResults;
 

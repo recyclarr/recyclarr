@@ -2,7 +2,7 @@ using System.Text.Json;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Api;
 
 // Shapes every error response as RFC 9457 Problem Details. Endpoints that need extension members
 // subclass HttpValidationProblemDetails and fill the common members through Apply.

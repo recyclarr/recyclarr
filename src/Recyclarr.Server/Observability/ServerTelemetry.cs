@@ -4,7 +4,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 
-namespace Recyclarr.Server.Telemetry;
+namespace Recyclarr.Server.Observability;
 
 /// <summary>
 /// OpenTelemetry for the server. OTLP export of traces, metrics, and logs is configured only by

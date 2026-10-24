@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

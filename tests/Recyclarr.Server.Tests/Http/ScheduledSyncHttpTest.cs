@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Recyclarr.Server.Features.Sync.GetSchedule;
 using Recyclarr.Server.Features.Sync.ListJobs;
-using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Hosting;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.TestLibrary;
 using Recyclarr.Server.Tests.Reusable;

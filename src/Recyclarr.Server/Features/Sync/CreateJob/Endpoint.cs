@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FastEndpoints;
+using Recyclarr.Server.Api;
 using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 using Recyclarr.TrashGuide;

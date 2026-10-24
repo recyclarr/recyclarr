@@ -1,4 +1,4 @@
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// Signals that the server has finished starting and is ready to accept requests. The default

@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
+using Recyclarr.Server.Logging;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
