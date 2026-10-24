@@ -45,7 +45,7 @@ public class TrashIdMappingStore(List<TrashIdMapping> mappings) : IMappingStoreV
                 r => r.ServiceId,
                 l => l, // Keep existing service items not in user config
                 r => r, // Add new mappings from user config
-                (l, r) => r // Update existing mappings with new trash_id/name from user config
+                (_, r) => r // Update existing mappings with new trash_id/name from user config
             )
             .Where(m => m.ServiceId != 0)
             .OrderBy(m => m.ServiceId)

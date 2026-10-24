@@ -70,7 +70,7 @@ internal sealed class SyncJobRestartHttpTest
             .Content?.Instances.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<Recyclarr.Client.V1.SyncInstanceResultsResponseRadarr>()
+            .BeOfType<Client.V1.SyncInstanceResultsResponseRadarr>()
             .Which.Name.Should()
             .Be("movies");
     }
@@ -121,7 +121,7 @@ internal sealed class SyncJobRestartHttpTest
             .Content?.Instances.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<Recyclarr.Client.V1.SyncInstanceResultsResponseRadarr>()
+            .BeOfType<Client.V1.SyncInstanceResultsResponseRadarr>()
             .Which.Name.Should()
             .Be("finished");
     }

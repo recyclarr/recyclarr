@@ -7,6 +7,7 @@ using Recyclarr.Client.V1;
 using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Commands;
 
@@ -184,7 +185,7 @@ internal class DeleteCustomFormatsCommand(
                 .Select(x =>
                     Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[bold white]{x}[/]")
                 )
-                .ToArray();
+                .ToArray<IRenderable>();
 
             grid.AddRow(rows);
         }
