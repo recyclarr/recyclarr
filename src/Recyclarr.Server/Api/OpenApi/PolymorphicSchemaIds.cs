@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Api.OpenApi;
 
 /// <summary>
 /// Shortens the OpenAPI schema IDs of polymorphic derived types. ASP.NET Core names a derived

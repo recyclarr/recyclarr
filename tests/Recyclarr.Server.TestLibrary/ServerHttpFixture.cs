@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Platform;
+using Recyclarr.Server.Hosting;
 
 namespace Recyclarr.Server.TestLibrary;
 

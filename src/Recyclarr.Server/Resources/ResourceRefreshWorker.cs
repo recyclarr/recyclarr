@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Hosting;
 
 namespace Recyclarr.Server.Resources;
 

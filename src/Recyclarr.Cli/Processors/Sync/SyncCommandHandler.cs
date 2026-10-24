@@ -3,6 +3,7 @@ using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Cli.Processors.Sync.Results;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Refit;
 using Spectre.Console;
 

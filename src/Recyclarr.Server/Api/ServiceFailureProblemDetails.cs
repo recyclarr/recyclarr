@@ -1,6 +1,6 @@
 using Recyclarr.Sync.Results;
 
-namespace Recyclarr.Server.Features;
+namespace Recyclarr.Server.Api;
 
 // 502 response for a Sonarr or Radarr call that failed outside a sync job (ADR-019). The failure
 // category is the same one sync results report for the same cause.

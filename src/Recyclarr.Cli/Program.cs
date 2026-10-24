@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
+using Recyclarr.Platform;
 using Spectre.Console;
 
 namespace Recyclarr.Cli;

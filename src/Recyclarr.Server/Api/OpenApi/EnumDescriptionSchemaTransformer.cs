@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Api.OpenApi;
 
 /// <summary>
 /// Publishes <see cref="DescriptionAttribute"/> text on enum members as an

@@ -1,6 +1,6 @@
 using FastEndpoints;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Api;
 
 internal static class OperationIds
 {

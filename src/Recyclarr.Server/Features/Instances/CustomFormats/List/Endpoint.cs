@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Recyclarr.Servarr.CustomFormat;
+using Recyclarr.Server.Api;
 
 namespace Recyclarr.Server.Features.Instances.CustomFormats.List;
 

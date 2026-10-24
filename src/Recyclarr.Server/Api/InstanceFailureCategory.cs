@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Recyclarr.Sync.Results;
 
-namespace Recyclarr.Server.Features;
+namespace Recyclarr.Server.Api;
 
 // The wire form of OperationalFailure, shared by every endpoint that reports why a call to a
 // Sonarr or Radarr instance failed.

@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
-using IEnvironment = Recyclarr.Platform.IEnvironment;
 
 namespace Recyclarr.Core.Tests.Platform;
 

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Recyclarr.Platform;
 
-namespace Recyclarr.Server.Auth;
+namespace Recyclarr.Server.Api.Auth;
 
 /// <summary>
 /// The server API key: the secret every request under <c>/api</c> must present as a bearer token

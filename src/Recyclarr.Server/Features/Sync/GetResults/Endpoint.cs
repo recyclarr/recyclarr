@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Recyclarr.Server.Api;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Results;
 

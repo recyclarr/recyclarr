@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Recyclarr.Cli.Server;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

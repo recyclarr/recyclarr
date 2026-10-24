@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Recyclarr.Migration;
+using Recyclarr.Server.Logging;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// One-time bootstrap of on-disk state: schema migrations first, then the first resource refresh
