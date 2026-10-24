@@ -29,7 +29,7 @@ internal sealed class SyncExecutionGate
 
         await using (ct.Register(() => Withdraw(waiter, ct)))
         {
-            await waiter.Admission.Task;
+            await waiter.AdmissionSignal.Task;
         }
 
         return new Admission(this);
@@ -41,7 +41,7 @@ internal sealed class SyncExecutionGate
         {
             if (_waiting.Remove(waiter))
             {
-                waiter.Admission.TrySetCanceled(ct);
+                waiter.AdmissionSignal.TrySetCanceled(ct);
             }
         }
     }
@@ -66,14 +66,14 @@ internal sealed class SyncExecutionGate
         var next = _waiting.MinBy(x => (x.CreatedAt, x.JobId))!;
         _waiting.Remove(next);
         _occupied = true;
-        next.Admission.TrySetResult();
+        next.AdmissionSignal.TrySetResult();
     }
 
     private sealed class Waiter(DateTimeOffset createdAt, Guid jobId)
     {
         public DateTimeOffset CreatedAt { get; } = createdAt;
         public Guid JobId { get; } = jobId;
-        public TaskCompletionSource Admission { get; } =
+        public TaskCompletionSource AdmissionSignal { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 

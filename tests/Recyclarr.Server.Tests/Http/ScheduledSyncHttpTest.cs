@@ -199,10 +199,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         }
     }
 
-    private static async Task<Recyclarr.Client.V1.GetSyncJobResponse> WaitForTerminal(
-        ISyncApi api,
-        Guid id
-    )
+    private static async Task<Client.V1.GetSyncJobResponse> WaitForTerminal(ISyncApi api, Guid id)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         while (true)
