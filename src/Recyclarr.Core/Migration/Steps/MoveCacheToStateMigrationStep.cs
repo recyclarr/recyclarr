@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Migration.Steps;
 
-[MigrationOrder(2)]
 internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
 {
     public string Description => "Move cache directory to state";
@@ -20,13 +19,13 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
     private IDirectoryInfo StateDir => paths.ConfigDirectory.SubDirectory("state");
     private IDirectoryInfo ResourcesDir => paths.ResourceDirectory;
 
-    public bool CheckIfNeeded()
+    public void Run(ILogger log)
     {
-        return CacheDir.Exists;
-    }
+        if (!CacheDir.Exists)
+        {
+            return;
+        }
 
-    public void Execute(ILogger log)
-    {
         var totalFiles = 0;
         var services = new List<string>();
 
