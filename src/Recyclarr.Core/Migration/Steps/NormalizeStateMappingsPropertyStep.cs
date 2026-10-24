@@ -9,7 +9,6 @@ namespace Recyclarr.Migration.Steps;
 /// Renames the top-level JSON property in state mapping files from the old per-type names
 /// ("trash_id_mappings", "TrashIdMappings") to the canonical name ("mappings").
 /// </summary>
-[MigrationOrder(3)]
 internal class NormalizeStateMappingsPropertyStep(IAppPaths paths) : IMigrationStep
 {
     private static readonly string[] LegacyPropertyNames = ["trash_id_mappings", "TrashIdMappings"];
@@ -22,14 +21,10 @@ internal class NormalizeStateMappingsPropertyStep(IAppPaths paths) : IMigrationS
             $"Manually edit JSON files under {paths.StateDirectory} and rename the top-level property to \"mappings\"",
         ];
 
-    public bool CheckIfNeeded()
+    public void Run(ILogger log)
     {
-        return FindFilesNeedingMigration().Any();
-    }
-
-    public void Execute(ILogger log)
-    {
-        foreach (var file in FindFilesNeedingMigration())
+        // Materialized so rewriting a file cannot disturb the directory enumeration
+        foreach (var file in FindFilesNeedingMigration().ToList())
         {
             var json = file.FileSystem.File.ReadAllText(file.FullName);
             var node = JsonNode.Parse(json);

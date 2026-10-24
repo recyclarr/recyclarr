@@ -33,7 +33,7 @@ internal sealed class ServerBootstrapService(
             logJanitor.DeleteOldestLogFiles(logger.ActiveLogFiles);
         }
 
-        migrations.PerformAllMigrationSteps();
+        migrations.RunAll();
         await resources.RefreshAsync(RefreshMode.Startup, ct);
 
         // TickerQ's hosted services read their tables as soon as they start. The host runs every

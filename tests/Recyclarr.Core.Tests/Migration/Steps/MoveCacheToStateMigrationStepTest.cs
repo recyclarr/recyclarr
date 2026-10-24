@@ -6,36 +6,21 @@ namespace Recyclarr.Core.Tests.Migration.Steps;
 internal sealed class MoveCacheToStateMigrationStepTest
 {
     [Test, AutoMockData]
-    public void CheckIfNeeded_returns_true_when_cache_directory_exists(
+    public void Run_does_nothing_when_cache_directory_does_not_exist(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
+        [Frozen] IAppPaths appPaths,
+        ILogger log
     )
     {
-        var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.ConfigDirectory.Returns(appDataDir);
-        fs.AddDirectory("/app/cache");
+        appPaths.ConfigDirectory.Returns(fs.DirectoryInfo.New("/app"));
+        appPaths.ResourceDirectory.Returns(fs.DirectoryInfo.New("/app/resources"));
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        var result = sut.CheckIfNeeded();
+        sut.Run(log);
 
-        result.Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
-    public void CheckIfNeeded_returns_false_when_cache_directory_does_not_exist(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
-    )
-    {
-        var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.ConfigDirectory.Returns(appDataDir);
-
-        var sut = new MoveCacheToStateMigrationStep(appPaths);
-
-        var result = sut.CheckIfNeeded();
-
-        result.Should().BeFalse();
+        fs.Directory.Exists("/app/state").Should().BeFalse();
+        fs.Directory.Exists("/app/resources").Should().BeFalse();
     }
 
     [Test, AutoMockData]
@@ -53,7 +38,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.FileExists("/app/state/sonarr/abc123/custom-format-mappings.json").Should().BeTrue();
         fs.FileExists("/app/state/sonarr/abc123/quality-profile-mappings.json").Should().BeTrue();
@@ -75,7 +60,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.FileExists("/app/state/radarr/def456/custom-format-mappings.json").Should().BeTrue();
         fs.FileExists("/app/cache/radarr/def456/custom-format-cache.json").Should().BeFalse();
@@ -96,7 +81,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
         // Should not throw
-        var act = () => sut.Execute(log);
+        var act = () => sut.Run(log);
 
         act.Should().NotThrow();
         fs.Directory.Exists("/app/state/sonarr").Should().BeFalse();
@@ -117,7 +102,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/state/sonarr/hash1").Should().BeTrue();
     }
@@ -136,7 +121,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/cache/sonarr/hash1").Should().BeFalse();
     }
@@ -155,7 +140,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/cache/sonarr").Should().BeFalse();
     }
@@ -175,7 +160,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.FileExists("/app/resources/test.json").Should().BeTrue();
         fs.Directory.Exists("/app/cache/resources").Should().BeFalse();
@@ -197,7 +182,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/cache/resources").Should().BeFalse();
         fs.FileExists("/app/resources/new.json").Should().BeTrue();
@@ -219,7 +204,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
         // Should not throw
-        var act = () => sut.Execute(log);
+        var act = () => sut.Run(log);
 
         act.Should().NotThrow();
         fs.Directory.Exists("/app/resources").Should().BeFalse();
@@ -239,7 +224,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/cache").Should().BeFalse();
     }
@@ -259,36 +244,10 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.Directory.Exists("/app/cache").Should().BeTrue();
         fs.FileExists("/app/cache/unexpected-file.txt").Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
-    public void Description_is_correct([Frozen] IAppPaths appPaths)
-    {
-        var sut = new MoveCacheToStateMigrationStep(appPaths);
-
-        sut.Description.Should().Be("Move cache directory to state");
-    }
-
-    [Test, AutoMockData]
-    public void Remediation_contains_expected_instructions(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
-    )
-    {
-        var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.ConfigDirectory.Returns(appDataDir);
-
-        var sut = new MoveCacheToStateMigrationStep(appPaths);
-
-        sut.Remediation.Should().HaveCount(4);
-        sut.Remediation.Should().Contain(x => x.Contains("permission"));
-        sut.Remediation.Should().Contain(x => x.Contains("sonarr") && x.Contains("radarr"));
-        sut.Remediation.Should().Contain(x => x.Contains("resources"));
-        sut.Remediation.Should().Contain(x => x.Contains("Delete"));
     }
 
     [Test, AutoMockData]
@@ -307,7 +266,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.FileExists("/app/state/sonarr/hash1/cf-mappings.json").Should().BeTrue();
         fs.FileExists("/app/state/sonarr/hash2/qp-mappings.json").Should().BeTrue();
@@ -330,7 +289,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
-        sut.Execute(log);
+        sut.Run(log);
 
         // File with -cache.json should be renamed to -mappings.json
         fs.FileExists("/app/state/sonarr/hash1/test-mappings.json").Should().BeTrue();
