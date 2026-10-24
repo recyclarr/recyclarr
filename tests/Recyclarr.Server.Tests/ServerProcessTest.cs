@@ -17,7 +17,7 @@ internal sealed class ServerProcessTest
     private static readonly TimeSpan ExitTimeout = TimeSpan.FromSeconds(30);
 
     private IDirectoryInfo _root = null!;
-    private string? _apiKey = "test-server-api-key";
+    private string? _apiKey = "test-server-api-key-0123456789abcdef";
     private string _apiUrl = "http://127.0.0.1:0";
     private int _managementPort;
     private bool _managementPortFromEnvironment = true;

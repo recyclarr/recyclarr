@@ -3,12 +3,14 @@ using Recyclarr.Cli.Tests.Reusable;
 namespace Recyclarr.Cli.Tests.Settings;
 
 /// <summary>
-/// The CLI sends the server API key from cli.yml, or from RECYCLARR_API_KEY when that is set, so
-/// a container can share one variable between the server and the CLI (ADR-027).
+/// The CLI sends the server API key from cli.yml, or from RECYCLARR_API_KEY or
+/// RECYCLARR_API_KEY_FILE when one is set, so a container can share one secret between the server
+/// and the CLI (ADR-027).
 /// </summary>
 internal sealed class ServerApiKeyHttpTest : CliServerHttpFixture
 {
     private const string EnvVar = "RECYCLARR_API_KEY";
+    private const string FileEnvVar = "RECYCLARR_API_KEY_FILE";
 
     private void WriteKey(string? key)
     {
@@ -46,6 +48,30 @@ internal sealed class ServerApiKeyHttpTest : CliServerHttpFixture
         var exitCode = await RunCliAsync("list", "qualities", "radarr");
 
         exitCode.Should().Be(0);
+    }
+
+    [Test]
+    public async Task Key_file_variable_overrides_cli_yml_key()
+    {
+        WriteKey("wrong-key");
+        SetCliEnvironmentVariable(FileEnvVar, AddCliFile("api-key", ApiKey + "\n"));
+
+        var exitCode = await RunCliAsync("list", "qualities", "radarr");
+
+        exitCode.Should().Be(0);
+    }
+
+    [Test]
+    public async Task Variable_and_key_file_together_fail_the_command()
+    {
+        WriteKey(ApiKey);
+        SetCliEnvironmentVariable(EnvVar, ApiKey);
+        SetCliEnvironmentVariable(FileEnvVar, AddCliFile("api-key", ApiKey));
+
+        var exitCode = await RunCliAsync("list", "qualities", "radarr");
+
+        exitCode.Should().Be(1);
+        LogOutput.Should().Contain(EnvVar).And.Contain(FileEnvVar).And.Contain("both set");
     }
 
     [TestCase(null, TestName = "Missing key fails the command and names where to set it")]

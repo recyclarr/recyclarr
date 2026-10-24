@@ -62,9 +62,9 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
             return
             [
                 "The Recyclarr server rejected the request: missing or wrong API key. Set "
-                    + $"server.api_key in {CliSettingsLoader.FileName} or the "
-                    + $"{CliSettingsLoader.ApiKeyVariable} environment variable to the key the "
-                    + "server uses.",
+                    + $"server.api_key in {CliSettingsLoader.FileName}, or the "
+                    + $"{ServerApiKeyLocator.Variable} or {ServerApiKeyLocator.FileVariable} "
+                    + "environment variable, to the key the server uses.",
             ];
         }
 

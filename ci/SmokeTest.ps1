@@ -28,8 +28,8 @@ $startInfo.ArgumentList.Add("--urls=http://127.0.0.1:0")
 $startInfo.RedirectStandardOutput = $true
 $startInfo.RedirectStandardError = $true
 $startInfo.UseShellExecute = $false
-# The server refuses to start without an API key; any value satisfies startup.
-$startInfo.Environment["RECYCLARR_API_KEY"] = "smoke-test"
+# The server refuses to start without an API key of at least 32 characters.
+$startInfo.Environment["RECYCLARR_API_KEY"] = "smoke-test-api-key-0123456789abcdef"
 
 $process = [System.Diagnostics.Process]::Start($startInfo)
 $deadline = [DateTime]::UtcNow.AddSeconds(30)

@@ -20,7 +20,7 @@
         "api_key": {
           "type": "string",
           "title": "Server API key sent to the server at base_url",
-          "description": "Must match the RECYCLARR_API_KEY environment variable of that server. Not used without base_url, because the CLI gives the server it starts a one-time key. A non-empty RECYCLARR_API_KEY environment variable overrides this value."
+          "description": "Must match the API key of that server. Not used without base_url, because the CLI gives the server it starts a one-time key. A key from the RECYCLARR_API_KEY or RECYCLARR_API_KEY_FILE environment variable overrides this value."
         }
       }
     }
