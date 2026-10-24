@@ -1,31 +1,21 @@
 namespace Recyclarr.Migration.Steps;
 
+/// <summary>
+/// Converts on-disk data left by an older Recyclarr version to the current layout. Every step runs
+/// at each server startup, so <see cref="Run"/> must do nothing when the old layout is absent and
+/// log only the changes it makes.
+/// </summary>
 internal interface IMigrationStep
 {
     /// <summary>
-    /// A description printed to the user so that they understand the purpose of this migration step, and
-    /// what it does.
+    /// What the step does, shown to the user when it fails.
     /// </summary>
     string Description { get; }
 
     /// <summary>
-    /// One or more strings that individually represent a distinct manual solution that a user can attempt
-    /// when this migration step fails.
+    /// Distinct manual fixes the user can try when the step fails.
     /// </summary>
     IReadOnlyCollection<string> Remediation { get; }
 
-    /// <summary>
-    /// Run logic to determine if this migration step is necessary
-    /// </summary>
-    /// <returns>
-    /// Return true if this migration step is needed and should be run. False means the migration step is
-    /// not needed and Execute() will not be called.
-    /// </returns>
-    bool CheckIfNeeded();
-
-    /// <summary>
-    /// Execute the logic necessary for this migration step.
-    /// </summary>
-    /// <param name="log">Logger for debug diagnostics during migration execution.</param>
-    void Execute(ILogger log);
+    void Run(ILogger log);
 }

@@ -15,7 +15,6 @@ using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
-using Recyclarr.ErrorHandling;
 using Recyclarr.Http;
 using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
@@ -57,7 +56,6 @@ public class CoreAutofacModule : Module
         RegisterCommon(builder);
         RegisterCompatibility(builder);
         RegisterConfig(builder);
-        RegisterErrorHandling(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
         RegisterServarrApiClients(builder);
@@ -71,27 +69,18 @@ public class CoreAutofacModule : Module
         RegisterPorts(builder);
     }
 
-    private static void RegisterErrorHandling(ContainerBuilder builder)
-    {
-        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
-    }
-
-    private void RegisterMigrations(ContainerBuilder builder)
+    private static void RegisterMigrations(ContainerBuilder builder)
     {
         builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
-
-        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
         builder
-            .RegisterAssemblyTypes(ThisAssembly)
-            .AssignableTo<IMigrationStep>()
+            .RegisterTypes(
+                // Order-sensitive! A step may depend on the layout an earlier step produces.
+                typeof(DeleteRepoDirMigrationStep),
+                typeof(MoveCacheToStateMigrationStep),
+                typeof(NormalizeStateMappingsPropertyStep)
+            )
             .As<IMigrationStep>()
-            .WithMetadataFrom<MigrationOrderAttribute>();
+            .OrderByRegistration();
     }
 
     private static void RegisterCache(ContainerBuilder builder)

@@ -16,62 +16,18 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
     }
 
     [Test, AutoMockData]
-    public void CheckIfNeeded_returns_false_when_no_state_directory(
+    public void Run_does_nothing_when_no_state_directory(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
+        [Frozen] IAppPaths appPaths,
+        ILogger log
     )
     {
         var sut = CreateSut(fs, appPaths);
 
-        sut.CheckIfNeeded().Should().BeFalse();
-    }
+        var act = () => sut.Run(log);
 
-    [Test, AutoMockData]
-    public void CheckIfNeeded_returns_false_when_files_already_canonical(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
-    )
-    {
-        fs.AddFile(
-            "/app/state/radarr/abc123/custom-format-mappings.json",
-            new MockFileData("""{ "mappings": [] }""")
-        );
-
-        var sut = CreateSut(fs, appPaths);
-
-        sut.CheckIfNeeded().Should().BeFalse();
-    }
-
-    [Test, AutoMockData]
-    public void CheckIfNeeded_returns_true_for_cf_legacy_property(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
-    )
-    {
-        fs.AddFile(
-            "/app/state/radarr/abc123/custom-format-mappings.json",
-            new MockFileData("""{ "trash_id_mappings": [] }""")
-        );
-
-        var sut = CreateSut(fs, appPaths);
-
-        sut.CheckIfNeeded().Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
-    public void CheckIfNeeded_returns_true_for_qp_legacy_property(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
-    )
-    {
-        fs.AddFile(
-            "/app/state/sonarr/abc123/quality-profile-mappings.json",
-            new MockFileData("""{ "TrashIdMappings": [] }""")
-        );
-
-        var sut = CreateSut(fs, appPaths);
-
-        sut.CheckIfNeeded().Should().BeTrue();
+        act.Should().NotThrow();
+        fs.Directory.Exists("/app/state").Should().BeFalse();
     }
 
     [Test, AutoMockData]
@@ -96,7 +52,7 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         );
 
         var sut = CreateSut(fs, appPaths);
-        sut.Execute(log);
+        sut.Run(log);
 
         var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
@@ -126,7 +82,7 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         );
 
         var sut = CreateSut(fs, appPaths);
-        sut.Execute(log);
+        sut.Run(log);
 
         var result = fs.File.ReadAllText("/app/state/sonarr/def456/quality-profile-mappings.json");
 
@@ -156,7 +112,7 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         );
 
         var sut = CreateSut(fs, appPaths);
-        sut.Execute(log);
+        sut.Run(log);
 
         var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
@@ -183,7 +139,7 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         );
 
         var sut = CreateSut(fs, appPaths);
-        sut.Execute(log);
+        sut.Run(log);
 
         var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
@@ -208,7 +164,7 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         );
 
         var sut = CreateSut(fs, appPaths);
-        sut.Execute(log);
+        sut.Run(log);
 
         fs.File.ReadAllText("/app/state/radarr/hash1/custom-format-mappings.json")
             .Should()
@@ -219,18 +175,18 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
     }
 
     [Test, AutoMockData]
-    public void CheckIfNeeded_ignores_malformed_json(
+    public void Run_leaves_malformed_json_unchanged(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths
+        [Frozen] IAppPaths appPaths,
+        ILogger log
     )
     {
-        fs.AddFile(
-            "/app/state/radarr/abc123/custom-format-mappings.json",
-            new MockFileData("not valid json {{{")
-        );
+        const string path = "/app/state/radarr/abc123/custom-format-mappings.json";
+        fs.AddFile(path, new MockFileData("not valid json {{{"));
 
         var sut = CreateSut(fs, appPaths);
+        sut.Run(log);
 
-        sut.CheckIfNeeded().Should().BeFalse();
+        fs.File.ReadAllText(path).Should().Be("not valid json {{{");
     }
 }

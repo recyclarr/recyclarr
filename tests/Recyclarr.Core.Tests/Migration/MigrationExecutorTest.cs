@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using Autofac.Features.Metadata;
 using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
 
@@ -7,109 +5,45 @@ namespace Recyclarr.Core.Tests.Migration;
 
 internal sealed class MigrationExecutorTest
 {
-    private static List<Meta<IMigrationStep>> WrapWithMetadata(IEnumerable<IMigrationStep> steps)
-    {
-        return steps
-            .Select(
-                (step, index) =>
-                    new Meta<IMigrationStep>(
-                        step,
-                        new Dictionary<string, object?> { ["Order"] = index }
-                    )
-            )
-            .ToList();
-    }
+    // OrderBy is stable, so a constant key keeps the given order
+    private static MigrationExecutor CreateSut(params IMigrationStep[] steps) =>
+        new(steps.OrderBy(_ => 0), Substitute.For<ILogger>());
 
     [Test]
-    public void Step_not_executed_if_check_returns_false()
+    public void Steps_run_in_order()
     {
-        var log = Substitute.For<ILogger>();
-        var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(WrapWithMetadata([step]), log);
-
-        step.CheckIfNeeded().Returns(false);
-
-        executor.PerformAllMigrationSteps();
-
-        step.Received().CheckIfNeeded();
-        step.DidNotReceiveWithAnyArgs().Execute(default!);
-    }
-
-    [Test]
-    public void Step_executed_if_check_returns_true()
-    {
-        var log = Substitute.For<ILogger>();
-        var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(WrapWithMetadata([step]), log);
-
-        step.CheckIfNeeded().Returns(true);
-
-        executor.PerformAllMigrationSteps();
-
-        step.Received().CheckIfNeeded();
-        step.ReceivedWithAnyArgs().Execute(default!);
-    }
-
-    [Test]
-    public void Steps_executed_in_ascending_order()
-    {
-        var log = Substitute.For<ILogger>();
-
-        var steps = new[]
-        {
+        IMigrationStep[] steps =
+        [
             Substitute.For<IMigrationStep>(),
             Substitute.For<IMigrationStep>(),
             Substitute.For<IMigrationStep>(),
-        };
+        ];
 
-        var executor = new MigrationExecutor(WrapWithMetadata(steps), log);
-
-        executor.PerformAllMigrationSteps();
+        CreateSut(steps).RunAll();
 
         Received.InOrder(() =>
         {
-            steps[0].CheckIfNeeded();
-            steps[1].CheckIfNeeded();
-            steps[2].CheckIfNeeded();
+            steps[0].Run(Arg.Any<ILogger>());
+            steps[1].Run(Arg.Any<ILogger>());
+            steps[2].Run(Arg.Any<ILogger>());
         });
     }
 
     [Test]
-    public void Exception_converted_to_migration_exception()
+    public void Failure_names_step_cause_and_fixes_and_stops_later_steps()
     {
-        var log = Substitute.For<ILogger>();
-        var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(WrapWithMetadata([step]), log);
+        var failing = Substitute.For<IMigrationStep>();
+        failing.Description.Returns("Move things");
+        failing.Remediation.Returns(["Fix one", "Fix two"]);
+        failing.When(x => x.Run(Arg.Any<ILogger>())).Throw(new IOException("disk full"));
+        var later = Substitute.For<IMigrationStep>();
 
-        step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(new ArgumentException("test message"));
-
-        var act = () => executor.PerformAllMigrationSteps();
+        var act = () => CreateSut(failing, later).RunAll();
 
         act.Should()
             .Throw<MigrationException>()
-            .Which.OriginalException.Message.Should()
-            .Be("test message");
-    }
-
-    [Test]
-    [SuppressMessage(
-        "SonarLint",
-        "S3928:Parameter names used into ArgumentException constructors should match an existing one",
-        Justification = "Used in unit test only"
-    )]
-    public void Migration_exceptions_are_not_converted()
-    {
-        var log = Substitute.For<ILogger>();
-        var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(WrapWithMetadata([step]), log);
-        var exception = new MigrationException(new ArgumentException(), "a", ["b"]);
-
-        step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(exception);
-
-        var act = () => executor.PerformAllMigrationSteps();
-
-        act.Should().Throw<MigrationException>().Which.Should().Be(exception);
+            .WithMessage("*Move things*disk full*Fix one*Fix two*")
+            .WithInnerException<IOException>();
+        later.DidNotReceiveWithAnyArgs().Run(default!);
     }
 }

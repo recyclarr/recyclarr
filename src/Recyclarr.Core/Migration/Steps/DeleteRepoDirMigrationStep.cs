@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Migration.Steps;
 
-[MigrationOrder(1)]
 internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {
     public string Description => "Delete old repo directory";
@@ -16,13 +15,13 @@ internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 
     private IDirectoryInfo RepoDir => paths.ConfigDirectory.SubDirectory("repo");
 
-    public bool CheckIfNeeded()
+    public void Run(ILogger log)
     {
-        return RepoDir.Exists;
-    }
+        if (!RepoDir.Exists)
+        {
+            return;
+        }
 
-    public void Execute(ILogger log)
-    {
         RepoDir.RecursivelyDeleteReadOnly();
         log.Information("Deleted repo dir: {RepoDir}", RepoDir.FullName);
     }
