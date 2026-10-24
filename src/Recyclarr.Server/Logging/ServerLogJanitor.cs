@@ -3,7 +3,7 @@ using Recyclarr.Platform;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Logging;
 
 internal sealed class ServerLogJanitor(IAppPaths paths, ISettings<LogJanitorSettings> settings)
 {

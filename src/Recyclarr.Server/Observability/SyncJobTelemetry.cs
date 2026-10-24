@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using Recyclarr.Server.Sync;
 
-namespace Recyclarr.Server.Telemetry;
+namespace Recyclarr.Server.Observability;
 
 /// <summary>
 /// Traces and measures sync job runs. Each run is its own trace; a job created by an API request

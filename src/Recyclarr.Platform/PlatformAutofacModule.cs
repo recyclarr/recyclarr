@@ -1,7 +1,6 @@
 using Autofac;
-using Recyclarr.Platform;
 
-namespace Recyclarr;
+namespace Recyclarr.Platform;
 
 /// <summary>
 /// Registers the process environment and the configuration directory lookup. The host registers

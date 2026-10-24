@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config;
+using Recyclarr.Server.Observability;
 using Recyclarr.Server.Resources;
-using Recyclarr.Server.Telemetry;
 using Recyclarr.Sync.Results;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;

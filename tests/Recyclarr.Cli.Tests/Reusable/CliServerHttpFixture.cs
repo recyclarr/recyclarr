@@ -7,6 +7,7 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Recyclarr.Server.TestLibrary;
 using Serilog.Events;
 using Spectre.Console;

@@ -1,5 +1,5 @@
 <Solution>
-  <Folder Name="/Props/">
+  <Folder Name="/_props/">
     <File Path=".config/dotnet-tools.json" />
     <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
@@ -9,10 +9,7 @@
     <File Path="renovate.json5" />
     <File Path="scratch.ignored.md" />
   </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/Recyclarr.Platform/Recyclarr.Platform.csproj" />
-  </Folder>
-  <Folder Name="/Tests/">
+  <Folder Name="/test/">
     <Project Path="tests/Recyclarr.Analyzers.Tests/Recyclarr.Analyzers.Tests.csproj" />
     <Project Path="tests/Recyclarr.Cli.Tests/Recyclarr.Cli.Tests.csproj" />
     <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
@@ -30,5 +27,6 @@
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
   <Project Path="src/Recyclarr.Client/Recyclarr.Client.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
+  <Project Path="src/Recyclarr.Platform/Recyclarr.Platform.csproj" />
   <Project Path="src/Recyclarr.Server/Recyclarr.Server.csproj" />
 </Solution>

@@ -1,4 +1,4 @@
-namespace Recyclarr;
+namespace Recyclarr.Platform;
 
 public enum ExitStatus
 {

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Http;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.OutboundHttp;
 
 internal static class OutboundHttpClientRegistration
 {

@@ -9,6 +9,7 @@ using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Cli.Processors.Sync.Results;
 using Recyclarr.Cli.Server;
+using Recyclarr.Platform;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;

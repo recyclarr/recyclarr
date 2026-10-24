@@ -6,7 +6,7 @@ using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
-namespace Recyclarr.TestLibrary;
+namespace Recyclarr.Core.TestLibrary;
 
 /// <summary>
 /// Builds terminal pipeline results for tests outside Recyclarr.Core, whose result constructors

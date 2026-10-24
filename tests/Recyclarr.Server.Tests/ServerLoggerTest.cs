@@ -1,7 +1,8 @@
 using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Recyclarr.Platform;
-using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Hosting;
+using Recyclarr.Server.Logging;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Serilog.Core;

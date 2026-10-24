@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// Hosted service that monitors stdin for EOF and polls whether the parent process is still alive.

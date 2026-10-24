@@ -1,13 +1,13 @@
 # ADR-004: Automatic migrations at startup
 
-- **Scope:** `src/Recyclarr.Core` migration steps, `src/Recyclarr.Server/ServerBootstrapService.cs`
+- **Scope:** `src/Recyclarr.Core` migration steps,
+  `src/Recyclarr.Server/Hosting/ServerBootstrapService.cs`
 
 ## Context
 
-Migrations move files and directories between Recyclarr versions. A manual `recyclarr migrate`
-step confused users: commands failed until they ran it, and migrations must run eventually anyway.
-The server owns the data directory, so it is the process that must find the data in its current
-layout.
+Migrations move files and directories between Recyclarr versions. A manual `recyclarr migrate` step
+confused users: commands failed until they ran it, and migrations must run eventually anyway. The
+server owns the data directory, so it is the process that must find the data in its current layout.
 
 ## Decision
 
@@ -17,8 +17,8 @@ remediation steps. There is no migration command and no optional migration.
 
 Migrations MUST only change files and subdirectories inside the already-resolved paths. They MUST
 NOT move or rename the root config or data directories: `IAppPaths` is resolved once when the DI
-container is built (`DefaultAppDataSetup`) and would hold stale paths for the rest of the process.
-A root relocation needs a user-facing diagnostic outside the migration system instead, as done for
+container is built (`DefaultAppDataSetup`) and would hold stale paths for the rest of the process. A
+root relocation needs a user-facing diagnostic outside the migration system instead, as done for
 `RECYCLARR_APP_DATA` (`ConfigDirectoryLocator`).
 
 ## Rejected Options

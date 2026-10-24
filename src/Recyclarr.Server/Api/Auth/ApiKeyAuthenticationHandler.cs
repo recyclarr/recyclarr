@@ -4,7 +4,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace Recyclarr.Server.Auth;
+namespace Recyclarr.Server.Api.Auth;
 
 /// <summary>
 /// Authenticates a request whose <c>Authorization</c> header carries the server API key as a

@@ -255,6 +255,8 @@ log.Information(message);
 - Central package management: `Directory.Packages.props` contains versions only. Private packages
   MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
   synchronized when adding, renaming, removing, or changing package privacy.
+- `Recyclarr.slnx` layout: non-test projects at the solution root, test projects in `/test/`, and
+  repository configuration files (`*.props`, `.editorconfig`, tool configs) in `/_props/`.
 - `InternalsVisibleTo` is granted convention-wide by `Directory.Build.props`. MUST NOT add it to an
   individual csproj; name the consuming project to match the convention, or extend the convention.
 

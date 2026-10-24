@@ -1,9 +1,8 @@
 using System.IO.Abstractions;
 using Recyclarr.Logging;
 using Recyclarr.Platform;
-using Recyclarr.Server.Logging;
-using Recyclarr.Server.Persistence;
-using Recyclarr.Server.Telemetry;
+using Recyclarr.Server.Hosting;
+using Recyclarr.Server.Observability;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Serilog.Core;
@@ -11,7 +10,7 @@ using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Logging;
 
 /// <summary>
 /// The server's logger, configured in two stages. Until <see cref="Reload"/> it writes only errors

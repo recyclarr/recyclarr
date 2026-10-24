@@ -3,7 +3,7 @@ using Microsoft.OpenApi;
 using Recyclarr.Server.Features.Guide.Naming;
 using Recyclarr.Server.Features.Sync.GetResults;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Api.OpenApi;
 
 // Polymorphic response types declare their discriminator on the base schema. Removing it from each
 // derived schema keeps generated clients from seeing the property twice.

@@ -1,8 +1,8 @@
-using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Hosting;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Server;
+namespace Recyclarr.Server.Observability;
 
 /// <summary>
 /// The port that alone serves health probes and metrics (ADR-029). Only a persistent server opens
