@@ -23,6 +23,8 @@ separate management port, and MUST NOT serve them on the API port.
 - Routing checks the port a connection arrived on (`HttpContext.Connection.LocalPort`), never the
   `Host` header, which clients can forge. Management routes return 404 on the API port; every other
   route returns 404 on the management port.
+- The management port binds the same host as the API endpoint; restricting who reaches it is the
+  operator's job (ADR-032).
 - A management port equal to the API port fails startup.
 - The ephemeral server opens no management port; it lives only as long as one CLI command.
 - `server.management.metrics` turns Prometheus metrics off without affecting probes.
@@ -50,6 +52,7 @@ separate management port, and MUST NOT serve them on the API port.
 ## History
 
 - 2026-10-17: Serve probes and metrics only on a separate management port.
+- 2026-10-24: The management port binds the API endpoint's host; no separate bind address.
 
 [keycloak]: https://www.keycloak.org/server/management-interface
 [aspnet]: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-10.0
