@@ -67,7 +67,8 @@ jobs:
   #############################################
   docker-validation:
     name: Docker Validation
-    needs: [build-validation]
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     permissions:
       contents: read
       packages: write
