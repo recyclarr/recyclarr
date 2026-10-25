@@ -42,7 +42,7 @@ internal sealed class GitProviderLocationTest
                 Reference = "master",
             },
             Substitute.For<IProviderTypeStrategy>(),
-            new AppPaths(data, data),
+            new AppPaths(data, data, data.SubDirectory("state")),
             new RepoUpdater(log, RepoFactory),
             RepoFactory,
             log

@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Recyclarr.Platform;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
@@ -9,29 +8,16 @@ namespace Recyclarr.Core.Tests.Config.Settings;
 internal sealed class SettingsLoaderTest
 {
     [Test, AutoMockData]
-    public void Load_should_create_settings_file_if_not_exists(
+    public void Load_defaults_without_writing_when_file_does_not_exist(
         [Frozen] MockFileSystem fileSystem,
-        [Frozen] IAppPaths paths,
-        SettingsLoader sut
-    )
-    {
-        sut.LoadAndOptionallyCreate();
-
-        fileSystem
-            .AllFiles.Should()
-            .ContainSingle(paths.ConfigDirectory.File("settings.yml").FullName);
-    }
-
-    [Test, AutoMockData]
-    public void Load_defaults_when_file_does_not_exist(
         [Frozen(Matching.ImplementedInterfaces)] YamlSerializerFactory serializerFactory,
         [Frozen] IAppPaths paths,
         SettingsLoader sut
     )
     {
-        var expectedSettings = new RecyclarrSettings();
-        var settings = sut.LoadAndOptionallyCreate();
+        var settings = sut.Load();
 
-        settings.Should().BeEquivalentTo(expectedSettings);
+        settings.Should().BeEquivalentTo(new RecyclarrSettings());
+        fileSystem.AllFiles.Should().BeEmpty();
     }
 }

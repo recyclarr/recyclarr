@@ -39,15 +39,9 @@ public sealed class TestStubsModule : Module
         Env.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
 
         var testRoot = Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
-        var paths = new AppPaths(testRoot, testRoot);
-        paths.CreateTopDirectories();
+        var paths = new AppPaths(testRoot, testRoot, testRoot.SubDirectory("state"));
+        paths.CreateWritableDirectories();
         Paths = paths;
-
-        // Create empty settings.yml to avoid SettingsLoader creating one and triggering YAML errors
-        Fs.AddFile(
-            Fs.Path.Combine(testRoot.FullName, "settings.yml"),
-            new MockFileData("# Empty settings for tests\n")
-        );
     }
 
     protected override void Load(ContainerBuilder builder)

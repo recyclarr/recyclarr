@@ -108,8 +108,12 @@ internal sealed class ServerLoggerTest
 
     private AppPaths CreatePaths()
     {
-        var paths = new AppPaths(_root.SubDirectory("config"), _root.SubDirectory("data"));
-        paths.CreateTopDirectories();
+        var paths = new AppPaths(
+            _root.SubDirectory("config"),
+            _root.SubDirectory("data"),
+            _root.SubDirectory("state")
+        );
+        paths.CreateWritableDirectories();
         return paths;
     }
 

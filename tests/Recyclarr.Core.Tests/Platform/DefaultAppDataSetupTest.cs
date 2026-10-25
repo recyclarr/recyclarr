@@ -106,6 +106,105 @@ internal sealed class DefaultAppDataSetupTest
     }
 
     [Test, AutoMockData]
+    public void State_dir_defaults_under_config_dir_when_unset(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IEnvironment env,
+        DefaultAppDataSetup sut
+    )
+    {
+        var configDir = fs.CurrentDirectory().SubDirectory("config");
+
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
+        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configDir.FullName);
+
+        var paths = sut.CreateAppPaths();
+
+        paths.StateDirectory.FullName.Should().Be(configDir.SubDirectory("state").FullName);
+        fs.AllDirectories.Should().Contain(paths.StateDirectory.FullName);
+    }
+
+    [Test, AutoMockData]
+    public void Use_state_dir_environment_variable(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IEnvironment env,
+        DefaultAppDataSetup sut
+    )
+    {
+        var configDir = fs.CurrentDirectory().SubDirectory("config");
+        var dataDir = fs.CurrentDirectory().SubDirectory("data");
+        var stateDir = fs.CurrentDirectory().SubDirectory("state");
+
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
+        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configDir.FullName);
+        env.GetEnvironmentVariable("RECYCLARR_DATA_DIR").Returns(dataDir.FullName);
+        env.GetEnvironmentVariable("RECYCLARR_STATE_DIR").Returns(stateDir.FullName);
+
+        var paths = sut.CreateAppPaths();
+
+        paths.StateDirectory.FullName.Should().Be(stateDir.FullName);
+        fs.AllDirectories.Should().Contain(stateDir.FullName);
+    }
+
+    [Test, AutoMockData]
+    public void Relative_state_dir_resolves_from_config_dir(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IEnvironment env,
+        DefaultAppDataSetup sut
+    )
+    {
+        var configDir = fs.CurrentDirectory().SubDirectory("config");
+
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
+        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configDir.FullName);
+        env.GetEnvironmentVariable("RECYCLARR_STATE_DIR").Returns("../state");
+
+        var paths = sut.CreateAppPaths();
+
+        paths
+            .StateDirectory.FullName.Should()
+            .Be(fs.CurrentDirectory().SubDirectory("state").FullName);
+    }
+
+    [Test, AutoMockData]
+    public void Config_dir_is_not_written_when_data_and_state_dirs_are_elsewhere(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IEnvironment env,
+        DefaultAppDataSetup sut
+    )
+    {
+        var configDir = fs.CurrentDirectory().SubDirectory("config");
+
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
+        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configDir.FullName);
+        env.GetEnvironmentVariable("RECYCLARR_DATA_DIR")
+            .Returns(fs.CurrentDirectory().SubDirectory("data").FullName);
+        env.GetEnvironmentVariable("RECYCLARR_STATE_DIR")
+            .Returns(fs.CurrentDirectory().SubDirectory("state").FullName);
+
+        sut.CreateAppPaths();
+
+        fs.AllDirectories.Should().NotContain(configDir.FullName);
+    }
+
+    [Test, AutoMockData]
+    public void User_config_directories_are_not_created(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IEnvironment env,
+        DefaultAppDataSetup sut
+    )
+    {
+        var configDir = fs.CurrentDirectory().SubDirectory("config");
+
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
+        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configDir.FullName);
+
+        var paths = sut.CreateAppPaths();
+
+        fs.AllDirectories.Should()
+            .NotContain([paths.YamlConfigDirectory.FullName, paths.YamlIncludeDirectory.FullName]);
+    }
+
+    [Test, AutoMockData]
     public void Deprecated_app_data_variable_throws_error(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
