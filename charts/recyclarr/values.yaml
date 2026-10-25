@@ -19,7 +19,10 @@ apiKey:
 # Content is a string, so YAML tags such as !env_var pass through unchanged.
 configs:
   # Name of an existing ConfigMap whose keys are config files, for example one from a
-  # Kustomize configMapGenerator. Takes the place of files.
+  # Kustomize configMapGenerator. Takes the place of files. The server reads config only at
+  # startup and the chart cannot track changes to a ConfigMap it does not own, so restart the
+  # Deployment after editing it (or use a tool such as Reloader). The same applies to
+  # includes.existingConfigMap and settings.existingConfigMap.
   existingConfigMap: ~
   files: {}
   # recyclarr.yml: |
@@ -69,7 +72,8 @@ serviceMonitor:
 
 serviceAccount:
   create: true
-  # Recyclarr does not call the Kubernetes API.
+  # Recyclarr does not call the Kubernetes API. Applies to the pod, so it also holds for an
+  # existing service account.
   automount: false
   annotations: {}
   name: ~
