@@ -11,6 +11,9 @@ inputs:
   path:
     description: Destination path
     required: false
+  pattern:
+    description: Glob matching the artifact names to download when name is unset
+    required: false
 
 runs:
   using: composite
@@ -19,6 +22,7 @@ runs:
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
+        pattern: ${{ inputs.pattern }}
 
     - run: ${{ github.action_path }}/untar.sh "${{ inputs.name }}"
       working-directory: ${{ inputs.path }}
