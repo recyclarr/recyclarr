@@ -5,7 +5,7 @@ using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, UseDeepCloning = true)]
 internal static partial class RadarrCustomFormatMapper
 {
     public static partial CustomFormatResource ToDomain(RadarrApi.CustomFormatResource dto);
@@ -16,13 +16,30 @@ internal static partial class RadarrCustomFormatMapper
         RadarrApi.CustomFormatSpecificationSchema dto
     );
 
-    private static partial RadarrApi.CustomFormatSpecificationSchema SpecFromDomain(
+    public static partial RadarrApi.CustomFormatSpecificationSchema SpecFromDomain(
         CustomFormatSpecificationData domain
+    );
+
+    // Presets are UI starting points for a new specification, not part of a saved one
+    [MapperIgnoreTarget(nameof(RadarrApi.CustomFormatSpecificationSchema.Presets))]
+    public static partial RadarrApi.CustomFormatSpecificationSchema CloneSpec(
+        RadarrApi.CustomFormatSpecificationSchema schema
+    );
+
+    [MapperIgnoreSource(nameof(CustomFormatSpecificationData.Fields))]
+    public static partial void UpdateSpec(
+        CustomFormatSpecificationData domain,
+        [MappingTarget] RadarrApi.CustomFormatSpecificationSchema dto
     );
 
     private static partial CustomFormatFieldData FieldToDomain(RadarrApi.Field dto);
 
-    private static partial RadarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+    public static partial RadarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+
+    public static partial void UpdateField(
+        CustomFormatFieldData domain,
+        [MappingTarget] RadarrApi.Field dto
+    );
 
     // Normalizes object? (JsonElement from Refit) to FieldValue with proper equality semantics
     private static FieldValue MapFieldValue(object? value) => FieldValue.From(value);
