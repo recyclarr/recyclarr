@@ -40,7 +40,8 @@ repos:
       - id: prettier
         args: [--write]
         types_or: [json, json5, xml, html, yaml, javascript, markdown]
-        exclude: ^(\.pre-commit-hooks\.yaml|\.config/|\.claude/)
+        # Helm templates are Go templates, not YAML
+        exclude: ^(\.pre-commit-hooks\.yaml|\.config/|\.claude/|charts/[^/]+/templates/)
 
   - repo: local
     hooks:

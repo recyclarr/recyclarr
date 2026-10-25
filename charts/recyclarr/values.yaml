@@ -1,0 +1,99 @@
+image:
+  repository: ghcr.io/recyclarr/recyclarr
+  # Defaults to the chart appVersion.
+  tag: ~
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ~
+fullnameOverride: ~
+
+# API key clients send to the server. The chart mounts it as a file and points
+# RECYCLARR_API_KEY_FILE at it. Set exactly one of existingSecret or value.
+apiKey:
+  existingSecret: ~
+  existingSecretKey: api-key
+  value: ~
+
+# Files loaded from the configs/ directory; each key is a file name ending in .yml or .yaml.
+# Content is a string, so YAML tags such as !env_var pass through unchanged.
+configs:
+  # Name of an existing ConfigMap whose keys are config files, for example one from a
+  # Kustomize configMapGenerator. Takes the place of files.
+  existingConfigMap: ~
+  files: {}
+  # recyclarr.yml: |
+  #   sonarr:
+  #     main:
+  #       base_url: http://sonarr:8989
+  #       api_key: !env_var SONARR_API_KEY
+
+# Files for the includes/ directory, referenced by include directives in configs.
+includes:
+  existingConfigMap: ~
+  files: {}
+
+# Content of settings.yml. Without it, the server uses default settings.
+settings:
+  # Name of an existing ConfigMap with a settings.yml key. Takes the place of content.
+  existingConfigMap: ~
+  content: ~
+
+# Environment variables for the server, for example Sonarr and Radarr API keys used by
+# !env_var in configs.
+env: []
+envFrom: []
+# - secretRef:
+#     name: recyclarr-servarr-keys
+
+# Durable state: sync state and the server database (RECYCLARR_STATE_DIR). Losing it loses
+# the mapping between Sonarr/Radarr IDs and TRaSH IDs.
+persistence:
+  # When false, state lives in an emptyDir and is lost when the pod is recreated.
+  enabled: true
+  existingClaim: ~
+  # Null uses the cluster default StorageClass.
+  storageClass: ~
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+service:
+  type: ClusterIP
+  port: 7982
+
+# Prometheus Operator ServiceMonitor for /metrics on the management port.
+serviceMonitor:
+  enabled: false
+  interval: ~
+  labels: {}
+
+serviceAccount:
+  create: true
+  # Recyclarr does not call the Kubernetes API.
+  automount: false
+  annotations: {}
+  name: ~
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

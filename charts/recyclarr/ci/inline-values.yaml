@@ -1,0 +1,23 @@
+apiKey:
+  value: ci-api-key-0123456789abcdef0123456789
+configs:
+  files:
+    recyclarr.yml: |
+      sonarr:
+        main:
+          base_url: http://sonarr:8989
+          api_key: !env_var SONARR_API_KEY
+          include:
+            - config: shared.yml
+includes:
+  files:
+    shared.yml: |
+      quality_definition:
+        type: series
+settings:
+  content: |
+    log_janitor:
+      max_files: 5
+env:
+  - name: SONARR_API_KEY
+    value: ci-sonarr-key

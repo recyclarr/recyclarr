@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recyclarr.fullname" . }}
+  labels:
+    {{- include "recyclarr.labels" . | nindent 4 }}
+{{- $configs := include "recyclarr.configMapName" (dict "root" . "source" "configs") }}
+{{- $includes := include "recyclarr.configMapName" (dict "root" . "source" "includes") }}
+{{- $settings := include "recyclarr.configMapName" (dict "root" . "source" "settings") }}
+{{- $stateClaim := include "recyclarr.stateClaimName" . }}
+spec:
+  # One server owns the state volume; Recreate stops the old pod before the new one mounts it.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "recyclarr.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        # The server reads config only at startup, so chart-managed changes roll the pod.
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "recyclarr.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "recyclarr.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # The image sets RECYCLARR_CONFIG_DIR=/config and fixes ports 7982 (API) and 7983
+          # (management). Config files mount read-only under /config. /config itself cannot be a
+          # read-only volume: the runtime must create the nested mount points in it.
+          env:
+            - name: RECYCLARR_API_KEY_FILE
+              value: /secrets/api-key
+            - name: RECYCLARR_DATA_DIR
+              value: /data
+            - name: RECYCLARR_STATE_DIR
+              value: /state
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 7982
+              protocol: TCP
+            - name: management
+              containerPort: 7983
+              protocol: TCP
+          # The first start clones resource providers before the server listens.
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: management
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: management
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: management
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: api-key
+              mountPath: /secrets
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: state
+              mountPath: /state
+            - name: tmp
+              mountPath: /tmp
+            {{- if $configs }}
+            - name: configs
+              mountPath: /config/configs
+              readOnly: true
+            {{- end }}
+            {{- if $includes }}
+            - name: includes
+              mountPath: /config/includes
+              readOnly: true
+            {{- end }}
+            {{- if $settings }}
+            - name: settings
+              mountPath: /config/settings.yml
+              subPath: settings.yml
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: api-key
+          secret:
+            secretName: {{ include "recyclarr.apiKeySecretName" . }}
+            items:
+              - key: {{ .Values.apiKey.existingSecretKey }}
+                path: api-key
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: state
+          {{- if $stateClaim }}
+          persistentVolumeClaim:
+            claimName: {{ $stateClaim }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if $configs }}
+        - name: configs
+          configMap:
+            name: {{ $configs }}
+        {{- end }}
+        {{- if $includes }}
+        - name: includes
+          configMap:
+            name: {{ $includes }}
+        {{- end }}
+        {{- if $settings }}
+        - name: settings
+          configMap:
+            name: {{ $settings }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
