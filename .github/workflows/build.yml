@@ -22,12 +22,17 @@ on:
       - ".github/workflows/build.yml"
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-helm.yml"
       - ".github/actions/**"
       - "ci/**"
 
       # Docker
       - "Dockerfile"
       - "docker/**"
+
+      # Helm chart
+      - "charts/**"
+      - ".github/ct.yaml"
 
       # Versioning (affects build outputs)
       - "GitVersion.yml"
@@ -179,6 +184,17 @@ jobs:
       packages: write
     uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
+
+  #############################################
+  helm-release:
+    name: Helm Chart (release)
+    # Publish the chart only after the GitHub release exists, like the release images.
+    if: github.ref_type == 'tag'
+    needs: [release]
+    permissions:
+      contents: read
+      packages: write
+    uses: $/.github/workflows/reusable-helm.yml
 
   #############################################
   release:

@@ -21,6 +21,7 @@ on:
       - ".github/workflows/build-quick.yml"
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-helm.yml"
       - ".github/workflows/reusable-precheck.yml"
       - ".github/actions/**"
       - "ci/**"
@@ -28,6 +29,10 @@ on:
       # Docker
       - "Dockerfile"
       - "docker/**"
+
+      # Helm chart
+      - "charts/**"
+      - ".github/ct.yaml"
 
       # Versioning (affects build outputs)
       - "GitVersion.yml"
@@ -70,6 +75,14 @@ jobs:
     secrets: inherit
 
   #############################################
+  # Runs on every PR because image changes can break the chart as much as chart changes can.
+  helm-validation:
+    name: Helm Chart Validation
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
+    uses: $/.github/workflows/reusable-helm.yml
+
+  #############################################
   # The main purpose of this job is to group all the other jobs together into one single job status
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
   # jobs in a workflow to ensure they all pass.
@@ -80,6 +93,7 @@ jobs:
       - pre-check
       - build-validation
       - docker-validation
+      - helm-validation
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded
