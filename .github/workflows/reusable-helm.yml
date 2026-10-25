@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: ⚙️ Helm Chart Validate & Publish
+
+on:
+  workflow_call:
+
+env:
+  # The chart shares the Recyclarr version, so it publishes only with a release tag.
+  SHOULD_PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') }}
+  CHART_DIR: charts/recyclarr
+
+jobs:
+  helm:
+    name: Validate & Push Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+          persist-credentials: false
+
+      - name: Setup GitVersion
+        uses: $/.github/actions/setup-gitversion
+        id: gitversion
+
+      - name: Setup Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
+
+      - name: Setup chart-testing
+        uses: helm/chart-testing-action@720270857a28afd41e2426521a7801db09e9b510 # v2.9.0
+
+      - name: Lint
+        run: ct lint --config .github/ct.yaml
+
+      # Paths the install test cannot reach: existing objects and a CRD-backed resource render,
+      # and invalid values fail.
+      - name: Render Checks
+        run: |
+          key=--set=apiKey.value=0123456789abcdef0123456789abcdef
+          helm template t "$CHART_DIR" "$key" > /dev/null
+          helm template t "$CHART_DIR" --set=apiKey.existingSecret=s \
+            --set=configs.existingConfigMap=c --set=includes.existingConfigMap=i \
+            --set=settings.existingConfigMap=st --set=persistence.existingClaim=pvc \
+            --set=serviceMonitor.enabled=true > /dev/null
+          # errexit ignores commands negated with !, so each rejection is checked explicitly
+          reject() {
+            if helm template t "$CHART_DIR" "$@" > /dev/null 2>&1; then
+              echo "::error::Rendered values that must be rejected: $*"
+              exit 1
+            fi
+          }
+          reject
+          reject --set=apiKey.value=short
+          reject "$key" --set=apiKey.existingSecret=s
+          reject "$key" --set=configs.existingConfigMap=c --set=configs.files.a\\.yml=b
+          reject "$key" --set=configs.files.a\\.txt=b
+          reject "$key" --set=persistance.enabled=false
+
+      - name: Package Chart
+        env:
+          VERSION: ${{ steps.gitversion.outputs.semVer }}
+        run: helm package "$CHART_DIR" --version "$VERSION" --app-version "$VERSION"
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build Image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
+        with:
+          context: .
+          load: true
+          tags: recyclarr:ci
+          build-args: |
+            VERSION=${{ steps.gitversion.outputs.semVer }}
+            INFORMATIONAL_VERSION=${{ steps.gitversion.outputs.informationalVersion }}
+
+      - name: Create kind Cluster
+        uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
+
+      # Installs once per ci/*-values.yaml file, waits for readiness, and runs helm test.
+      - name: Install Test
+        run: |
+          kind load docker-image recyclarr:ci --name chart-testing
+          ct install --config .github/ct.yaml --helm-extra-set-args \
+            "--set=image.repository=recyclarr --set=image.tag=ci --set=image.pullPolicy=Never"
+
+      - name: Login to GHCR
+        if: env.SHOULD_PUBLISH == 'true'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Chart to GHCR
+        if: env.SHOULD_PUBLISH == 'true'
+        env:
+          VERSION: ${{ steps.gitversion.outputs.semVer }}
+          CHART_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
+        run: helm push "recyclarr-$VERSION.tgz" "$CHART_REPO"

@@ -1,0 +1,7 @@
+# chart-testing config for the PR chart-validation job
+chart-dirs: [charts]
+all: true
+validate-maintainers: false
+# Versions are stamped from the release tag at package time
+check-version-increment: false
+helm-extra-args: --timeout 600s
