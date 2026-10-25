@@ -6851,7 +6851,8 @@
           "searchForCutoffUnmetEpisodes": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "AlternateTitleResource": {
         "type": "object",
@@ -6878,7 +6879,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ApiInfoResource": {
         "type": "object",
@@ -6894,7 +6896,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ApplyTags": {
         "enum": ["add", "remove", "replace"],
@@ -6942,7 +6945,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "AutoTaggingSpecificationSchema": {
         "type": "object",
@@ -6976,7 +6980,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "BackupResource": {
         "type": "object",
@@ -7004,7 +7009,8 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "BackupType": {
         "enum": ["scheduled", "manual", "update"],
@@ -7021,7 +7027,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "BlocklistResource": {
         "type": "object",
@@ -7081,7 +7088,8 @@
           "series": {
             "$ref": "#/components/schemas/SeriesResource"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "BlocklistResourcePagingResource": {
         "type": "object",
@@ -7112,7 +7120,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CertificateValidationType": {
         "enum": ["enabled", "disabledForLocalAddresses", "disabled"],
@@ -7170,7 +7179,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CommandPriority": {
         "enum": ["normal", "high", "low"],
@@ -7253,7 +7263,8 @@
             "format": "date-time",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CommandResult": {
         "enum": ["unknown", "successful", "unsuccessful", "indeterminate"],
@@ -7298,7 +7309,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CustomFormatBulkResource": {
         "type": "object",
@@ -7316,7 +7328,8 @@
             "type": "boolean",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CustomFormatResource": {
         "type": "object",
@@ -7340,7 +7353,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CustomFormatSpecificationSchema": {
         "type": "object",
@@ -7385,7 +7399,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DatabaseType": {
         "enum": ["sqLite", "postgreSQL"],
@@ -7438,7 +7453,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DiskSpaceResource": {
         "type": "object",
@@ -7463,7 +7479,8 @@
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DownloadClientBulkResource": {
         "type": "object",
@@ -7504,7 +7521,8 @@
             "type": "boolean",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DownloadClientConfigResource": {
         "type": "object",
@@ -7526,7 +7544,8 @@
           "autoRedownloadFailedFromInteractiveSearch": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DownloadClientResource": {
         "type": "object",
@@ -7597,7 +7616,8 @@
           "removeFailedDownloads": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "DownloadProtocol": {
         "enum": ["unknown", "usenet", "torrent"],
@@ -7632,7 +7652,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EpisodeFileResource": {
         "type": "object",
@@ -7708,7 +7729,8 @@
           "qualityCutoffNotMet": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EpisodeHistoryEventType": {
         "enum": [
@@ -7822,7 +7844,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EpisodeResourcePagingResource": {
         "type": "object",
@@ -7853,7 +7876,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "EpisodeTitleRequiredType": {
         "enum": ["always", "bulkSeasonReleases", "never"],
@@ -7873,7 +7897,8 @@
           "monitored": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "Field": {
         "type": "object",
@@ -7906,9 +7931,7 @@
             "type": "string",
             "nullable": true
           },
-          "value": {
-            "nullable": true
-          },
+          "value": {},
           "type": {
             "type": "string",
             "nullable": true
@@ -7945,7 +7968,8 @@
           "isFloat": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "FileDateType": {
         "enum": ["none", "localAirDate", "utcAirDate"],
@@ -7977,7 +8001,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "HistoryResource": {
         "type": "object",
@@ -8047,7 +8072,8 @@
           "series": {
             "$ref": "#/components/schemas/SeriesResource"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "HistoryResourcePagingResource": {
         "type": "object",
@@ -8078,7 +8104,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "HostConfigResource": {
         "type": "object",
@@ -8255,7 +8282,8 @@
           "trustCgnatIpAddresses": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListBulkResource": {
         "type": "object",
@@ -8295,7 +8323,8 @@
           "tagExisting": {
             "$ref": "#/components/schemas/TagExistingType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListConfigResource": {
         "type": "object",
@@ -8311,7 +8340,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListExclusionBulkResource": {
         "type": "object",
@@ -8325,7 +8355,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListExclusionResource": {
         "type": "object",
@@ -8342,7 +8373,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListExclusionResourcePagingResource": {
         "type": "object",
@@ -8373,7 +8405,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListResource": {
         "type": "object",
@@ -8471,7 +8504,8 @@
           "tagExisting": {
             "$ref": "#/components/schemas/TagExistingType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ImportListType": {
         "enum": ["program", "plex", "trakt", "simkl", "other", "advanced"],
@@ -8487,7 +8521,8 @@
           "type": {
             "$ref": "#/components/schemas/RejectionType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "IndexerBulkResource": {
         "type": "object",
@@ -8533,7 +8568,8 @@
             "format": "int32",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "IndexerConfigResource": {
         "type": "object",
@@ -8558,7 +8594,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "IndexerFlagResource": {
         "type": "object",
@@ -8576,7 +8613,8 @@
             "nullable": true,
             "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "IndexerResource": {
         "type": "object",
@@ -8661,7 +8699,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "Language": {
         "type": "object",
@@ -8674,7 +8713,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LanguageProfileItemResource": {
         "type": "object",
@@ -8689,7 +8729,8 @@
           "allowed": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LanguageProfileResource": {
         "type": "object",
@@ -8715,7 +8756,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LanguageResource": {
         "type": "object",
@@ -8733,7 +8775,8 @@
             "nullable": true,
             "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ListSyncLevelType": {
         "enum": ["disabled", "logOnly", "keepAndUnmonitor", "keepAndTag"],
@@ -8746,7 +8789,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LocalizationResource": {
         "type": "object",
@@ -8763,7 +8807,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LogFileResource": {
         "type": "object",
@@ -8788,7 +8833,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LogResource": {
         "type": "object",
@@ -8825,7 +8871,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LogResourcePagingResource": {
         "type": "object",
@@ -8856,7 +8903,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ManualImportReprocessResource": {
         "type": "object",
@@ -8936,7 +8984,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ManualImportResource": {
         "type": "object",
@@ -9032,7 +9081,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "MediaCover": {
         "type": "object",
@@ -9048,7 +9098,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "MediaCoverTypes": {
         "enum": [
@@ -9129,7 +9180,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "MediaManagementConfigResource": {
         "type": "object",
@@ -9219,7 +9271,8 @@
             "type": "number",
             "format": "double"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "MetadataResource": {
         "type": "object",
@@ -9277,7 +9330,8 @@
           "enable": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "MonitorTypes": {
         "enum": [
@@ -9310,7 +9364,8 @@
           "monitor": {
             "$ref": "#/components/schemas/MonitorTypes"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "NamingConfigResource": {
         "type": "object",
@@ -9361,7 +9416,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "NewItemMonitorTypes": {
         "enum": ["all", "none"],
@@ -9509,7 +9565,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ParseResource": {
         "type": "object",
@@ -9553,7 +9610,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ParsedEpisodeInfoResource": {
         "type": "object",
@@ -9676,7 +9734,8 @@
           "releaseType": {
             "$ref": "#/components/schemas/ReleaseType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PingResource": {
         "type": "object",
@@ -9685,7 +9744,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PrivacyLevel": {
         "enum": ["normal", "password", "apiKey", "userName"],
@@ -9737,7 +9797,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ProperDownloadTypes": {
         "enum": ["preferAndUpgrade", "doNotUpgrade", "doNotPrefer"],
@@ -9753,7 +9814,8 @@
           "type": {
             "$ref": "#/components/schemas/ProviderMessageType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ProviderMessageType": {
         "enum": ["info", "warning", "error"],
@@ -9781,7 +9843,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualityDefinitionLimitsResource": {
         "type": "object",
@@ -9794,7 +9857,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualityDefinitionResource": {
         "type": "object",
@@ -9829,7 +9893,8 @@
             "format": "double",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualityModel": {
         "type": "object",
@@ -9840,7 +9905,8 @@
           "revision": {
             "$ref": "#/components/schemas/Revision"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualityProfileQualityItemResource": {
         "type": "object",
@@ -9881,7 +9947,8 @@
             "format": "double",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualityProfileResource": {
         "type": "object",
@@ -9927,7 +9994,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QualitySource": {
         "enum": [
@@ -9953,7 +10021,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QueueResource": {
         "type": "object",
@@ -10078,7 +10147,8 @@
             "nullable": true,
             "deprecated": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QueueResourcePagingResource": {
         "type": "object",
@@ -10109,7 +10179,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "QueueStatus": {
         "enum": [
@@ -10157,7 +10228,8 @@
           "unknownWarnings": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "Ratings": {
         "type": "object",
@@ -10170,7 +10242,8 @@
             "type": "number",
             "format": "double"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RejectionType": {
         "enum": ["permanent", "temporary"],
@@ -10200,7 +10273,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ReleaseProfileResource": {
         "type": "object",
@@ -10216,12 +10290,8 @@
           "enabled": {
             "type": "boolean"
           },
-          "required": {
-            "nullable": true
-          },
-          "ignored": {
-            "nullable": true
-          },
+          "required": {},
+          "ignored": {},
           "airDateRestriction": {
             "type": "boolean"
           },
@@ -10254,7 +10324,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ReleaseResource": {
         "type": "object",
@@ -10536,7 +10607,8 @@
             "type": "boolean",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ReleaseType": {
         "enum": ["unknown", "singleEpisode", "multiEpisode", "seasonPack"],
@@ -10561,7 +10633,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RenameEpisodeResource": {
         "type": "object",
@@ -10598,7 +10671,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RescanAfterRefreshType": {
         "enum": ["always", "afterManual", "never"],
@@ -10618,7 +10692,8 @@
           "isRepack": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RootFolderResource": {
         "type": "object",
@@ -10651,7 +10726,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "RuntimeMode": {
         "enum": ["console", "service", "tray"],
@@ -10674,7 +10750,8 @@
           "monitoringOptions": {
             "$ref": "#/components/schemas/MonitoringOptions"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeasonPassSeriesResource": {
         "type": "object",
@@ -10694,7 +10771,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeasonResource": {
         "type": "object",
@@ -10720,7 +10798,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeasonStatisticsResource": {
         "type": "object",
@@ -10763,7 +10842,8 @@
             "format": "double",
             "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeasonTypeResource": {
         "type": "object",
@@ -10788,7 +10868,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SelectOption": {
         "type": "object",
@@ -10809,7 +10890,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesEditorResource": {
         "type": "object",
@@ -10868,7 +10950,8 @@
           "addImportListExclusion": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesFolderResource": {
         "type": "object",
@@ -10880,7 +10963,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesResource": {
         "type": "object",
@@ -10984,6 +11068,10 @@
             "format": "int32"
           },
           "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "pendingPath": {
             "type": "string",
             "nullable": true
           },
@@ -11114,7 +11202,8 @@
             "readOnly": true,
             "deprecated": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesStatisticsResource": {
         "type": "object",
@@ -11151,7 +11240,8 @@
             "format": "double",
             "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesStatusType": {
         "enum": ["continuing", "ended", "upcoming", "deleted"],
@@ -11179,7 +11269,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesTranslationResource": {
         "type": "object",
@@ -11195,7 +11286,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SeriesTypes": {
         "enum": ["standard", "daily", "anime"],
@@ -11326,7 +11418,8 @@
           "databaseType": {
             "$ref": "#/components/schemas/DatabaseType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TagDetailsResource": {
         "type": "object",
@@ -11411,7 +11504,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TagExistingType": {
         "enum": ["none", "add", "sync"],
@@ -11428,7 +11522,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TaskResource": {
         "type": "object",
@@ -11466,7 +11561,8 @@
             "format": "date-span",
             "readOnly": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TrackedDownloadState": {
         "enum": [
@@ -11499,7 +11595,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UiConfigResource": {
         "type": "object",
@@ -11546,7 +11643,8 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UnmappedFolder": {
         "type": "object",
@@ -11563,7 +11661,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UpdateChanges": {
         "type": "object",
@@ -11582,7 +11681,8 @@
             },
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UpdateMechanism": {
         "enum": ["builtIn", "script", "external", "apt", "docker"],
@@ -11636,7 +11736,8 @@
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
