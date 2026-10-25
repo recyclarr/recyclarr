@@ -11,24 +11,31 @@ internal class DefaultAppDataSetup(
     public IAppPaths CreateAppPaths()
     {
         var configDir = configLocator.Locate();
-        configDir.Create();
+        var dataDir = ResolveDirectory("RECYCLARR_DATA_DIR", configDir, configDir);
+        var stateDir = ResolveDirectory(
+            "RECYCLARR_STATE_DIR",
+            configDir,
+            configDir.SubDirectory("state")
+        );
 
-        var dataDir = GetDataDirectory(configDir);
-        var paths = new AppPaths(configDir, dataDir);
-        paths.CreateTopDirectories();
+        var paths = new AppPaths(configDir, dataDir, stateDir);
+        paths.CreateWritableDirectories();
         return paths;
     }
 
-    private IDirectoryInfo GetDataDirectory(IDirectoryInfo configDir)
+    // Relative paths resolve against the config dir; empty values count as unset.
+    private IDirectoryInfo ResolveDirectory(
+        string variable,
+        IDirectoryInfo configDir,
+        IDirectoryInfo fallback
+    )
     {
-        var dataDir = env.GetEnvironmentVariable("RECYCLARR_DATA_DIR") ?? configDir.FullName;
-
-        // If data dir is relative, resolve it relative to config dir
-        if (!fs.Path.IsPathRooted(dataDir))
+        var path = env.GetEnvironmentVariable(variable);
+        if (string.IsNullOrEmpty(path))
         {
-            dataDir = fs.Path.Combine(configDir.FullName, dataDir);
+            return fallback;
         }
 
-        return fs.Directory.CreateDirectory(dataDir);
+        return fs.DirectoryInfo.New(fs.Path.GetFullPath(path, configDir.FullName));
     }
 }

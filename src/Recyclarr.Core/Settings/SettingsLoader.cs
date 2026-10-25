@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
@@ -20,9 +19,13 @@ public class SettingsLoader(
     ILogger log
 )
 {
-    public RecyclarrSettings LoadAndOptionallyCreate()
+    public RecyclarrSettings Load()
     {
-        var yamlPath = paths.ConfigDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
+        var yamlPath = paths.ConfigDirectory.YamlFile("settings");
+        if (yamlPath is null)
+        {
+            return new RecyclarrSettings();
+        }
 
         RecyclarrSettings settings;
 
@@ -72,22 +75,5 @@ public class SettingsLoader(
         {
             throw new ContextualValidationException(e, "Settings", "Settings Validation");
         }
-    }
-
-    private IFileInfo CreateDefaultSettingsFile()
-    {
-        const string fileData = """
-            # yaml-language-server: $schema=https://schemas.recyclarr.dev/latest/settings-schema.json
-
-            # Edit this file to customize the behavior of Recyclarr beyond its defaults
-            # For the settings file reference guide, visit the link to the wiki below:
-            # https://recyclarr.dev/reference/settings/
-            """;
-
-        var settingsFile = paths.ConfigDirectory.File("settings.yml");
-        settingsFile.CreateParentDirectory();
-        using var stream = settingsFile.CreateText();
-        stream.Write(fileData);
-        return settingsFile;
     }
 }
