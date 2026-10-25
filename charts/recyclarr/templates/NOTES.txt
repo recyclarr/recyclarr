@@ -1,0 +1,9 @@
+Recyclarr server API: http://{{ include "recyclarr.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}
+
+Run the CLI inside the pod; it uses the in-pod server and API key:
+
+  kubectl --namespace {{ .Release.Namespace }} exec deploy/{{ include "recyclarr.fullname" . }} -- recyclarr sync --preview
+{{- if not (include "recyclarr.configMapName" (dict "root" . "source" "configs")) }}
+
+No configs are set, so sync has nothing to do. Set configs.files or configs.existingConfigMap.
+{{- end }}

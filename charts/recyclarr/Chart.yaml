@@ -1,0 +1,11 @@
+apiVersion: v2
+name: recyclarr
+description: Recyclarr server, which syncs TRaSH Guides settings to Sonarr and Radarr
+type: application
+# The chart shares the Recyclarr version. The release workflow sets both fields from the release
+# tag at package time; the committed values are placeholders.
+version: 0.0.0
+appVersion: "0.0.0"
+home: https://recyclarr.dev
+sources:
+  - https://github.com/recyclarr/recyclarr
