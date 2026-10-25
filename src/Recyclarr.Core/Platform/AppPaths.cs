@@ -2,26 +2,30 @@ using System.IO.Abstractions;
 
 namespace Recyclarr.Platform;
 
-public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IAppPaths
+/// <summary>
+/// Runtime directory layout. The config root holds user files and may be read-only; the data root
+/// holds rebuildable data (logs, resource clones); the state root holds data that must persist
+/// (sync state and the server database).
+/// </summary>
+public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot, IDirectoryInfo stateRoot)
+    : IAppPaths
 {
-    // Config root for backward compatibility with other code
     public IDirectoryInfo ConfigDirectory => configRoot;
-
-    // Ephemeral data directories (derive from data root)
-    public IDirectoryInfo ServerLogDirectory => dataRoot.SubDirectory("logs", "server");
-    public IDirectoryInfo ResourceDirectory => dataRoot.SubDirectory("resources");
-
-    // User configuration directories (derive from config root)
-    public IDirectoryInfo StateDirectory => configRoot.SubDirectory("state");
     public IDirectoryInfo YamlConfigDirectory => configRoot.SubDirectory("configs");
     public IDirectoryInfo YamlIncludeDirectory => configRoot.SubDirectory("includes");
 
-    // Do not initialize the repo directory here; the RepoUpdater handles that later.
-    public void CreateTopDirectories()
+    public IDirectoryInfo ServerLogDirectory => dataRoot.SubDirectory("logs", "server");
+    public IDirectoryInfo ResourceDirectory => dataRoot.SubDirectory("resources");
+
+    public IDirectoryInfo StateDirectory => stateRoot;
+
+    /// <summary>
+    /// Creates only directories Recyclarr writes to. User config directories are never created so
+    /// the config root can be mounted read-only; readers treat them as optional.
+    /// </summary>
+    public void CreateWritableDirectories()
     {
         StateDirectory.Create();
         ServerLogDirectory.Create();
-        YamlConfigDirectory.Create();
-        YamlIncludeDirectory.Create();
     }
 }

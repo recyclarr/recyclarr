@@ -16,7 +16,7 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
         ];
 
     private IDirectoryInfo CacheDir => paths.ConfigDirectory.SubDirectory("cache");
-    private IDirectoryInfo StateDir => paths.ConfigDirectory.SubDirectory("state");
+    private IDirectoryInfo StateDir => paths.StateDirectory;
     private IDirectoryInfo ResourcesDir => paths.ResourceDirectory;
 
     public void Run(ILogger log)

@@ -13,7 +13,11 @@ internal sealed class ServerLogJanitorTest
     {
         var fs = new MockFileSystem();
         var root = fs.CurrentDirectory();
-        var paths = new AppPaths(root.SubDirectory("config"), root.SubDirectory("data"));
+        var paths = new AppPaths(
+            root.SubDirectory("config"),
+            root.SubDirectory("data"),
+            root.SubDirectory("state")
+        );
         string[] logNames =
         [
             "recyclarr-server_2026-01-01_00-00-00.debug.log",
@@ -44,7 +48,11 @@ internal sealed class ServerLogJanitorTest
     {
         var fs = new MockFileSystem();
         var root = fs.CurrentDirectory();
-        var paths = new AppPaths(root.SubDirectory("config"), root.SubDirectory("data"));
+        var paths = new AppPaths(
+            root.SubDirectory("config"),
+            root.SubDirectory("data"),
+            root.SubDirectory("state")
+        );
         var oldLog = paths.ServerLogDirectory.File("recyclarr-server_old.debug.log");
         var activeDebugLog = paths.ServerLogDirectory.File("recyclarr-server_new.debug.log");
         var activeVerboseLog = paths.ServerLogDirectory.File("recyclarr-server_new.verbose.log");
