@@ -12,12 +12,13 @@ on:
         required: true
       publish-args:
         type: string
-      skip-test:
+      # For runtimes the runner cannot execute (e.g. musl on a glibc runner)
+      skip-smoke:
         type: boolean
 
 jobs:
   build:
-    name: Build, Test, Smoke
+    name: Publish & Smoke
     # Windows version info missing? See this:
     # https://github.com/dotnet/runtime/issues/3828
     runs-on: ${{ inputs.platform }}
@@ -31,18 +32,12 @@ jobs:
       - name: Setup .NET & Tools
         uses: $/.github/actions/setup-dotnet
 
-      - name: Test
-        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
-        run: >-
-          dotnet test -c Release
-          --filter FullyQualifiedName!~Recyclarr.EndToEndTests
-
       - name: Publish
         shell: pwsh
         run: ci/Publish.ps1 -Runtime ${{ inputs.runtime }} ${{ inputs.publish-args }}
 
       - name: Smoke
-        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
+        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
         shell: pwsh
         run: ci/SmokeTest.ps1 publish/${{ inputs.runtime }}
 

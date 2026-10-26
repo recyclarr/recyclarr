@@ -56,6 +56,34 @@ jobs:
     uses: $/.github/workflows/reusable-precheck.yml
 
   #############################################
+  # Runs apart from the publish jobs so neither waits for the other.
+  test:
+    name: Test
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
+    strategy:
+      matrix:
+        platform: >-
+          ${{ fromJSON(needs.pre-check.outputs.full_build == 'true'
+          && '["ubuntu-latest", "windows-latest", "macos-latest"]'
+          || '["ubuntu-latest"]') }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+          persist-credentials: false
+
+      - name: Setup .NET & Tools
+        uses: $/.github/actions/setup-dotnet
+
+      - name: Test
+        run: >-
+          dotnet test -c Release
+          --filter FullyQualifiedName!~Recyclarr.EndToEndTests
+
+  #############################################
   build-win:
     name: Build Windows
     needs: pre-check
@@ -78,7 +106,6 @@ jobs:
     uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
-        # Only x64 runs tests, so other runtimes wait for a full build.
         runtime: >-
           ${{ fromJSON(needs.pre-check.outputs.full_build == 'true'
           && '["linux-x64", "linux-arm64", "linux-arm"]'
@@ -116,7 +143,7 @@ jobs:
       platform: ubuntu-latest
       runtime: ${{ matrix.runtime }}
       publish-args: -NoSingleFile
-      skip-test: true
+      skip-smoke: true
 
   #############################################
   codesign:
@@ -183,10 +210,11 @@ jobs:
   # Pushes edge on master and only validates the image elsewhere.
   docker:
     name: Docker Validation
-    # Wait on builds to verify tests pass. Windows and macOS are skipped outside full builds.
-    needs: [build-win, build-linux, build-osx, build-musl]
+    # Edge must not publish before tests and every build pass. Windows and macOS are skipped
+    # outside full builds.
+    needs: [test, build-win, build-linux, build-osx, build-musl]
     if: >-
-      !cancelled() && github.ref_type != 'tag'
+      !cancelled() && github.ref_type != 'tag' && needs.test.result == 'success'
       && needs.build-linux.result == 'success' && needs.build-musl.result == 'success'
       && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     permissions:
@@ -256,6 +284,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
+      - test
       - build-win
       - build-linux
       - build-musl
@@ -329,6 +358,7 @@ jobs:
     name: Report Quick Build Status
     needs:
       - pre-check
+      - test
       - build-win
       - build-linux
       - build-osx
