@@ -5,8 +5,13 @@ on:
   workflow_call:
     outputs:
       should_run:
-        description: Whether the calling workflow should run (false if push event has a PR)
+        description: >-
+          Whether the calling workflow should run (false for a feature-branch push that has a PR)
         value: ${{ jobs.precheck.outputs.should_run }}
+      full_build:
+        description: >-
+          Whether to build every platform and run release-only jobs (master, tags, manual runs)
+        value: ${{ jobs.precheck.outputs.full_build }}
 
 permissions:
   pull-requests: read
@@ -17,14 +22,30 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
+      full_build: ${{ steps.check.outputs.full_build }}
     steps:
       - name: Check if push event has corresponding PR
         id: check
         run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" \
+            || "${{ github.ref_type }}" == "tag" \
+            || "${{ github.ref_name }}" == "master" ]]; then
+            echo "full_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "full_build=false" >> $GITHUB_OUTPUT
+          fi
+
           # Always run for non-push events (prioritize PR builds, workflow_dispatch, etc.)
           if [[ "${{ github.event_name }}" != "push" ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "Event type: ${{ github.event_name }} - allowing run"
+            exit 0
+          fi
+
+          # Merged commits on master have PRs too, so only feature-branch pushes are deduplicated.
+          if [[ "${{ github.ref_type }}" == "tag" || "${{ github.ref_name }}" == "master" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "Push to ${{ github.ref_name }} - allowing run"
             exit 0
           fi
 
