@@ -71,13 +71,14 @@ spec:
             - name: management
               containerPort: 7983
               protocol: TCP
-          # The first start clones resource providers before the server listens.
+          # The first start clones resource providers before the server listens; the budget stays
+          # at 5 minutes. Short periods let the pod report ready soon after the server is up.
           startupProbe:
             httpGet:
               path: /livez
               port: management
-            periodSeconds: 5
-            failureThreshold: 60
+            periodSeconds: 2
+            failureThreshold: 150
           livenessProbe:
             httpGet:
               path: /livez
@@ -86,6 +87,7 @@ spec:
             httpGet:
               path: /readyz
               port: management
+            periodSeconds: 5
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
