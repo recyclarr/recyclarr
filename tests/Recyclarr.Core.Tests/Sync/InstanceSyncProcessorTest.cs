@@ -1,7 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using Autofac;
 using NSubstitute.ExceptionExtensions;
 using Recyclarr.Compatibility;
@@ -17,18 +14,12 @@ using Serilog.Events;
 
 namespace Recyclarr.Core.Tests.Sync;
 
-internal interface IFailureApi
-{
-    [Get("/")]
-    Task<string> Get(CancellationToken ct);
-}
-
 internal sealed class InstanceSyncProcessorTest
 {
     [Test]
     public async Task Handled_failure_is_retained_and_logged()
     {
-        var exception = await CreateApiRequestException();
+        var exception = CreateApiRequestException();
         var serviceInfo = Substitute.For<IServiceInformation>();
         serviceInfo.GetAppName(default).ThrowsAsync(exception);
         var log = new RecordingLogger();
@@ -202,81 +193,23 @@ internal sealed class InstanceSyncProcessorTest
         }
     }
 
-    [SuppressMessage(
-        "Reliability",
-        "CA2025:Ensure tasks using IDisposable instances complete before the instances are disposed",
-        Justification = "The server task completes before the listener is disposed in finally."
-    )]
+    // Built the way Refit builds them, without a server: only the exception type and status code
+    // matter to the classifier under test.
     private static async Task<ApiException> CreateApiException(HttpStatusCode statusCode)
     {
-        using var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        var endpoint = (IPEndPoint)listener.LocalEndpoint;
-        var server = Respond(listener, statusCode);
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri($"http://127.0.0.1:{endpoint.Port}");
-        var api = RestService.For<IFailureApi>(client);
-
-        try
-        {
-            await api.Get(CancellationToken.None);
-            throw new AssertionException("Expected Refit to reject the response.");
-        }
-        catch (ApiException e)
-        {
-            return e;
-        }
-        finally
-        {
-            await server;
-            listener.Stop();
-        }
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://service/");
+        using var response = new HttpResponseMessage(statusCode) { RequestMessage = request };
+        return await ApiException.Create(request, HttpMethod.Get, response, new RefitSettings());
     }
 
-    private static async Task Respond(TcpListener listener, HttpStatusCode statusCode)
+    private static ApiRequestException CreateApiRequestException()
     {
-        using var connection = await listener.AcceptTcpClientAsync();
-        await using var stream = connection.GetStream();
-        var response = Encoding.ASCII.GetBytes(
-            $"HTTP/1.1 {(int)statusCode} {statusCode}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://service/");
+        return new ApiRequestException(
+            request,
+            HttpMethod.Get,
+            new RefitSettings(),
+            new HttpRequestException("Connection refused")
         );
-        await stream.WriteAsync(response);
-    }
-
-    [SuppressMessage(
-        "Reliability",
-        "CA2025:Ensure tasks using IDisposable instances complete before the instances are disposed",
-        Justification = "The server task completes before the listener is disposed in finally."
-    )]
-    private static async Task<ApiRequestException> CreateApiRequestException()
-    {
-        using var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        var endpoint = (IPEndPoint)listener.LocalEndpoint;
-        var server = CloseConnection(listener);
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri($"http://127.0.0.1:{endpoint.Port}");
-        var api = RestService.For<IFailureApi>(client);
-
-        try
-        {
-            await api.Get(CancellationToken.None);
-            throw new AssertionException("Expected Refit to reject the closed connection.");
-        }
-        catch (ApiRequestException e)
-        {
-            return e;
-        }
-        finally
-        {
-            await server;
-            listener.Stop();
-        }
-    }
-
-    private static async Task CloseConnection(TcpListener listener)
-    {
-        using var connection = await listener.AcceptTcpClientAsync();
-        connection.Client.LingerState = new LingerOption(enable: true, seconds: 0);
     }
 }
