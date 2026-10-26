@@ -1,24 +1,3 @@
-# directories
-.config/
-.github/
-.idea/
-.sonarqube/
-.vs/
-ci/
-.vscode/
-publish/
-schemas/
-scripts/
-tests/
-
-# csharp output directories
-**/bin/
-**/obj/
-**/out/
-
-# files
-Dockerfile*
-**/*.trx
-**/*.md
-
-# Ignore these directories inside the docker subdir
+# The image only packages prebuilt binaries (see Dockerfile)
+*
+!publish/linux-musl-*/

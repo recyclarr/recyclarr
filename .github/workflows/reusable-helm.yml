@@ -63,6 +63,12 @@ jobs:
           VERSION: ${{ steps.gitversion.outputs.semVer }}
         run: helm package "$CHART_DIR" --version "$VERSION" --app-version "$VERSION"
 
+      - name: Download Binaries
+        uses: $/.github/actions/download-tar
+        with:
+          name: linux-musl-x64
+          path: publish/linux-musl-x64
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -74,10 +80,8 @@ jobs:
         with:
           context: .
           load: true
+          platforms: linux/amd64
           tags: recyclarr:ci
-          build-args: |
-            VERSION=${{ steps.gitversion.outputs.semVer }}
-            INFORMATIONAL_VERSION=${{ steps.gitversion.outputs.informationalVersion }}
 
       - name: Create kind Cluster
         uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1

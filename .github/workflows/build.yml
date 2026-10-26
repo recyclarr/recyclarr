@@ -102,7 +102,7 @@ jobs:
       runtime: ${{ matrix.runtime }}
 
   #############################################
-  # Note: This builds the MUSL zip artifacts but isn't used in the actual docker image build
+  # Release archives and the Docker image both ship these binaries.
   build-musl:
     name: Build MUSL
     needs: pre-check
@@ -214,8 +214,7 @@ jobs:
   # Runs on every PR because image changes can break the chart as much as chart changes can.
   helm-validation:
     name: Helm Chart Validation
-    needs: pre-check
-    if: needs.pre-check.outputs.should_run == 'true'
+    needs: build-musl
     uses: $/.github/workflows/reusable-helm.yml
 
   #############################################

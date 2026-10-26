@@ -1,6 +1,7 @@
 # Build output: mixes file types that are also tracked (.json, .props, .xml)
 bin/
 obj/
+publish/
 
 # Refitter-generated API clients
 *.g.cs
