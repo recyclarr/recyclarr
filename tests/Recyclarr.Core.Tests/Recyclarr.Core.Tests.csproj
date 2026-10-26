@@ -11,4 +11,7 @@
   <ItemGroup>
     <PackageReference Remove="Serilog.Sinks.NUnit" />
   </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="BannedSymbols.txt" />
+  </ItemGroup>
 </Project>

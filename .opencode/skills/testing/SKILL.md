@@ -169,6 +169,10 @@ loops, in every test project except E2E. Never suppress the ban. Instead:
 
 If none fits, the code under test is untestable by design; change the design.
 
+Build failure results (exceptions, error responses) directly. Open real sockets only when network
+behavior is what the test checks; OS network stacks differ on resets and timeouts, so a socket used
+only to manufacture an exception can hang on one platform. `Recyclarr.Core.Tests` bans sockets.
+
 ## Running Tests
 
 ```bash

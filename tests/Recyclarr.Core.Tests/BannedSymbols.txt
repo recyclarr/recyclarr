@@ -1,0 +1,4 @@
+// Core has no network-facing behavior to test; see the testing skill, "Time and Background Work".
+T:System.Net.Sockets.Socket;Build failure results directly instead of opening sockets
+T:System.Net.Sockets.TcpClient;Build failure results directly instead of opening sockets
+T:System.Net.Sockets.TcpListener;Build failure results directly instead of opening sockets
