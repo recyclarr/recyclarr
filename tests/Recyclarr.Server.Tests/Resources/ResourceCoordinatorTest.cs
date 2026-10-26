@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Autofac;
-using Microsoft.Extensions.Time.Testing;
 using Recyclarr.Config;
 using Recyclarr.Repo;
 using Recyclarr.ResourceProviders.Domain;
@@ -21,7 +20,7 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
     private const string Guides = "trash-guides";
     private const string Templates = "config-templates";
 
-    private readonly FakeTimeProvider _time = new();
+    private readonly TimerObservingTimeProvider _time = new();
     private FakeGitRemote _remote = null!;
 
     private ResourceCoordinator Coordinator => Resolve<ResourceCoordinator>();
@@ -248,18 +247,21 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
         await Startup();
         CommitGuide("cf-one", "cf-two");
         using var worker = Resolve<ResourceRefreshWorker>();
-        await worker.StartAsync(CancellationToken.None);
+        var fetched = _remote.NextFetch(Guides);
 
-        // The worker's loop starts on another thread, so its timer may not exist yet; keep ticking.
+        // The worker creates its timer on another thread; one tick needs that timer to exist.
         _time.Advance(ResourceCoordinator.Ttl);
-        for (var i = 0; i < 500 && _remote.Fetches(Guides) < 2; i++)
-        {
-            _time.Advance(ResourceRefreshWorker.Interval);
-            await Task.Delay(10);
-        }
+        await worker.StartAsync(CancellationToken.None);
+        await _time.NextTimer(ResourceRefreshWorker.Interval);
+        _time.Advance(ResourceRefreshWorker.Interval);
+        await fetched;
 
+        // The refresh holds the write lock from fetch to publish, so this read waits until it ends.
+        // Stopping the worker first could cancel the refresh before it publishes.
+        (await GuideCustomFormats())
+            .Should()
+            .Equal("cf-one", "cf-two");
         await worker.StopAsync(CancellationToken.None);
-        (await GuideCustomFormats()).Should().Equal("cf-one", "cf-two");
     }
 
     private Task RunSyncJob(JobId id)

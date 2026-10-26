@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.Net.Http.Json;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Time.Testing;
 using Recyclarr.Server.Features.Sync.GetSchedule;
 using Recyclarr.Server.Features.Sync.ListJobs;
 using Recyclarr.Server.Hosting;
@@ -22,7 +21,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     private static readonly DateTimeOffset Start = new(2025, 1, 1, 12, 0, 0, TimeSpan.Zero);
     private static readonly DateTimeOffset Midnight = new(2025, 1, 2, 0, 0, 0, TimeSpan.Zero);
 
-    private readonly WaitObservingTimeProvider _time = new(Start);
+    private readonly TimerObservingTimeProvider _time = new(Start);
     private ServerMode _mode = ServerMode.Persistent;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
@@ -83,21 +82,23 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
             .Be(new DateTimeOffset(2025, 1, 1, 12, 30, 0, TimeSpan.Zero));
     }
 
+    // Whether an occurrence runs or is skipped is decided when its job is created; running a
+    // queued job to completion is covered by the CLI's HTTP tests.
     [Test]
-    public async Task Occurrence_while_idle_runs_a_scheduled_job()
+    public async Task Occurrence_while_idle_queues_a_scheduled_job()
     {
         AddInstance();
         using var client = CreateClient();
-        var api = RestService.For<ISyncApi>(client);
         (await GetSchedule(client)).NextOccurrence.Should().Be(Midnight);
 
-        await _time.SchedulerWaiting;
+        await SchedulerWait();
         _time.SetUtcNow(Midnight);
-        var job = await WaitForScheduledJob(client);
-        var finished = await WaitForTerminal(api, job.Id);
+        await SchedulerWait();
 
-        finished.Status.Should().Be(nameof(SyncJobStatus.Succeeded));
-        finished.ScheduledFor.Should().Be(Midnight);
+        var queued = await TheOnlyScheduledJob(client);
+        var job = (await RestService.For<ISyncApi>(client).JobsGet(queued.Id)).Content;
+        job?.Status.Should().NotBe(nameof(SyncJobStatus.Skipped));
+        job?.ScheduledFor.Should().Be(Midnight);
         var schedule = await GetSchedule(client);
         schedule.PreviousOccurrence.Should().Be(Midnight);
         schedule.NextOccurrence.Should().Be(Midnight.AddDays(1));
@@ -110,9 +111,10 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         using var client = CreateClient();
         var active = Services.GetRequiredService<ISyncJobStore>().CreateManualJob(["movies"]);
 
-        await _time.SchedulerWaiting;
+        await SchedulerWait();
         _time.SetUtcNow(Midnight);
-        var skipped = await WaitForScheduledJob(client);
+        await SchedulerWait();
+        var skipped = await TheOnlyScheduledJob(client);
         var job = await RestService.For<ISyncApi>(client).JobsGet(skipped.Id);
 
         job.Content?.Status.Should().Be(nameof(SyncJobStatus.Skipped));
@@ -126,15 +128,16 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         AddInstance();
         using var client = CreateClient();
 
-        await _time.SchedulerWaiting;
+        await SchedulerWait();
         _time.Advance(TimeSpan.FromDays(3));
-        await WaitForScheduledJob(client);
-        await Task.Delay(TimeSpan.FromMilliseconds(500));
+        await SchedulerWait();
 
         (await ListScheduledJobs(client)).Should().ContainSingle();
         (await GetSchedule(client)).NextOccurrence.Should().Be(Midnight.AddDays(3));
     }
 
+    // A disabled schedule never starts the scheduler loop (decided during host startup), so no
+    // amount of elapsed time can create a job and the test need not wait for one.
     [Test]
     public async Task Disabled_schedule_creates_no_jobs()
     {
@@ -143,8 +146,6 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         using var client = CreateClient();
 
         var schedule = await GetSchedule(client);
-        _time.Advance(TimeSpan.FromDays(2));
-        await Task.Delay(TimeSpan.FromMilliseconds(500));
 
         schedule.Enabled.Should().BeFalse();
         schedule.NextOccurrence.Should().BeNull();
@@ -159,8 +160,6 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         using var client = CreateClient();
 
         var schedule = await GetSchedule(client);
-        _time.Advance(TimeSpan.FromDays(2));
-        await Task.Delay(TimeSpan.FromMilliseconds(500));
 
         schedule.Enabled.Should().BeFalse();
         (await ListScheduledJobs(client)).Should().BeEmpty();
@@ -184,64 +183,14 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         return list!.Jobs;
     }
 
-    private static async Task<SyncJobSummaryResponse> WaitForScheduledJob(HttpClient client)
-    {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        while (true)
-        {
-            var jobs = await ListScheduledJobs(client);
-            if (jobs.Count > 0)
-            {
-                return jobs[0];
-            }
-
-            await Task.Delay(50, timeout.Token);
-        }
-    }
-
-    private static async Task<Client.V1.GetSyncJobResponse> WaitForTerminal(ISyncApi api, Guid id)
-    {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        while (true)
-        {
-            var job = (await api.JobsGet(id, timeout.Token)).Content;
-            if (
-                job is not null
-                && job.Status
-                    is not (nameof(SyncJobStatus.Pending) or nameof(SyncJobStatus.Running))
-            )
-            {
-                return job;
-            }
-
-            await Task.Delay(50, timeout.Token);
-        }
-    }
-
     /// <summary>
-    /// Signals when the scheduler starts waiting on fake time. Since .NET 10, BackgroundService runs
-    /// ExecuteAsync on a background thread, so a test can move the clock before the scheduler reads
-    /// it. The scheduler then sizes its wait from the moved clock and misses the occurrence. Tests
-    /// that move the clock to fire an occurrence must await <see cref="SchedulerWaiting"/> first.
+    /// Completes when the scheduler next waits on fake time (a one-shot delay). Moving the clock
+    /// before the first wait would let the scheduler size that wait from the moved clock and miss
+    /// the occurrence. Each occurrence is handled before the next wait, so awaiting a wait after
+    /// moving the clock proves the occurrence's job exists.
     /// </summary>
-    private sealed class WaitObservingTimeProvider(DateTimeOffset start) : FakeTimeProvider(start)
-    {
-        private readonly TaskCompletionSource _waiting = new(
-            TaskCreationOptions.RunContinuationsAsynchronously
-        );
+    private Task SchedulerWait() => _time.NextTimer(Timeout.InfiniteTimeSpan);
 
-        public Task SchedulerWaiting => _waiting.Task.WaitAsync(TimeSpan.FromSeconds(10));
-
-        public override ITimer CreateTimer(
-            TimerCallback callback,
-            object? state,
-            TimeSpan dueTime,
-            TimeSpan period
-        )
-        {
-            var timer = base.CreateTimer(callback, state, dueTime, period);
-            _waiting.TrySetResult();
-            return timer;
-        }
-    }
+    private static async Task<SyncJobSummaryResponse> TheOnlyScheduledJob(HttpClient client) =>
+        (await ListScheduledJobs(client)).Should().ContainSingle().Subject;
 }

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO.Abstractions;
 using Recyclarr.Repo;
@@ -17,8 +18,20 @@ internal sealed class FakeGitRemote(MockFileSystem fs) : IRepoUpdater
     private readonly Dictionary<string, int> _heads = [];
     private readonly Dictionary<string, int> _good = [];
     private readonly Dictionary<string, int> _fetches = [];
+    private readonly ConcurrentDictionary<string, TaskCompletionSource> _fetchWaiters = [];
 
     public bool Offline { get; set; }
+
+    /// <summary>
+    /// Completes when the next fetch of <paramref name="type"/> starts, so a test can follow a
+    /// refresh that runs on another thread.
+    /// </summary>
+    public Task NextFetch(string type)
+    {
+        var waiter = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _fetchWaiters[type] = waiter;
+        return waiter.Task.WaitAsync(TimeSpan.FromSeconds(10));
+    }
 
     public void Commit(string type, IReadOnlyDictionary<string, string> files)
     {
@@ -39,6 +52,10 @@ internal sealed class FakeGitRemote(MockFileSystem fs) : IRepoUpdater
     {
         var type = TypeOf(source.Path);
         _fetches[type] = Fetches(type) + 1;
+        if (_fetchWaiters.TryRemove(type, out var waiter))
+        {
+            waiter.SetResult();
+        }
 
         if (Offline)
         {
