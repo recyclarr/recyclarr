@@ -3,8 +3,9 @@ name: Build & Test
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
-    branches: [master]
+    branches: ["**"]
     tags: [v*]
     paths:
       # Source code and tests
@@ -23,6 +24,7 @@ on:
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-docker.yml"
       - ".github/workflows/reusable-helm.yml"
+      - ".github/workflows/reusable-precheck.yml"
       - ".github/actions/**"
       - "ci/**"
 
@@ -41,16 +43,23 @@ on:
       - "schemas/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   #############################################
+  pre-check:
+    uses: $/.github/workflows/reusable-precheck.yml
+
+  #############################################
   build-win:
     name: Build Windows
+    needs: pre-check
+    if: needs.pre-check.outputs.full_build == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -63,11 +72,17 @@ jobs:
   #############################################
   build-linux:
     name: Build Linux
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
-        runtime: [linux-x64, linux-arm64, linux-arm]
+        # Only x64 runs tests, so other runtimes wait for a full build.
+        runtime: >-
+          ${{ fromJSON(needs.pre-check.outputs.full_build == 'true'
+          && '["linux-x64", "linux-arm64", "linux-arm"]'
+          || '["linux-x64"]') }}
     with:
       platform: ubuntu-latest
       runtime: ${{ matrix.runtime }}
@@ -75,6 +90,8 @@ jobs:
   #############################################
   build-osx:
     name: Build Mac OS
+    needs: pre-check
+    if: needs.pre-check.outputs.full_build == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -88,6 +105,8 @@ jobs:
   # Note: This builds the MUSL zip artifacts but isn't used in the actual docker image build
   build-musl:
     name: Build MUSL
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -161,11 +180,15 @@ jobs:
           path: publish
 
   #############################################
-  docker-edge:
-    name: Docker (edge)
-    if: github.ref_type == 'branch'
-    # Wait on builds only to verify tests pass
+  # Pushes edge on master and only validates the image elsewhere.
+  docker:
+    name: Docker Validation
+    # Wait on builds to verify tests pass. Windows and macOS are skipped outside full builds.
     needs: [build-win, build-linux, build-osx, build-musl]
+    if: >-
+      !cancelled() && github.ref_type != 'tag'
+      && needs.build-linux.result == 'success' && needs.build-musl.result == 'success'
+      && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     permissions:
       contents: read
       packages: write
@@ -188,8 +211,11 @@ jobs:
   #############################################
   # Gates the release: a published GitHub release cannot be recovered, so a chart that fails
   # after it would leave that version without a chart.
+  # Runs on every PR because image changes can break the chart as much as chart changes can.
   helm-validation:
     name: Helm Chart Validation
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     uses: $/.github/workflows/reusable-helm.yml
 
   #############################################
@@ -294,3 +320,32 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+
+  #############################################
+  # Groups all jobs into one status that pull requests require before merging. The name predates
+  # the merge of the quick build into this workflow; renaming it requires updating the master
+  # ruleset's required checks.
+  post-check:
+    if: always() && needs.pre-check.outputs.should_run == 'true'
+    name: Report Quick Build Status
+    needs:
+      - pre-check
+      - build-win
+      - build-linux
+      - build-osx
+      - build-musl
+      - codesign
+      - docker
+      - docker-release
+      - helm-validation
+      - helm-release
+      - release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if all jobs succeeded
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        with:
+          # Skipped outside full builds, or outside tag builds for release jobs
+          allowed-skips: >-
+            build-win, build-osx, codesign, docker, docker-release, helm-release, release
+          jobs: ${{ toJSON(needs) }}
