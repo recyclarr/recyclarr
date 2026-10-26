@@ -36,6 +36,9 @@ internal static class ServerLifecycle
         {
             if (!isDocumentGeneration)
             {
+                // First, so nothing touches directories another running server owns.
+                app.Services.GetRequiredService<DataDirectoryLock>().Acquire();
+
                 // Fail closed: without a key the server would serve its API to anyone (ADR-027).
                 app.Services.GetRequiredService<ServerApiKey>();
                 app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureValidPorts();
