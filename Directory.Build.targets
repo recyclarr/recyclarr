@@ -15,6 +15,7 @@
     <PackageReference Update="coverlet.collector" PrivateAssets="all" />
     <PackageReference Update="GitVersion.MsBuild" PrivateAssets="all" />
     <PackageReference Update="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
     <PackageReference Update="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
     <PackageReference Update="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
