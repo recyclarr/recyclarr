@@ -1,0 +1,7 @@
+// Rationale and alternatives: testing skill, "Time and Background Work". IDs cannot wrap.
+M:System.Threading.Tasks.Task.Delay(System.Int32);No real-time waits in tests; see the testing skill
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan);No real-time waits in tests; see the testing skill
+M:System.Threading.Tasks.Task.Delay(System.Int32,System.Threading.CancellationToken);No real-time waits in tests
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan,System.Threading.CancellationToken);No real-time waits in tests
+M:System.Threading.Thread.Sleep(System.Int32);No real-time waits in tests; see the testing skill
+M:System.Threading.Thread.Sleep(System.TimeSpan);No real-time waits in tests; see the testing skill

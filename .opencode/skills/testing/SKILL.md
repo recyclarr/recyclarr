@@ -156,6 +156,19 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 "/absolute/path/file.json"
 ```
 
+## Time and Background Work
+
+`tests/BannedSymbols.txt` bans real-time waits (`Task.Delay`, `Thread.Sleep`), including polling
+loops, in every test project except E2E. Never suppress the ban. Instead:
+
+- Assert decisions where the code makes them synchronously, at the lowest layer that owns them.
+- Await a signal from a test double (`TaskCompletionSource` set when the double is called).
+- Drive time with `TimerObservingTimeProvider`: await `NextTimer(period)` before `Advance`, because
+  background loops create timers on another thread; awaiting the next timer after `Advance` proves
+  the loop finished that iteration.
+
+If none fits, the code under test is untestable by design; change the design.
+
 ## Running Tests
 
 ```bash
