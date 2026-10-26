@@ -14,6 +14,7 @@ public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot, IDirec
     public IDirectoryInfo YamlConfigDirectory => configRoot.SubDirectory("configs");
     public IDirectoryInfo YamlIncludeDirectory => configRoot.SubDirectory("includes");
 
+    public IDirectoryInfo DataDirectory => dataRoot;
     public IDirectoryInfo ServerLogDirectory => dataRoot.SubDirectory("logs", "server");
     public IDirectoryInfo ResourceDirectory => dataRoot.SubDirectory("resources");
 

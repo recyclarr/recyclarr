@@ -19,6 +19,7 @@ internal sealed class ServerProcessTest
     private IDirectoryInfo _root = null!;
     private string? _apiKey = "test-server-api-key-0123456789abcdef";
     private string _apiUrl = "http://127.0.0.1:0";
+    private string? _dataDirectory;
     private int _managementPort;
     private bool _managementPortFromEnvironment = true;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
@@ -167,6 +168,65 @@ internal sealed class ServerProcessTest
         server.ExitCode.Should().NotBe(0);
         (await output).Should().NotContain("READY:");
         (await errors).Should().Contain("RECYCLARR_API_KEY");
+    }
+
+    /// <summary>
+    /// The CLI launches an ephemeral server for each command, which would otherwise race a running
+    /// server on the resource cache, state files, and log files.
+    /// </summary>
+    [Test]
+    public async Task A_second_server_on_the_same_data_directory_stops_startup()
+    {
+        using var first = Start($"--parent-pid={Environment.ProcessId}");
+        await WaitForReadyAsync(first);
+
+        using var second = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        var output = second.StandardOutput.ReadToEndAsync();
+        var errors = second.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(second);
+
+        second.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("Another Recyclarr server").And.Contain("cli.yml");
+        first.StandardInput.Close();
+        await WaitForExitAsync(first);
+    }
+
+    [Test]
+    public async Task A_second_server_sharing_only_the_state_directory_stops_startup()
+    {
+        using var first = Start($"--parent-pid={Environment.ProcessId}");
+        await WaitForReadyAsync(first);
+
+        _dataDirectory = _root.SubDirectory("other-data").FullName;
+        using var second = Start($"--parent-pid={Environment.ProcessId}");
+        var output = second.StandardOutput.ReadToEndAsync();
+        var errors = second.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(second);
+
+        second.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("Another Recyclarr server").And.Contain("state");
+        first.StandardInput.Close();
+        await WaitForExitAsync(first);
+    }
+
+    [Test]
+    public async Task A_server_that_crashed_does_not_block_the_next_start()
+    {
+        using (var crashed = Start($"--parent-pid={Environment.ProcessId}"))
+        {
+            await WaitForReadyAsync(crashed);
+            crashed.Kill(entireProcessTree: true);
+            await WaitForExitAsync(crashed);
+        }
+
+        using var next = Start($"--parent-pid={Environment.ProcessId}");
+        await WaitForReadyAsync(next);
+        next.StandardInput.Close();
+        await WaitForExitAsync(next);
+
+        next.ExitCode.Should().Be(0);
     }
 
     /// <summary>
@@ -338,6 +398,7 @@ internal sealed class ServerProcessTest
             {
                 ["RECYCLARR_CONFIG_DIR"] = ConfigDirectory.FullName,
                 ["RECYCLARR_API_KEY"] = _apiKey,
+                ["RECYCLARR_DATA_DIR"] = _dataDirectory,
             },
         };
 

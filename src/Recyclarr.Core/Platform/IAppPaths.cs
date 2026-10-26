@@ -5,6 +5,7 @@ namespace Recyclarr.Platform;
 public interface IAppPaths
 {
     IDirectoryInfo ConfigDirectory { get; }
+    IDirectoryInfo DataDirectory { get; }
     IDirectoryInfo ServerLogDirectory { get; }
     IDirectoryInfo ResourceDirectory { get; }
     IDirectoryInfo StateDirectory { get; }

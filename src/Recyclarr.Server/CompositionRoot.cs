@@ -66,6 +66,7 @@ internal static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
 
+        builder.RegisterType<DataDirectoryLock>().SingleInstance();
         builder.RegisterType<ServerApiKey>().SingleInstance();
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
         builder
