@@ -9,12 +9,15 @@ if (-not $configDir) {
 if (-not $env:RECYCLARR_API_KEY) {
     throw "RECYCLARR_API_KEY is not set"
 }
-$version = dotnet gitversion -output json | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet gitversion failed"
+
+# The image packages prebuilt binaries for the Docker host's architecture.
+$arch = switch (docker info --format '{{.Architecture}}') {
+    { $_ -in "x86_64", "amd64" } { "x64" }
+    { $_ -in "aarch64", "arm64" } { "arm64" }
+    default { throw "Unsupported Docker architecture: $_" }
 }
-$env:RECYCLARR_VERSION = $version.SemVer
-$env:RECYCLARR_INFORMATIONAL_VERSION = $version.InformationalVersion
+& "$PSScriptRoot/../ci/Publish.ps1" -Runtime "linux-musl-$arch" -NoSingleFile `
+    -OutputDir "$PSScriptRoot/../publish/linux-musl-$arch"
 
 $env:DOCKER_UID = $(id -u)
 $env:DOCKER_GID = $(id -g)
@@ -26,7 +29,8 @@ if (-not (Test-Path $configDir)) {
     New-Item -ItemType Directory -Path $configDir -Force | Out-Null
 }
 
-$stat = stat -c '%u:%g' $configDir
+# BSD stat (macOS) and GNU stat (Linux) take different format flags.
+$stat = if ($IsMacOS) { stat -f '%u:%g' $configDir } else { stat -c '%u:%g' $configDir }
 if ($stat -ne "$env:DOCKER_UID`:$env:DOCKER_GID") {
     Write-Host "Fixing $configDir ownership ($stat -> $env:DOCKER_UID`:$env:DOCKER_GID)"
     sudo chown -R "$env:DOCKER_UID`:$env:DOCKER_GID" $configDir

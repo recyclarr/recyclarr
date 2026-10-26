@@ -1,39 +1,20 @@
-# Following Microsoft's pattern shown here:
-# https://github.com/dotnet/dotnet-docker/blob/main/samples/dotnetapp/Dockerfile.alpine
-# https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
+# The image packages binaries published outside Docker, so it ships the same framework-dependent
+# musl builds as the release archives. Publish each target platform's runtime first, e.g.:
+#   ci/Publish.ps1 -Runtime linux-musl-x64 -NoSingleFile
+# BuildKit builds only the stage matching the target platform, so other runtimes may be absent.
+FROM scratch AS binaries-amd64
+COPY --link publish/linux-musl-x64/ /
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+FROM scratch AS binaries-arm64
+COPY --link publish/linux-musl-arm64/ /
 
-ARG TARGETARCH
-WORKDIR /source
+FROM scratch AS binaries-arm
+COPY --link publish/linux-musl-arm/ /
 
-# copy csproj and restore as distinct layers. Typically, packages change less often than code, so
-# this cached layer is expected to be reused in the majority of cases.
-COPY --link --parents *.props src/*/*.csproj ./
-RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH \
- && dotnet restore src/Recyclarr.Server -a $TARGETARCH
-
-# The build context has no usable Git repository (a linked worktree's .git is a pointer outside
-# the context), so GitVersion runs on the host and its results arrive as build arguments.
-ARG VERSION
-ARG INFORMATIONAL_VERSION
-RUN test -n "$VERSION" && test -n "$INFORMATIONAL_VERSION" \
- || { echo "Pass VERSION and INFORMATIONAL_VERSION from dotnet gitversion" >&2; exit 1; }
-
-# copy and publish app and libraries
-COPY --link . .
-RUN publish() { \
-      dotnet publish "src/$1" -a $TARGETARCH --no-restore -o /app \
-        -p:DisableGitVersionTask=true -p:Version=$VERSION \
-        -p:InformationalVersion=$INFORMATIONAL_VERSION \
-        -p:OpenApiGenerateDocuments=false; \
-    } \
- && publish Recyclarr.Cli \
- && publish Recyclarr.Server
+FROM binaries-$TARGETARCH AS binaries
 
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
-# final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 
 LABEL name="recyclarr" \
@@ -65,7 +46,7 @@ RUN set -ex; \
     apk add --no-cache bash tzdata git tini; \
     mkdir -p /config /data && chown 1000:1000 /config /data;
 
-COPY --link --from=build /app /app/recyclarr/
+COPY --link --from=binaries / /app/recyclarr/
 
 USER 1000:1000
 VOLUME /config
