@@ -51,6 +51,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "rememberMe",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -85,7 +93,7 @@
                     "type": "string"
                   },
                   "rememberMe": {
-                    "type": "string"
+                    "type": "boolean"
                   }
                 }
               },
@@ -8522,9 +8530,7 @@
             "type": "string",
             "nullable": true
           },
-          "value": {
-            "nullable": true
-          },
+          "value": {},
           "type": {
             "type": "string",
             "nullable": true
@@ -10832,12 +10838,8 @@
           "enabled": {
             "type": "boolean"
           },
-          "required": {
-            "nullable": true
-          },
-          "ignored": {
-            "nullable": true
-          },
+          "required": {},
+          "ignored": {},
           "airDateRestriction": {
             "type": "boolean"
           },
@@ -11600,6 +11602,10 @@
             "format": "int32"
           },
           "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "pendingPath": {
             "type": "string",
             "nullable": true
           },
