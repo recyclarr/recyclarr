@@ -51,6 +51,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "rememberMe",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -85,7 +93,7 @@
                     "type": "string"
                   },
                   "rememberMe": {
-                    "type": "string"
+                    "type": "boolean"
                   }
                 }
               },
@@ -5644,42 +5652,24 @@
             }
           },
           {
+            "name": "removalMethod",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QueueRemovalMethod"
+            }
+          },
+          {
+            "name": "blocklistMethod",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QueueBlocklistMethod"
+            }
+          },
+          {
             "name": "message",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "removeFromClient",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          },
-          {
-            "name": "blocklist",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "skipRedownload",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "changeCategory",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
             }
           }
         ],
@@ -5698,42 +5688,24 @@
         "tags": ["Queue"],
         "parameters": [
           {
+            "name": "removalMethod",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QueueRemovalMethod"
+            }
+          },
+          {
+            "name": "blocklistMethod",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QueueBlocklistMethod"
+            }
+          },
+          {
             "name": "message",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "removeFromClient",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          },
-          {
-            "name": "blocklist",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "skipRedownload",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "changeCategory",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": false
             }
           }
         ],
@@ -9057,9 +9029,7 @@
             "type": "string",
             "nullable": true
           },
-          "value": {
-            "nullable": true
-          },
+          "value": {},
           "type": {
             "type": "string",
             "nullable": true
@@ -10894,11 +10864,6 @@
             },
             "nullable": true
           },
-          "seasonNumber": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
           "episodeNumbers": {
             "type": "array",
             "items": {
@@ -11017,11 +10982,6 @@
           },
           "fullSeason": {
             "type": "boolean"
-          },
-          "seasonNumber": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
           },
           "seasonNumbers": {
             "type": "array",
@@ -11368,6 +11328,10 @@
           }
         }
       },
+      "QueueBlocklistMethod": {
+        "enum": ["doNotBlocklist", "blocklistAndSearch", "blocklistOnly"],
+        "type": "string"
+      },
       "QueueBulkResource": {
         "required": ["ids"],
         "type": "object",
@@ -11381,6 +11345,10 @@
             "nullable": true
           }
         }
+      },
+      "QueueRemovalMethod": {
+        "enum": ["removeFromClient", "changeCategory", "ignore"],
+        "type": "string"
       },
       "QueueResource": {
         "type": "object",
@@ -12536,6 +12504,10 @@
             "type": "string",
             "nullable": true
           },
+          "pendingPath": {
+            "type": "string",
+            "nullable": true
+          },
           "qualityProfileId": {
             "type": "integer",
             "format": "int32"
@@ -13295,6 +13267,10 @@
           "enableColorImpairedMode": {
             "type": "boolean"
           },
+          "headerColor": {
+            "type": "string",
+            "nullable": true
+          },
           "theme": {
             "type": "string",
             "nullable": true
@@ -13430,12 +13406,8 @@
             "type": "string",
             "nullable": true
           },
-          "attemptedValue": {
-            "nullable": true
-          },
-          "customState": {
-            "nullable": true
-          },
+          "attemptedValue": {},
+          "customState": {},
           "severity": {
             "$ref": "#/components/schemas/Severity"
           },
@@ -13451,9 +13423,7 @@
           },
           "formattedMessagePlaceholderValues": {
             "type": "object",
-            "additionalProperties": {
-              "nullable": true
-            },
+            "additionalProperties": {},
             "nullable": true
           }
         }
