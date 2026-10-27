@@ -1,25 +1,24 @@
+using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Secrets;
 
-public class SecretsProvider : ISecretsProvider
+public class SecretsProvider(IAppPaths paths) : ISecretsProvider
 {
     public IReadOnlyDictionary<string, string> Secrets => _secrets.Value;
 
-    private readonly IAppPaths _paths;
-    private readonly Lazy<Dictionary<string, string>> _secrets;
+    private readonly Lazy<Dictionary<string, string>> _secrets = new(() =>
+        Load(paths.ConfigDirectory)
+    );
 
-    public SecretsProvider(IAppPaths paths)
+    /// <summary>
+    /// The secrets in <c>secrets.yml</c> of the configuration directory; empty without the file.
+    /// </summary>
+    public static Dictionary<string, string> Load(IDirectoryInfo configDirectory)
     {
-        _paths = paths;
-        _secrets = new Lazy<Dictionary<string, string>>(LoadSecretsFile);
-    }
-
-    private Dictionary<string, string> LoadSecretsFile()
-    {
-        var yamlPath = _paths.ConfigDirectory.YamlFile("secrets");
+        var yamlPath = configDirectory.YamlFile("secrets");
         if (yamlPath is null)
         {
             return [];

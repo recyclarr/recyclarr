@@ -25,9 +25,10 @@ response bodies at Verbose; it never logs headers.
 `log_janitor.max_files` counts server log files. The server cleans its logs during startup and never
 deletes the files of the current run.
 
-Until `settings.yml` loads, the server writes only errors to stderr, because loading settings logs
-through the same logger. A startup failure before that point (for example, a management port that
-equals the API port) is reported there.
+Until startup has validated `settings.yml`, the server writes only errors to stderr, because the
+configured outputs are not known to be valid yet. A startup failure before that point (invalid
+settings, or a management port that equals the API port) is reported there, with the YAML line for
+settings problems.
 
 ## Telemetry
 

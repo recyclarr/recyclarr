@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Options;
 using Recyclarr.Platform;
 using Recyclarr.Server.Logging;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Tests;
@@ -34,8 +34,7 @@ internal sealed class ServerLogJanitorTest
             fs.AddEmptyFile(log);
         }
 
-        var settings = Substitute.For<ISettings<LogJanitorSettings>>();
-        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 4 });
+        var settings = Options.Create(new LogJanitorSettings { MaxFiles = 4 });
 
         new ServerLogJanitor(paths, settings).DeleteOldestLogFiles([logs[4], logs[5]]);
 
@@ -59,8 +58,7 @@ internal sealed class ServerLogJanitorTest
         fs.AddEmptyFile(oldLog);
         fs.AddEmptyFile(activeDebugLog);
         fs.AddEmptyFile(activeVerboseLog);
-        var settings = Substitute.For<ISettings<LogJanitorSettings>>();
-        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 1 });
+        var settings = Options.Create(new LogJanitorSettings { MaxFiles = 1 });
 
         new ServerLogJanitor(paths, settings).DeleteOldestLogFiles([
             activeDebugLog,

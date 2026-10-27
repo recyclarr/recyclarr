@@ -107,6 +107,42 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             );
     }
 
+    [TestCase(
+        "server:\n  port: [1\n",
+        "settings.yml line 3, column 1: invalid YAML",
+        TestName = "Invalid settings YAML stops startup"
+    )]
+    [TestCase(
+        "repository:\n  clone_url: http://x\n",
+        "settings.yml line 1, column 1: The `repository` setting has been removed",
+        TestName = "Removed setting stops startup"
+    )]
+    [TestCase(
+        "server:\n  prot: 9000\n",
+        "settings.yml line 2, column 3: unknown setting 'server.prot'",
+        TestName = "Unknown setting stops startup"
+    )]
+    [TestCase(
+        "server:\n  schedule:\n    cron: ''\n",
+        "settings.yml line 3, column 5: `server.schedule.cron` must not be empty",
+        TestName = "Invalid setting value stops startup"
+    )]
+    public void Invalid_settings_stop_startup_with_their_position(string yaml, string expected)
+    {
+        Fs.AddFile(Paths.ConfigDirectory.File("settings.yml"), new MockFileData(yaml));
+
+        var start = () => CreateClient();
+
+        start.Should().Throw<Exception>();
+        _log.Events.Should()
+            .Contain(evt =>
+                evt.Level == LogEventLevel.Fatal
+                && evt.MessageTemplate.Text == "Server startup failed: {Message}"
+                && evt.RenderMessage(CultureInfo.InvariantCulture)
+                    .Contains(expected, StringComparison.Ordinal)
+            );
+    }
+
     // Fail closed: a server without a valid key would serve its API to anyone (ADR-027).
     [TestCase(null, null, "RECYCLARR_API_KEY_FILE", TestName = "Missing key stops startup")]
     [TestCase("", null, "RECYCLARR_API_KEY_FILE", TestName = "Empty variable stops startup")]
@@ -120,7 +156,7 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
         string expectedMessage
     )
     {
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns(key);
+        Env.Set("RECYCLARR_API_KEY", key);
         if (fileKey is not null)
         {
             SetKeyFile(fileKey);
@@ -140,9 +176,8 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
     [Test]
     public void Unreadable_key_file_stops_startup()
     {
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns((string?)null);
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE")
-            .Returns(Fs.CurrentDirectory().File("missing-key").FullName);
+        Env.Set("RECYCLARR_API_KEY", null);
+        Env.Set("RECYCLARR_API_KEY_FILE", Fs.CurrentDirectory().File("missing-key").FullName);
 
         var start = () => CreateClient();
 
@@ -159,7 +194,7 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
     {
         var file = Fs.CurrentDirectory().File("api-key");
         Fs.AddFile(file, new MockFileData(content));
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE").Returns(file.FullName);
+        Env.Set("RECYCLARR_API_KEY_FILE", file.FullName);
     }
 
     [Test]

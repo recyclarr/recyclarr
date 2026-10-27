@@ -19,8 +19,8 @@ namespace Recyclarr.Core.TestLibrary;
 /// Register this last so it overrides the production registrations it replaces.
 /// </summary>
 /// <remarks>
-/// This is a module rather than a fixture base class because <c>WebApplicationFactory</c>-derived
-/// fixtures cannot inherit from <see cref="IntegrationTestFixture"/>.
+/// This is a module rather than a fixture base class because HTTP host fixtures cannot inherit from
+/// <see cref="IntegrationTestFixture"/>.
 /// </remarks>
 public sealed class TestStubsModule : Module
 {
@@ -30,13 +30,17 @@ public sealed class TestStubsModule : Module
     public IAppPaths Paths { get; }
 
     /// <summary>
-    /// The process environment the container sees. Fixtures configure variables on it.
+    /// The process environment. Fixtures set variables on it and expose it to the code under test
+    /// as <c>IConfiguration</c> (a host fixture passes it to the host instead), because a host's
+    /// configuration also carries settings this module must not replace.
     /// </summary>
-    public IEnvironment Env { get; } = Substitute.For<IEnvironment>();
+    public TestEnvironment Env { get; } = new();
+
+    public ISpecialFolders SpecialFolders { get; } = Substitute.For<ISpecialFolders>();
 
     public TestStubsModule()
     {
-        Env.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
+        SpecialFolders.GetFolderPath(default, default).ReturnsForAnyArgs("/mock/home");
 
         var testRoot = Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
         var paths = new AppPaths(testRoot, testRoot, testRoot.SubDirectory("state"));
@@ -54,7 +58,7 @@ public sealed class TestStubsModule : Module
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
         builder.RegisterType<BlockedHttpClientFactory>().As<IHttpClientFactory>().SingleInstance();
 
-        builder.RegisterInstance(Env);
+        builder.RegisterInstance(SpecialFolders);
 
         builder.RegisterMockFor<IGitRepository>();
 

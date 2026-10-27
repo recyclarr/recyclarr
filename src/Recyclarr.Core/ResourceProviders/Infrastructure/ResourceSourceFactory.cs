@@ -1,5 +1,5 @@
+using Microsoft.Extensions.Options;
 using Recyclarr.ResourceProviders.Storage;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Infrastructure;
@@ -9,7 +9,7 @@ namespace Recyclarr.ResourceProviders.Infrastructure;
 /// order (later sources override earlier ones).
 /// </summary>
 public class ResourceSourceFactory(
-    ISettings<IReadOnlyCollection<ResourceProvider>> settings,
+    IOptions<RecyclarrSettings> settings,
     IEnumerable<IProviderTypeStrategy> strategies,
     GitProviderLocation.Factory createGitLocation,
     LocalProviderLocation.Factory createLocalLocation
@@ -19,10 +19,11 @@ public class ResourceSourceFactory(
     {
         var strategyList = strategies.ToList();
         var strategyByType = strategyList.ToDictionary(s => s.Type);
+        var providers = settings.Value.ResourceProviders;
 
         return strategyList
-            .SelectMany(s => s.GetInitialProviders(settings.Value))
-            .Concat(settings.Value)
+            .SelectMany(s => s.GetInitialProviders(providers))
+            .Concat(providers)
             .Select(config => CreateSource(config, strategyByType[config.Type]))
             .ToList();
     }

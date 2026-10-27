@@ -86,13 +86,13 @@ internal sealed class ApiKeyAuthenticationHttpTest : ServerHttpFixture
     {
         var file = Fs.CurrentDirectory().File("api-key");
         file.WriteAllText(content);
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY").Returns((string?)null);
-        Env.GetEnvironmentVariable("RECYCLARR_API_KEY_FILE").Returns(file.FullName);
+        Env.Set("RECYCLARR_API_KEY", null);
+        Env.Set("RECYCLARR_API_KEY_FILE", file.FullName);
         return file;
     }
 
     [TestCase("/openapi/v1.json")]
-    [TestCase("/scalar")]
+    [TestCase("/scalar/")]
     public async Task Routes_outside_api_need_no_key(string route)
     {
         using var client = CreateClient();

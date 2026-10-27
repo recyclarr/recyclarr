@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using Recyclarr.Server.Observability;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Hosting;
@@ -18,7 +17,7 @@ namespace Recyclarr.Server.Hosting;
 /// form keeps Kestrel's own parsing, so "localhost" and "0.0.0.0" mean what they do in --urls.
 /// </remarks>
 internal sealed class SettingsEndpointSetup(
-    ISettings<ServerSettings> settings,
+    IOptions<ServerSettings> settings,
     IConfiguration configuration,
     ManagementPort managementPort
 ) : IConfigureOptions<KestrelServerOptions>

@@ -15,21 +15,21 @@ internal static class ManagementPipeline
         /// Requests branch off by the port the connection arrived on, never the Host header, which
         /// clients can forge. Call this before request logging: the branch registers no routing
         /// endpoints, so probes stay out of the request log and the OpenAPI document, and the API
-        /// pipeline never sees them. Unknown paths in the branch get 404. The port is read per
-        /// request: settings.yml loads lazily, and a load failure must surface through the startup
-        /// failure path, not while the pipeline is built.
+        /// pipeline never sees them. Unknown paths in the branch get 404. Invalid settings give
+        /// the default port here; startup then fails before the server listens.
         /// </remarks>
         public void UseManagementPort()
         {
             var port = app.Services.GetRequiredService<ManagementPort>();
+            var number = port.Number;
             app.MapWhen(
-                ctx => ctx.Connection.LocalPort == port.Number,
-                management => Configure(management, port)
+                ctx => ctx.Connection.LocalPort == number,
+                management => Configure(management, port.ServesMetrics)
             );
         }
     }
 
-    private static void Configure(IApplicationBuilder management, ManagementPort port)
+    private static void Configure(IApplicationBuilder management, bool servesMetrics)
     {
         management.Use(SuppressTelemetry);
 
@@ -37,26 +37,13 @@ internal static class ManagementPipeline
         management.UseHealthChecks("/livez", noChecks);
         management.UseHealthChecks("/readyz", noChecks);
 
-        // The scraping middleware looks up the Prometheus exporter when its pipeline is built, and
-        // the exporter exists only when settings enable metrics. settings.yml is not loaded while
-        // this pipeline is built, so the metrics pipeline is built on the first scrape instead.
-        // REC-196 makes settings available here and removes the deferral.
-        RequestDelegate? scrape = null;
-        management.Use(
-            (ctx, next) =>
-            {
-                if (ctx.Request.Path != "/metrics" || !port.ServesMetrics)
-                {
-                    return next(ctx);
-                }
-
-                scrape ??= management
-                    .New()
-                    .UseOpenTelemetryPrometheusScrapingEndpoint(_ => true)
-                    .Build();
-                return scrape(ctx);
-            }
-        );
+        // The Prometheus exporter is registered only when settings enable metrics.
+        if (servesMetrics)
+        {
+            management.UseOpenTelemetryPrometheusScrapingEndpoint(ctx =>
+                ctx.Request.Path == "/metrics"
+            );
+        }
 
         // Routing has already matched any API endpoint for this path; ending the branch without
         // executing it would be a server error rather than a 404.

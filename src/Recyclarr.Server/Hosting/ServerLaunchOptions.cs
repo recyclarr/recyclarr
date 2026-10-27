@@ -4,8 +4,8 @@ using Serilog.Events;
 namespace Recyclarr.Server.Hosting;
 
 /// <summary>
-/// Process-level options read from the command line and host configuration before settings.yml
-/// loads. They decide which services and middleware the server registers.
+/// Process-level options read from the command line and host configuration. They decide which
+/// services and middleware the server registers, and whether settings.yml is read at all.
 /// </summary>
 internal sealed record ServerLaunchOptions
 {

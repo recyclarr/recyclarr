@@ -1,15 +1,15 @@
-using Recyclarr.Platform;
+using Microsoft.Extensions.Configuration;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.EnvironmentVariables;
 
-public class EnvironmentVariablesYamlBehavior(IEnvironment environment) : IYamlBehavior
+public class EnvironmentVariablesYamlBehavior(IConfiguration configuration) : IYamlBehavior
 {
     public void Setup(DeserializerBuilder builder)
     {
         builder
-            .WithNodeDeserializer(new EnvironmentVariablesDeserializer(environment))
+            .WithNodeDeserializer(new EnvironmentVariablesDeserializer(configuration))
             .WithTagMapping("!env_var", typeof(EnvironmentVariableTag));
     }
 }

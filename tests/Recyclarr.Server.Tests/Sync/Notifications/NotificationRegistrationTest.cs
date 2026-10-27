@@ -1,7 +1,7 @@
 using Autofac;
+using Microsoft.Extensions.Options;
 using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Tests.Reusable;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Tests.Sync.Notifications;
@@ -19,8 +19,7 @@ internal sealed class NotificationRegistrationTest : ServerIntegrationFixture
     [Test]
     public void Configured_notifications_resolve_the_result_service()
     {
-        var settings = Substitute.For<ISettings<NotificationSettings>>();
-        settings.Value.Returns(
+        var settings = Options.Create(
             new NotificationSettings
             {
                 Apprise = new AppriseNotificationSettings
@@ -32,7 +31,7 @@ internal sealed class NotificationRegistrationTest : ServerIntegrationFixture
         );
         using var scope = Container.BeginLifetimeScope(
             "run",
-            builder => builder.RegisterInstance(settings).As<ISettings<NotificationSettings>>()
+            builder => builder.RegisterInstance(settings).As<IOptions<NotificationSettings>>()
         );
 
         scope.Resolve<INotificationService>().Should().BeOfType<NotificationService>();

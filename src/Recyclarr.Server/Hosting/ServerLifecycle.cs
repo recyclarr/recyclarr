@@ -1,9 +1,12 @@
 using System.ServiceProcess;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.Extensions.Options;
 using Recyclarr.Logging;
+using Recyclarr.Platform;
 using Recyclarr.Server.Api.Auth;
 using Recyclarr.Server.Observability;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Hosting;
 
@@ -15,18 +18,33 @@ internal static class ServerLifecycle
         /// Starts the server, reports readiness, and waits for it to stop. Returns the process exit
         /// code: 1 when startup fails or a background service faulted, otherwise 0.
         /// </summary>
-        public async Task<int> RunServerAsync(ServerLaunchOptions launch)
+        public async Task<int> RunServerAsync()
         {
-            if (!await TryStartAsync(app, launch.IsDocumentGeneration))
+            if (!await app.StartServerAsync())
             {
                 return 1;
             }
 
-            AnnounceReady(app, launch.IsDocumentGeneration);
-
             var failed = await WaitForStopAsync(app);
             await app.StopAsync();
             return failed ? 1 : 0;
+        }
+
+        /// <summary>
+        /// Starts the server and reports readiness. Returns false when startup fails; the cause is
+        /// already logged. In-process test hosts start through this too, so they report startup
+        /// failures the same way.
+        /// </summary>
+        public async Task<bool> StartServerAsync()
+        {
+            var launch = app.Services.GetRequiredService<ServerLaunchOptions>();
+            if (!await TryStartAsync(app, launch.IsDocumentGeneration))
+            {
+                return false;
+            }
+
+            AnnounceReady(app, launch.IsDocumentGeneration);
+            return true;
         }
     }
 
@@ -39,6 +57,10 @@ internal static class ServerLifecycle
                 // First, so nothing touches directories another running server owns.
                 app.Services.GetRequiredService<DataDirectoryLock>().Acquire();
 
+                // Throws with every settings problem; the host would also, but its message wraps
+                // them.
+                _ = app.Services.GetRequiredService<IOptions<RecyclarrSettings>>().Value;
+
                 // Fail closed: without a key the server would serve its API to anyone (ADR-027).
                 app.Services.GetRequiredService<ServerApiKey>();
                 app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureValidPorts();
@@ -47,15 +69,41 @@ internal static class ServerLifecycle
             await app.StartAsync();
             return true;
         }
-        catch (Exception e)
-            when ((e as FatalException ?? e.FindInnerException<FatalException>()) is { } fatal)
+        catch (Exception e) when (StartupFailures(e) is { Count: > 0 } failures)
         {
             // The cause is already logged; startup fails without a READY line so a parent CLI sees
             // the child exit instead of a server that cannot sync (ADR-019).
-            app.Services.GetRequiredService<ILogger>()
-                .Fatal("Server startup failed: {Message}", fatal.Message);
+            var log = app.Services.GetRequiredService<ILogger>();
+            foreach (var failure in failures)
+            {
+                log.Fatal("Server startup failed: {Message}", failure);
+            }
+
             return false;
         }
+    }
+
+    private static IReadOnlyList<string> StartupFailures(Exception e)
+    {
+        if (
+            (
+                e as OptionsValidationException
+                ?? e.FindInnerException<OptionsValidationException>()
+            ) is
+            { } settings
+        )
+        {
+            return [.. settings.Failures];
+        }
+
+        if ((e as EnvironmentException ?? e.FindInnerException<EnvironmentException>()) is { } env)
+        {
+            return [env.Message];
+        }
+
+        return (e as FatalException ?? e.FindInnerException<FatalException>()) is { } fatal
+            ? [fatal.Message]
+            : [];
     }
 
     // Uses bound addresses, not configured ones: the ephemeral launcher requests port 0, so only

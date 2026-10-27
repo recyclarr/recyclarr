@@ -1,4 +1,4 @@
-using Recyclarr.Platform;
+using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Templates;
@@ -16,13 +16,14 @@ namespace Recyclarr.Cli.Logging;
 /// failure before setup is still visible. Setup then either sends everything at the selected level
 /// to the console (log mode) or discards it, because IAnsiConsole carries user output.
 /// </remarks>
-internal class ReloadableLogger(IEnvironment env, LoggingLevelSwitch levelSwitch) : ILogger
+internal class ReloadableLogger(IConfiguration configuration, LoggingLevelSwitch levelSwitch)
+    : ILogger
 {
     private const string Template =
         "[{@t:yyyy-MM-dd HH:mm:ss} {@l:u3}] {@m}{#if @x is not null}: {Inspect(@x).Message}{#end}\n";
 
     private volatile ILogger _inner = CreateConsoleLogger(
-        env,
+        configuration,
         new LoggingLevelSwitch(LogEventLevel.Error)
     );
 
@@ -35,7 +36,7 @@ internal class ReloadableLogger(IEnvironment env, LoggingLevelSwitch levelSwitch
 
     public void UseConsole()
     {
-        _inner = CreateConsoleLogger(env, levelSwitch);
+        _inner = CreateConsoleLogger(configuration, levelSwitch);
     }
 
     public void Silence()
@@ -43,9 +44,12 @@ internal class ReloadableLogger(IEnvironment env, LoggingLevelSwitch levelSwitch
         _inner = Logger.None;
     }
 
-    private static Logger CreateConsoleLogger(IEnvironment env, LoggingLevelSwitch levelSwitch)
+    private static Logger CreateConsoleLogger(
+        IConfiguration configuration,
+        LoggingLevelSwitch levelSwitch
+    )
     {
-        var raw = !string.IsNullOrEmpty(env.GetEnvironmentVariable("NO_COLOR"));
+        var raw = !string.IsNullOrEmpty(configuration["NO_COLOR"]);
         var template = new ExpressionTemplate(Template, theme: raw ? null : TemplateTheme.Code);
 
         return new LoggerConfiguration()
