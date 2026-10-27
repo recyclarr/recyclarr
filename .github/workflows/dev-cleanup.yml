@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Dev Package Cleanup
+
+# Each push moves a branch's dev tags, leaving the previous image and chart untagged. Untagged
+# versions are deleted 30 days after their build, so digest pins keep working for a while.
+# Tags of deleted branches are not cleaned up; delete them by hand if they pile up.
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  prune:
+    name: Prune Untagged Dev Versions
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete Old Untagged Versions
+        uses: dataaxiom/ghcr-cleanup-action@d52806a0dc70b430571a37da1fde39733ffd640f # v1.2.2
+        with:
+          packages: recyclarr-dev,charts-dev/recyclarr
+          delete-untagged: true
+          older-than: 30 days
