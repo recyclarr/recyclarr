@@ -6,7 +6,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />

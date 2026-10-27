@@ -1,5 +1,5 @@
+using Microsoft.Extensions.Options;
 using Recyclarr.Server.Hosting;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Observability;
@@ -10,7 +10,7 @@ namespace Recyclarr.Server.Observability;
 /// image sets, wins over <c>server.management.port</c>.
 /// </summary>
 internal sealed class ManagementPort(
-    ISettings<ServerSettings> settings,
+    IOptions<ServerSettings> settings,
     IConfiguration configuration,
     ServerMode mode
 )

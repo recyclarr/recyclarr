@@ -1,12 +1,12 @@
+using Microsoft.Extensions.Options;
 using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Sync.Notifications.Apprise;
 
 internal sealed class AppriseNotificationApiService(
     IAppriseApi api,
-    ISettings<NotificationSettings> settings
+    IOptions<NotificationSettings> settings
 ) : IAppriseNotificationApiService
 {
     public async Task Notify(Func<AppriseNotification, AppriseNotification> notificationBuilder)

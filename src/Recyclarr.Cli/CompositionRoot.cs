@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extras.Ordering;
+using Microsoft.Extensions.Configuration;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
@@ -29,6 +30,14 @@ internal static class CompositionRoot
         // configuration directory lookup, never Recyclarr.Core.
         builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
+        builder
+            .Register(_ =>
+                new ConfigurationBuilder()
+                    .AddEnvironment(EnvironmentConfiguration.FromProcess())
+                    .Build()
+            )
+            .As<IConfiguration>()
+            .SingleInstance();
 
         CliRegistrations(builder);
         RegisterServiceProcessors(builder);

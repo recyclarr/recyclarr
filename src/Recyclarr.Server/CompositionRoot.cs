@@ -23,7 +23,6 @@ using Recyclarr.Server.Sync.Notifications.Apprise;
 using Recyclarr.Server.Sync.Progress;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.Sync.Schedule;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Refit;
@@ -64,8 +63,6 @@ internal static class CompositionRoot
         builder.RegisterModule<PipelineAutofacModule>();
         builder.RegisterModule<ResourceProviderAutofacModule>();
 
-        builder.RegisterType<FileSystem>().As<IFileSystem>();
-
         builder.RegisterType<DataDirectoryLock>().SingleInstance();
         builder.RegisterType<ServerApiKey>().SingleInstance();
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
@@ -93,7 +90,7 @@ internal static class CompositionRoot
         builder
             .Register(c =>
                 SyncSchedule.Create(
-                    c.Resolve<ISettings<ServerSettings>>().Value.Schedule,
+                    c.Resolve<IOptions<ServerSettings>>().Value.Schedule,
                     c.Resolve<ServerMode>(),
                     c.Resolve<TimeProvider>()
                 )
@@ -105,7 +102,7 @@ internal static class CompositionRoot
         builder
             .Register<INotificationService>(c =>
             {
-                var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
+                var settings = c.Resolve<IOptions<NotificationSettings>>().Value;
                 return settings.Apprise is not null
                     ? c.Resolve<NotificationService>()
                     : new NoopNotificationService();
@@ -130,7 +127,7 @@ internal static class CompositionRoot
             .Register(c =>
             {
                 var factory = c.Resolve<IHttpClientFactory>();
-                var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
+                var settings = c.Resolve<IOptions<NotificationSettings>>().Value;
                 var apprise =
                     settings.Apprise
                     ?? throw new InvalidOperationException(
@@ -143,7 +140,7 @@ internal static class CompositionRoot
             .As<IAppriseApi>();
         builder.Register(c =>
         {
-            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
+            var settings = c.Resolve<IOptions<NotificationSettings>>().Value;
             return VerbosityOptions.From(settings.Verbosity);
         });
     }

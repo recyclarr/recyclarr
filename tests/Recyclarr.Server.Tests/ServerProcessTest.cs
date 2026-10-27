@@ -20,6 +20,7 @@ internal sealed class ServerProcessTest
     private string? _apiKey = "test-server-api-key-0123456789abcdef";
     private string _apiUrl = "http://127.0.0.1:0";
     private string? _dataDirectory;
+    private string? _retiredAppData;
     private int _managementPort;
     private bool _managementPortFromEnvironment = true;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
@@ -306,6 +307,36 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("management port");
     }
 
+    [Test]
+    public async Task Invalid_settings_stop_startup_and_explain_why_on_stderr()
+    {
+        ConfigDirectory.File("settings.yml").AppendAllText("\nserver:\n  prot: 9000\n");
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("unknown setting 'server.prot'");
+    }
+
+    [Test]
+    public async Task Retired_app_data_variable_stops_startup_and_explains_why_on_stderr()
+    {
+        _retiredAppData = _root.SubDirectory("old").FullName;
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("RECYCLARR_APP_DATA is no longer supported");
+    }
+
     [TestCase(0)]
     [TestCase(70000)]
     public async Task An_out_of_range_management_port_stops_startup(int port)
@@ -399,6 +430,7 @@ internal sealed class ServerProcessTest
                 ["RECYCLARR_CONFIG_DIR"] = ConfigDirectory.FullName,
                 ["RECYCLARR_API_KEY"] = _apiKey,
                 ["RECYCLARR_DATA_DIR"] = _dataDirectory,
+                ["RECYCLARR_APP_DATA"] = _retiredAppData,
             },
         };
 

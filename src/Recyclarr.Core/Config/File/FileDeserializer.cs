@@ -26,18 +26,17 @@ public class FileDeserializer(IFileSystem fs, IAppPaths paths) : INodeDeserializ
         }
 
         var scalar = reader.Consume<Scalar>();
-        var resolvedPath = ResolveFilePath(scalar.Value);
-        value = fs.File.ReadAllText(resolvedPath).Trim();
+        value = Read(fs, paths.ConfigDirectory, scalar.Value);
         return true;
     }
 
-    private string ResolveFilePath(string path)
+    /// <summary>
+    /// The trimmed contents of a <c>!file</c> tag's file; relative paths resolve against the
+    /// configuration directory.
+    /// </summary>
+    public static string Read(IFileSystem fs, IDirectoryInfo configDirectory, string path)
     {
-        if (fs.Path.IsPathRooted(path))
-        {
-            return path;
-        }
-
-        return paths.ConfigDirectory.File(path).FullName;
+        var resolved = fs.Path.IsPathRooted(path) ? path : configDirectory.File(path).FullName;
+        return fs.File.ReadAllText(resolved).Trim();
     }
 }

@@ -47,12 +47,13 @@ internal static class ServerTelemetry
 
     extension(IServiceCollection services)
     {
-        public void AddServerTelemetry(IConfiguration configuration)
+        public void AddServerTelemetry(IConfiguration configuration, ManagementPort management)
         {
             var otlp = ExportsOtlp(configuration);
+            var prometheus = management.Number is not null && management.ServesMetrics;
 
             // Tracing is always on so log lines carry trace and span ids; configuration only adds
-            // exporters.
+            // exporters. With Prometheus off and no OTLP, the meter provider listens to no meters.
             var telemetry = services
                 .AddOpenTelemetry()
                 .ConfigureResource(r =>
@@ -61,20 +62,8 @@ internal static class ServerTelemetry
                 .WithTracing(tracing =>
                     tracing.AddSource("Microsoft.AspNetCore", "System.Net.Http", SourceName)
                 )
-                .WithMetrics();
-
-            // server.management.metrics lives in settings.yml, which loads through the container
-            // and is not available while services are registered. This callback runs while the
-            // meter provider is built, so it can read settings. With Prometheus off and no OTLP,
-            // the provider listens to no meters at all. Only builder calls that avoid
-            // ConfigureServices work here (e.g. AddPrometheusExporter without options).
-            // REC-196 (settings.yml as an IConfiguration provider) makes settings available at
-            // registration time and removes the need for this deferral.
-            services.ConfigureOpenTelemetryMeterProvider(
-                (sp, metrics) =>
+                .WithMetrics(metrics =>
                 {
-                    var management = sp.GetRequiredService<ManagementPort>();
-                    var prometheus = management.Number is not null && management.ServesMetrics;
                     if (!otlp && !prometheus)
                     {
                         return;
@@ -91,8 +80,7 @@ internal static class ServerTelemetry
                     {
                         metrics.AddPrometheusExporter();
                     }
-                }
-            );
+                });
 
             if (otlp)
             {

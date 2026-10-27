@@ -5,10 +5,10 @@
 ## Context
 
 The CLI is an HTTP client of the server, yet it still needs a few process-level pieces that Core
-had: the environment abstraction, the configuration directory lookup, and exit codes. Both
-executables read the same configuration directory and server API key on one machine, so they must
-resolve them with the same rules. A general "shared" project tends to collect unrelated code and
-pass its dependencies to the CLI.
+had: environment access, the configuration directory lookup, and exit codes. Both executables read
+the same configuration directory and server API key on one machine, so they must resolve them with
+the same rules. A general "shared" project tends to collect unrelated code and pass its dependencies
+to the CLI.
 
 ## Decision
 
@@ -24,11 +24,13 @@ The CLI's and the client's build-only references to `Recyclarr.Server`
 (`ReferenceOutputAssembly="false"`) order the build and place the server binary beside the CLI
 (ADR-010); they link nothing.
 
-`Recyclarr.Platform` holds only code that describes the process or its environment: the environment
-abstraction (`IEnvironment`), the configuration directory lookup (`ConfigDirectoryLocator`), the
-server API key lookup (`ServerApiKeyLocator`, ADR-027), exit codes (`ExitStatus`), and its Autofac
-module. Anything else stays out. Log templates are not platform code: the CLI owns its own, and the
-server's live in Core (`LogSetup`). The server's data layout (`AppPaths`) stays in Core.
+`Recyclarr.Platform` holds only code that describes the process or its environment: environment
+variables as configuration (`EnvironmentConfiguration`; code reads them only through
+`IConfiguration`), the OS special folders (`ISpecialFolders`), the configuration directory lookup
+(`ConfigDirectoryLocator`), the server API key lookup (`ServerApiKeyLocator`, ADR-027), exit codes
+(`ExitStatus`), and its Autofac module. Anything else stays out. Log templates are not platform
+code: the CLI owns its own, and the server's live in Core (`LogSetup`). The server's data layout
+(`AppPaths`) stays in Core.
 
 ## Rejected Options
 
@@ -45,3 +47,5 @@ server's live in Core (`LogSetup`). The server's data layout (`AppPaths`) stays 
 
 - 2026-09-27: The CLI depends only on the client and `Recyclarr.Platform`.
 - 2026-10-24: `Recyclarr.Platform` also resolves the server API key.
+- 2026-10-26: Environment variables are read through `IConfiguration`; `IEnvironment` is replaced by
+  `EnvironmentConfiguration` and `ISpecialFolders`.

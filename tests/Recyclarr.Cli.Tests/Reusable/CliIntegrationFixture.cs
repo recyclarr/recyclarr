@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 using Autofac;
-using Recyclarr.Platform;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
@@ -15,7 +15,7 @@ internal abstract class CliIntegrationFixture : IDisposable
     protected MockFileSystem Fs { get; } =
         new(new MockFileSystemOptions { CreateDefaultTempDir = false });
 
-    protected IEnvironment Env { get; } = Substitute.For<IEnvironment>();
+    protected TestEnvironment Env { get; } = new();
 
     protected CliIntegrationFixture()
     {
@@ -25,7 +25,7 @@ internal abstract class CliIntegrationFixture : IDisposable
             var builder = new ContainerBuilder();
             CompositionRoot.Setup(builder);
             builder.RegisterInstance(Fs).As<IFileSystem>();
-            builder.RegisterInstance(Env);
+            builder.RegisterInstance(Env.Configuration);
             RegisterStubsAndMocks(builder);
             return builder.Build();
         });

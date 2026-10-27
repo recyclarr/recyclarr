@@ -1,32 +1,26 @@
+using Microsoft.Extensions.Options;
 using Recyclarr.Repo;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Core.Tests.VersionControl;
 
 internal sealed class GitPathTest
 {
-    [Test, AutoMockData]
-    public void Default_path_used_when_setting_is_null(
-        [Frozen] ISettings<RecyclarrSettings> settings,
-        GitPath sut
-    )
+    [Test]
+    public void Default_path_used_when_setting_is_null()
     {
-        settings.Value.Returns(new RecyclarrSettings { GitPath = null });
+        var sut = new GitPath(Options.Create(new RecyclarrSettings { GitPath = null }));
 
         var result = sut.Path;
 
         result.Should().Be(GitPath.Default);
     }
 
-    [Test, AutoMockData]
-    public void User_specified_path_used_instead_of_default(
-        [Frozen] ISettings<RecyclarrSettings> settings,
-        GitPath sut
-    )
+    [Test]
+    public void User_specified_path_used_instead_of_default()
     {
         var expectedPath = "/usr/local/bin/git";
-        settings.Value.Returns(new RecyclarrSettings { GitPath = expectedPath });
+        var sut = new GitPath(Options.Create(new RecyclarrSettings { GitPath = expectedPath }));
 
         var result = sut.Path;
 

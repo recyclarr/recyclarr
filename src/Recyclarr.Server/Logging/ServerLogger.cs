@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Options;
 using Recyclarr.Logging;
 using Recyclarr.Platform;
 using Recyclarr.Server.Hosting;
 using Recyclarr.Server.Observability;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Serilog.Core;
 using Serilog.Events;
@@ -17,17 +17,18 @@ namespace Recyclarr.Server.Logging;
 /// to stderr; afterwards it uses the console format and log files from <c>server.logging</c>.
 /// </summary>
 /// <remarks>
-/// Two stages break a dependency cycle: loading settings.yml logs through this logger, so the
-/// final configuration cannot exist until settings have loaded. For the same reason the settings
-/// are resolved lazily; resolving them while this logger is constructed recurses without end. This
-/// is an instance in DI rather than Serilog's static bootstrap logger because tests start many
-/// hosts in one process.
+/// The first stage reports failures that happen before settings are known to be valid (invalid
+/// settings, a bad management port) on stderr, where a launching CLI or service manager sees them.
+/// <see cref="Reload"/> runs once startup validation has passed. The app paths are resolved only
+/// then: locating them can fail (a retired environment variable), and this logger is built with
+/// the host, before the startup failure path can report that. This is an instance in DI rather
+/// than Serilog's static bootstrap logger because tests start many hosts in one process.
 /// </remarks>
 internal sealed class ServerLogger(
-    IAppPaths paths,
+    Lazy<IAppPaths> paths,
     LoggingLevelSwitch levelSwitch,
     ServerMode mode,
-    Lazy<ISettings<ServerSettings>> settings,
+    IOptions<ServerSettings> settings,
     IConfiguration configuration
 ) : ILogger, IDisposable
 {
@@ -42,7 +43,7 @@ internal sealed class ServerLogger(
 
     public void Reload()
     {
-        var logging = settings.Value.Value.Logging;
+        var logging = settings.Value.Logging;
         var config = LogSetup.BaseConfiguration();
 
         if (logging.Files)
@@ -103,8 +104,9 @@ internal sealed class ServerLogger(
     private void AddLogFiles(LoggerConfiguration config)
     {
         var prefix = $"recyclarr-server_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
-        var debugLogFile = paths.ServerLogDirectory.File($"{prefix}.debug.log");
-        var verboseLogFile = paths.ServerLogDirectory.File($"{prefix}.verbose.log");
+        var logDirectory = paths.Value.ServerLogDirectory;
+        var debugLogFile = logDirectory.File($"{prefix}.debug.log");
+        var verboseLogFile = logDirectory.File($"{prefix}.verbose.log");
         ActiveLogFiles = [debugLogFile, verboseLogFile];
         var template = new ExpressionTemplate(LogSetup.FileTemplate);
 
@@ -116,6 +118,14 @@ internal sealed class ServerLogger(
                 c.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
                     .WriteTo.File(template, verboseLogFile.FullName)
             );
+    }
+
+    /// <summary>
+    /// A logger like this one's first stage, for failures that happen before any host exists.
+    /// </summary>
+    public static Logger CreateErrorsToStderr()
+    {
+        return ErrorsToStderr(LogSetup.BaseConfiguration()).CreateLogger();
     }
 
     private static LoggerConfiguration ErrorsToStderr(LoggerConfiguration config)

@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Recyclarr.Platform;
 using Recyclarr.Server.Hosting;
 using Recyclarr.Server.Logging;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Serilog.Core;
 using Serilog.Events;
@@ -124,14 +124,13 @@ internal sealed class ServerLoggerTest
         ServerLoggingSettings? logging = null
     )
     {
-        var settings = Substitute.For<ISettings<ServerSettings>>();
-        settings.Value.Returns(new ServerSettings { Logging = logging ?? new() });
+        var settings = Options.Create(new ServerSettings { Logging = logging ?? new() });
 
         using var serverLogger = new ServerLogger(
-            paths,
+            new Lazy<IAppPaths>(paths),
             new LoggingLevelSwitch(LogEventLevel.Fatal),
             mode,
-            new Lazy<ISettings<ServerSettings>>(settings),
+            settings,
             new ConfigurationBuilder().Build()
         );
 

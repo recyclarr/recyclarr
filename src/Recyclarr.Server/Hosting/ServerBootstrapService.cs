@@ -4,6 +4,7 @@ using Recyclarr.Server.Logging;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
+using Recyclarr.Settings.Configuration;
 
 namespace Recyclarr.Server.Hosting;
 
@@ -21,12 +22,24 @@ internal sealed class ServerBootstrapService(
     ServerLogger logger,
     IDbContextFactory<ServerDbContext> serverDb,
     IDbContextFactory<TickerQueueDbContext> tickerQueueDb,
-    ISyncJobStore jobs
+    ISyncJobStore jobs,
+    SettingsBindResult settings,
+    ILogger log
 ) : IHostedLifecycleService
 {
     public async Task StartingAsync(CancellationToken ct)
     {
         logger.Reload();
+
+        // Logged once the configured outputs exist; settings errors stopped startup earlier.
+        foreach (
+            var warning in settings.Diagnostics.Where(d =>
+                d.Severity == SettingsDiagnosticSeverity.Warning
+            )
+        )
+        {
+            log.Warning("[DEPRECATED] {Message}", warning.Describe());
+        }
 
         if (logger.ActiveLogFiles.Count > 0)
         {

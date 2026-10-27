@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Http;
-using Recyclarr.Settings;
+using Microsoft.Extensions.Options;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.OutboundHttp;
@@ -31,7 +31,7 @@ internal static class OutboundHttpClientRegistration
                 .AddHttpMessageHandler<HttpLoggingHandler>()
                 .ConfigurePrimaryHttpMessageHandler(sp =>
                 {
-                    var settings = sp.GetRequiredService<ISettings<RecyclarrSettings>>();
+                    var settings = sp.GetRequiredService<IOptions<RecyclarrSettings>>();
                     var handler = new HttpClientHandler();
 
                     if (!settings.Value.EnableSslCertificateValidation)

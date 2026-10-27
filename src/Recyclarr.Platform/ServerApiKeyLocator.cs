@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 
 namespace Recyclarr.Platform;
 
@@ -13,7 +14,7 @@ namespace Recyclarr.Platform;
 /// call. Throws <see cref="EnvironmentException"/> when both variables are set or the file cannot
 /// be read. Key strength is the server's rule, not this type's.
 /// </remarks>
-public class ServerApiKeyLocator(IEnvironment env, IFileSystem fs)
+public class ServerApiKeyLocator(IConfiguration configuration, IFileSystem fs)
 {
     public const string Variable = "RECYCLARR_API_KEY";
     public const string FileVariable = "RECYCLARR_API_KEY_FILE";
@@ -38,7 +39,7 @@ public class ServerApiKeyLocator(IEnvironment env, IFileSystem fs)
 
     private string? NonEmpty(string variable)
     {
-        var value = env.GetEnvironmentVariable(variable);
+        var value = configuration[variable];
         return string.IsNullOrEmpty(value) ? null : value;
     }
 

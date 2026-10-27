@@ -188,7 +188,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         public CliContainer(Func<HttpClient> createClient)
         {
             _createClient = createClient;
-            Env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(ConfigDirectory.FullName);
+            Env.Set("RECYCLARR_CONFIG_DIR", ConfigDirectory.FullName);
 
             // A configured server address selects the centralized mode, so commands connect to
             // the in-process server instead of launching an ephemeral one.
@@ -227,7 +227,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
 
         public void SetEnvironmentVariable(string name, string value)
         {
-            Env.GetEnvironmentVariable(name).Returns(value);
+            Env.Set(name, value);
         }
 
         public new T Resolve<T>()

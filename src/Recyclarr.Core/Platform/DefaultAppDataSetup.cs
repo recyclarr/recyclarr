@@ -1,9 +1,10 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 
 namespace Recyclarr.Platform;
 
 internal class DefaultAppDataSetup(
-    IEnvironment env,
+    IConfiguration configuration,
     IFileSystem fs,
     ConfigDirectoryLocator configLocator
 )
@@ -30,7 +31,7 @@ internal class DefaultAppDataSetup(
         IDirectoryInfo fallback
     )
     {
-        var path = env.GetEnvironmentVariable(variable);
+        var path = configuration[variable];
         if (string.IsNullOrEmpty(path))
         {
             return fallback;

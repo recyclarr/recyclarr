@@ -13,7 +13,8 @@ internal static class ServerLoggingRegistration
     {
         /// <summary>
         /// Routes all events to <see cref="ServerLogger"/>, which owns sinks and enrichment and is
-        /// reconfigured once settings.yml has loaded. Only framework filtering happens here.
+        /// reconfigured once startup has validated the settings. Only framework filtering happens
+        /// here.
         /// </summary>
         public void AddServerLogging()
         {

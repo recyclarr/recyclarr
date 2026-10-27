@@ -1,9 +1,11 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Recyclarr.Common;
 
 /// Value type representing a data size, parsed from human-readable strings like "100MB", "1GB".
+[TypeConverter(typeof(DataSizeTypeConverter))]
 public readonly partial record struct DataSize
 {
     public long Bytes { get; }

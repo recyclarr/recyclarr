@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Recyclarr.Platform;
 using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
@@ -20,7 +21,7 @@ namespace Recyclarr.Cli.Settings;
 internal sealed class CliSettingsLoader(
     ConfigDirectoryLocator configLocator,
     ServerApiKeyLocator apiKeyLocator,
-    IEnvironment env
+    IConfiguration configuration
 )
 {
     public const string FileName = "cli.yml";
@@ -30,7 +31,7 @@ internal sealed class CliSettingsLoader(
     {
         var settings = LoadFile();
 
-        var envUrl = env.GetEnvironmentVariable(ServerUrlVariable);
+        var envUrl = configuration[ServerUrlVariable];
         if (!string.IsNullOrEmpty(envUrl))
         {
             settings = settings with { ServerBaseUrl = ParseBaseUrl(envUrl, ServerUrlVariable) };

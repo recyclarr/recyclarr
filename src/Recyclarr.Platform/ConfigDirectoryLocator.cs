@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 
 namespace Recyclarr.Platform;
 
@@ -12,7 +13,11 @@ namespace Recyclarr.Platform;
 /// write to it create it themselves. Throws <see cref="EnvironmentException"/> when the retired
 /// <c>RECYCLARR_APP_DATA</c> variable is set or no platform default exists.
 /// </remarks>
-public class ConfigDirectoryLocator(IEnvironment env, IFileSystem fs)
+public class ConfigDirectoryLocator(
+    IConfiguration configuration,
+    ISpecialFolders folders,
+    IFileSystem fs
+)
 {
     public const string DefaultDirectoryName = "recyclarr";
 
@@ -20,15 +25,14 @@ public class ConfigDirectoryLocator(IEnvironment env, IFileSystem fs)
     {
         RejectRetiredEnvironmentVariable();
 
-        var configDir =
-            env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR") ?? GetPlatformDefaultDirectory();
+        var configDir = configuration["RECYCLARR_CONFIG_DIR"] ?? GetPlatformDefaultDirectory();
 
         return fs.DirectoryInfo.New(configDir);
     }
 
     private void RejectRetiredEnvironmentVariable()
     {
-        var deprecatedVar = env.GetEnvironmentVariable("RECYCLARR_APP_DATA");
+        var deprecatedVar = configuration["RECYCLARR_APP_DATA"];
         if (string.IsNullOrEmpty(deprecatedVar))
         {
             return;
@@ -47,7 +51,7 @@ public class ConfigDirectoryLocator(IEnvironment env, IFileSystem fs)
 
     private string GetPlatformDefaultDirectory()
     {
-        var appData = env.GetFolderPath(
+        var appData = folders.GetFolderPath(
             Environment.SpecialFolder.ApplicationData,
             Environment.SpecialFolderOption.Create
         );

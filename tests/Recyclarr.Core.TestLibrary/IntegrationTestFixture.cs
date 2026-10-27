@@ -1,10 +1,15 @@
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Autofac.Features.ResolveAnything;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.Settings.Configuration;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.TestLibrary;
 
@@ -16,6 +21,7 @@ public abstract class IntegrationTestFixture : IDisposable
     protected ILifetimeScope Container => _container.Value;
     protected MockFileSystem Fs => _stubs.Fs;
     protected IAppPaths Paths => _stubs.Paths;
+    protected TestEnvironment Env => _stubs.Env;
 
     protected IntegrationTestFixture()
     {
@@ -43,6 +49,14 @@ public abstract class IntegrationTestFixture : IDisposable
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterModule(_stubs);
+        builder.RegisterInstance(_stubs.Env.Configuration);
+
+        // Read when the container is built, so tests write settings.yml before resolving.
+        var settings = new ConfigurationBuilder();
+        var report = settings.AddSettingsYaml(Paths.ConfigDirectory, _stubs.Env.Configuration);
+        var services = new ServiceCollection();
+        services.AddRecyclarrSettings(settings.Build(), report);
+        builder.Populate(services);
 
         // Every scope reads one test-owned guide index; tests register guide files into it.
         builder.RegisterInstance(ResourceScope.For(Guide));

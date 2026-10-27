@@ -1,11 +1,11 @@
 using System.IO.Abstractions;
+using Microsoft.Extensions.Options;
 using Recyclarr.Platform;
-using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Server.Logging;
 
-internal sealed class ServerLogJanitor(IAppPaths paths, ISettings<LogJanitorSettings> settings)
+internal sealed class ServerLogJanitor(IAppPaths paths, IOptions<LogJanitorSettings> settings)
 {
     public void DeleteOldestLogFiles(IReadOnlyCollection<IFileInfo> activeLogFiles)
     {

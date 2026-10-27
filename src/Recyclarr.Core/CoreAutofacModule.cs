@@ -32,8 +32,6 @@ using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
-using Recyclarr.Settings;
-using Recyclarr.Settings.Deprecations;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
 using Recyclarr.TrashGuide;
@@ -60,7 +58,6 @@ public class CoreAutofacModule : Module
         RegisterRepo(builder);
         RegisterServarrApiClients(builder);
         RegisterServarrGateways(builder);
-        RegisterSettings(builder);
         RegisterTrashGuide(builder);
         RegisterYaml(builder);
         RegisterVersionControl(builder);
@@ -161,9 +158,6 @@ public class CoreAutofacModule : Module
             .RegisterType<ConfigDiagnosticCollector>()
             .As<IConfigDiagnosticCollector>()
             .InstancePerLifetimeScope();
-
-        // Settings Deprecations
-        builder.RegisterType<SettingsDeprecations>();
 
         // These validators are required by IncludePostProcessor
         builder.RegisterType<RadarrConfigYamlValidator>().As<IValidator>();
@@ -269,18 +263,6 @@ public class CoreAutofacModule : Module
             .For<RadarrMediaManagementGateway>(ServiceApiTarget.RadarrV3);
     }
 
-    private static void RegisterSettings(ContainerBuilder builder)
-    {
-        builder.RegisterType<SettingsLoader>();
-        builder.RegisterType<SettingsProvider>().SingleInstance();
-
-        builder.RegisterSettings(x => x);
-        builder.RegisterSettings(x => x.LogJanitor);
-        builder.RegisterSettings(x => x.Notifications);
-        builder.RegisterSettings(x => x.ResourceProviders);
-        builder.RegisterSettings(x => x.Server);
-    }
-
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
@@ -290,19 +272,8 @@ public class CoreAutofacModule : Module
     {
         builder
             .RegisterAssemblyTypes(ThisAssembly)
-            .Where(t =>
-                typeof(IYamlBehavior).IsAssignableFrom(t)
-                && !t.IsAbstract
-                && t != typeof(SettingsDeprecatedPropertyBehavior)
-            )
+            .Where(t => typeof(IYamlBehavior).IsAssignableFrom(t) && !t.IsAbstract)
             .As<IYamlBehavior>();
-
-        // Registered both as itself (for SettingsLoader to read deprecations) and as IYamlBehavior
-        builder
-            .RegisterType<SettingsDeprecatedPropertyBehavior>()
-            .AsSelf()
-            .As<IYamlBehavior>()
-            .SingleInstance();
 
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
