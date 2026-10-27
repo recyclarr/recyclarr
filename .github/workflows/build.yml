@@ -24,6 +24,7 @@ on:
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-docker.yml"
       - ".github/workflows/reusable-helm.yml"
+      - ".github/workflows/reusable-helm-publish.yml"
       - ".github/workflows/reusable-precheck.yml"
       - ".github/actions/**"
       - "ci/**"
@@ -207,11 +208,11 @@ jobs:
           path: publish
 
   #############################################
-  # Pushes edge on master and only validates the image elsewhere.
+  # Publishes the branch's dev image; fork pull requests only validate it.
   docker:
-    name: Docker Validation
-    # Edge must not publish before tests and every build pass. Windows and macOS are skipped
-    # outside full builds.
+    name: Docker (dev)
+    # Dev images must not publish before tests and every build pass. Windows and macOS are
+    # skipped outside full builds.
     needs: [test, build-win, build-linux, build-osx, build-musl]
     if: >-
       !cancelled() && github.ref_type != 'tag' && needs.test.result == 'success'
@@ -222,6 +223,8 @@ jobs:
       packages: write
     uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
+    with:
+      target: dev
 
   #############################################
   docker-release:
@@ -235,6 +238,8 @@ jobs:
       packages: write
     uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
+    with:
+      target: release
 
   #############################################
   # Gates the release: a published GitHub release cannot be recovered, so a chart that fails
@@ -246,37 +251,34 @@ jobs:
     uses: $/.github/workflows/reusable-helm.yml
 
   #############################################
+  # Waits for the dev image so the dev chart never points at a missing one.
+  helm-dev:
+    name: Helm Chart (dev)
+    needs: [docker, helm-validation]
+    if: >-
+      !cancelled() && needs.docker.result == 'success'
+      && needs.helm-validation.result == 'success'
+      && (github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      packages: write
+    uses: $/.github/workflows/reusable-helm-publish.yml
+    with:
+      target: dev
+
+  #############################################
   helm-release:
     name: Helm Chart (release)
     # Publish the chart only after the GitHub release exists, like the release images.
     if: github.ref_type == 'tag'
     needs: [release]
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    steps:
-      - name: Download Chart
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: helm-chart
-
-      - name: Setup Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
-        with:
-          version: v4.3.1
-
-      - name: Login to GHCR
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push Chart to GHCR
-        env:
-          CHART_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
-        run: helm push recyclarr-*.tgz "$CHART_REPO"
+    uses: $/.github/workflows/reusable-helm-publish.yml
+    with:
+      target: release
 
   #############################################
   release:
@@ -367,6 +369,7 @@ jobs:
       - docker
       - docker-release
       - helm-validation
+      - helm-dev
       - helm-release
       - release
     runs-on: ubuntu-latest
@@ -374,7 +377,8 @@ jobs:
       - name: Check if all jobs succeeded
         uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
-          # Skipped outside full builds, or outside tag builds for release jobs
+          # Skipped outside full builds, outside tag builds for release jobs, and on tag builds or
+          # fork pull requests for dev jobs
           allowed-skips: >-
-            build-win, build-osx, codesign, docker, docker-release, helm-release, release
+            build-win, build-osx, codesign, docker, docker-release, helm-dev, helm-release, release
           jobs: ${{ toJSON(needs) }}

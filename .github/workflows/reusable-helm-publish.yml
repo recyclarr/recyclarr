@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: ⚙️ Helm Chart Publish
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: >-
+          dev packages the chart as oci://ghcr.io/<owner>/charts-dev/recyclarr:0.0.0-<branch key>,
+          defaulting to the dev image of the same key; release pushes the validated helm-chart
+          artifact to oci://ghcr.io/<owner>/charts
+        type: string
+        required: true
+
+jobs:
+  helm:
+    name: Push Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        if: inputs.target == 'dev'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The release publishes this validated package rather than repackaging the chart.
+      - name: Download Chart
+        if: inputs.target == 'release'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: helm-chart
+
+      - name: Setup Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
+
+      - name: Package Dev Chart
+        if: inputs.target == 'dev'
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/recyclarr-dev
+        run: |
+          KEY=$(ci/branch-key.sh "$BRANCH")
+          yq -i '.image.repository = strenv(IMAGE)' charts/recyclarr/values.yaml
+          helm package charts/recyclarr --version "0.0.0-$KEY" --app-version "$KEY"
+
+      - name: Login to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Chart to GHCR
+        env:
+          CHART_REPO: >-
+            oci://ghcr.io/${{ github.repository_owner }}/${{
+            inputs.target == 'dev' && 'charts-dev' || 'charts' }}
+        run: helm push recyclarr-*.tgz "$CHART_REPO"
