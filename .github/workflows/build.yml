@@ -208,16 +208,11 @@ jobs:
           path: publish
 
   #############################################
-  # Publishes the branch's dev image; fork pull requests only validate it.
+  # Publishes the branch's dev image after tests pass; fork pull requests only validate it.
   docker:
     name: Docker (dev)
-    # Dev images must not publish before tests and every build pass. Windows and macOS are
-    # skipped outside full builds.
-    needs: [test, build-win, build-linux, build-osx, build-musl]
-    if: >-
-      !cancelled() && github.ref_type != 'tag' && needs.test.result == 'success'
-      && needs.build-linux.result == 'success' && needs.build-musl.result == 'success'
-      && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    needs: [pre-check, test, build-linux, build-musl]
+    if: github.ref_type != 'tag'
     permissions:
       contents: read
       packages: write
@@ -225,6 +220,7 @@ jobs:
     secrets: inherit
     with:
       target: dev
+      publish: ${{ needs.pre-check.outputs.publish_dev == 'true' }}
 
   #############################################
   docker-release:
@@ -240,6 +236,7 @@ jobs:
     secrets: inherit
     with:
       target: release
+      publish: true
 
   #############################################
   # Gates the release: a published GitHub release cannot be recovered, so a chart that fails
@@ -254,12 +251,8 @@ jobs:
   # Waits for the dev image so the dev chart never points at a missing one.
   helm-dev:
     name: Helm Chart (dev)
-    needs: [docker, helm-validation]
-    if: >-
-      !cancelled() && needs.docker.result == 'success'
-      && needs.helm-validation.result == 'success'
-      && (github.event_name != 'pull_request'
-      || github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [pre-check, docker, helm-validation]
+    if: needs.pre-check.outputs.publish_dev == 'true'
     permissions:
       contents: read
       packages: write

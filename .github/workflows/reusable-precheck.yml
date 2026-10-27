@@ -12,6 +12,11 @@ on:
         description: >-
           Whether to build every platform and run release-only jobs (master, tags, manual runs)
         value: ${{ jobs.precheck.outputs.full_build }}
+      publish_dev:
+        description: >-
+          Whether to publish the dev image and chart (not a tag; fork pull requests get a
+          read-only token)
+        value: ${{ jobs.precheck.outputs.publish_dev }}
 
 permissions:
   pull-requests: read
@@ -23,6 +28,9 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       full_build: ${{ steps.check.outputs.full_build }}
+      publish_dev: >-
+        ${{ github.ref_type != 'tag' && (github.event_name != 'pull_request'
+        || github.event.pull_request.head.repo.full_name == github.repository) }}
     steps:
       - name: Check if push event has corresponding PR
         id: check

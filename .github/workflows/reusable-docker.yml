@@ -10,12 +10,10 @@ on:
           tags to Docker Hub and GHCR
         type: string
         required: true
-
-env:
-  # Fork pull requests get a read-only token, so they only validate the image.
-  SHOULD_PUBLISH: >-
-    ${{ inputs.target == 'release' || github.event_name != 'pull_request'
-    || github.event.pull_request.head.repo.full_name == github.repository }}
+      publish:
+        description: Push the image; false only builds it
+        type: boolean
+        required: true
 
 jobs:
   docker:
@@ -89,7 +87,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GHCR
-        if: env.SHOULD_PUBLISH == 'true'
+        if: inputs.publish
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
@@ -103,7 +101,7 @@ jobs:
           DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
-          push: ${{ env.SHOULD_PUBLISH == 'true' }}
+          push: ${{ inputs.publish }}
           no-cache: true
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.dev-meta.outputs.tags || steps.release-meta.outputs.tags }}
