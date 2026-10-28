@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Refit;
 
@@ -71,6 +72,38 @@ internal class HttpExceptionStrategyTest
 
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo("HTTP 400");
+    }
+
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "ApiException.Create takes ownership of request and response"
+    )]
+    [Test]
+    public async Task Unreadable_success_response_reports_the_read_failure()
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("""{"authentication":"oidc"}""", Encoding.UTF8),
+        };
+        var exception = await ApiException.Create(
+            "An error occured deserializing the response.",
+            new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/v3/system/status"),
+            HttpMethod.Get,
+            response,
+            new RefitSettings(),
+            new JsonException("The JSON value could not be converted. Path: $.authentication")
+        );
+
+        var sut = new HttpExceptionStrategy();
+        var result = await sut.HandleAsync(exception);
+
+        result
+            .Should()
+            .BeEquivalentTo(
+                "HTTP 200: Could not read the response: "
+                    + "The JSON value could not be converted. Path: $.authentication"
+            );
     }
 
     [Test]

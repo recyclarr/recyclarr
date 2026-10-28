@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Sync: Every Radarr sync failed when Radarr 7 uses OIDC login. Sync also no longer fails when
   Sonarr or Radarr reports a setting value that Recyclarr does not know yet
+- Sync: When Sonarr or Radarr sends a reply Recyclarr cannot read, the error now says what failed
+  instead of showing only `HTTP 200`
 - Sync: On Sonarr v5, the progress table kept showing a spinner for quality sizes after sync
   finished, and failed syncs could be reported as successful in notifications
 

@@ -27,6 +27,12 @@ internal class HttpExceptionStrategy : IExceptionStrategy
         var messages = e.StatusCode switch
         {
             HttpStatusCode.Unauthorized => [$"{statusText}: Unauthorized - check your api_key"],
+            // Refit reports a response it could not deserialize as an ApiException carrying the
+            // success status; the cause is in the inner exception, not the body
+            _ when statusCode is >= 200 and < 300 =>
+            [
+                $"{statusText}: Could not read the response: {e.GetBaseException().Message}",
+            ],
             _ => ParseResponseBody(e.Content, statusText),
         };
 
