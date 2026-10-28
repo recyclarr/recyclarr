@@ -1,0 +1,14 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customDatasources: {
+    // Built-in dotnet-version datasource and mcr.microsoft.com floating tags (e.g. 11.0-alpine)
+    // expose RC builds without a pre-release marker. The release index support-phase is the only
+    // reliable GA signal; "preview" and "go-live" (RC) channels are excluded.
+    "dotnet-ga": {
+      defaultRegistryUrlTemplate: "https://builds.dotnet.microsoft.com/dotnet/release-metadata/releases-index.json",
+      transformTemplates: [
+        '{"releases": [`releases-index`[`support-phase` in ["active", "maintenance", "eol"]].{"version": `channel-version`}], "sourceUrl": "https://github.com/dotnet/sdk"}',
+      ],
+    },
+  },
+}

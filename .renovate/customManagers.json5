@@ -17,8 +17,7 @@
         "<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>",
       ],
       depNameTemplate: "dotnet-sdk",
-      datasourceTemplate: "dotnet-version",
-      extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
+      datasourceTemplate: "custom.dotnet-ga",
     },
     {
       description: "Update dotnet-version input in setup-dotnet action",
@@ -26,8 +25,16 @@
       managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
       matchStrings: ["dotnet-version:\\s*(?<currentValue>\\d+\\.\\d+)\\.x"],
       depNameTemplate: "dotnet-sdk",
-      datasourceTemplate: "dotnet-version",
-      extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
+      datasourceTemplate: "custom.dotnet-ga",
+    },
+    {
+      description: "Update .NET image channel tags in Dockerfile (docker manager is disabled for these)",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)Dockerfile$/"],
+      matchStrings: [
+        "(?<depName>mcr\\.microsoft\\.com/dotnet/[a-z-]+):(?<currentValue>\\d+\\.\\d+)-",
+      ],
+      datasourceTemplate: "custom.dotnet-ga",
     },
     {
       description: "Update the .NET SDK major version in mise configuration",
@@ -35,7 +42,7 @@
       managerFilePatterns: ["/(^|/)mise\\.toml$/"],
       matchStrings: ['dotnet\\s*=\\s*"(?<currentValue>\\d+)"'],
       depNameTemplate: "dotnet-sdk",
-      datasourceTemplate: "dotnet-version",
+      datasourceTemplate: "custom.dotnet-ga",
       extractVersionTemplate: "^(?<version>\\d+)",
     },
   ],

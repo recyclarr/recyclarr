@@ -27,15 +27,6 @@
       ignoreTests: true,
     },
     {
-      description: "Auto-merge .NET Docker images - patch and digest only",
-      matchDatasources: ["docker"],
-      matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/"],
-      automerge: true,
-      automergeType: "pr",
-      matchUpdateTypes: ["patch", "digest"],
-      ignoreTests: false,
-    },
-    {
       description: "Require manual review for release-critical actions",
       matchManagers: ["github-actions"],
       matchPackageNames: [

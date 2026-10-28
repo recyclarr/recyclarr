@@ -9,6 +9,7 @@
     ":ignoreUnstable",
     "helpers:pinGitHubActionDigestsToSemver",
     "recyclarr/recyclarr//.renovate/autoMerge.json5",
+    "recyclarr/recyclarr//.renovate/customDatasources.json5",
     "recyclarr/recyclarr//.renovate/customManagers.json5",
     "recyclarr/recyclarr//.renovate/groups.json5",
     "recyclarr/recyclarr//.renovate/packageRules.json5",

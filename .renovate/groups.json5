@@ -26,8 +26,7 @@
     {
       description: ".NET SDK and runtime major version upgrades (replaces built-in dotnet monorepo preset)",
       groupName: "dotnet monorepo",
-      matchDatasources: ["docker", "dotnet-version"],
-      matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
+      matchDatasources: ["custom.dotnet-ga"],
       matchUpdateTypes: ["major"],
       commitMessagePrefix: "build(deps):",
       minimumGroupSize: 4,

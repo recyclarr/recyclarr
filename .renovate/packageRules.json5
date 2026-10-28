@@ -17,12 +17,10 @@
       minimumReleaseAge: "5 days",
     },
     {
-      // dotnet-version datasource doesn't mark RC/preview releases as unstable,
-      // so ignoreUnstable preset doesn't work. Block pre-releases until GA.
-      description: "Prevent .NET pre-release versions (RC/preview) until GA",
-      matchDatasources: ["docker", "dotnet-version"],
-      matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
-      allowedVersions: "!/-(rc|preview|alpha|beta)/",
+      description: ".NET images are updated through the custom.dotnet-ga datasource instead",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/^mcr\\.microsoft\\.com/dotnet//"],
+      enabled: false,
     },
     {
       description: "Add changelog URLs for GitHub Actions digest updates",
