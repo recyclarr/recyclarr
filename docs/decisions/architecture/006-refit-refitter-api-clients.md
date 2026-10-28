@@ -1,6 +1,6 @@
 # ADR-006: Refit + Refitter for API Client Generation
 
-- **Status:** Accepted
+- **Status:** superseded by [ADR-010](010-hand-written-servarr-api-contracts.md)
 - **Date:** 2026-02-26
 
 ## Context and Problem Statement

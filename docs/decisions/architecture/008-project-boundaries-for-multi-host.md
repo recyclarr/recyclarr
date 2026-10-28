@@ -102,8 +102,10 @@ Phase 3 (CLI becomes HTTP client):
 ```
 
 In Phase 3, Cli drops its Core reference entirely. It becomes a standalone HTTP client, consuming
-the Server's OpenAPI spec through code generation (the same Refit/Refitter pattern already used for
-Sonarr and Radarr APIs). At that point, Core becomes the Server's private dependency.
+the Server's OpenAPI spec through Refit/Refitter code generation. Generation fits there because
+Recyclarr owns both the server and its spec; Sonarr and Radarr use hand-written contracts instead
+([ADR-010](010-hand-written-servarr-api-contracts.md)). At that point, Core becomes the Server's
+private dependency.
 
 ### Consequences
 

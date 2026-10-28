@@ -1,8 +1,8 @@
 # Service Gateway Layer
 
 > For decision rationale, see [ADR-005](../decisions/architecture/005-service-gateway-layer.md)
-> (gateway layer) and [ADR-006](../decisions/architecture/006-refit-refitter-api-clients.md)
-> (Refit/Refitter migration). For the Custom Format passthrough exception, see
+> (gateway layer) and [ADR-010](../decisions/architecture/010-hand-written-servarr-api-contracts.md)
+> (hand-written Refit contracts). For the Custom Format passthrough exception, see
 > [ADR-007](../decisions/architecture/007-custom-format-gateway-passthrough.md).
 
 ## Overview
@@ -75,7 +75,8 @@ variations), the test setup cost of going through the gateway is negligible.
 
 Gateways that perform read-modify-write operations hold the original service DTO in an internal
 dictionary keyed by resource ID. This eliminates the need for `[JsonExtensionData]` on domain types
-while preserving lossless round-trips.
+while preserving lossless round-trips. Service DTOs keep fields they do not model in their own
+extension data, so the stashed DTO carries them back on update.
 
 ```csharp
 internal class SonarrV3QualityDefinitionGateway(IQualityDefinitionApiService api)
@@ -112,8 +113,8 @@ DTOs. See the Custom Format passthrough exception below.
 
 ## DI Resolution
 
-Gateways are keyed by `ServiceApiTarget` (`SonarrV3`, `SonarrV5`, `RadarrV3`), the API generation
-a service instance speaks. A non-keyed registration resolves the port by the detected target:
+Gateways are keyed by `ServiceApiTarget` (`SonarrV3`, `SonarrV5`, `RadarrV3`), the API generation a
+service instance speaks. A non-keyed registration resolves the port by the detected target:
 
 ```csharp
 builder
@@ -125,15 +126,14 @@ builder
 
 The target comes from `DetectedService`, produced by the capability check from the server version
 (see [ADR-009](../decisions/architecture/009-api-version-selection-by-server-major.md)).
-`InstanceSyncProcessor` runs the check, then begins a child scope with
-`BeginDetectedServiceScope` that registers `DetectedService`; planning and pipelines resolve from
-that scope. Resolving a port before detection fails with `DependencyResolutionException` instead of
-defaulting. `ISystemService` is the exception: it performs detection, so it stays keyed by
-`SupportedServices`.
+`InstanceSyncProcessor` runs the check, then begins a child scope with `BeginDetectedServiceScope`
+that registers `DetectedService`; planning and pipelines resolve from that scope. Resolving a port
+before detection fails with `DependencyResolutionException` instead of defaulting. `ISystemService`
+is the exception: it performs detection, so it stays keyed by `SupportedServices`.
 
 Pipelines declare the targets they apply to (`IPipelineMetadata.AppliesTo`). Phases are resolved
-lazily, so a pipeline excluded for a target never resolves ports that target lacks (the quality
-size pipeline has no Sonarr v5 gateway).
+lazily, so a pipeline excluded for a target never resolves ports that target lacks (the quality size
+pipeline has no Sonarr v5 gateway).
 
 Pipeline phases inject the port directly; they have no idea keying is involved.
 
@@ -154,8 +154,7 @@ pipelines depend on (e.g. `NamingFormatLookup`).
 Every pipeline gets one gateway per API target it applies to, regardless of whether the pipeline is
 shared or split. Sonarr has one gateway per API generation (`SonarrV3*`, `SonarrV5*`).
 
-- **Shared pipelines:** All gateways implement the same port. DI resolves the correct one by
-  target.
+- **Shared pipelines:** All gateways implement the same port. DI resolves the correct one by target.
 - **Split pipelines:** Each pipeline has its own port, with one gateway per target of that service
   (e.g. `ISonarrNamingService` implemented by `SonarrV3NamingGateway` and `SonarrV5NamingGateway`).
 - **Target-specific ports:** `IQualityDefinitionService` has no Sonarr v5 gateway; v5 stores sizes
@@ -196,24 +195,24 @@ DTOs should only appear inside gateways.
 
 ## Custom Format Gateways
 
-Custom Format gateways follow the standard DTO/domain split pattern. The generated Refit DTOs serve
-as service types; gateways map to/from the domain `CustomFormatResource`. One-way sync still holds
-(guide is complete source of truth), so no stashed DTOs or hydrated resource pattern is needed.
+Custom Format gateways follow the standard DTO/domain split pattern. The Refit DTOs serve as service
+types; gateways map to/from the domain `CustomFormatResource`. One-way sync still holds (guide is
+complete source of truth), so no stashed DTOs or hydrated resource pattern is needed.
 
 Previously, CF gateways used a passthrough exception (see [ADR-007][adr-007], now deprecated) where
 `CustomFormatResource` served directly as both guide and API type. The Refit migration introduced
-generated DTOs as separate C# types, breaking the identical-schema condition that justified the
+service DTOs as separate C# types, breaking the identical-schema condition that justified the
 exception.
 
 ## HTTP Pipeline
 
-Gateways use Refit-generated interfaces backed by `IHttpClientFactory` named clients. Cross-cutting
-concerns live in `DelegatingHandler` subclasses, configured once per named client.
+Gateways use hand-written Refit interfaces backed by `IHttpClientFactory` named clients.
+Cross-cutting concerns live in `DelegatingHandler` subclasses, configured once per named client.
 
 ### Named clients
 
 | Client      | Handlers             | Primary handler config   |
-|-------------|----------------------|--------------------------|
+| ----------- | -------------------- | ------------------------ |
 | `"servarr"` | `HttpLoggingHandler` | SSL bypass (conditional) |
 | `"apprise"` | `HttpLoggingHandler` | (default)                |
 
@@ -258,11 +257,11 @@ handler pipeline is pooled by `IHttpClientFactory`.
 
 ## Service API Divergence
 
-Comparison of Sonarr and Radarr OpenAPI specs for endpoints Recyclarr consumes. Useful when deciding
-shared vs split pipeline for new features.
+Comparison of Sonarr and Radarr APIs for endpoints Recyclarr consumes. Useful when deciding shared
+vs split pipeline for new features.
 
 | Endpoint            | Divergence           | Notes                                                  |
-|---------------------|----------------------|--------------------------------------------------------|
+| ------------------- | -------------------- | ------------------------------------------------------ |
 | Custom Formats      | Identical            | Truly shareable                                        |
 | Quality Definitions | Identical            | Nested `Quality` model differs but main schema matches |
 | Language            | Identical            |                                                        |
@@ -271,6 +270,7 @@ shared vs split pipeline for new features.
 | Media Management    | Divergent            | Domain-specific fields, different enum values          |
 | Media Naming        | Completely different | Almost no overlap beyond `id`                          |
 
-Both services publish official OpenAPI 3.0 specs (auto-generated via Swashbuckle).
+Both services publish OpenAPI specs in their repositories; use them as a reference when adding
+fields or endpoints.
 
 [adr-007]: ../decisions/architecture/007-custom-format-gateway-passthrough.md
