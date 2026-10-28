@@ -133,7 +133,9 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         var sonarrCfs = await cfApi.CustomformatGet(ct);
         var obfuscatedId = sonarrCfs.First(cf => cf.Name == "Obfuscated").Id!.Value;
         // Fetch full resource by ID (list endpoint returns minimal data insufficient for PUT)
-        var obfuscatedCf = await cfApi.CustomformatGet(obfuscatedId, ct);
+        var obfuscatedCf = await _harness
+            .SonarrApi<ISonarrCustomFormatByIdApi>()
+            .CustomformatGet(obfuscatedId, ct);
         obfuscatedCf.Name = "Obfuscated-RENAMED";
         await cfApi.CustomformatPut(
             obfuscatedId.ToString(CultureInfo.InvariantCulture),
@@ -440,12 +442,12 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         var qualityDefs = await _harness
             .SonarrApi<SonarrApi.IQualityDefinitionApi>()
             .QualitydefinitionGet(ct);
-        var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
+        var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
         hdtv1080P.MinSize.Should().BeApproximately(5, 0.1);
         hdtv1080P.MaxSize.Should().BeApproximately(50, 0.1);
         hdtv1080P.PreferredSize.Should().BeApproximately(30, 0.1);
 
-        var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
+        var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
         bluray1080P.MinSize.Should().BeApproximately(50.4, 0.1);
     }
 
@@ -529,10 +531,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .MediamanagementGet(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be(
-                SonarrApi.ProperDownloadTypes.DoNotUpgrade,
-                "propers_and_repacks should be set to do_not_upgrade"
-            );
+            .Be("doNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
     }
 
     private async Task VerifyRadarrState(CancellationToken ct)
@@ -706,7 +705,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             var sonarrDefs = await _harness
                 .SonarrApi<SonarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
-            var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
+            var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");
             if (sonarrHdtv?.MinSize is >= 4.9 and <= 5.1)
             {
                 break;
