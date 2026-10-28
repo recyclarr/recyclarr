@@ -72,6 +72,7 @@ public class CoreAutofacModule : Module
         builder
             .RegisterTypes(
                 // Order-sensitive! A step may depend on the layout an earlier step produces.
+                typeof(FlattenNestedStateMigrationStep),
                 typeof(DeleteRepoDirMigrationStep),
                 typeof(MoveCacheToStateMigrationStep),
                 typeof(NormalizeStateMappingsPropertyStep)
