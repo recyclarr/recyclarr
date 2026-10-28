@@ -23,10 +23,11 @@ Re-verify against generated code after a Mapperly upgrade.
 
 ## Mapper Conventions
 
-- `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Generated DTOs
-  have many properties we don't map; this silences unmapped-member warnings (RMG012, RMG020).
+- `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Service DTOs
+  have properties we don't map (including extension data); this silences unmapped-member warnings
+  (RMG012, RMG020).
 - Mappers are `internal static partial class`.
-- One mapper class per service API generation (`SonarrV3*`, `SonarrV5*`, `Radarr*`). Generated DTO
+- One mapper class per service API generation (`SonarrV3*`, `SonarrV5*`, `Radarr*`). Service DTO
   types share names but are distinct types; alias namespaces:
   `using SonarrApi = Recyclarr.Api.Sonarr.V3`.
 - Domain-to-DTO writes use an existing-target method

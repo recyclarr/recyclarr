@@ -56,9 +56,9 @@ that action arrives too late.
 ## Project Context
 
 Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
-`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (Refitter-
-generated clients from vendored `openapi.json`; `Generated/` is excluded from source control).
-Solution is SLNX (`Recyclarr.slnx`), not SLN.
+`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (hand-written
+Refit contracts; model only used fields, no enums, every DTO derives from `ExtensibleResource`; see
+ADR-010). Solution is SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
@@ -265,7 +265,6 @@ log.Warning(message);
     - `architecture/`: Technical implementation decisions (ADRs)
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
-
 - `schemas/`: JSON Schemas for `recyclarr.yml` and `settings.yml`
 - `Directory.Packages.props`: NuGet central package management
 
@@ -290,8 +289,8 @@ All under `./scripts`.
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)
 - `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
-- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via `docker
-  compose up -d`
+- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
+  `docker compose up -d`
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 
