@@ -1,3 +1,4 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Servarr.MediaManagement;
 using Riok.Mapperly.Abstractions;
 using RadarrApi = Recyclarr.Api.Radarr;
@@ -13,12 +14,17 @@ internal static partial class RadarrMediaManagementMapper
     )]
     public static partial MediaManagementData ToDomain(RadarrApi.MediaManagementConfigResource dto);
 
-    [MapProperty(
-        nameof(MediaManagementData.PropersAndRepacks),
-        nameof(RadarrApi.MediaManagementConfigResource.DownloadPropersAndRepacks)
-    )]
-    public static partial void UpdateDto(
+    public static void UpdateDto(
         MediaManagementData domain,
-        [MappingTarget] RadarrApi.MediaManagementConfigResource dto
-    );
+        RadarrApi.MediaManagementConfigResource dto
+    )
+    {
+        if (domain.PropersAndRepacks is { } mode)
+        {
+            dto.DownloadPropersAndRepacks = PropersAndRepacksValue.Format(mode);
+        }
+    }
+
+    private static PropersAndRepacksMode? ParsePropers(string? value) =>
+        PropersAndRepacksValue.Parse(value);
 }

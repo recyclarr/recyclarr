@@ -1,62 +1,95 @@
 using Recyclarr.Config.Models;
+using Recyclarr.Core.TestLibrary;
+using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.ServarrApi.MediaManagement;
-using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaManagement;
 
-internal sealed class RadarrMediaManagementGatewayTest
+internal sealed class RadarrMediaManagementGatewayTest : ServarrHttpTestFixture
 {
-    [Test, AutoMockData]
-    public async Task Get_returns_domain_data_with_correct_mapping(
-        [Frozen] RadarrApi.IMediaManagementConfigApi api,
-        RadarrMediaManagementGateway sut
-    )
+    private const string Path = "/api/v3/config/mediamanagement";
+
+    [Test]
+    public async Task Get_maps_propers_mode()
     {
-        var dto = new RadarrApi.MediaManagementConfigResource
-        {
-            Id = 5,
-            DownloadPropersAndRepacks = RadarrApi.ProperDownloadTypes.DoNotUpgrade,
-        };
-        api.MediamanagementGet(Arg.Any<CancellationToken>()).Returns(dto);
+        Respond(
+            HttpMethod.Get,
+            Path,
+            """{ "id": 5, "downloadPropersAndRepacks": "doNotUpgrade" }"""
+        );
+        var sut = ResolveGateway<RadarrMediaManagementGateway>(NewConfig.Radarr());
 
         var result = await sut.GetMediaManagement(CancellationToken.None);
 
-        result.Id.Should().Be(5);
-        result.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotUpgrade);
+        result
+            .Should()
+            .BeEquivalentTo(
+                new MediaManagementData
+                {
+                    Id = 5,
+                    PropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
+                }
+            );
     }
 
-    [Test, AutoMockData]
-    public async Task Update_merges_domain_changes_onto_stashed_dto(
-        [Frozen] RadarrApi.IMediaManagementConfigApi api,
-        RadarrMediaManagementGateway sut
-    )
+    [Test]
+    public async Task Get_reads_unknown_propers_mode_as_unset()
     {
-        var originalDto = new RadarrApi.MediaManagementConfigResource
-        {
-            Id = 1,
-            DownloadPropersAndRepacks = RadarrApi.ProperDownloadTypes.PreferAndUpgrade,
-            RecycleBin = "/recycle",
-        };
-        api.MediamanagementGet(Arg.Any<CancellationToken>()).Returns(originalDto);
+        Respond(HttpMethod.Get, Path, """{ "id": 1, "downloadPropersAndRepacks": "futureMode" }""");
+        var sut = ResolveGateway<RadarrMediaManagementGateway>(NewConfig.Radarr());
 
-        // Fetch to populate stashed state
+        var result = await sut.GetMediaManagement(CancellationToken.None);
+
+        result.PropersAndRepacks.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Update_sends_mode_and_round_trips_unmanaged_fields()
+    {
+        Respond(
+            HttpMethod.Get,
+            Path,
+            """
+            {
+              "id": 1,
+              "downloadPropersAndRepacks": "preferAndUpgrade",
+              "recycleBin": "/recycle",
+              "fileDate": "futureFileDate",
+              "futureSetting": { "enabled": true, "limit": 5 }
+            }
+            """
+        );
+        var sut = ResolveGateway<RadarrMediaManagementGateway>(NewConfig.Radarr());
+
         var fetched = await sut.GetMediaManagement(CancellationToken.None);
+        await sut.UpdateMediaManagement(
+            fetched with
+            {
+                PropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
+            },
+            CancellationToken.None
+        );
 
-        // Update with changed domain data
-        var updated = fetched with
-        {
-            PropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
-        };
-        await sut.UpdateMediaManagement(updated, CancellationToken.None);
-
-        await api.Received()
-            .MediamanagementPut(
-                "1",
-                Arg.Is<RadarrApi.MediaManagementConfigResource>(d =>
-                    d.DownloadPropersAndRepacks == RadarrApi.ProperDownloadTypes.DoNotPrefer
-                    && d.RecycleBin == "/recycle"
-                ),
-                Arg.Any<CancellationToken>()
+        var sent = SentBody(HttpMethod.Put, $"{Path}/1");
+        sent.ToJsonString()
+            .Should()
+            .Be(
+                """{"id":1,"downloadPropersAndRepacks":"doNotPrefer","recycleBin":"/recycle","fileDate":"futureFileDate","futureSetting":{"enabled":true,"limit":5}}"""
             );
+    }
+
+    [Test]
+    public async Task Update_without_mode_keeps_unknown_server_value()
+    {
+        Respond(HttpMethod.Get, Path, """{ "id": 1, "downloadPropersAndRepacks": "futureMode" }""");
+        var sut = ResolveGateway<RadarrMediaManagementGateway>(NewConfig.Radarr());
+
+        var fetched = await sut.GetMediaManagement(CancellationToken.None);
+        await sut.UpdateMediaManagement(fetched, CancellationToken.None);
+
+        SentBody(HttpMethod.Put, $"{Path}/1")["downloadPropersAndRepacks"]!
+            .GetValue<string>()
+            .Should()
+            .Be("futureMode");
     }
 }

@@ -636,16 +636,16 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         var qualityDefs = await _harness
             .RadarrApi<RadarrApi.IQualityDefinitionApi>()
             .QualitydefinitionGet(ct);
-        var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
+        var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
         bluray1080P.MaxSize.Should().BeNull();
         bluray1080P.PreferredSize.Should().BeNull();
 
-        var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
+        var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
         hdtv1080P.MinSize.Should().BeApproximately(0, 0.1);
         hdtv1080P.MaxSize.Should().BeApproximately(100, 0.1);
         hdtv1080P.PreferredSize.Should().BeApproximately(50, 0.1);
 
-        var webdl1080P = qualityDefs.First(q => q.Title == "WEBDL-1080p");
+        var webdl1080P = qualityDefs.First(q => q.Quality?.Name == "WEBDL-1080p");
         webdl1080P.MinSize.Should().BeApproximately(12.5, 0.1);
 
         // Media naming settings
@@ -667,10 +667,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .MediamanagementGet(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be(
-                RadarrApi.ProperDownloadTypes.DoNotPrefer,
-                "propers_and_repacks should be set to do_not_prefer"
-            );
+            .Be("doNotPrefer", "propers_and_repacks should be set to do_not_prefer");
     }
 
     // CF group assigns required (CF1) + selected (CF3) to this profile with no explicit
@@ -723,7 +720,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             var radarrDefs = await _harness
                 .RadarrApi<RadarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
-            var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
+            var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");
             if (radarrHdtv?.MinSize is >= -0.1 and <= 0.1)
             {
                 break;

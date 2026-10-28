@@ -1,16 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-      <RefitterNoLogging>true</RefitterNoLogging>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <Compile Remove="Generated/**" />
-    </ItemGroup>
-
     <ItemGroup>
       <PackageReference Include="Refit.HttpClientFactory" />
-      <PackageReference Include="Refitter.MSBuild" />
     </ItemGroup>
 
 </Project>
