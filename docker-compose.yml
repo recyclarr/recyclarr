@@ -30,8 +30,15 @@ services:
     ports: [7890:7878]
     volumes: [radarr_develop1:/config]
 
+  # Radarr v7 (develop branch) with native OIDC; radarr_develop1 stays on stable
   radarr_develop2:
     <<: *radarr
+    image: lscr.io/linuxserver/radarr:develop
+    environment:
+      TZ: America/Chicago
+      RADARR__AUTH__APIKEY: testkey
+      RADARR__AUTH__METHOD: Oidc
+      RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
     ports: [7891:7878]
     volumes: [radarr_develop2:/config]
 
