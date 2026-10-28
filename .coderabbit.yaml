@@ -6,8 +6,6 @@ reviews:
     ignore_usernames:
       - renovate[bot]
       - recyclarr[bot]
-  path_filters:
-    - "!src/**/openapi.json"
   path_instructions:
     - path: src/**
       instructions: >-
