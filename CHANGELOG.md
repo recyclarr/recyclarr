@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.8.1] - 2026-10-28
+
 ### Fixed
 
 - Sync: Every Radarr sync failed when Radarr 7 uses OIDC login. Sync also no longer fails when
@@ -1443,7 +1445,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.8.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.8.1...HEAD
+[8.8.1]: https://github.com/recyclarr/recyclarr/compare/v8.8.0...v8.8.1
 [8.8.0]: https://github.com/recyclarr/recyclarr/compare/v8.7.3...v8.8.0
 [8.7.3]: https://github.com/recyclarr/recyclarr/compare/v8.7.2...v8.7.3
 [8.7.2]: https://github.com/recyclarr/recyclarr/compare/v8.7.1...v8.7.2
