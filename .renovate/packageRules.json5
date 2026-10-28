@@ -17,9 +17,9 @@
       minimumReleaseAge: "5 days",
     },
     {
-      description: ".NET images are updated through the custom.dotnet-ga datasource instead",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/^mcr\\.microsoft\\.com/dotnet//"],
+      description: "Built-in .NET lookups; the custom.dotnet-ga datasource handles these instead",
+      matchDatasources: ["docker", "dotnet-version"],
+      matchPackageNames: ["/^mcr\\.microsoft\\.com/dotnet//", "dotnet-sdk"],
       enabled: false,
     },
     {
