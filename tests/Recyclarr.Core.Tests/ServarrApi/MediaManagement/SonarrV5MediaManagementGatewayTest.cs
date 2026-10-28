@@ -1,41 +1,45 @@
-using System.Text.Json;
 using Recyclarr.Config.Models;
-using Recyclarr.Json;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.ServarrApi.MediaManagement;
-using SonarrApi = Recyclarr.Api.Sonarr.V5;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaManagement;
 
-internal sealed class SonarrV5MediaManagementGatewayTest
+internal sealed class SonarrV5MediaManagementGatewayTest : ServarrHttpTestFixture
 {
-    [Test, AutoMockData]
-    public async Task Update_changes_owned_field_and_round_trips_the_rest(
-        [Frozen] SonarrApi.IMediaManagementSettingsApi api,
-        SonarrV5MediaManagementGateway sut
-    )
+    private const string Path = "/api/v5/settings/mediamanagement";
+
+    [Test]
+    public async Task Get_reads_unknown_propers_mode_as_unset()
     {
-        const string serverJson = """
+        Respond(HttpMethod.Get, Path, """{ "id": 1, "downloadPropersAndRepacks": "futureMode" }""");
+        var sut = ResolveGateway<SonarrV5MediaManagementGateway>(NewConfig.Sonarr());
+
+        var result = await sut.GetMediaManagement(CancellationToken.None);
+
+        result.PropersAndRepacks.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Update_changes_owned_field_and_round_trips_the_rest()
+    {
+        Respond(
+            HttpMethod.Get,
+            Path,
+            """
             {
               "id": 1,
               "downloadPropersAndRepacks": "preferAndUpgrade",
               "recycleBin": "/recycle",
-              "seasonPackUpgrade": "threshold",
+              "seasonPackUpgrade": "futureUpgradeMode",
               "seasonPackUpgradeThreshold": 75,
-              "skipFreeSpaceCheckWhenGrabbing": true,
-              "userRejectedExtensions": ".exe"
+              "futureSetting": { "enabled": true }
             }
-            """;
-        api.MediamanagementGet(default)
-            .ReturnsForAnyArgs(
-                JsonSerializer.Deserialize<SonarrApi.MediaManagementSettingsResource>(
-                    serverJson,
-                    GlobalJsonSerializerSettings.Services
-                )!
-            );
+            """
+        );
+        var sut = ResolveGateway<SonarrV5MediaManagementGateway>(NewConfig.Sonarr());
 
         var fetched = await sut.GetMediaManagement(CancellationToken.None);
         fetched.PropersAndRepacks.Should().Be(PropersAndRepacksMode.PreferAndUpgrade);
-
         await sut.UpdateMediaManagement(
             fetched with
             {
@@ -44,24 +48,11 @@ internal sealed class SonarrV5MediaManagementGatewayTest
             CancellationToken.None
         );
 
-        var call = api.ReceivedCalls()
-            .Single(c =>
-                c.GetMethodInfo().Name
-                == nameof(SonarrApi.IMediaManagementSettingsApi.MediamanagementPut)
-            );
-        call.GetArguments()[0].Should().Be("1");
-        var sent = JsonSerializer.SerializeToNode(
-            call.GetArguments()[1],
-            GlobalJsonSerializerSettings.Services
-        )!;
-        sent["downloadPropersAndRepacks"]!
-            .GetValue<string>()
+        SentBody(HttpMethod.Put, $"{Path}/1")
+            .ToJsonString()
             .Should()
-            .BeEquivalentTo("doNotPrefer");
-        sent["recycleBin"]!.GetValue<string>().Should().Be("/recycle");
-        sent["seasonPackUpgrade"]!.GetValue<string>().Should().BeEquivalentTo("threshold");
-        sent["seasonPackUpgradeThreshold"]!.GetValue<double>().Should().Be(75);
-        sent["skipFreeSpaceCheckWhenGrabbing"]!.GetValue<bool>().Should().BeTrue();
-        sent["userRejectedExtensions"]!.GetValue<string>().Should().Be(".exe");
+            .Be(
+                """{"id":1,"downloadPropersAndRepacks":"doNotPrefer","recycleBin":"/recycle","seasonPackUpgrade":"futureUpgradeMode","seasonPackUpgradeThreshold":75,"futureSetting":{"enabled":true}}"""
+            );
     }
 }

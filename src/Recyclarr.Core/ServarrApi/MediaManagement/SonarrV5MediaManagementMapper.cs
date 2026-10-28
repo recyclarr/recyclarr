@@ -1,3 +1,4 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Servarr.MediaManagement;
 using Riok.Mapperly.Abstractions;
 using SonarrApi = Recyclarr.Api.Sonarr.V5;
@@ -15,12 +16,17 @@ internal static partial class SonarrV5MediaManagementMapper
         SonarrApi.MediaManagementSettingsResource dto
     );
 
-    [MapProperty(
-        nameof(MediaManagementData.PropersAndRepacks),
-        nameof(SonarrApi.MediaManagementSettingsResource.DownloadPropersAndRepacks)
-    )]
-    public static partial void UpdateDto(
+    public static void UpdateDto(
         MediaManagementData domain,
-        [MappingTarget] SonarrApi.MediaManagementSettingsResource dto
-    );
+        SonarrApi.MediaManagementSettingsResource dto
+    )
+    {
+        if (domain.PropersAndRepacks is { } mode)
+        {
+            dto.DownloadPropersAndRepacks = PropersAndRepacksValue.Format(mode);
+        }
+    }
+
+    private static PropersAndRepacksMode? ParsePropers(string? value) =>
+        PropersAndRepacksValue.Parse(value);
 }

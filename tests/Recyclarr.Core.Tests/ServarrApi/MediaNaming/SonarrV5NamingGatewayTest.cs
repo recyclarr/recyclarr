@@ -1,26 +1,29 @@
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.ServarrApi.MediaNaming;
-using SonarrApi = Recyclarr.Api.Sonarr.V5;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaNaming;
 
-internal sealed class SonarrV5NamingGatewayTest
+internal sealed class SonarrV5NamingGatewayTest : ServarrHttpTestFixture
 {
-    [Test, AutoMockData]
-    public async Task Fetch_maps_and_update_changes_only_owned_fields(
-        [Frozen] SonarrApi.INamingSettingsApi api,
-        SonarrV5NamingGateway sut
-    )
+    private const string Path = "/api/v5/settings/naming";
+
+    [Test]
+    public async Task Fetch_maps_and_update_changes_only_owned_fields()
     {
-        api.NamingGet(default)
-            .ReturnsForAnyArgs(
-                new SonarrApi.NamingSettingsResource
-                {
-                    Id = 4,
-                    RenameEpisodes = false,
-                    SeasonFolderFormat = "Season {season}",
-                    ReplaceIllegalCharacters = true,
-                }
-            );
+        Respond(
+            HttpMethod.Get,
+            Path,
+            """
+            {
+              "id": 4,
+              "renameEpisodes": false,
+              "seasonFolderFormat": "Season {season}",
+              "replaceIllegalCharacters": true,
+              "colonReplacementFormat": "futureFormat"
+            }
+            """
+        );
+        var sut = ResolveGateway<SonarrV5NamingGateway>(NewConfig.Sonarr());
 
         var fetched = await sut.GetNaming(CancellationToken.None);
         fetched.RenameEpisodes.Should().BeFalse();
@@ -35,18 +38,11 @@ internal sealed class SonarrV5NamingGatewayTest
             CancellationToken.None
         );
 
-        var call = api.ReceivedCalls()
-            .Single(c => c.GetMethodInfo().Name == nameof(SonarrApi.INamingSettingsApi.NamingPut));
-        call.GetArguments()[0].Should().Be("4");
-        call.GetArguments()[1]
+        SentBody(HttpMethod.Put, $"{Path}/4")
+            .ToJsonString()
             .Should()
-            .BeEquivalentTo(
-                new
-                {
-                    RenameEpisodes = true,
-                    SeasonFolderFormat = "Season {season:00}",
-                    ReplaceIllegalCharacters = true,
-                }
+            .Be(
+                """{"id":4,"renameEpisodes":true,"seasonFolderFormat":"Season {season:00}","replaceIllegalCharacters":true,"colonReplacementFormat":"futureFormat"}"""
             );
     }
 }
