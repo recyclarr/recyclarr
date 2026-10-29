@@ -303,6 +303,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             new ServiceUnauthenticatedFailure(),
             new ServiceUnauthorizedFailure(),
             new ServiceRateLimitedFailure(),
+            new ServiceRedirectedFailure(),
             new ServiceIncompatibleFailure(),
             new SyncStateUnavailableFailure(),
         ];
@@ -340,6 +341,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
                 InstanceFailureCategory.ServiceUnauthenticated,
                 InstanceFailureCategory.ServiceUnauthorized,
                 InstanceFailureCategory.ServiceRateLimited,
+                InstanceFailureCategory.ServiceRedirected,
                 InstanceFailureCategory.ServiceIncompatible,
                 InstanceFailureCategory.SyncStateUnavailable
             );

@@ -14,6 +14,12 @@ public sealed record ServiceUnauthorizedFailure : OperationalFailure;
 public sealed record ServiceRateLimitedFailure : OperationalFailure;
 
 /// <summary>
+/// The service answered with a redirect (3xx). Recyclarr does not follow redirects, because
+/// one usually means a wrong base URL or a reverse proxy sending API calls to a login page.
+/// </summary>
+public sealed record ServiceRedirectedFailure : OperationalFailure;
+
+/// <summary>
 /// The connected service does not match the configuration or supported capabilities.
 /// </summary>
 public sealed record ServiceIncompatibleFailure : OperationalFailure;

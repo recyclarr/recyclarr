@@ -18,6 +18,9 @@ internal static class ServiceFailureText
                 "The service denied access (403). Check the API key's permissions.",
             InstanceFailureCategory.ServiceRateLimited =>
                 "The service is rate limiting requests (429). Try again later.",
+            InstanceFailureCategory.ServiceRedirected =>
+                "The service redirected the request (3xx). Check base_url, and that any reverse "
+                    + "proxy in front of the service lets API calls through.",
             InstanceFailureCategory.ServiceIncompatible =>
                 "The service version is not supported by Recyclarr.",
             InstanceFailureCategory.SyncStateUnavailable =>

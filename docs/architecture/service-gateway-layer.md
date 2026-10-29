@@ -208,10 +208,10 @@ Cross-cutting concerns live in `DelegatingHandler` subclasses, configured once p
 
 ### Named clients
 
-| Client      | Handlers             | Primary handler config   |
-| ----------- | -------------------- | ------------------------ |
-| `"servarr"` | `HttpLoggingHandler` | SSL bypass (conditional) |
-| `"apprise"` | `HttpLoggingHandler` | (default)                |
+| Client      | Handlers             | Primary handler config                 |
+| ----------- | -------------------- | -------------------------------------- |
+| `"servarr"` | `HttpLoggingHandler` | No redirects; SSL bypass (conditional) |
+| `"apprise"` | `HttpLoggingHandler` | (default)                              |
 
 ### Handler pipeline (servarr)
 
@@ -220,9 +220,11 @@ HttpLoggingHandler -> HttpClientHandler -> network
 ```
 
 - **HttpLoggingHandler**: Logs request method + sanitized URL (Debug), response status (Debug), and
-  request/response bodies (Verbose). Also detects failed requests that were redirected (by comparing
-  original vs final URI) and logs a warning about potential URL/reverse proxy misconfiguration.
-  Replaces Flurl's `FlurlBeforeCallLogRedactor`, `FlurlAfterCallLogRedactor`, and
+  request/response bodies (Verbose). Warns about URL/reverse proxy misconfiguration when a response
+  is a redirect. Replaces Flurl's `FlurlBeforeCallLogRedactor` and `FlurlAfterCallLogRedactor`.
+- **No redirects**: `AllowAutoRedirect = false`. A redirect usually means a wrong base URL or a
+  reverse proxy sending API calls to a login page; following it ends in an HTML page that fails to
+  parse. The 3xx response fails the instance as `ServiceRedirectedFailure`. Replaces Flurl's
   `FlurlRedirectPreventer`.
 - **SSL bypass**: Conditionally disables certificate validation via
   `ConfigurePrimaryHttpMessageHandler` based on `EnableSslCertificateValidation` setting.

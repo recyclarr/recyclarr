@@ -23,6 +23,10 @@ public static class OperationalFailureClassifier
             SyncStateUnavailableException => new SyncStateUnavailableFailure(),
             ApiRequestException => new ServiceUnavailableFailure(),
             HttpRequestException => new ServiceUnavailableFailure(),
+            ApiException
+            {
+                StatusCode: >= HttpStatusCode.MultipleChoices and < HttpStatusCode.BadRequest
+            } => new ServiceRedirectedFailure(),
             ApiException { StatusCode: HttpStatusCode.Unauthorized } =>
                 new ServiceUnauthenticatedFailure(),
             ApiException { StatusCode: HttpStatusCode.Forbidden } =>

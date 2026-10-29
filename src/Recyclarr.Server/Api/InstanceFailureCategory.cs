@@ -20,6 +20,12 @@ internal enum InstanceFailureCategory
     [Description("The instance is limiting requests (429).")]
     ServiceRateLimited,
 
+    [Description(
+        "The instance answered with a redirect (3xx), which Recyclarr does not follow. Usually a "
+            + "wrong base URL or a reverse proxy that does not let API calls through."
+    )]
+    ServiceRedirected,
+
     [Description("Recyclarr does not support the instance's version.")]
     ServiceIncompatible,
 
@@ -38,6 +44,7 @@ internal static class InstanceFailureCategoryMapping
                 ServiceUnauthenticatedFailure => InstanceFailureCategory.ServiceUnauthenticated,
                 ServiceUnauthorizedFailure => InstanceFailureCategory.ServiceUnauthorized,
                 ServiceRateLimitedFailure => InstanceFailureCategory.ServiceRateLimited,
+                ServiceRedirectedFailure => InstanceFailureCategory.ServiceRedirected,
                 ServiceIncompatibleFailure => InstanceFailureCategory.ServiceIncompatible,
                 SyncStateUnavailableFailure => InstanceFailureCategory.SyncStateUnavailable,
                 _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null),
