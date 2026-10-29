@@ -144,12 +144,9 @@ CLI and schedule relationship, authentication) lives in hand-written wiki pages,
 - Describe what a consumer cannot infer from the name and type: units, valid values, defaults,
   absence meaning, status conditions. Leave self-explanatory members bare.
 - Schemas, properties, path/query params: XML `<summary>` on the DTO member.
-- Enum values: `[Description]` on each member; published as a Markdown list in the schema
-  description, not `x-enumDescriptions`, which breaks Refitter (ADR-026).
+- Enum values: `[Description]` on each member; published as `x-enumDescriptions`.
 - Operations: `Summary()` in `Configure()` (summary, description, per-status response text,
   examples). Not endpoint-class XML docs.
-- Until FastEndpoints#1201 ships, XML summaries are one paragraph; multi-paragraph text goes in
-  `Summary()`.
 
 ## httpyac Requests
 

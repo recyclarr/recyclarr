@@ -9,14 +9,21 @@ internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
     public async Task Enum_value_descriptions_are_keyed_by_wire_value()
     {
         var document = await GetDocument();
-        var description = document?["components"]?["schemas"]?["InstanceProgressStatusResponse"]?[
-            "description"
-        ]?.GetValue<string>();
+        var schema = document!["components"]!["schemas"]!["InstanceProgressStatusResponse"]!;
+        var descriptions = schema["x-enumDescriptions"]!.AsObject();
 
-        description
+        descriptions["notRun"]!
+            .GetValue<string>()
             .Should()
-            .StartWith("Sync progress of one instance in a job.")
-            .And.Contain("- `notRun`: The job stopped before this instance started.");
+            .Be("The job stopped before this instance started.");
+        descriptions
+            .Select(x => x.Key)
+            .Should()
+            .Equal(schema["enum"]!.AsArray().Select(x => x!.GetValue<string>()));
+        schema["description"]!
+            .GetValue<string>()
+            .Should()
+            .Be("Sync progress of one instance in a job.");
     }
 
     // The wiki API reference renders only what the document contains.

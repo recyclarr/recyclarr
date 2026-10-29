@@ -60,8 +60,8 @@ dependencies ([refitter#1310][refitter-1310]).
 - Good, because the CLI keeps non-nullable contracts and fails fast on a broken response
 - Good, because Refit interfaces stay directly mockable and call sites stay free of path segments
 - Good, because all three clients keep one generator and configuration format
-- Bad, because the self-client stays blocked on an upstream fix or a spec-side workaround for
-  object-valued `x-enumDescriptions`
+- Bad, because the self-client stayed blocked on an upstream fix for object-valued
+  `x-enumDescriptions` until Refitter 2.3.1-preview.120 ([refitter#1336][refitter-1336])
 - Bad, because NJsonSchema remains in the read path until Refitter removes it, and its 3.1 support
   is incomplete
 
@@ -75,3 +75,4 @@ removal stalls while NJsonSchema failures keep blocking builds.
 [kiota-4004]: https://github.com/microsoft/kiota/issues/4004
 [kiota-3005]: https://github.com/microsoft/kiota/issues/3005
 [refitter-1310]: https://github.com/christianhelle/refitter/issues/1310
+[refitter-1336]: https://github.com/christianhelle/refitter/issues/1336
