@@ -37,4 +37,10 @@
       PrivateAssets="all"
     />
   </ItemGroup>
+
+  <!-- Generated clients target the System.Text.Json version of the project's framework, so
+       framework bumps need no .refitter edits. -->
+  <PropertyGroup>
+    <RefitterJsonLibraryVersion>$(TargetFrameworkVersion.TrimStart('v'))</RefitterJsonLibraryVersion>
+  </PropertyGroup>
 </Project>
