@@ -38,7 +38,7 @@ internal sealed class HttpLoggingHandler(ILogger log) : DelegatingHandler
             cancellationToken
         );
 
-        WarnOnFailedRedirect(response, originalUri, sanitizedUrl);
+        WarnOnRedirect(response, sanitizedUrl);
 
         return response;
     }
@@ -79,24 +79,21 @@ internal sealed class HttpLoggingHandler(ILogger log) : DelegatingHandler
         log.Verbose("HTTP {Direction} Body: {Method} {Url} {Body}", direction, method, url, body);
     }
 
-    private void WarnOnFailedRedirect(
-        HttpResponseMessage response,
-        Uri originalUri,
-        Uri sanitizedOriginalUri
-    )
+    private void WarnOnRedirect(HttpResponseMessage response, Uri sanitizedUrl)
     {
-        if (
-            !response.IsSuccessStatusCode
-            && response.RequestMessage?.RequestUri is { } finalUri
-            && finalUri != originalUri
-        )
+        if ((int)response.StatusCode is < 300 or >= 400)
         {
-            log.Warning(
-                "HTTP redirect was followed from {OriginalUrl} to {FinalUrl}; "
-                    + "this may indicate a problem with your URL and/or reverse proxy",
-                sanitizedOriginalUri,
-                Sanitize.Url(finalUri)
-            );
+            return;
         }
+
+        var location = response.Headers.Location is { } target
+            ? Sanitize.Url(target.IsAbsoluteUri ? target : new Uri(sanitizedUrl, target))
+            : null;
+        log.Warning(
+            "HTTP redirect received from {Url} to {Location} and not followed; "
+                + "this indicates a problem with your URL and/or reverse proxy",
+            sanitizedUrl,
+            location
+        );
     }
 }

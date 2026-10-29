@@ -351,6 +351,8 @@ internal sealed class NotificationService(
             ServiceUnauthenticatedFailure => "The service rejected the API credentials",
             ServiceUnauthorizedFailure => "The service denied access",
             ServiceRateLimitedFailure => "The service rate limit was exceeded",
+            ServiceRedirectedFailure =>
+                "The service redirected the request; check base_url and any reverse proxy",
             ServiceIncompatibleFailure =>
                 "The connected service is incompatible with this configuration",
             SyncStateUnavailableFailure => "The persisted synchronization state is unavailable",

@@ -32,7 +32,9 @@ internal static class OutboundHttpClientRegistration
                 .ConfigurePrimaryHttpMessageHandler(sp =>
                 {
                     var settings = sp.GetRequiredService<IOptions<RecyclarrSettings>>();
-                    var handler = new HttpClientHandler();
+                    // A redirect means a wrong base URL or a proxy login page; following it
+                    // would turn the problem into an unreadable response
+                    var handler = new HttpClientHandler { AllowAutoRedirect = false };
 
                     if (!settings.Value.EnableSslCertificateValidation)
                     {

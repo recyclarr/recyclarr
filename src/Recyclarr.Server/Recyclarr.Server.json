@@ -1535,6 +1535,7 @@
           "serviceUnauthenticated",
           "serviceUnauthorized",
           "serviceRateLimited",
+          "serviceRedirected",
           "serviceIncompatible",
           "syncStateUnavailable"
         ],
@@ -1544,6 +1545,7 @@
           "serviceUnauthenticated": "The instance rejected the API key (401).",
           "serviceUnauthorized": "The instance denied access (403).",
           "serviceRateLimited": "The instance is limiting requests (429).",
+          "serviceRedirected": "The instance answered with a redirect (3xx), which Recyclarr does not follow. Usually a wrong base URL or a reverse proxy that does not let API calls through.",
           "serviceIncompatible": "Recyclarr does not support the instance's version.",
           "syncStateUnavailable": "Recyclarr could not read or save its stored sync state for the instance."
         }

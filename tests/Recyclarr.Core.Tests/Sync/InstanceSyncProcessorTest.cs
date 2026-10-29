@@ -77,6 +77,7 @@ internal sealed class InstanceSyncProcessorTest
         result.Failure.Should().BeOfType<SyncStateUnavailableFailure>();
     }
 
+    [TestCase(HttpStatusCode.Found, typeof(ServiceRedirectedFailure))]
     [TestCase(HttpStatusCode.Unauthorized, typeof(ServiceUnauthenticatedFailure))]
     [TestCase(HttpStatusCode.Forbidden, typeof(ServiceUnauthorizedFailure))]
     [TestCase(HttpStatusCode.TooManyRequests, typeof(ServiceRateLimitedFailure))]
