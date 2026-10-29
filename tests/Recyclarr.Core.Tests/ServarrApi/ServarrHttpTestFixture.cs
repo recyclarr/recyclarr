@@ -3,14 +3,13 @@ using System.Text;
 using System.Text.Json.Nodes;
 using Autofac;
 using Recyclarr.Config.Models;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 
 namespace Recyclarr.Core.Tests.ServarrApi;
 
 // Resolves gateways with the production Refit clients and serializer settings, backed by canned
 // HTTP responses, so tests observe the JSON a gateway actually sends to Sonarr or Radarr.
-internal abstract class ServarrHttpTestFixture : IntegrationTestFixture
+internal abstract class ServarrHttpTestFixture : CoreIntegrationTestFixture
 {
     private readonly StubServarrHandler _handler = new();
 

@@ -62,6 +62,8 @@ internal class RadarrCustomFormatGateway(RadarrApi.ICustomFormatApi api) : ICust
         }
 
         var dto = RadarrCustomFormatMapper.CloneSpec(schema);
+        // Presets are UI starting points for a new specification, not part of a saved one
+        dto.ExtensionData.Remove("presets");
         RadarrCustomFormatMapper.UpdateSpec(spec, dto);
 
         var fields = dto.Fields?.ToList() ?? [];

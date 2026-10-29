@@ -63,6 +63,8 @@ internal class SonarrV5CustomFormatGateway(SonarrApi.ICustomFormatApi api) : ICu
         }
 
         var dto = SonarrV5CustomFormatMapper.CloneSpec(schema);
+        // Presets are UI starting points for a new specification, not part of a saved one
+        dto.ExtensionData.Remove("presets");
         SonarrV5CustomFormatMapper.UpdateSpec(spec, dto);
 
         var fields = dto.Fields?.ToList() ?? [];

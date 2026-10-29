@@ -23,6 +23,13 @@ public interface ICustomFormatApi
 
     [Delete("/api/v3/customformat/{id}")]
     Task CustomformatDelete(int id, CancellationToken ct = default);
+
+    /// <summary>
+    /// One template per specification implementation. Saved specifications start from these so
+    /// members the guide does not carry keep the service's values.
+    /// </summary>
+    [Get("/api/v3/customformat/schema")]
+    Task<ICollection<CustomFormatSpecificationSchema>> Schema(CancellationToken ct = default);
 }
 
 /// <summary>
