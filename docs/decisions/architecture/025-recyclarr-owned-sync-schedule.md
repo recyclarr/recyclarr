@@ -1,32 +1,18 @@
 # ADR-025: Recyclarr-owned sync schedule
 
-- **Status:** accepted
-- **Date:** 2026-10-05
+- **Scope:** `src/Recyclarr.Server/Sync/Schedule/`, `server.schedule` in `settings.yml`
 
-## Context and Problem Statement
+## Context
 
-The container ran sync on a supercronic `@daily` job that invoked the CLI. The persistent server now
-owns sync execution (ADR-024), so it must also own the schedule: one global cron schedule from
-`settings.yml`, an explicit off switch for external schedulers, and an API that reports it.
+The persistent server owns sync execution (ADR-024), so it also owns the schedule: one global cron
+schedule from `settings.yml`, an off switch for external schedulers, and an API that reports the
+next occurrence. Overlapping occurrences must be recorded as skipped, missed ones must not replay,
+and tests must drive time without the real clock.
 
-## Decision Drivers
+## Decision
 
-- `settings.yml` is the only source of schedule state; nothing to reconcile with the database.
-- The next occurrence must be visible through `GET /api/v1/sync/schedule`.
-- An occurrence that overlaps an active sync is recorded as skipped and never runs later.
-- Missed occurrences (server down) are not replayed.
-- Tests must drive time without waiting on the real clock.
-
-## Considered Options
-
-1. Recyclarr computes occurrences (Cronos) in a `BackgroundService` and enqueues TickerQ jobs
-2. TickerQ cron tickers
-
-## Decision Outcome
-
-Chosen option: "Recyclarr computes occurrences", because TickerQ cron tickers live in the database
-(needing reconciliation with `settings.yml` on every start), hide the next occurrence, and run on
-the real clock.
+Recyclarr computes occurrences with Cronos in a background service and enqueues TickerQ jobs.
+`settings.yml` is the only source of schedule state.
 
 - `SyncSchedule` parses `server.schedule` (`enabled`, `cron`) with Cronos at startup; an invalid
   cron fails startup. Default: `0 0 * * *`.
@@ -39,8 +25,17 @@ the real clock.
 - The schedule endpoint's next occurrence uses the same calculation the scheduler waits on.
 - Ephemeral servers never schedule.
 
-### Consequences
+## Rejected Options
 
-- Good, because the schedule is plain configuration and fully visible through the API.
-- Good, because tests advance a fake `TimeProvider` instead of waiting.
-- Bad, because a clock jump past several occurrences in a running server produces one catch-up job.
+- TickerQ cron tickers: they live in the database (reconciled with `settings.yml` on every start),
+  hide the next occurrence, and run on the real clock.
+
+## Consequences
+
+- The schedule is plain configuration and fully visible through the API.
+- Tests advance a fake `TimeProvider` instead of waiting.
+- A clock jump past several occurrences in a running server produces one catch-up job.
+
+## History
+
+- 2026-10-05: The server schedules syncs from `settings.yml`, replacing the container cron job.

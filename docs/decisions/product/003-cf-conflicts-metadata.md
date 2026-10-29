@@ -1,32 +1,29 @@
 # PDR-003: CF Conflicts Metadata
 
-- **Status:** Accepted
-- **Date:** 2025-12-30
-- **Upstream:** [Discord discussion](../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-3-cf-conflicts-metadata)
+- **Upstream:** [Discord discussion][upstream]
+
+[upstream]: ../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-3-cf-conflicts-metadata
 
 ## Context
 
-Some custom formats are mutually exclusive (e.g., SDR vs SDR no WEBDL, x265 HD vs x265 no HDR) but
-there's no machine-readable way to express this. Users can inadvertently select conflicting CFs.
+Some custom formats are mutually exclusive (for example SDR versus SDR no WEBDL, x265 HD versus
+x265 no HDR), and users can select both by mistake. The guides now publish
+`docs/json/{radarr,sonarr}/conflicts.json` (schema `schemas/conflicts.schema.json`, paths declared
+in `metadata.json`) for sync tools to use.
 
 ## Decision
 
-Add `conflicts.json` files to TRaSH Guides at `docs/json/{radarr,sonarr}/conflicts.json` listing
-mutually exclusive custom format pairs. Sync tools can use this to warn users about conflicting
-selections.
-
-**Implementation details pending**: The concept of a conflicts file is accepted, but the exact
-schema (including updates to `metadata.json` and `metadata.schema.json`) is still being finalized
-upstream.
-
-## Affected Areas
-
-- Config: None
-- Commands: None
-- Migration: Not required
+Recyclarr treats `conflicts.json` as the source for warning users about conflicting custom format
+selections. Recyclarr does not read the file yet; support needs a resource provider entry in
+`RepoMetadata` and a planning outcome.
 
 ## Consequences
 
-- Users get warnings when selecting conflicting custom formats
-- Requires new resource provider support in Recyclarr when upstream finalizes schema
-- Can be implemented independently of other TRaSH Guides schema changes
+- Config: None
+- Migration: not required
+- Support can ship independently of other guide schema changes.
+
+## History
+
+- 2025-12-30: Upstream adds conflicts metadata for sync tools to warn on.
+- 2026-10-16: Record matched to upstream: the file and schema are published.

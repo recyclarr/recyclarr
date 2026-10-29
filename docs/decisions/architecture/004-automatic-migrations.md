@@ -1,55 +1,36 @@
 # ADR-004: Automatic migrations at startup
 
-- **Status:** accepted
-- **Date:** 2026-02-20
+- **Scope:** `src/Recyclarr.Core` migration steps, `src/Recyclarr.Server/ServerBootstrapService.cs`
 
-## Context and Problem Statement
+## Context
 
-Recyclarr has a migration system that handles data/directory changes between versions. Users must
-run `recyclarr migrate` manually before other commands work, which adds friction and causes
-confusion when required migrations block normal usage. The extra command provides little value since
-migrations must eventually run regardless.
+Migrations move files and directories between Recyclarr versions. A manual `recyclarr migrate`
+step confused users: commands failed until they ran it, and migrations must run eventually anyway.
+The server owns the data directory, so it is the process that must find the data in its current
+layout.
 
-## Decision Drivers
+## Decision
 
-- Migrations are prerequisites for normal operation; deferring them to a manual step adds complexity
-  without benefit
-- Users encounter confusing errors when they forget to run migrations before `sync`
-- The migration system is simple (filesystem operations on subdirectories within the config root)
+The server runs every migration step at startup (`ServerBootstrapService`), before it loads
+configuration and before Kestrel binds. A failed migration stops startup with a non-zero exit and
+remediation steps. There is no migration command and no optional migration.
 
-## Considered Options
+Migrations MUST only change files and subdirectories inside the already-resolved paths. They MUST
+NOT move or rename the root config or data directories: `IAppPaths` is resolved once when the DI
+container is built (`DefaultAppDataSetup`) and would hold stale paths for the rest of the process.
+A root relocation needs a user-facing diagnostic outside the migration system instead, as done for
+`RECYCLARR_APP_DATA` (`ConfigDirectoryLocator`).
 
-1. Run migrations automatically at startup before command dispatch
-2. Keep the manual `migrate` command as the only migration path
+## Rejected Options
 
-## Decision Outcome
+- Manual `migrate` command as the only path: adds a step with no benefit and blocks other commands.
 
-Chosen option: "Run migrations automatically at startup", because it eliminates unnecessary user
-friction while maintaining the same safety guarantees (failure still exits non-zero with remediation
-steps).
+## Consequences
 
-Migrations run in `Program.Main()` after the DI container is built but before Spectre.Console
-dispatches to any command. The `migrate` subcommand is retained as a deprecated no-op for backward
-compatibility.
+- Users never run a migration step.
+- Root path changes cannot be migrations.
 
-### Constraint: Migrations must not affect root path resolution
+## History
 
-`IAppPaths` is resolved as a singleton during DI container construction via `DefaultAppDataSetup`.
-Migrations depend on `IAppPaths` and run after the container is built. Therefore, migrations must
-never relocate or rename the root config or data directories, as `IAppPaths` would hold stale
-references for the remainder of the process.
-
-Migrations are constrained to operating on files and subdirectories *within* the already-resolved
-paths. If a future version needs to relocate root directories, that must be handled outside the
-migration system (e.g., environment variable deprecation with user-facing error, as was done for
-`RECYCLARR_APP_DATA`).
-
-### Consequences
-
-- Good, because users never need to remember a separate migration step
-- Good, because every command automatically benefits from up-to-date data layout
-- Good, because the `Required` vs optional migration distinction is eliminated (all migrations just
-  run)
-- Bad, because migrations cannot relocate root app paths (documented constraint above)
-- Bad, because the `migrate` command becomes dead weight that must be maintained for backward
-  compatibility
+- 2026-02-20: Run migrations automatically at startup; `migrate` becomes a deprecated no-op.
+- 2026-09-26: Migrations run in the server; the CLI no longer migrates and `migrate` is removed.

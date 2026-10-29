@@ -1,77 +1,39 @@
 # ADR-003: Simplify OpenCode agent architecture to single primary agent
 
-- **Status:** accepted
-- **Date:** 2026-01-17
+- **Scope:** `AGENTS.md`, `.opencode/`
 
-## Context and Problem Statement
+## Context
 
-Implemented a multi-agent architecture inspired by Opencode-Workflows repo, with an orchestrator
-that delegates to domain specialists (sync, config-schema, integration, cli-ux, test, devops).
-Empirical testing revealed this pattern adds coordination overhead without proportional benefit for
-Recyclarr's single-tech (.NET) codebase.
+An orchestrator agent that delegated to domain subagents (sync, config-schema, integration, cli-ux,
+test, devops) added coordination cost without matching benefit in this single-stack .NET codebase.
+In trials, a simple task (REC-55) took 15+ tool calls instead of about 8, and on a multi-domain task
+(REC-26) writing delegation prompts took nearly as long as doing the work. Most subagent domain
+knowledge duplicated `AGENTS.md` or was discoverable from code. Published guidance agrees: start
+with one agent ([Anthropic][anthropic], [Cognition][cognition], [Microsoft][microsoft]).
 
-## Decision Drivers
+## Decision
 
-- Orchestrator pattern designed for heterogeneous multi-tech stacks (React+Convex+Tailwind), not
-  single-tech codebases
-- Empirical testing: REC-55 (simple task) showed "orchestration added friction"; REC-26
-  (multi-domain task) showed "moderate value" with prompt overhead approaching direct implementation
-  time
-- Industry research consensus: Anthropic ("start with simplest solution"), Cognition/Devin ("don't
-  build multi-agents"), Microsoft ("before you try many agents, try just one")
-- Domain knowledge in subagents was largely redundant with AGENTS.md or discoverable from code
+The repository defines no agents. One primary agent does the work, using `AGENTS.md` for durable
+rules and `.opencode/skills/` for on-demand procedures (testing, changelog, decisions). MUST NOT add
+domain-specialist subagents to the repository; put the knowledge in `AGENTS.md` or a skill.
+Subagents for separate tool access or external lookup (for example `trash-guides`) live in the
+user's global OpenCode configuration, not here.
 
-## Considered Options
+## Rejected Options
 
-1. Keep orchestrator + domain subagents (status quo)
-2. Keep subagents but remove orchestrator
-3. Single primary agent with domain knowledge in AGENTS.md and skills for procedural knowledge
+- Orchestrator with domain subagents: coordination overhead exceeded the benefit (REC-55, REC-26).
+- Domain subagents without an orchestrator: same duplicated knowledge, less context per agent.
 
-## Decision Outcome
+## Consequences
 
-Chosen option: "Single primary agent with domain knowledge in AGENTS.md", because empirical testing
-showed orchestration overhead without proportional benefit, and most domain knowledge is either
-already in AGENTS.md, discoverable from code exploration, or covered by skills.
+- The primary agent carries broader context.
+- A skill only helps when it loads; skill descriptions must name their triggers precisely.
 
-### Consequences
+## History
 
-- Good, because simpler architecture with less coordination overhead
-- Good, because domain knowledge centralized in AGENTS.md for consistent context
-- Good, because skills remain for procedural knowledge (testing, changelog, decisions)
-- Good, because trash-guides subagent retained for external reference lookup (distinct use case)
-- Good, because test and devops subagents retained for isolated domain work
-- Bad, because less specialized agents may require broader context in primary agent
-- Bad, because future complex multi-domain tasks may need to rebuild specialization
+- 2026-01-17: Replace the orchestrator and domain subagents with one primary agent plus skills.
+- 2026-10-16: Record matched to configuration: no agent definitions remain in the repository.
 
-## Testing Conducted
-
-### REC-55: Remove legacy cache field name aliases (simple, single-domain)
-
-- 4 files, 56 lines deleted
-- Orchestrator delegated to sync + test subagents across 5 task invocations
-- Self-assessment: "Orchestration added friction for this task size"
-- Metrics: 15+ tool calls vs ~8 direct, ~2000 tokens prompt overhead
-
-### REC-26: Add language config YAML support (medium, multi-domain)
-
-- 5 files, 126 lines added
-- Used config-schema, sync, test subagents
-- Self-assessment: "Moderate value" - prompt writing (~12 min) approached direct implementation (~15
-  min)
-- Subagent work was correct on first attempt
-
-### Skill Usage
-
-- Test subagent loaded `testing` skill before writing tests
-- Sync and config-schema subagents did not load `csharp-coding` skill despite having permission
-- Skills work but require explicit instructions to trigger consistently
-
-## References
-
-- [Anthropic: Building Effective
-  Agents](https://www.anthropic.com/engineering/building-effective-agents)
-- [Cognition: Don't Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents)
-- [Microsoft: Before You Try Many
-  Agents](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/the-future-of-ai-single-agent-or-multi-agent---how-should-i-choose/4257104)
-- [Opencode-Workflows repo](https://github.com/IgorWarzocha/Opencode-Workflows) - source of
-  brain+orchestrator pattern
+[anthropic]: https://www.anthropic.com/engineering/building-effective-agents
+[cognition]: https://cognition.ai/blog/dont-build-multi-agents
+[microsoft]: https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/the-future-of-ai-single-agent-or-multi-agent---how-should-i-choose/4257104

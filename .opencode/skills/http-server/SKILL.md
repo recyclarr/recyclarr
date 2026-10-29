@@ -47,7 +47,7 @@ Model as job resources, never verb endpoints (ADR-011):
 - The snapshot is cumulative (per-instance, per-operation); a slow or skipped poll loses nothing
 - Polling only; no SSE
 - Large result payloads belong on a sub-resource (`GET .../jobs/{id}/results`), never on the polled
-  job resource (ADR-014); DTOs are shaped for what consumers render, not mirrors of domain types
+  job resource (ADR-016); DTOs are shaped for what consumers render, not mirrors of domain types
 - "Is one running" = filter the jobs collection, never a singleton status resource
 
 ## FastEndpoints

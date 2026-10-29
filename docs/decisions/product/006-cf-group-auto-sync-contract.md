@@ -1,7 +1,5 @@
 # PDR-006: CF Group Auto-Sync Contract
 
-- **Status:** Accepted
-- **Date:** 2026-02-01
 - **Upstream:** [Discord DM][upstream] with TRaSH Guides contributor
 
 [upstream]: https://discordapp.com/channels/@me/1046139300401660005/1467565004663427102
@@ -33,32 +31,25 @@ contributor acknowledged this as a data bug to be reviewed; it is not a Recyclar
 
 ## Decision
 
-Recyclarr's auto-sync behavior follows the group-level `default` flag:
+Recyclarr's auto-sync follows only the group-level `default` flag:
 
-| Group `default` | Recyclarr Behavior             | User Override                          |
-|-----------------|--------------------------------|----------------------------------------|
-| `true`          | Auto-sync to matching profiles | `custom_format_groups.skip` to opt-out |
-| `false`/omitted | Do not auto-sync               | `custom_format_groups.add` to opt-in   |
+| Group `default` | Recyclarr behavior                          | User override               |
+|-----------------|---------------------------------------------|-----------------------------|
+| `true`          | Auto-sync to matching guide-backed profiles | `custom_format_groups.skip` |
+| `false`/omitted | Do not auto-sync                            | `custom_format_groups.add`  |
 
-This design correctly models the intended three-tier semantics:
-
-- Users who want guide recommendations get Mandatory and Recommended groups automatically
-- Deviations from recommendations require explicit configuration in either direction
-- The `default` flag is the single source of truth; prose documentation is informational only
-
-Recyclarr does not distinguish between Mandatory and Recommended at runtime; both auto-sync. The
-distinction exists for guide documentation purposes to help users understand the impact of skipping
-a group.
-
-## Affected Areas
-
-- Config: `custom_format_groups.skip[]` and `custom_format_groups.add[]` for user overrides
-- Commands: None
-- Migration: Not required
+- The `default` flag is the single source of truth; guide prose is informational only. A mismatch
+  between prose and JSON is an upstream data bug, not a reason to special-case a group.
+- Mandatory and Recommended both auto-sync; the distinction only helps users judge the impact of
+  skipping a group.
+- A group listed under `add` is not also auto-synced.
 
 ## Consequences
 
-- Auto-sync behavior is deterministic and based solely on JSON data, not prose interpretation
-- Users trust that `default: true` groups represent guide maintainer recommendations
-- Semantic mismatches between prose and JSON are upstream data bugs to be fixed in TRaSH Guides
-- Recyclarr's `skip`/`add` design remains stable; no changes needed to support the three-tier model
+- Config: `custom_format_groups.skip[]` and `custom_format_groups.add[]`
+- Migration: not required
+- Auto-sync is deterministic and depends only on JSON data.
+
+## History
+
+- 2026-02-01: Auto-sync follows the group `default` flag; `skip` and `add` override it.

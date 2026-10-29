@@ -1,67 +1,44 @@
-# ADR-002: ID-First Custom Format Matching
+# ADR-002: ID-first custom format matching with automatic adoption
 
-- **Status:** Superseded (adoption philosophy changed; see below)
-- **Date:** 2025-12-15
+- **Scope:** `src/Recyclarr.Core/Pipelines/CustomFormat/CustomFormatSyncOperation.cs`, sync state
 
-## Context and Problem Statement
+## Context
 
-Custom Format synchronization requires matching CFs from TRaSH Guides to existing CFs in
-Sonarr/Radarr. The original implementation used name-first matching: find a service CF by name
-(case-insensitive), then fall back to stored ID. Issue #672 revealed Sonarr uses case-sensitive
-comparison, allowing multiple CFs with case-variant names ("HULU", "Hulu", "hulu") to coexist.
-Recyclarr's case-insensitive matching returned arbitrary matches, causing "Must be unique" API
-errors.
+Custom format sync must match each guide CF to a CF in Sonarr or Radarr. Name-first matching broke
+when Sonarr allowed case-variant names ("HULU", "Hulu") to coexist: Recyclarr picked an arbitrary
+match and the API rejected the write as "Must be unique" (issue #672). Sync state already records
+the service ID that each trash_id owns, and IDs do not change when a CF is renamed.
 
-## Decision Drivers
+## Decision
 
-- IDs are stable after creation; names can change
-- State already tracks ownership via trash_id to service_id mappings
-- Name collisions should be explicit errors, not silent misbehavior
-- Adoption should be intentional (`state repair --adopt`), not implicit
+Match by the service ID stored in sync state first; use names only to find a CF that state does
+not know. Name comparison is case-insensitive.
 
-## Considered Options
+1. Stored ID exists in the service: update that CF, whatever its name.
+2. Stored ID is gone, or no state entry exists: look up the name.
+   - No match: create the CF.
+   - Exactly one match: adopt it (record its ID in state) and report an adoption outcome.
+   - Two or more matches: report an ambiguous-match outcome and do not write that CF.
 
-1. Switch to ID-first matching with name-based conflict detection
-2. Name normalization (lowercase before comparison)
-3. Auto-conflict resolution (rename conflicting CFs automatically)
-4. Keep name-first with better collision detection
+The user's config is authoritative: a CF listed in config and found once by name belongs to
+Recyclarr. MUST NOT reintroduce a manual adoption step.
 
-## Decision Outcome
+## Rejected Options
 
-Chosen option: "Switch to ID-first matching", because IDs provide stable, unambiguous matching while
-names serve only for display and conflict detection.
+- Name normalization (lowercase before comparing): still picks arbitrarily between case variants.
+- Automatic renaming of conflicting CFs: changes user data Recyclarr does not own.
+- Explicit adoption only (`state repair --adopt`): users nearly always wanted adoption, and an
+  ad-hoc command is impractical in scheduled or Kubernetes deployments.
 
-The matching algorithm:
+## Consequences
 
-1. State entry exists + service CF with that ID exists: UPDATE (regardless of name)
-2. State entry exists + service CF deleted: check name collision, then CREATE or ERROR
-3. No state entry + name exists in service: ERROR (suggest `state repair --adopt`)
-4. No state entry + name doesn't exist: CREATE
+- Renames in the service do not break ownership.
+- Ambiguous names need manual cleanup in the service before that CF syncs.
+- `replace_existing_custom_formats` is removed and reported as an ignored deprecated property.
 
-Additionally, deprecate `replace_existing_custom_formats` - its purpose is now handled explicitly
-via `state repair --adopt`.
+## History
 
-### Consequences
-
-- Good, because O(1) ID lookups replace O(n) name scanning
-- Good, because name collisions produce clear error messages instead of silent misbehavior
-- Good, because adoption becomes an intentional user action
-- Bad, because users with corrupted/missing state entries must run `state repair`
-- Bad, because `replace_existing_custom_formats` is deprecated (breaking change for users relying on
-  it)
-
-## Superseded: Adoption Philosophy
-
-The ID-first matching algorithm from this ADR remains in effect. However, the explicit adoption
-requirement (Case 3: "No state + name exists -> ERROR, suggest `--adopt`") has been replaced with
-automatic adoption.
-
-**New behavior**: Config is authoritative. If a resource is in the user's YAML config and a single
-matching name exists in the service, Recyclarr adopts it automatically with a warning. The `state
-repair --adopt` workflow is no longer needed. Only ambiguous matches (2+ service resources with the
-same name) still require manual resolution.
-
-**Rationale**: The explicit adoption requirement caused significant friction, especially in
-Kubernetes cron job deployments where adhoc CLI commands are impractical. Support experience showed
-users nearly universally wanted adoption; the conservative approach was protecting against a
-scenario that the happy path (ID-based updates) didn't protect against anyway.
+- 2025-12-15: Switch to ID-first matching; name matches without state require explicit adoption.
+- 2026-01-09: Remove `replace_existing_custom_formats`.
+- 2026-03-05: Adopt single name matches automatically.
+- 2026-09-26: Remove the `state repair` command.

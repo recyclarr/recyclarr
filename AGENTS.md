@@ -45,7 +45,7 @@ parallel with the action arrives too late.
 Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `TrashGuide/`,
 `ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (hand-written
 Refit contracts; model only used fields, no enums, every DTO derives from `ExtensibleResource`; see
-ADR-010). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
+ADR-006). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
 typed client from the server's OpenAPI spec) and `Recyclarr.Platform` (process and environment
 primitives only, also referenced by Core; ADR-020). The CLI MUST NOT reference Core. Solution is
 SLNX (`Recyclarr.slnx`), not SLN.

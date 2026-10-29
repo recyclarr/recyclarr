@@ -1,34 +1,27 @@
 # PDR-001: CF Groups Exclude to Include Migration
 
-- **Status:** Accepted
-- **Date:** 2025-12-30
-- **Upstream:** [Discord discussion](../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-1-exclude-to-include-migration)
+- **Upstream:** [Discord discussion][upstream]
+
+[upstream]: ../../reference/trash-guides-cf-groups-discord-2025-11-06.md#decision-1-exclude-to-include-migration
 
 ## Context
 
-TRaSH Guides CF Groups use `exclude` lists - groups apply to ALL quality profiles EXCEPT those
-explicitly excluded. This fail-open design was chosen in 2022 assuming more profiles would be
-included than excluded.
-
-TRaSH reported making mistakes: "I made a mistake by not adding an exclude for a certain profile,
-which resulted that the users got the wrong group added." The inverse thinking required for exclude
-logic proved error-prone for maintainers.
+TRaSH Guides CF groups used `exclude` lists: a group applied to every quality profile except those
+listed. Maintainers found this fail-open design error-prone; a missing exclude gave users the wrong
+group.
 
 ## Decision
 
-Switch CF Groups from `exclude` to `include` semantics. Groups will only apply to explicitly listed
-quality profiles (fail-closed).
-
-Recyclarr will update CF group parsing when the upstream migration is complete.
-
-## Affected Areas
-
-- Config: `custom_format_groups` implicit profile assignment becomes explicit
-- Commands: None
-- Migration: Not required - coordinated upstream deployment ensures compatibility
+CF groups apply only to the quality profiles listed in `quality_profiles.include` (fail-closed).
+Recyclarr parses only `include` (`CfGroupResource`) and has no guide-side `exclude` handling.
 
 ## Consequences
 
-- CF group profile assignment becomes explicit rather than fail-open
-- Easier for TRaSH Guides maintainers to reason about which profiles receive groups
-- Recyclarr's `CfGroupResource` parsing will need updating when upstream migrates
+- Config: None; the user-side `custom_format_groups` keys are unaffected (PDR-005, PDR-006).
+- Migration: not required; the upstream change was deployed in coordination with Recyclarr.
+- Maintainers state which profiles receive each group.
+
+## History
+
+- 2025-12-30: Upstream switches CF groups from `exclude` to `include`.
+- 2026-10-16: Record matched to code: upstream migration done; Recyclarr parses only `include`.

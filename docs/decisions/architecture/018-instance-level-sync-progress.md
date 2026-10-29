@@ -1,33 +1,17 @@
 # ADR-018: Report instance-level sync progress through snapshots
 
-- **Status:** accepted
-- **Date:** 2026-09-17
+- **Scope:** Core progress interface, `src/Recyclarr.Server/Sync/Progress/`
 
-## Context and Problem Statement
+## Context
 
-The sync engine publishes pipeline status, counts, item changes, and diagnostics through Rx streams.
-The Server reduces those events into a snapshot that clients poll, but most pipelines finish too
-quickly for their intermediate states to be useful. Terminal results already provide the complete
-pipeline account.
+Most pipelines finish too quickly for their intermediate states to be useful, and terminal results
+already give the complete pipeline account. A client joining mid-run must render current progress
+from one small response, and progress must never decide terminal status.
 
-## Decision Drivers
+## Decision
 
-- A client joining mid-run must be able to render current progress from one response
-- Polling should remain small and independent of terminal result detail
-- Progress must not determine terminal status or require event replay
-- The CLI needs useful feedback without exposing Core execution structure
-- The reporting mechanism should match its single state-reduction consumer
-
-## Considered Options
-
-1. Keep Rx pipeline events and the per-pipeline polling response
-2. Report instance lifecycle changes and poll a cumulative instance snapshot
-3. Stream progress to clients with Server-Sent Events
-
-## Decision Outcome
-
-Chosen option: "Report instance lifecycle changes and poll a cumulative instance snapshot", because
-the UI needs current instance state rather than every pipeline transition.
+Core reports instance lifecycle changes; the server reduces them into a cumulative instance
+snapshot that clients poll.
 
 Core reports when an instance starts and when its terminal result is available. The Server reduces
 those callbacks into an ordered snapshot. Polling exposes only the instance name and one of these
@@ -44,12 +28,18 @@ deltas. The polled job resource carries no pipeline counts, item changes, or eve
 
 Clients continue to poll. A client may miss a short Running state and move directly from Pending to
 a terminal status. SSE should be reconsidered only if measured polling latency or request volume
-becomes a problem; it does not require retaining Core Rx streams.
+becomes a problem; it does not require Rx streams in Core.
 
-### Consequences
+## Rejected Options
 
-- Good, because progress matches the granularity users can act on
-- Good, because skipped polls and reconnects lose no current state
-- Good, because Core no longer needs a reactive transport for progress
-- Bad, because clients cannot observe individual pipeline transitions
-- Bad, because short instance executions may complete between polls
+- Rx pipeline events with a per-pipeline polling response: reports transitions nobody can act on.
+- Server-Sent Events: not needed while polling latency and volume are acceptable.
+
+## Consequences
+
+- Skipped polls and reconnects lose no current state.
+- Clients cannot observe individual pipeline transitions.
+
+## History
+
+- 2026-09-17: Replace Rx pipeline events with polled instance-level snapshots.

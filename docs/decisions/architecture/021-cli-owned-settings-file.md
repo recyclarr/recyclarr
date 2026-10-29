@@ -1,36 +1,23 @@
 # ADR-021: The CLI reads its own optional settings file
 
-- **Status:** accepted
-- **Date:** 2026-09-27
+- **Scope:** `src/Recyclarr.Cli` settings loading, `schemas/cli-schema.json`
 
-## Context and Problem Statement
+## Context
 
-The CLI read `server.base_url` from `settings.yml`, which the server owns and validates strictly. In
-centralized mode the CLI and the server often run on different machines. A shared file forces each
-process to accept or ignore the other's keys, and one schema then describes keys that two processes
-own.
+`settings.yml` belongs to the server, which validates it strictly. In centralized mode the CLI and
+the server often run on different machines, so a shared file would force each process to accept or
+ignore the other's keys. Most users run the ephemeral server and should need no extra file, and
+`settings.yml` is released user data that keeps its name.
 
-## Decision Drivers
+## Decision
 
-- Each settings file should have one owner that validates it strictly
-- On one machine, the CLI and the server should use the same configuration directory
-- Most users run the ephemeral server and should need no extra file
-- `settings.yml` is released user data and keeps its name
+The CLI reads its own optional file, `cli.yml`; the server keeps `settings.yml`. MUST NOT add CLI
+keys to `settings.yml` or server keys to `cli.yml`.
 
-## Considered Options
-
-1. One shared `settings.yml` with a separate section for each process
-2. Separate files, `settings.yml` for the server and `cli.yml` for the CLI
-3. Rename both files to `settings.server.yml` and `settings.cli.yml`
-
-## Decision Outcome
-
-Chosen option: "Separate files", because each file has one owner and existing server settings files
-keep working.
-
-- `cli.yml` is optional and lives in the configuration directory (ADR-020). If it is absent, every
-  default applies and commands use an ephemeral server.
-- `server.base_url` selects centralized mode (ADR-010). REC-153 adds the API key beside it.
+- `cli.yml` lives in the configuration directory (ADR-020). If it is absent, every default applies
+  and commands use an ephemeral server.
+- `server.base_url` selects centralized mode (ADR-010); `server.api_key` holds the server API key
+  (ADR-027).
 - A non-empty `RECYCLARR_SERVER_URL` overrides `server.base_url`, so a container image can target
   its own server without a file in the user's volume. An empty value falls back to the file.
 - Parsing is strict. An unknown key or a base URL that is not absolute http or https stops the
@@ -38,8 +25,19 @@ keep working.
 - The CLI reads the file only when a command connects to a server.
 - `schemas/cli-schema.json` describes the file.
 
-### Consequences
+## Rejected Options
 
-- Good, because each process validates only its own keys
-- Good, because ephemeral users see no change
-- Bad, because a user who runs both on one machine edits two files
+- One shared `settings.yml` with a section per process: one schema describes keys two processes
+  own.
+- Rename both files (`settings.server.yml`, `settings.cli.yml`): breaks released server settings.
+
+## Consequences
+
+- Each process validates only its own keys.
+- A user who runs both on one machine edits two files.
+
+## History
+
+- 2026-09-27: The CLI reads `cli.yml`; `settings.yml` belongs to the server.
+- 2026-10-06: A non-empty `RECYCLARR_SERVER_URL` overrides `server.base_url`.
+- 2026-10-14: Add `server.api_key`.
