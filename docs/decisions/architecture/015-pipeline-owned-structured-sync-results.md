@@ -1,39 +1,19 @@
 # ADR-015: Pipeline-owned structured sync results
 
-- **Status:** Accepted
-- **Date:** 2026-08-19
-- **Supersedes:** ADR-009
+- **Scope:** `src/Recyclarr.Core/Sync/`, `src/Recyclarr.Core/Pipelines/`
 
-## Context and Problem Statement
+## Context
 
-Core reduces many sync decisions to diagnostic prose. The HTTP server cannot expose those decisions
-without transporting messages or reconstructing context that producers discarded. The existing
-result work also combines planning, transaction data, presentation compatibility, and every
-pipeline in changes too large to review safely.
+Diagnostic prose cannot carry sync decisions to the HTTP API without transporting messages or
+reconstructing context that producers discarded. Every consumer (CLI rendering, HTTP results,
+notifications) needs the same facts. Core must stay free of console, logging, notification, HTTP,
+and serialization concerns; preview and apply must report the same deltas; and sync state must
+never claim a service write that was not acknowledged.
 
-Core needs a consumer-independent terminal result that preserves semantic outcomes and deltas. It
-must retain the current Plan, Transaction, and Persistence stages, support preview, and make
-dependency behavior explicit.
+## Decision
 
-## Decision Drivers
-
-- Core must contain no console, logging, notification, HTTP, or serialization concerns
-- Preview and apply must report the same calculated deltas
-- Pipeline dependencies require deterministic status and blocking rules
-- Independent resource failures should not discard valid work
-- Sync state must never claim an unacknowledged service write
-- Each pipeline contract must be independently reviewable
-
-## Considered Options
-
-1. Keep diagnostic events as the authoritative result
-2. Serialize existing transaction and service resource models
-3. Return pipeline-owned semantic results from Core
-
-## Decision Outcome
-
-Chosen option: "Return pipeline-owned semantic results from Core", because producers retain the
-facts needed by every adapter without coupling Core to any presentation or transport.
+Core returns pipeline-owned semantic results: typed outcomes and deltas that each pipeline defines.
+Producers keep the facts every adapter needs, and no adapter's presentation shapes them.
 
 ### Lifecycle
 
@@ -56,8 +36,8 @@ Preview runs Plan and Transaction but skips Persistence. In apply mode, each pip
 Transaction and Persistence before a dependent pipeline starts. This preserves Custom Format ID
 hydration before Quality Profile processing.
 
-Planning and execution happen inside the background sync job. Only request selectors and
-server-owned configuration validity are checked before job creation.
+Planning and execution happen inside the background sync job; job creation checks only the request
+(ADR-019).
 
 ### Result hierarchy
 
@@ -104,8 +84,6 @@ Instance and run status derive from child terminal results. Progress never deter
 status.
 
 ### Semantic model
-
-The canonical language is defined in `CONTEXT.md`.
 
 - An outcome explains a decision, rejection, skip, or failure
 - A planning outcome explains a condition found before pipeline execution
@@ -199,11 +177,24 @@ Instance-wide failures stop the instance. Unexpected failures expose only an opa
 outside Core presentation concerns. ADR-017 defines fault attribution and continuation across
 independent instances.
 
-### Consequences
+## Rejected Options
 
-- Good, because Core results preserve semantic context without consumer coupling
-- Good, because preview and apply share one calculated result contract
-- Good, because status and dependency behavior are explicit and testable
-- Good, because each pipeline can migrate in an independent review slice
-- Bad, because every pipeline needs deliberate outcome and delta models
-- Bad, because partial persistence requires careful sync-state bookkeeping
+- Diagnostic events as the authoritative result: prose loses the context consumers need.
+- Serializing transaction and service resource models: couples consumers to internal and service
+  shapes, and ships full resources nothing reads.
+- A typed aggregate with one nullable property per operation behind an `object?` operation
+  contract: hides status and dependency rules and loses typing at the boundary.
+
+## Consequences
+
+- Preview and apply share one calculated result contract.
+- Status and dependency behavior are explicit and testable.
+- Every pipeline needs deliberate outcome and delta models.
+- Partial persistence needs careful sync-state bookkeeping.
+
+## History
+
+- 2026-05-16: Operations return typed results collected into a per-instance aggregate.
+- 2026-08-19: Replace the aggregate with pipeline-owned semantic outcomes, deltas, and statuses.
+- 2026-09-13: Planning outcomes belong to the instance.
+- 2026-09-17: Fault attribution moves to ADR-017.

@@ -1,9 +1,9 @@
 # Service Gateway Layer
 
 > For decision rationale, see [ADR-005](../decisions/architecture/005-service-gateway-layer.md)
-> (gateway layer) and [ADR-010](../decisions/architecture/010-hand-written-servarr-api-contracts.md)
-> (hand-written Refit contracts). For the Custom Format passthrough exception, see
-> [ADR-007](../decisions/architecture/007-custom-format-gateway-passthrough.md).
+> (gateway layer) and
+> [ADR-006](../decisions/architecture/006-refit-with-hand-written-servarr-contracts.md)
+> (hand-written Refit contracts).
 
 ## Overview
 
@@ -201,11 +201,6 @@ Custom Format gateways follow the standard DTO/domain split pattern. The Refit D
 types; gateways map to/from the domain `CustomFormatResource`. One-way sync still holds (guide is
 complete source of truth), so no stashed DTOs or hydrated resource pattern is needed.
 
-Previously, CF gateways used a passthrough exception (see [ADR-007][adr-007], now deprecated) where
-`CustomFormatResource` served directly as both guide and API type. The Refit migration introduced
-service DTOs as separate C# types, breaking the identical-schema condition that justified the
-exception.
-
 ## HTTP Pipeline
 
 Gateways use hand-written Refit interfaces backed by `IHttpClientFactory` named clients.
@@ -275,5 +270,4 @@ fields are shared and which are service-owned for new features.
 Both services publish OpenAPI specs in their repositories; use them as a reference when adding
 fields or endpoints.
 
-[adr-007]: ../decisions/architecture/007-custom-format-gateway-passthrough.md
 [adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md

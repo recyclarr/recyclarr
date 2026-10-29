@@ -1,35 +1,18 @@
 # ADR-011: REST API route conventions and resource model
 
-- **Status:** accepted
-- **Date:** 2026-07-24
+- **Scope:** every HTTP endpoint in `src/Recyclarr.Server/Features/`
 
-## Context and Problem Statement
+## Context
 
-The HTTP server (ADR-008, ADR-010) needs an API surface covering sync operations, TRaSH Guides data,
-and configured instance data. The original endpoint sketch placed all resources in one flat
-namespace (`/api/custom-formats`, `/api/quality-profiles`), which conflated three distinct domains:
-`GET /api/custom-formats` would have returned guide data while `DELETE /api/custom-formats` mutated
-a Sonarr/Radarr instance. The OpenAPI spec and the Kiota-generated client bind permanently to these
-URLs, so the structure has to be settled before endpoint work starts.
+The server exposes TRaSH Guides data, the user's Sonarr and Radarr instances, and Recyclarr's own
+sync jobs. These have different owners and lifecycles. A flat namespace (`/api/custom-formats`)
+would let `GET` return guide data while `DELETE` on the same path changed an instance. The
+committed OpenAPI spec and the generated client bind to the URLs, so URL mistakes become client API
+mistakes. Sync runs for 10-60 seconds, and Kubernetes probes need a stable, unauthenticated URL.
 
-## Decision Drivers
+## Decision
 
-- Guide resources, instance resources, and Recyclarr's own state have different owners, scopes, and
-  lifecycles; the URL structure should make that visible
-- Recyclarr is multi-instance; instance addressing must be first-class, not bolted on later
-- Kiota generates the client from the committed spec; URL mistakes become client API mistakes
-- Sync is long-running (10-60s) and needs a job-based lifecycle, not a request/response call
-- Kubernetes probes and load balancers need a stable, unauthenticated health URL
-
-## Considered Options
-
-1. Flat namespace: all resources directly under `/api` (original sketch)
-2. Domain namespaces: `guide`, `instances`, and `sync` groupings under a versioned `/api` prefix
-
-## Decision Outcome
-
-Chosen option: "domain namespaces", because the flat namespace forced unrelated resources to share
-URLs and left instance addressing unsolved.
+Routes use domain namespaces (`guide`, `instances`, `sync`) under a versioned `/api` prefix.
 
 ### Route grammar
 
@@ -38,7 +21,7 @@ URLs and left instance addressing unsolved.
 ```
 
 - **Version** is a path segment (`/api/v1/...`). The API version is independent from the application
-  semver. Path versioning keeps per-version OpenAPI specs and Kiota clients unambiguous, and matches
+  semver. Path versioning keeps per-version OpenAPI specs and clients unambiguous, and matches
   the `/api/v3/...` shape users already know from Sonarr/Radarr.
 - **Namespaces** group related resources (`sync/`, `guide/{service}/`). They never resolve: no
   handler mounts at `/api/v1/sync` or `/api/v1/guide/{service}`; both 404. At most one conceptual
@@ -62,22 +45,21 @@ GET    /api/v1/guide/{service}/qualities
 GET    /api/v1/guide/{service}/score-sets
 GET    /api/v1/guide/{service}/naming
 
-GET    /api/v1/instances
-GET    /api/v1/instances/{name}
 GET    /api/v1/instances/{name}/custom-formats
 DELETE /api/v1/instances/{name}/custom-formats/{id}
-GET    /api/v1/instances/{name}/quality-profiles
 
 POST   /api/v1/sync/jobs                              # 202 + Location
 GET    /api/v1/sync/jobs                              # history and running state
 GET    /api/v1/sync/jobs/{id}                         # cumulative snapshot
-GET    /api/v1/sync/schedule                          # singleton; serve mode only
+GET    /api/v1/sync/jobs/{id}/results                 # terminal results (ADR-016)
+GET    /api/v1/sync/schedule                          # singleton
 ```
 
 The three namespaces map to the three data owners: `guide` is read-only TRaSH Guides data scoped by
 service type; `instances` is the user's configured Sonarr/Radarr instances scoped by instance name
 (names are unique across services, enforced by config validation); `sync` is Recyclarr's own job and
-schedule state.
+schedule state. New routes MUST fit this grammar; instance configuration routes follow ADR-012 when
+a consumer needs them.
 
 ### Supporting rules
 
@@ -101,12 +83,22 @@ schedule state.
   `*SummaryResponse` so the full-resource name stays free for the `/{id}` representation. Adding
   summary fields is additive; removing them is breaking.
 
-### Consequences
+## Rejected Options
 
-- Good, because each URL identifies exactly one resource with one owner; GET and DELETE on the same
-  path operate on the same thing
-- Good, because instance addressing is explicit and the scheme survives the multi-instance reality
-- Good, because mutation verbs (PUT/PATCH on `instances`) can be added later without restructuring
-- Bad, because URLs are longer than the flat sketch and the CLI must loop for bulk deletes
-- Bad, because the non-resolvable namespace rule is a discipline the code cannot enforce; it lives
-  here and in the `http-server` skill
+- Flat namespace under `/api`: unrelated resources share URLs and instance addressing is unsolved.
+
+## Consequences
+
+- Each URL identifies one resource with one owner; `GET` and `DELETE` on a path act on the same
+  thing.
+- Mutation verbs on `instances` can be added without restructuring.
+- URLs are longer, and the CLI loops for bulk deletes.
+- The non-resolvable namespace rule is not enforced by code; it lives here and in the
+  `http-server` skill.
+
+## History
+
+- 2026-07-24: Adopt versioned domain namespaces, job resources, and health outside `/api`.
+- 2026-09-17: Job resource returns the cumulative instance snapshot from ADR-018.
+- 2026-09-26: Collections return wrapped summary items.
+- 2026-10-16: Resource model matched to implemented routes.

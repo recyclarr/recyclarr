@@ -1,53 +1,26 @@
 # ADR-016: Semantic sync job results API
 
-- **Status:** Accepted
-- **Date:** 2026-08-19
-- **Supersedes:** ADR-014
+- **Scope:** `src/Recyclarr.Server/Features/Sync/` (job creation, job, and results endpoints)
 
-## Context and Problem Statement
+## Context
 
-Sync job progress is polled repeatedly, while terminal outcomes and deltas are read after
-completion. The existing response work carries diagnostic prose and shapes DTOs around the current
-CLI. It also returns an empty successful result while a job is still running, which hides resource
-state.
+Job progress is polled about every 500 ms for the 10-60 seconds a sync takes; terminal outcomes and
+deltas are read once, after completion, and can be tens of KB per instance. Generated clients need
+explicit schemas, HTTP status must describe the request rather than the background sync, and
+server-owned configuration details must not leak through the sync API.
 
-The HTTP contract needs stable semantic DTOs independent of Core serialization and current consumer
-presentation.
+## Decision
 
-## Decision Drivers
-
-- Progress and terminal results have different access patterns
-- HTTP status must describe the request, not the background sync outcome
-- Generated clients need explicit schemas without arbitrary payload dictionaries
-- Server-owned configuration details must not leak through the sync API
-- New outcome variants need predictable API versioning rules
-
-## Considered Options
-
-1. Embed terminal results in the polled job resource
-2. Keep one terminal results sub-resource with semantic DTOs
-3. Expose one result endpoint per pipeline or resource
-
-## Decision Outcome
-
-Chosen option: "Keep one terminal results sub-resource with semantic DTOs", because it keeps the
-poll response small while returning one coherent terminal aggregate.
+Terminal results live on one sub-resource, `GET /api/v1/sync/jobs/{id}/results`, as semantic DTOs
+that the server maps from Core results. The polled job resource carries only status and progress.
 
 ### Request and job lifecycle
 
-> Superseded by ADR-019: the server validates its configuration at startup. Job creation validates
-> only the request against the loaded configuration, and the 500 rule below no longer applies.
-
-`POST /api/v1/sync/jobs` performs only request and server-configuration validation before creating a
-job.
+`POST /api/v1/sync/jobs` validates only the request against the loaded configuration (ADR-019).
 
 - Invalid request selectors return 400 and create no job
-- Invalid server-owned configuration returns 500 and creates no job
 - A valid request creates a pending job and returns 202 with its location
 - Planning, transaction, and persistence happen inside the background job
-
-Configuration parsing details and deprecations remain in server logs. A future remote configuration
-write API will define its own typed validation responses when that capability exists.
 
 ### Resource status
 
@@ -58,7 +31,7 @@ GET /api/v1/sync/jobs/{id}
 
 GET /api/v1/sync/jobs/{id}/results
   200  terminal results, including partial and failed jobs
-  409  known job is not terminal
+  409  known job is not terminal, or was skipped
   404  unknown or evicted job
 ```
 
@@ -76,9 +49,11 @@ SyncJobResultsResponse
 ├── Fault
 └── Instances
     ├── Name
-    ├── Service
+    ├── Service (discriminator)
     ├── Status
+    ├── Failure
     ├── Fault
+    ├── PlanningOutcomes
     └── Pipelines
 ```
 
@@ -123,11 +98,23 @@ messages, stack traces, or C# type names.
 - Removing, renaming, or changing field meaning requires a new API version
 - Core changes do not affect API versioning unless the mapped HTTP contract changes
 
-### Consequences
+## Rejected Options
 
-- Good, because polling cost is independent of terminal result size
-- Good, because generated clients receive explicit, reviewable contracts
-- Good, because HTTP and sync statuses cannot be confused
-- Good, because Core and transport models can evolve for their own responsibilities
-- Bad, because Server needs explicit mapping for every supported result variant
-- Bad, because clients make a second request after job completion
+- Results embedded in the polled job resource: serializes a large static payload on every poll.
+- One endpoint per pipeline or resource: the CLI needs every operation at once, so this multiplies
+  round trips.
+- An empty successful result while the job runs: hides that results do not exist yet.
+
+## Consequences
+
+- Polling cost is independent of terminal result size.
+- HTTP and sync statuses cannot be confused.
+- Core and transport models evolve separately; the server maps every result variant explicitly.
+- Clients make a second request after the job completes.
+
+## History
+
+- 2026-07-26: Results move to a separate sub-resource of the job.
+- 2026-08-19: Results become semantic DTOs; 409 until the job is terminal.
+- 2026-09-17: Faults attach to instances and jobs (ADR-017).
+- 2026-09-26: Job creation no longer validates configuration (ADR-019).

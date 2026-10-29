@@ -1,33 +1,18 @@
 # ADR-024: Durable sync jobs with TickerQ and SQLite
 
-- **Status:** accepted
-- **Date:** 2026-10-05
+- **Scope:** `src/Recyclarr.Server/Persistence/`, `src/Recyclarr.Server/Sync/`
 
-## Context and Problem Statement
+## Context
 
-Sync jobs ran on a process-local `Task.Run` with in-memory job state. A server restart lost every
-job, its status, and its results, and manual and scheduled syncs had no shared execution path. The
-persistent server (`recyclarr serve`) needs jobs that survive restarts and run one at a time.
+A persistent server needs sync jobs whose status and results survive a restart, one execution path
+for manual and scheduled syncs, and one sync at a time in creation order. Deployment is one
+container with one config volume and no external database, and a later external backend (for
+example Postgres) must not need a rewrite.
 
-## Decision Drivers
+## Decision
 
-- Jobs and results stay queryable after a restart; nothing re-runs on its own.
-- Manual (API) and scheduled jobs use one execution path.
-- Only one sync runs at a time, in creation order.
-- Self-hosted deployment: one container, one config volume, no external database.
-- A later external database backend (e.g. Postgres) must not need a rewrite.
-
-## Considered Options
-
-1. TickerQ (EF Core operational store) with SQLite in the config volume
-2. Hand-written queue table and `BackgroundService` worker over EF Core
-3. Keep in-memory jobs
-
-## Decision Outcome
-
-Chosen option: "TickerQ with SQLite", because it gives a persisted queue and worker lifecycle
-without owning that code, and its only relational store is EF Core, which Recyclarr's job tables
-also use.
+Sync jobs are queued and executed by TickerQ over an EF Core SQLite store; Recyclarr owns job
+identity, status, and results.
 
 - One database file, `state/server.db`, holds two EF contexts with separate migration sets:
   `ServerDbContext` (Recyclarr job tables) and `TickerQueueDbContext` (TickerQ tables). TickerQ
@@ -43,15 +28,24 @@ also use.
 - Data access is LINQ only (no SQLite-specific SQL); `DateTimeOffset` is stored as binary so SQLite
   can order it.
 
-### Consequences
+## Rejected Options
 
-- Good, because jobs and results survive restarts and the job API contract is unchanged.
-- Good, because manual and scheduled jobs share one path.
-- Bad, because each waiting job holds a TickerQ worker. When waiting jobs reach the worker count,
+- Hand-written queue table and `BackgroundService` worker: owns queue and worker lifecycle code
+  that TickerQ provides.
+- In-memory jobs on `Task.Run`: a restart loses every job and its results.
+
+## Consequences
+
+- Jobs and results survive restarts; manual and scheduled jobs share one path.
+- Each waiting job holds a TickerQ worker. When waiting jobs reach the worker count,
   later jobs start late (still in order).
-- Bad, because per-instance results are stored as JSON of the v1 results DTO. A breaking change to
-  that DTO needs a data migration of stored rows.
-- Bad, because a Postgres backend needs a second migration set and provider selection in settings.
-  The trigger is a request for an external database.
-- Bad, because TickerQ's `MapTicker` writes a process-wide dictionary without locking; Recyclarr
-  serializes the call so in-process test servers can register in parallel.
+- Per-instance results are stored as JSON of the v1 results DTO. A breaking change to that DTO
+  needs a data migration of stored rows.
+- A Postgres backend needs a second migration set and provider selection in settings. The trigger
+  is a request for an external database.
+- TickerQ's `MapTicker` writes a process-wide dictionary without locking; Recyclarr serializes the
+  call so in-process test servers can register in parallel.
+
+## History
+
+- 2026-10-05: Persist sync jobs with TickerQ and SQLite; one sync at a time.
