@@ -42,7 +42,7 @@ internal class SonarrV3CustomFormatGateway(SonarrApi.ICustomFormatApi api) : ICu
         CancellationToken ct
     )
     {
-        _specSchemas ??= (await api.SpecificationSchema(ct))
+        _specSchemas ??= (await api.Schema(ct))
             .Where(x => x.Implementation is not null)
             .ToDictionary(x => x.Implementation!, StringComparer.OrdinalIgnoreCase);
 
@@ -62,6 +62,8 @@ internal class SonarrV3CustomFormatGateway(SonarrApi.ICustomFormatApi api) : ICu
         }
 
         var dto = SonarrV3CustomFormatMapper.CloneSpec(schema);
+        // Presets are UI starting points for a new specification, not part of a saved one
+        dto.ExtensionData.Remove("presets");
         SonarrV3CustomFormatMapper.UpdateSpec(spec, dto);
 
         var fields = dto.Fields?.ToList() ?? [];

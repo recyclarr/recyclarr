@@ -25,8 +25,9 @@ public interface ICustomFormatApi
     Task CustomformatDelete(int id, CancellationToken ct = default);
 
     /// <summary>
-    /// One template per specification implementation. Sonarr v5 requires the template's
-    /// <c>implementationName</c> and <c>infoLink</c> on saved specifications.
+    /// One template per specification implementation. Saved specifications start from these so
+    /// members the guide does not carry keep the service's values; Sonarr v5 requires the
+    /// template's <c>implementationName</c> and <c>infoLink</c>.
     /// </summary>
     [Get("/api/v5/customformat/schema")]
     Task<ICollection<CustomFormatSpecificationSchema>> Schema(CancellationToken ct = default);

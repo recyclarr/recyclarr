@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 using Riok.Mapperly.Abstractions;
@@ -20,8 +21,6 @@ internal static partial class RadarrCustomFormatMapper
         CustomFormatSpecificationData domain
     );
 
-    // Presets are UI starting points for a new specification, not part of a saved one
-    [MapperIgnoreTarget(nameof(RadarrApi.CustomFormatSpecificationSchema.Presets))]
     public static partial RadarrApi.CustomFormatSpecificationSchema CloneSpec(
         RadarrApi.CustomFormatSpecificationSchema schema
     );
@@ -45,4 +44,7 @@ internal static partial class RadarrCustomFormatMapper
     private static FieldValue MapFieldValue(object? value) => FieldValue.From(value);
 
     private static object? MapFieldValueToObject(FieldValue value) => value.Inner;
+
+    // Deep cloning of unmodeled extension data; JsonElement has no members Mapperly can copy
+    private static JsonElement CloneElement(JsonElement element) => element.Clone();
 }
