@@ -32,6 +32,9 @@ LABEL name="recyclarr" \
 # RECYCLARR_SERVER_URL makes `docker exec <container> recyclarr ...` use this server instead of
 # starting a private one against the same /config.
 #
+# entrypoint.sh rejects v8-style CLI arguments with a pointer to `docker exec` and runs anything
+# else (the default recyclarr-server, sh) through exec, so tini still signals the process directly.
+#
 # RECYCLARR_API_KEY has no default: the server refuses to start without it. Users set it on the
 # container, and both the server and `docker exec` CLI commands read it.
 ENV PATH="${PATH}:/app/recyclarr" \
@@ -47,6 +50,7 @@ RUN set -ex; \
     mkdir -p /config /data && chown 1000:1000 /config /data;
 
 COPY --link --from=binaries / /app/recyclarr/
+COPY --link --chmod=555 docker/entrypoint.sh /entrypoint.sh
 
 USER 1000:1000
 VOLUME /config
@@ -55,5 +59,5 @@ EXPOSE 7982 7983
 # 127.0.0.1, not localhost: busybox wget tries ::1 first, and the server listens on IPv4 only.
 HEALTHCHECK CMD wget -q --spider http://127.0.0.1:7983/livez || exit 1
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 CMD ["recyclarr-server"]

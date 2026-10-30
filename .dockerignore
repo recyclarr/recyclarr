@@ -1,3 +1,4 @@
-# The image only packages prebuilt binaries (see Dockerfile)
+# The image only packages prebuilt binaries and its entrypoint (see Dockerfile)
 *
 !publish/linux-musl-*/
+!docker/entrypoint.sh
