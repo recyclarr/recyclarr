@@ -1,5 +1,6 @@
 using Autofac;
 using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -42,8 +43,18 @@ internal static class CliSetup
         );
     }
 
-    public static async Task<int> Run(ILifetimeScope scope, IEnumerable<string> args)
+    public static async Task<int> Run(ILifetimeScope scope, IReadOnlyList<string> args)
     {
+        var removed = RemovedCommands.Find(args);
+        if (removed is not null)
+        {
+            scope
+                .Resolve<IAnsiConsole>()
+                .MarkupLine($"[red][[REMOVED]][/] {Markup.Escape(removed)}");
+            scope.Resolve<ILogger>().Error("[REMOVED] {Message}", removed);
+            return (int)ExitStatus.Failed;
+        }
+
         var app = scope.Resolve<CommandApp>();
         app.Configure(config =>
         {
