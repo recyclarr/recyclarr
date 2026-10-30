@@ -97,7 +97,7 @@ services:
     profiles: [recyclarr]
     read_only: true
     tmpfs: /tmp
-    # Publish binaries first; scripts/Docker-Recyclarr.ps1 does this.
+    # Publish binaries first; scripts/docker-recyclarr.sh does this.
     build:
       context: .
       # platforms:

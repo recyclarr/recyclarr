@@ -11,7 +11,7 @@ description: >-
   `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
   updating E2E fixtures under `tests/Recyclarr.EndToEndTests/Fixtures/`
   (`recyclarr.yml`, `settings.yml`, `custom-formats-*`,
-  `trash-guides-override/`); running `Run-E2ETests.ps1` or
+  `trash-guides-override/`); running `run-e2e-tests.sh` or
   `scripts/coverage.py`; investigating flaky tests, coverage gaps, or
   Testcontainers setup. Triggers on phrases like "write a test", "fix this
   test", "improve coverage", "add an E2E case", "mock this dependency", or
@@ -186,7 +186,7 @@ dotnet test -v q tests/Recyclarr.Cli.Tests/
 dotnet test -v q --filter "FullyQualifiedName~TestMethodName"
 
 # E2E tests (requires Docker services)
-./scripts/Run-E2ETests.ps1
+./scripts/run-e2e-tests.sh
 ```
 
 ## Coverage Analysis
@@ -229,7 +229,7 @@ fixture.
 
 ### Running E2E Tests
 
-**MANDATORY**: Use `./scripts/Run-E2ETests.ps1` - never run `dotnet test` directly for E2E tests.
+**MANDATORY**: Use `./scripts/run-e2e-tests.sh` - never run `dotnet test` directly for E2E tests.
 The script outputs a log file path; use `rg` to search logs without rerunning tests.
 
 ### Resource Provider Strategy
