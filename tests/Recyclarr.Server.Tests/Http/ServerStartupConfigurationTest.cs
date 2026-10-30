@@ -220,6 +220,47 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             );
     }
 
+    [TestCase("CRON_SCHEDULE", "server.schedule.cron", "#cron-schedule")]
+    [TestCase("RECYCLARR_CREATE_CONFIG", "configuration files", "#docker-env-removed")]
+    [TestCase("RECYCLARR_LOG_LEVEL", "--log", "#docker-env-removed")]
+    public async Task Removed_v8_variable_is_warned_about_and_startup_continues(
+        string variable,
+        string replacement,
+        string anchor
+    )
+    {
+        Env.Set(variable, "set");
+
+        using var client = CreateClient();
+        var response = await client.GetAsync(new Uri("/api/v1/sync/jobs", UriKind.Relative));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var warning = RemovedVariableWarnings().Should().ContainSingle().Which;
+        warning.Level.Should().Be(LogEventLevel.Warning);
+        warning
+            .RenderMessage(CultureInfo.InvariantCulture)
+            .Should()
+            .Contain(variable)
+            .And.Contain(replacement)
+            .And.Contain(anchor);
+    }
+
+    [Test]
+    public async Task No_removed_variable_warning_when_none_are_set()
+    {
+        using var client = CreateClient();
+        await client.GetAsync(new Uri("/api/v1/sync/jobs", UriKind.Relative));
+
+        RemovedVariableWarnings().Should().BeEmpty();
+    }
+
+    private IEnumerable<LogEvent> RemovedVariableWarnings()
+    {
+        return _log.Events.Where(evt =>
+            evt.MessageTemplate.Text.StartsWith("[REMOVED]", StringComparison.Ordinal)
+        );
+    }
+
     // Includes resolve through resource providers, so this fails if configuration loads before
     // the providers initialize.
     [Test]

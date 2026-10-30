@@ -24,9 +24,33 @@ internal sealed class ServerBootstrapService(
     IDbContextFactory<TickerQueueDbContext> tickerQueueDb,
     ISyncJobStore jobs,
     SettingsBindResult settings,
+    IConfiguration configuration,
     ILogger log
 ) : IHostedLifecycleService
 {
+    private const string UpgradeGuide = "https://recyclarr.dev/guide/upgrade-guide/v9.0/";
+
+    // Recyclarr 8 Docker variables that Recyclarr 9 ignores. Containers upgraded without reading
+    // the upgrade guide often still set them, so each one gets a pointer to its replacement.
+    private static readonly (
+        string Variable,
+        string Replacement,
+        string Anchor
+    )[] RemovedVariables =
+    [
+        ("CRON_SCHEDULE", "set `server.schedule.cron` in settings.yml instead", "cron-schedule"),
+        (
+            "RECYCLARR_CREATE_CONFIG",
+            "create configuration files in the configuration directory yourself",
+            "docker-env-removed"
+        ),
+        (
+            "RECYCLARR_LOG_LEVEL",
+            "pass --log to CLI commands to show log output on the console",
+            "docker-env-removed"
+        ),
+    ];
+
     public async Task StartingAsync(CancellationToken ct)
     {
         logger.Reload();
@@ -39,6 +63,21 @@ internal sealed class ServerBootstrapService(
         )
         {
             log.Warning("[DEPRECATED] {Message}", warning.Describe());
+        }
+
+        foreach (var (variable, replacement, anchor) in RemovedVariables)
+        {
+            if (string.IsNullOrEmpty(configuration[variable]))
+            {
+                continue;
+            }
+
+            log.Warning(
+                "[REMOVED] {Variable} is no longer used; {Replacement}. See {Url}",
+                variable,
+                replacement,
+                $"{UpgradeGuide}#{anchor}"
+            );
         }
 
         if (logger.ActiveLogFiles.Count > 0)
