@@ -7,6 +7,45 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v9.0 Upgrade Guide][breaking9] for required
+changes you may need to make.
+
+[breaking9]: https://recyclarr.dev/guide/upgrade-guide/v9.0/
+
+### Added
+
+- Server: Recyclarr server with an HTTP API, scheduled syncs, and metrics
+- Kubernetes: Official Helm chart
+- Config: `RECYCLARR_STATE_DIR` environment variable
+
+### Changed
+
+- **BREAKING**: Recyclarr is now a client and server; CLI commands run through a server
+- **BREAKING**: Docker: The image runs the Recyclarr server instead of a cron job
+- **BREAKING**: Docker: Arguments after the image name no longer run CLI commands
+- **BREAKING**: Recyclarr no longer creates the `configs` and `includes` directories or an empty
+  `settings.yml`
+- CLI: No longer writes log files
+- Logs: Text log lines include the date and time
+
+### Removed
+
+- **BREAKING**: CLI: The `--config` option of `sync` has been removed
+- **BREAKING**: CLI: The `config create` and `config list` commands have been removed
+- **BREAKING**: CLI: The deprecated `migrate` command has been removed
+- **BREAKING**: CLI: The deprecated `state repair` command has been removed
+- **BREAKING**: Docker: The `CRON_SCHEDULE`, `RECYCLARR_CREATE_CONFIG`, and `RECYCLARR_LOG_LEVEL`
+  environment variables have been removed
+- Docker: The `edge` image tag has been removed. Use `ghcr.io/recyclarr/recyclarr-dev:master`
+  instead
+
+### Fixed
+
+- Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
+- Sync: Inconsistent results when two custom formats share the same name
+- Sync: Sonarr syncs reported a language change on some quality profiles every time
+- CLI: `list custom-formats` crashed when the guide had no custom formats for a service
+
 ## [8.8.1] - 2026-10-28
 
 ### Fixed
