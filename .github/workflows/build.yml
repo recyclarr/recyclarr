@@ -143,7 +143,7 @@ jobs:
     with:
       platform: ubuntu-latest
       runtime: ${{ matrix.runtime }}
-      publish-args: -NoSingleFile
+      publish-args: --no-single-file
       skip-smoke: true
 
   #############################################
@@ -306,11 +306,7 @@ jobs:
           pattern: "!helm-chart"
 
       - name: Create Archive
-        shell: pwsh
-        run: >
-          ci/CreateArchive.ps1
-          -PublishDir publish
-          -OutputDir archive
+        run: ci/create-archive.sh publish archive
 
       - name: Extract Changelog
         id: changelog

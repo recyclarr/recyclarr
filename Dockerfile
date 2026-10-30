@@ -1,6 +1,6 @@
 # The image packages binaries published outside Docker, so it ships the same framework-dependent
 # musl builds as the release archives. Publish each target platform's runtime first, e.g.:
-#   ci/Publish.ps1 -Runtime linux-musl-x64 -NoSingleFile
+#   ci/publish.sh linux-musl-x64 --no-single-file
 # BuildKit builds only the stage matching the target platform, so other runtimes may be absent.
 FROM scratch AS binaries-amd64
 COPY --link publish/linux-musl-x64/ /
