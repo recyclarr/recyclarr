@@ -45,8 +45,14 @@ try {
         }
 
         $readTask = $process.StandardOutput.ReadLineAsync()
-        $timeout = $deadline - [DateTime]::UtcNow
-        $line = $readTask.WaitAsync($timeout).GetAwaiter().GetResult()
+        $timeout = [TimeSpan]::FromTicks([Math]::Max(0, ($deadline - [DateTime]::UtcNow).Ticks))
+        try {
+            $line = $readTask.WaitAsync($timeout).GetAwaiter().GetResult()
+        }
+        catch [System.TimeoutException] {
+            break
+        }
+
         if ($null -ne $line) {
             $output.Add($line)
         }
@@ -57,7 +63,11 @@ try {
         }
     }
 
-    throw "Recyclarr server did not start within 30 seconds"
+    # Stop the server first so reading stderr to the end cannot block.
+    $process.Kill($true)
+    $process.WaitForExit()
+    $output.Add($process.StandardError.ReadToEnd())
+    throw "Recyclarr server did not start within 30 seconds:`n$($output -join "`n")"
 }
 finally {
     if (-not $process.HasExited) {
