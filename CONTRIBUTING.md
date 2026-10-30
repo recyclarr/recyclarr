@@ -119,12 +119,6 @@ The GitHub workflows handle:
 
 ## Additional Development Tasks
 
-### Updating `.gitignore`
-
-Execute `scripts/Update-Gitignore.ps1` from the repo root. This pulls the latest relevant
-`.gitignore` patterns from [gitignore.io](https://gitignore.io) and commits them to your current
-branch.
-
 ### Testing Discord Notifier
 
 1. Make a GET request to `https://api.github.com/repos/recyclarr/recyclarr/releases/tags/v8.0.0` (or
