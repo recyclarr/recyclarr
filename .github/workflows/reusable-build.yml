@@ -33,13 +33,26 @@ jobs:
         uses: $/.github/actions/setup-dotnet
 
       - name: Publish
-        shell: pwsh
-        run: ci/Publish.ps1 -Runtime ${{ inputs.runtime }} ${{ inputs.publish-args }}
+        shell: bash
+        env:
+          RUNTIME: ${{ inputs.runtime }}
+          PUBLISH_ARGS: ${{ inputs.publish-args }}
+        # PUBLISH_ARGS is unquoted so it splits into separate flags
+        run: ci/publish.sh "$RUNTIME" $PUBLISH_ARGS
+
+      # Runner images disagree on interpreter names; macOS lacks `python`, Windows lacks `python3`
+      - name: Setup Python
+        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
 
       - name: Smoke
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
-        shell: pwsh
-        run: ci/SmokeTest.ps1 publish/${{ inputs.runtime }}
+        shell: bash
+        env:
+          RUNTIME: ${{ inputs.runtime }}
+        run: python ci/smoke-test.py "publish/$RUNTIME"
 
       - name: Upload Artifact
         uses: $/.github/actions/upload-tar
