@@ -394,9 +394,5 @@ Changelog, so the newest entries are always at the top.
 
 The `changelog` skill has detailed format and conventions.
 
-Long-running unreleased features: intermediate changes MUST NOT modify `CHANGELOG.md`. Add one
-consolidated entry only when the feature is complete and merge-ready. The `http-server` branch is
-currently in this state.
-
-Otherwise, when planning user-facing changes (`feat`, `fix`, `perf`), MUST include `CHANGELOG.md` in
-scope and verify the implementation plan includes its update before starting work.
+When planning user-facing changes (`feat`, `fix`, `perf`), MUST include `CHANGELOG.md` in scope and
+verify the implementation plan includes its update before starting work.
