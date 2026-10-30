@@ -20,6 +20,23 @@ CHANGELOG format and conventions for documenting Recyclarr releases.
 Recyclarr uses keepachangelog.com format. The audience is non-technical end users who run Recyclarr
 but do not read source code. They care about what changed in their experience, not why or how.
 
+## Release Delta
+
+Entries describe the difference between the last released version and this release, as seen by a
+user who never ran an unreleased build. Commits are evidence for finding candidates, not entries.
+
+- A feature new in this release gets one entry for the whole feature. Its properties (auth, ports,
+  file formats, options) are not separate Added or Changed entries.
+- Changed, Deprecated, and Removed apply only to behavior a released version had. Fixed applies only
+  to bugs a released version had.
+- Drop changes that cancel out or only refine unreleased work, such as a feature added and reverted,
+  or a fix to an unreleased feature.
+- Before writing an Added or Fixed entry, confirm the last release tag lacks it: search older
+  `CHANGELOG.md` sections and `git grep <term> <tag>`. Unreleased commits can touch a released
+  feature without introducing it.
+- Test each entry: would a user upgrading from the last release recognize the "before" it implies?
+  If not, the entry describes development history; remove or fold it into its feature entry.
+
 ## CHANGELOG Format
 
 File: `CHANGELOG.md`
@@ -47,8 +64,6 @@ Entry format: `- Scope: Description (#NNN)`
   then minor items. Do not use commit chronology as the ordering.
 - Every Deprecated entry must include what to use instead or a migration path. A deprecation without
   guidance is incomplete.
-- Omit entries that cancel each other out within the same unreleased window. If a feature was added
-  and then reverted before release, remove both entries.
 
 ## Implementation Detail Filter
 
@@ -119,6 +134,9 @@ changes you may need to make.
 - **BREAKING**: Description of breaking change
 ```
 
+When a release links an upgrade guide, its breaking and removed entries name only what changed.
+Migration steps, replacement settings, and rationale belong in the guide, not the entry.
+
 ## Removed Features Wording
 
 Check if deprecation was in a prior release:
@@ -129,4 +147,5 @@ git tag --contains <sha> | grep -E '^v[0-9]'
 ```
 
 - **Tags exist**: "The deprecated `X` has been removed."
-- **No tags**: "The `X` option has been removed. Use `Y` instead."
+- **No tags**: "The `X` option has been removed. Use `Y` instead." (omit the replacement when an
+  upgrade guide covers it)
