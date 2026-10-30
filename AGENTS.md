@@ -264,7 +264,7 @@ log.Information(message);
 
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)
-- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
+- `docker-recyclarr.sh`: Run Recyclarr in container; auto-starts dependent services via
   `docker compose up -d`
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
@@ -278,7 +278,7 @@ Test conventions live in the `testing` skill.
 - Run `dotnet test -v q` at solution level; it excludes E2E tests. Use
   `dotnet build --no-incremental -v q` for a clean rebuild. MUST limit build and test output to 200
   lines.
-- E2E: MUST run `./scripts/Run-E2ETests.ps1`, never `dotnet test`. Search its log with `rg`.
+- E2E: MUST run `./scripts/run-e2e-tests.sh`, never `dotnet test`. Search its log with `rg`.
 
 ### Local Processes
 

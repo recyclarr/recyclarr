@@ -8,10 +8,8 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{cs,ps1}]
-indent_size = 4
-
 [*.cs]
+indent_size = 4
 
 ### Style Enforcement
 
