@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# ///
 """Release helpers for the Prepare, Tag, and Recover Release workflows."""
 
 import argparse

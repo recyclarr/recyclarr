@@ -136,7 +136,7 @@ The GitHub workflows handle:
 1. Run the notifier with your test Discord webhook:
 
    ```bash
-   python ./discord_notify.py \
+   ./discord_notify.py \
      --version v8.0.0 \
      --repo recyclarr/recyclarr \
      --webhook-url https://discord.com/api/webhooks/your_webhook_url \

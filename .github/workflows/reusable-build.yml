@@ -40,19 +40,16 @@ jobs:
         # PUBLISH_ARGS is unquoted so it splits into separate flags
         run: ci/publish.sh "$RUNTIME" $PUBLISH_ARGS
 
-      # Runner images disagree on interpreter names; macOS lacks `python`, Windows lacks `python3`
-      - name: Setup Python
+      - name: Setup uv
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.x"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
       - name: Smoke
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
         shell: bash
         env:
           RUNTIME: ${{ inputs.runtime }}
-        run: python ci/smoke-test.py "publish/$RUNTIME"
+        run: uv run ci/smoke-test.py "publish/$RUNTIME"
 
       - name: Upload Artifact
         uses: $/.github/actions/upload-tar
