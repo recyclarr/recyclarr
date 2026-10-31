@@ -30,6 +30,9 @@ jobs:
           persist-credentials: false
           ref: ${{ env.TAG }}
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
       - name: Build Schemas
         run: ./ci/build-schemas.py
 
@@ -123,17 +126,12 @@ jobs:
           jq -r '.assets[].browser_download_url' <<<"$DATA" > assets.txt
           jq -r '.body' <<<"$DATA" > changelog.txt
 
-      - name: Setup Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.x"
-
-      - name: Install Discord Webhook Python Module
-        run: pip install "discord-webhook==1.0.0"
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
       - name: Send Discord Notification
         run: >
-          python ci/notify/discord_notify.py
+          ./ci/notify/discord_notify.py
           --version ${{ env.TAG }}
           --repo ${{ github.repository }}
           --webhook-url ${{ secrets.DISCORD_WEBHOOK }}

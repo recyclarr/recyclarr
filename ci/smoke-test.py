@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# ///
 """Verify published binaries start: the CLI reports a version and the server signals READY."""
 
 import argparse

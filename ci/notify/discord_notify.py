@@ -1,3 +1,8 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["discord-webhook==1.0.0"]
+# ///
 from collections import defaultdict
 import re
 from discord_webhook import DiscordWebhook, DiscordEmbed
