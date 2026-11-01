@@ -49,10 +49,11 @@ provider data.
 
 ### Configuration authoring
 
-Configuration is hand-edited YAML on the server. No API client can act on configuration files or
-templates, so the API exposes neither:
+Configuration is hand-edited YAML on the server. The server never writes configuration files:
 
-- No endpoints list, read, or write configuration files or configuration templates.
+- No endpoints list, read, or write configuration files.
+- The server may return generated configuration text, such as starter templates. The client decides
+  where to write it; the server's config directory may be read-only, or on another machine.
 - `GET /api/v1/instances` and `GET /api/v1/instances/{name}` (ADR-012) have no consumer and are not
   implemented.
 - The instances namespace provides only what `delete custom-formats` needs: listing an instance's
@@ -64,6 +65,8 @@ templates, so the API exposes neither:
   server files, and administrators learn of problems only when a request fails.
 - Client config paths passed to ephemeral servers only: a command would mean different things per
   launch model.
+- Server writes starter configs into its config directory: fails for read-only mounts, and a remote
+  server writes where the user cannot edit the file.
 
 ## Consequences
 
@@ -77,3 +80,4 @@ templates, so the API exposes neither:
 
 - 2026-09-26: Load configuration once at startup; remove client-supplied config paths.
 - 2026-10-21: Resolve configuration again when provider data changes; files stay fixed.
+- 2026-10-31: Allow returning generated configuration text; the server still never writes files.
