@@ -1,0 +1,2 @@
+[pre-start]
+dotnet = "dotnet tool restore && dotnet restore"
