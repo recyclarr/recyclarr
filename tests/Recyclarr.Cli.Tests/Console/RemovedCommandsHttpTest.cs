@@ -8,10 +8,7 @@ namespace Recyclarr.Cli.Tests.Console;
 /// </summary>
 internal sealed class RemovedCommandsHttpTest : CliServerHttpFixture
 {
-    [TestCase("#config-commands-removed", "config", "create")]
-    [TestCase("#config-commands-removed", "config", "create", "-t", "x", "--force")]
     [TestCase("#config-commands-removed", "config", "list", "local")]
-    [TestCase("#config-commands-removed", "config", "list", "templates", "-i")]
     [TestCase("#migrate-removed", "migrate")]
     [TestCase("#state-repair-removed", "state", "repair", "--adopt")]
     [TestCase("#sync-config-removed", "sync", "--config", "a.yml")]

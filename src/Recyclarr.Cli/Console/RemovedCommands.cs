@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Console;
 /// </summary>
 /// <remarks>
 /// Matching happens on raw arguments before command parsing because strict parsing would reject
-/// the removed options (for example <c>config create --template</c>) before any command runs.
+/// the removed options (for example <c>sync --config</c>) before any command runs.
 /// </remarks>
 internal static class RemovedCommands
 {
@@ -15,16 +15,9 @@ internal static class RemovedCommands
     private static readonly (string[] Prefix, string Message)[] Commands =
     [
         (
-            ["config", "create"],
-            "The `config create` command was removed; copy a template from "
-                + "https://recyclarr.dev/guide/guide-configs/ into your configuration directory"
-                + $". See {UpgradeGuide}#config-commands-removed"
-        ),
-        (
-            ["config", "list"],
-            "The `config list` commands were removed; templates are listed at "
-                + "https://recyclarr.dev/guide/guide-configs/"
-                + $". See {UpgradeGuide}#config-commands-removed"
+            ["config", "list", "local"],
+            "The `config list local` command was removed; the server loads every file in its "
+                + $"configuration directory. See {UpgradeGuide}#config-commands-removed"
         ),
         (
             ["migrate"],

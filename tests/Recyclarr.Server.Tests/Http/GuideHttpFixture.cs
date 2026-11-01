@@ -22,14 +22,18 @@ internal abstract class GuideHttpFixture : ServerHttpFixture
                       "qualities": ["radarr/quality-size"],
                       "naming": ["radarr/naming"],
                       "quality_profiles": ["radarr/quality-profiles"],
-                      "custom_format_groups": ["radarr/cf-groups"]
+                      "quality_profile_groups": ["radarr/quality-profile-groups"],
+                      "custom_format_groups": ["radarr/cf-groups"],
+                      "conflicts": ["radarr/conflicts.json"]
                     },
                     "sonarr": {
                       "custom_formats": ["sonarr/cf"],
                       "qualities": ["sonarr/quality-size"],
                       "naming": ["sonarr/naming"],
                       "quality_profiles": ["sonarr/quality-profiles"],
-                      "custom_format_groups": ["sonarr/cf-groups"]
+                      "quality_profile_groups": ["sonarr/quality-profile-groups"],
+                      "custom_format_groups": ["sonarr/cf-groups"],
+                      "conflicts": ["sonarr/conflicts.json"]
                     }
                   }
                 }

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Text.Json.Serialization;
 using Recyclarr.SyncState;
 
@@ -18,6 +19,9 @@ public record QualityProfileQualityItem
 )]
 public record QualityProfileResource : IGuideResource
 {
+    [JsonIgnore]
+    public IFileInfo? SourceFile { get; init; }
+
     [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = "";
 

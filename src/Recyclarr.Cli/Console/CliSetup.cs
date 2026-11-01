@@ -18,6 +18,26 @@ internal static class CliSetup
             .WithExample("sync", "sonarr", "--preview");
 
         cli.AddBranch(
+            "config",
+            config =>
+            {
+                config.SetDescription("Create starter configuration files");
+                config
+                    .AddCommand<ConfigCreateCommand>("create")
+                    .WithExample("config", "create", "-t", "hd-bluray-web")
+                    .WithExample("config", "create", "-p", "./recyclarr.yml");
+                config.AddBranch(
+                    "list",
+                    list =>
+                    {
+                        list.SetDescription("List configuration templates");
+                        list.AddCommand<ConfigListTemplatesCommand>("templates");
+                    }
+                );
+            }
+        );
+
+        cli.AddBranch(
             "list",
             list =>
             {

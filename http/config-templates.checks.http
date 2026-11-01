@@ -1,0 +1,4 @@
+# Unknown template id
+GET {{baseUrl}}/api/v1/config-templates/no-such-template
+
+?? status == 404

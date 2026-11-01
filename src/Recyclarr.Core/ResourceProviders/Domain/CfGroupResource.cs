@@ -6,6 +6,9 @@ public record CfGroupCustomFormat
     public string Name { get; init; } = "";
     public bool Required { get; init; }
     public bool Default { get; init; }
+
+    /// <summary>A member synced only when the user selects it.</summary>
+    public bool IsOptional => !Required && !Default;
 }
 
 public record CfGroupProfiles
@@ -22,6 +25,15 @@ public record CfGroupResource
     public string Default { get; init; } = "";
     public IReadOnlyCollection<CfGroupCustomFormat> CustomFormats { get; init; } = [];
     public CfGroupProfiles QualityProfiles { get; init; } = new();
+
+    /// <summary>
+    /// A default group syncs automatically for every configured profile it includes. The guide
+    /// stores the flag as the string "true".
+    /// </summary>
+    public bool IsDefault => Default.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+    public IReadOnlySet<string> IncludedProfileTrashIds =>
+        QualityProfiles.Include.Values.ToHashSet(StringComparer.OrdinalIgnoreCase);
 }
 
 public record RadarrCfGroupResource : CfGroupResource;

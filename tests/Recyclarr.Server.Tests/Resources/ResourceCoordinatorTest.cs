@@ -36,6 +36,18 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
     [SetUp]
     public void SetUp()
     {
+        // No config-templates provider is added by default, so includes need a configured one.
+        Fs.AddFile(
+            Paths.ConfigDirectory.File("settings.yml"),
+            new MockFileData(
+                """
+                resource_providers:
+                  - name: includes
+                    type: config-templates
+                    clone_url: https://example.com/includes.git
+                """
+            )
+        );
         _remote = Resolve<FakeGitRemote>();
         CommitGuide("cf-one");
         CommitTemplates("movie-include");
@@ -197,7 +209,7 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
         var includes = Paths
             .ResourceDirectory.SubDirectory(Templates)
             .SubDirectory("git")
-            .SubDirectory("official")
+            .SubDirectory("includes")
             .File("includes.json");
         (await Fs.File.ReadAllTextAsync(includes.FullName)).Should().Contain("movie-include");
     }

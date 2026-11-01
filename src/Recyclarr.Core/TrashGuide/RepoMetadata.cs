@@ -14,6 +14,9 @@ public record RadarrMetadata
     public IReadOnlyCollection<string> QualityProfiles { get; init; } = [];
 
     public IReadOnlyCollection<string> QualityProfileGroups { get; init; } = [];
+
+    // File paths, unlike the other entries, which are directories
+    public IReadOnlyCollection<string> Conflicts { get; init; } = [];
 }
 
 public record SonarrMetadata
@@ -28,6 +31,9 @@ public record SonarrMetadata
     public IReadOnlyCollection<string> QualityProfiles { get; init; } = [];
 
     public IReadOnlyCollection<string> QualityProfileGroups { get; init; } = [];
+
+    // File paths, unlike the other entries, which are directories
+    public IReadOnlyCollection<string> Conflicts { get; init; } = [];
 }
 
 public record JsonPaths
