@@ -35,25 +35,29 @@ contributor did not respond to the process alternative.
 
 ## Decision
 
-Recyclarr does not special-case the Base Profile or the TEST profile group. Auto-sync matches
-groups to user-configured profiles strictly by trash_id, and no user configures the Base Profile,
-so its references are ignored at runtime. Recyclarr accepts an empty `quality_profiles.include`:
-such a group never auto-syncs but can still be added with `custom_format_groups.add`.
+Sync does not special-case the Base Profile or the TEST profile group. Auto-sync matches groups to
+user-configured profiles strictly by trash_id, and no user configures the Base Profile, so its
+references are ignored at runtime. Recyclarr accepts an empty `quality_profiles.include`: such a
+group never auto-syncs but can still be added with `custom_format_groups.add`.
+
+Starter config generation (PDR-009) skips the TEST group: a template for a testing profile gives
+users nothing to start from.
 
 Pursue removal of the schema constraint upstream only if the upstream position changes.
 
 ## Rejected Options
 
-- Filter the TEST group inside Recyclarr: adds a special case for data that is already harmless at
+- Filter the TEST group during sync: adds a special case for data that is already harmless at
   runtime.
 
 ## Consequences
 
 - Config: None
 - Migration: not required
-- `config-templates` keeps its TEST group exclusion. If more internal profile groups appear
-  upstream, that list grows; revisit this decision then.
+- Template generation keeps a TEST group exclusion. If more internal profile groups appear upstream,
+  that list grows; revisit this decision then.
 
 ## History
 
 - 2026-04-29: No Recyclarr change for the Base Profile; empty includes remain valid.
+- 2026-10-31: Starter config generation skips the TEST profile group; sync is unchanged.
