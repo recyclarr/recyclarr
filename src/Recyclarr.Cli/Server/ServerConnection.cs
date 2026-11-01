@@ -38,6 +38,9 @@ internal sealed class ServerConnection(HttpClient client, IAsyncDisposable? owne
     public IInstancesApi Instances { get; } =
         RestService.For<IInstancesApi>(client, SelfApiRefitSettings);
 
+    public IConfigTemplatesApi ConfigTemplates { get; } =
+        RestService.For<IConfigTemplatesApi>(client, SelfApiRefitSettings);
+
     public ValueTask DisposeAsync()
     {
         return ownedServer?.DisposeAsync() ?? ValueTask.CompletedTask;

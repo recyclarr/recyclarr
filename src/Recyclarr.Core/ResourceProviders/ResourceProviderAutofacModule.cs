@@ -47,5 +47,8 @@ public class ResourceProviderAutofacModule : Module
         builder.RegisterType<CfGroupResourceQuery>();
         builder.RegisterType<QualityProfileResourceQuery>();
         builder.RegisterType<QualityProfileGroupResourceQuery>();
+        builder.RegisterType<ConflictsResourceQuery>();
+        builder.RegisterType<ConfigTemplateCatalog>();
+        builder.RegisterType<ConfigTemplateRenderer>();
     }
 }

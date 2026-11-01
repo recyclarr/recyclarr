@@ -6,6 +6,117 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/config-includes": {
+      "get": {
+        "tags": [
+          "Config Templates"
+        ],
+        "summary": "List config includes",
+        "description": "Lists the include templates offered by `config-templates` resource providers, sorted by service and id.",
+        "operationId": "ConfigIncludesList",
+        "responses": {
+          "200": {
+            "description": "The config includes; empty when no provider offers any.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConfigIncludesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/config-templates": {
+      "get": {
+        "tags": [
+          "Config Templates"
+        ],
+        "summary": "List config templates",
+        "description": "Lists the starter configurations generated from guide quality profiles, sorted by id.",
+        "operationId": "ConfigTemplatesList",
+        "responses": {
+          "200": {
+            "description": "The config templates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConfigTemplatesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/config-templates/{id}": {
+      "get": {
+        "tags": [
+          "Config Templates"
+        ],
+        "summary": "Get a config template",
+        "description": "Returns the starter configuration as YAML text, generated from the current guide data. Clients write it to a configuration file; the server stores nothing.",
+        "operationId": "ConfigTemplatesGet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The template id from the config templates list; case-insensitive.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The configuration YAML.",
+            "content": {
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          },
+          "404": {
+            "description": "No template has this id.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/guide/{service}/custom-format-groups": {
       "get": {
         "tags": [
@@ -762,6 +873,55 @@
           "mediaManagement"
         ],
         "type": "string"
+      },
+      "ConfigIncludeSummaryResponse": {
+        "required": [
+          "id",
+          "service"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id to use with `template:` under `include:` in a configuration file."
+          },
+          "service": {
+            "$ref": "#/components/schemas/SupportedServices"
+          }
+        }
+      },
+      "ConfigTemplateSummaryResponse": {
+        "required": [
+          "id",
+          "service",
+          "profileName",
+          "profileTrashId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id to request the template with. It is the guide file name of the quality profile, with a\n`radarr-` or `sonarr-` prefix when both services have a profile file of that name."
+          },
+          "service": {
+            "$ref": "#/components/schemas/SupportedServices"
+          },
+          "profileName": {
+            "type": "string",
+            "description": "The name of the guide quality profile the template syncs."
+          },
+          "profileTrashId": {
+            "type": "string",
+            "description": "The trash_id of the guide quality profile the template syncs."
+          },
+          "trashUrl": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Link to the guide page for the profile; absent when the guide has none."
+          }
+        }
       },
       "CreateSyncJobProblemDetails": {
         "type": "object",
@@ -1593,6 +1753,18 @@
           "type": "string"
         }
       },
+      "IReadOnlyListOfConfigIncludeSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ConfigIncludeSummaryResponse"
+        }
+      },
+      "IReadOnlyListOfConfigTemplateSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ConfigTemplateSummaryResponse"
+        }
+      },
       "IReadOnlyListOfCustomFormatAmbiguousMatchResponse": {
         "type": "array",
         "items": {
@@ -1909,6 +2081,28 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/ValueChangeResponseOfDecimal"
+        }
+      },
+      "ListConfigIncludesResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfConfigIncludeSummaryResponse"
+          }
+        }
+      },
+      "ListConfigTemplatesResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfConfigTemplateSummaryResponse"
+          }
         }
       },
       "ListGuideCustomFormatGroupsResponse": {
@@ -4198,6 +4392,10 @@
     {
       "name": "Guide",
       "description": "Read-only TRaSH Guides data, scoped to one service."
+    },
+    {
+      "name": "Config Templates",
+      "description": "Starter configurations generated from guide data, and include templates from resource providers."
     }
   ]
 }

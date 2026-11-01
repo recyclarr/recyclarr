@@ -135,7 +135,7 @@ internal class ConfiguredCustomFormatProvider(
         foreach (var groupResource in cfGroupResources.Values)
         {
             // Only process default groups
-            if (!groupResource.Default.Equals("true", StringComparison.OrdinalIgnoreCase))
+            if (!groupResource.IsDefault)
             {
                 continue;
             }
@@ -156,12 +156,11 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            var includedTrashIds = groupResource.QualityProfiles.Include.Values.ToHashSet(
-                StringComparer.OrdinalIgnoreCase
-            );
-
             // Resolve all config profiles whose trash_id is in the include list
-            var assignScoresTo = ResolveImplicitProfiles(includedTrashIds, qpResources);
+            var assignScoresTo = ResolveImplicitProfiles(
+                groupResource.IncludedProfileTrashIds,
+                qpResources
+            );
 
             if (assignScoresTo.Count == 0)
             {
@@ -339,18 +338,13 @@ internal class ConfiguredCustomFormatProvider(
         }
 
         // Implicit: all config profiles whose trash_id is in the group's include list
-        var includedTrashIds = new HashSet<string>(
-            groupResource.QualityProfiles.Include.Values,
-            StringComparer.OrdinalIgnoreCase
-        );
-
-        return ResolveImplicitProfiles(includedTrashIds, qpResources);
+        return ResolveImplicitProfiles(groupResource.IncludedProfileTrashIds, qpResources);
     }
 
     // Resolves all config profiles whose trash_id is in the given include set.
     // Returns one entry per config profile (including variants with the same trash_id).
     private List<AssignScoresToConfig> ResolveImplicitProfiles(
-        HashSet<string> includedTrashIds,
+        IReadOnlySet<string> includedTrashIds,
         Dictionary<string, QualityProfileResource> qpResources
     )
     {

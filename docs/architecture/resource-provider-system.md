@@ -290,10 +290,10 @@ If multiple providers have CF with same TrashId, `my-overrides` wins.
 
 ### Default Behavior
 
-**Zero Configuration**: Implicit official providers injected automatically:
-
-- `trash-guides`: `https://github.com/TRaSH-Guides/Guides.git`
-- `config-templates`: `https://github.com/recyclarr/config-templates.git`
+**Zero Configuration**: The official `trash-guides` provider
+(`https://github.com/TRaSH-Guides/Guides.git`) is injected automatically. `config-templates` has no
+official provider: starter configs are generated from guide data (PDR-009), so the type serves only
+user-hosted include templates.
 
 **Replacing Defaults**: Use `replace_default: true` to prevent implicit injection:
 

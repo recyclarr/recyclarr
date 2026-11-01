@@ -92,6 +92,9 @@ internal static class ServerApi
         );
         o.TagDescriptions = t =>
         {
+            t["Config Templates"] =
+                "Starter configurations generated from guide data, and include templates from "
+                + "resource providers.";
             t["Guide"] = "Read-only TRaSH Guides data, scoped to one service.";
             t["Instances"] = "Direct calls to a configured Sonarr or Radarr instance.";
             t["Sync"] = "Sync jobs, their progress and results, and the built-in sync schedule.";

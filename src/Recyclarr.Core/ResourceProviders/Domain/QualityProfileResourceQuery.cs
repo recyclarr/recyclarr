@@ -34,7 +34,7 @@ public class QualityProfileResourceQuery(
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
         var result = loaded
-            .Select(tuple => tuple.Resource)
+            .Select(tuple => tuple.Resource with { SourceFile = tuple.SourceFile })
             .GroupBy(g => g.TrashId)
             .Select(g => g.Last())
             .ToList();

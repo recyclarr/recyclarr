@@ -141,6 +141,10 @@ internal static class ServerLifecycle
             if (new Uri(address).Port != management.Number)
             {
                 log.Information("API listening on {Address}", address);
+                log.Information(
+                    "API reference available at {Address}",
+                    new Uri(new Uri(address), "/scalar/").AbsoluteUri
+                );
                 continue;
             }
 
