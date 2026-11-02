@@ -41,9 +41,9 @@ internal class CustomFormatSyncOperation(
         var transactions = new CustomFormatTransactionData();
         var outcomes = MapPlanOutcomes(planOutcomes).ToList();
         var deltas = new List<CustomFormatDelta>();
-        var incompleteResources =
-            planOutcomes.OfType<InvalidCustomFormatTrashIdOutcome>().Count()
-            + planOutcomes.OfType<DuplicateCustomFormatNameOutcome>().Sum(x => x.TrashIds.Count);
+        var incompleteResources = planOutcomes
+            .OfType<DuplicateCustomFormatNameOutcome>()
+            .Sum(x => x.TrashIds.Count);
 
         var sourceInfo = plannedCfs.ToDictionary(
             cf => cf.Resource.TrashId,
@@ -442,9 +442,6 @@ internal class CustomFormatSyncOperation(
         {
             switch (outcome)
             {
-                case InvalidCustomFormatTrashIdOutcome x:
-                    yield return new CustomFormatReferenceMismatchOutcome(x.TrashId);
-                    break;
                 case InvalidCfGroupSkipIdOutcome x:
                     yield return new CustomFormatGroupReferenceMismatchOutcome(x.TrashId);
                     break;

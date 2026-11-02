@@ -19,7 +19,6 @@ internal static partial class CustomFormatResponseMapper
         ResultValueMapper.EnsureAllMapped(
             "Custom Format outcome",
             result.Outcomes.Count,
-            outcomes.ReferenceMismatches.Count,
             outcomes.GroupReferenceMismatches.Count,
             outcomes.IncompatibleGroups.Count,
             outcomes.EmptyGroups.Count,
@@ -55,10 +54,6 @@ internal static partial class CustomFormatResponseMapper
     ) =>
         new()
         {
-            ReferenceMismatches = outcomes
-                .OfType<CustomFormatReferenceMismatchOutcome>()
-                .Select(x => x.TrashId)
-                .ToList(),
             GroupReferenceMismatches = outcomes
                 .OfType<CustomFormatGroupReferenceMismatchOutcome>()
                 .Select(x => x.TrashId)

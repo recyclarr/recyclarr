@@ -7,8 +7,8 @@
 Diagnostic prose cannot carry sync decisions to the HTTP API without transporting messages or
 reconstructing context that producers discarded. Every consumer (CLI rendering, HTTP results,
 notifications) needs the same facts. Core must stay free of console, logging, notification, HTTP,
-and serialization concerns; preview and apply must report the same deltas; and sync state must
-never claim a service write that was not acknowledged.
+and serialization concerns; preview and apply must report the same deltas; and sync state must never
+claim a service write that was not acknowledged.
 
 ## Decision
 
@@ -120,8 +120,9 @@ successful. Batch and singleton pipelines follow their API request granularity.
 #### Planning
 
 - Planning outcomes belong to the instance rather than an individual pipeline
-- Blocking outcomes cover unknown Custom Format groups, unknown selected or excluded group members,
-  unknown group profile references, and ambiguous direct or group profile references
+- Blocking outcomes cover unknown Custom Formats, unknown Custom Format groups, unknown selected or
+  excluded group members, unknown group profile references, and ambiguous direct or group profile
+  references
 - Non-blocking outcomes cover redundant selection and ineffective exclusion of group members
 - Outcomes retain group, Custom Format, profile, and ambiguity candidate context as applicable
 
@@ -143,8 +144,8 @@ successful. Batch and singleton pipelines follow their API request granularity.
 - One profile create or update is one resource delta
 - Updates contain explicit value, quality-layout, and Custom Format score deltas
 - Created profiles contain only effective state controlled by Recyclarr
-- Outcomes cover reference mismatches, validation constraints, adoption, rename conflicts,
-  ambiguous matches, and score collisions
+- Outcomes cover reference mismatches, validation constraints, adoption, rename conflicts, ambiguous
+  matches, and score collisions
 - Quality Profile resources are independent, so recognized per-profile failures may continue
 - Unchanged profiles and full service resource snapshots are omitted
 
@@ -182,8 +183,8 @@ independent instances.
 - Diagnostic events as the authoritative result: prose loses the context consumers need.
 - Serializing transaction and service resource models: couples consumers to internal and service
   shapes, and ships full resources nothing reads.
-- A typed aggregate with one nullable property per operation behind an `object?` operation
-  contract: hides status and dependency rules and loses typing at the boundary.
+- A typed aggregate with one nullable property per operation behind an `object?` operation contract:
+  hides status and dependency rules and loses typing at the boundary.
 
 ## Consequences
 
@@ -198,3 +199,4 @@ independent instances.
 - 2026-08-19: Replace the aggregate with pipeline-owned semantic outcomes, deltas, and statuses.
 - 2026-09-13: Planning outcomes belong to the instance.
 - 2026-09-17: Fault attribution moves to ADR-017.
+- 2026-11-02: Unknown Custom Formats are blocking planning outcomes.

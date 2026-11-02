@@ -144,23 +144,6 @@ internal sealed class CustomFormatSyncOperationTest
     }
 
     [Test]
-    public async Task Reference_mismatch_without_completed_resources_fails()
-    {
-        var harness = CreateHarness([], []);
-        harness.PlanOutcomes.Add(new InvalidCustomFormatTrashIdOutcome("missing-id"));
-
-        var compute = await Compute(harness);
-
-        compute.Status.Should().Be(SyncResultStatus.Failed);
-        compute
-            .Outcomes.OfType<CustomFormatReferenceMismatchOutcome>()
-            .Should()
-            .ContainSingle()
-            .Which.TrashId.Should()
-            .Be("missing-id");
-    }
-
-    [Test]
     public async Task Duplicate_names_without_completed_resources_fail()
     {
         var harness = CreateHarness([], []);

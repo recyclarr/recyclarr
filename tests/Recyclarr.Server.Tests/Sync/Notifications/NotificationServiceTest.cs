@@ -69,12 +69,13 @@ internal sealed class NotificationServiceTest
                         new CustomFormatPipelineResult(
                             completedResources: 0,
                             incompleteResources: 1,
-                            [new CustomFormatReferenceMismatchOutcome("missing-cf")],
+                            [new CustomFormatGroupReferenceMismatchOutcome("missing-group")],
                             []
                         ),
                     ],
                     planningOutcomes:
                     [
+                        new CustomFormatReferenceMismatchPlanningOutcome("missing-cf"),
                         new CustomFormatGroupSelectReferenceMismatchPlanningOutcome(
                             "group-id",
                             "selected-cf"
@@ -112,6 +113,7 @@ internal sealed class NotificationServiceTest
                 "selected-cf",
                 "required-cf",
                 "missing-cf",
+                "missing-group",
                 "offline",
                 "service is unavailable"
             );

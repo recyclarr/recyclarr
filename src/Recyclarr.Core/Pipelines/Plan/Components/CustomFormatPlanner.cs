@@ -44,6 +44,9 @@ internal class CustomFormatPlanner(
             if (!cfResources.TryGetValue(group.Key, out var resource))
             {
                 context.Add(new InvalidCustomFormatTrashIdOutcome(group.Key));
+                context.AddPlanningOutcome(
+                    new CustomFormatReferenceMismatchPlanningOutcome(group.Key)
+                );
                 continue;
             }
 

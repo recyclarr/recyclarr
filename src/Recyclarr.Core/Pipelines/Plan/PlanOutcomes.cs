@@ -98,9 +98,13 @@ public record InvalidQualityProfileTrashIdOutcome(string TrashId) : SyncOutcome
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
 }
 
+/// <summary>
+/// A configured Custom Format is missing from the guide. Quality Profile scores depend on the
+/// complete set of configured formats, so this blocks every pipeline of the instance.
+/// </summary>
 public record InvalidCustomFormatTrashIdOutcome(string TrashId) : SyncOutcome
 {
-    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
 }
 
 public record InvalidCfGroupSkipIdOutcome(string TrashId) : SyncOutcome

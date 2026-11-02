@@ -44,6 +44,8 @@ changes you may need to make.
 
 ### Fixed
 
+- Sync: An unknown custom format `trash_id` did not fail the sync and could reset its score to 0
+  (#1013)
 - Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
 - Sync: Inconsistent results when two custom formats share the same name
 - Sync: Sonarr syncs reported a language change on some quality profiles every time
