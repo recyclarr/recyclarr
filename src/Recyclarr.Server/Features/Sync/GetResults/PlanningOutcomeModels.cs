@@ -9,6 +9,10 @@ namespace Recyclarr.Server.Features.Sync.GetResults;
 /// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(
+    typeof(CustomFormatReferenceMismatchPlanningOutcomeResponse),
+    "customFormatReferenceMismatch"
+)]
+[JsonDerivedType(
     typeof(CustomFormatGroupReferenceMismatchPlanningOutcomeResponse),
     "customFormatGroupReferenceMismatch"
 )]
@@ -49,6 +53,11 @@ namespace Recyclarr.Server.Features.Sync.GetResults;
     "customFormatGroupNonDefaultItemExcluded"
 )]
 internal abstract record PlanningOutcomeResponse;
+
+/// <summary>Blocking. A configured custom format does not exist in the guide.</summary>
+internal sealed record CustomFormatReferenceMismatchPlanningOutcomeResponse(
+    string CustomFormatTrashId
+) : PlanningOutcomeResponse;
 
 /// <summary>Blocking. The configured custom format group does not exist in the guide.</summary>
 internal sealed record CustomFormatGroupReferenceMismatchPlanningOutcomeResponse(

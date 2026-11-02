@@ -78,8 +78,6 @@ public sealed record CustomFormatPipelineResult : PipelineResult
 
 public abstract record CustomFormatOutcome : PipelineOutcome;
 
-public sealed record CustomFormatReferenceMismatchOutcome(string TrashId) : CustomFormatOutcome;
-
 public sealed record CustomFormatGroupReferenceMismatchOutcome(string TrashId)
     : CustomFormatOutcome;
 

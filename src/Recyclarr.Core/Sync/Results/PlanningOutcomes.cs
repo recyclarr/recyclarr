@@ -1,6 +1,12 @@
 namespace Recyclarr.Sync.Results;
 
 /// <summary>
+/// A configured Custom Format does not exist in the active guide resources.
+/// </summary>
+public sealed record CustomFormatReferenceMismatchPlanningOutcome(string CustomFormatTrashId)
+    : BlockingPlanningOutcome;
+
+/// <summary>
 /// The configured Custom Format group does not exist in the active guide resources.
 /// </summary>
 public sealed record CustomFormatGroupReferenceMismatchPlanningOutcome(string GroupTrashId)

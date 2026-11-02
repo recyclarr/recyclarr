@@ -46,6 +46,7 @@ internal static class SyncResultScenarios
 
     private static IReadOnlyList<PlanningOutcome> PlanningOutcomeContractInventory() =>
         [
+            new CustomFormatReferenceMismatchPlanningOutcome("missing-cf"),
             new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
             new CustomFormatGroupSelectReferenceMismatchPlanningOutcome(
                 "select-group",
@@ -99,7 +100,6 @@ internal static class SyncResultScenarios
 
         CustomFormatOutcome[] outcomes =
         [
-            new CustomFormatReferenceMismatchOutcome("missing-cf"),
             new CustomFormatGroupReferenceMismatchOutcome("missing-group"),
             new IncompatibleCustomFormatGroupOutcome("Wrong Group", "wrong-group"),
             new EmptyCustomFormatGroupOutcome("Empty Group", "empty-group"),

@@ -1099,10 +1099,6 @@
       "CustomFormatOutcomesResponse": {
         "type": "object",
         "properties": {
-          "referenceMismatches": {
-            "description": "Configured trash IDs that match no guide custom format; they are not synced.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
           "groupReferenceMismatches": {
             "description": "Configured custom format group trash IDs that match no guide group.",
             "$ref": "#/components/schemas/IReadOnlyListOfString"
@@ -2307,6 +2303,9 @@
         "type": "object",
         "anyOf": [
           {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatReferenceMismatch"
+          },
+          {
             "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch"
           },
           {
@@ -2341,6 +2340,7 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
+            "customFormatReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatReferenceMismatch",
             "customFormatGroupReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch",
             "customFormatGroupSelectReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch",
             "customFormatGroupExcludeReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch",
@@ -2503,6 +2503,17 @@
           }
         },
         "description": "Blocking. A quality profile trash ID that custom formats assign scores to matches more than one\nconfigured profile."
+      },
+      "PlanningOutcomeResponseCustomFormatReferenceMismatch": {
+        "required": [
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        },
+        "description": "Blocking. A configured custom format does not exist in the guide."
       },
       "PropersAndRepacksModeResponse": {
         "enum": [

@@ -74,6 +74,8 @@ internal static class SyncJobResultsResponseMapper
     private static PlanningOutcomeResponse MapPlanningOutcome(PlanningOutcome outcome) =>
         outcome switch
         {
+            CustomFormatReferenceMismatchPlanningOutcome x =>
+                new CustomFormatReferenceMismatchPlanningOutcomeResponse(x.CustomFormatTrashId),
             CustomFormatGroupReferenceMismatchPlanningOutcome x =>
                 new CustomFormatGroupReferenceMismatchPlanningOutcomeResponse(x.GroupTrashId),
             CustomFormatGroupSelectReferenceMismatchPlanningOutcome x =>

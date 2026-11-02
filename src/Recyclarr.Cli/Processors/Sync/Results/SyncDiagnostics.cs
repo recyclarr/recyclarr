@@ -124,6 +124,9 @@ internal static class SyncDiagnostics
     private static (DiagnosticSeverity, string) Planning(PlanningOutcomeResponse outcome) =>
         outcome switch
         {
+            PlanningOutcomeResponseCustomFormatReferenceMismatch x => Error(
+                $"Custom Format '{x.CustomFormatTrashId}' does not exist"
+            ),
             PlanningOutcomeResponseCustomFormatGroupReferenceMismatch x => Error(
                 $"Custom Format group '{x.GroupTrashId}' does not exist"
             ),
@@ -175,9 +178,6 @@ internal static class SyncDiagnostics
         var o = pipeline.Outcomes;
         return
         [
-            .. (o.ReferenceMismatches ?? []).Select(x =>
-                Error($"Custom Format '{x}' does not exist")
-            ),
             .. (o.GroupReferenceMismatches ?? []).Select(x =>
                 Error($"Custom Format group '{x}' does not exist")
             ),

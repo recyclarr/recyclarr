@@ -86,11 +86,6 @@ internal sealed record CustomFormatDuplicateNameResponse(
 
 internal sealed record CustomFormatOutcomesResponse
 {
-    /// <summary>
-    /// Configured trash IDs that match no guide custom format; they are not synced.
-    /// </summary>
-    public IReadOnlyList<string> ReferenceMismatches { get; init; } = [];
-
     /// <summary>Configured custom format group trash IDs that match no guide group.</summary>
     public IReadOnlyList<string> GroupReferenceMismatches { get; init; } = [];
 

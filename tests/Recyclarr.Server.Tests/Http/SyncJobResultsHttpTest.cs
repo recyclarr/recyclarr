@@ -190,6 +190,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Select(x => x.GetType())
             .Should()
             .Equal(
+                typeof(PlanningOutcomeResponseCustomFormatReferenceMismatch),
                 typeof(PlanningOutcomeResponseCustomFormatGroupReferenceMismatch),
                 typeof(PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch),
                 typeof(PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch),
@@ -201,7 +202,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
                 typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded),
                 typeof(PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded)
             );
-        var ambiguity = planningOutcomes[5]
+        var ambiguity = planningOutcomes[6]
             .Should()
             .BeOfType<PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous>()
             .Which;
@@ -213,10 +214,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative)
         );
 
-        raw.Should()
-            .Contain("\"planningOutcomes\":[{\"type\":\"customFormatGroupReferenceMismatch\"");
+        raw.Should().Contain("\"planningOutcomes\":[{\"type\":\"customFormatReferenceMismatch\"");
         string[] outcomeTypes =
         [
+            "customFormatReferenceMismatch",
             "customFormatGroupReferenceMismatch",
             "customFormatGroupSelectReferenceMismatch",
             "customFormatGroupExcludeReferenceMismatch",
@@ -383,7 +384,6 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         var outcomes = pipeline.Outcomes;
         int?[] counts =
         [
-            outcomes.ReferenceMismatches?.Count,
             outcomes.GroupReferenceMismatches?.Count,
             outcomes.IncompatibleGroups?.Count,
             outcomes.EmptyGroups?.Count,
@@ -395,7 +395,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.UpdateRejected?.Count,
             outcomes.DeleteRejected?.Count,
         ];
-        counts.Should().HaveCount(11).And.OnlyContain(x => x == 1);
+        counts.Should().HaveCount(10).And.OnlyContain(x => x == 1);
     }
 
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)

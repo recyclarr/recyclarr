@@ -311,6 +311,8 @@ internal sealed class NotificationService(
     private static string FormatPlanningOutcome(PlanningOutcome outcome) =>
         outcome switch
         {
+            CustomFormatReferenceMismatchPlanningOutcome x =>
+                $"Custom Format '{x.CustomFormatTrashId}' does not exist",
             CustomFormatGroupReferenceMismatchPlanningOutcome x =>
                 $"Custom Format group '{x.GroupTrashId}' does not exist",
             CustomFormatGroupSelectReferenceMismatchPlanningOutcome x =>
@@ -362,9 +364,6 @@ internal sealed class NotificationService(
     private static NotificationReport FormatCustomFormatOutcome(CustomFormatOutcome outcome) =>
         outcome switch
         {
-            CustomFormatReferenceMismatchOutcome x => Error(
-                $"Custom Format '{x.TrashId}' does not exist"
-            ),
             CustomFormatGroupReferenceMismatchOutcome x => Error(
                 $"Custom Format group '{x.TrashId}' does not exist"
             ),
