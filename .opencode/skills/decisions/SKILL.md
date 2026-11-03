@@ -27,6 +27,10 @@ past versions.
 **One decision per record.** Do not bundle multiple decisions into a single ADR/PDR. State each rule
 once, in the record that owns it, and link to it from other records instead of restating it.
 
+**Criteria, not inventories.** State the rule or criterion that decides each case. MUST NOT
+enumerate the current cases, types, values, or members it covers; that list changes with ordinary
+features and fixes and belongs in code. Label any example as an example.
+
 **Naming**: `NNN-kebab-case-title.md`, sequential per category. MUST NOT reuse a number, including
 numbers of deleted records; check `git log --diff-filter=D --name-only -- docs/decisions/` when the
 highest number may have been deleted.

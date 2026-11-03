@@ -9,7 +9,8 @@
 ## Decision
 
 {The rule currently in force, stated imperatively (MUST / MUST NOT). Name the anti-pattern it
-prevents. Enough rationale to apply the rule to cases the text does not list.}
+prevents. Enough rationale to apply the rule to cases the text does not list. State criteria, not
+inventories of current cases.}
 
 ## Rejected Options
 
