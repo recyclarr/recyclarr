@@ -120,11 +120,10 @@ successful. Batch and singleton pipelines follow their API request granularity.
 #### Planning
 
 - Planning outcomes belong to the instance rather than an individual pipeline
-- Blocking outcomes cover unknown Custom Formats, unknown Custom Format groups, unknown selected or
-  excluded group members, unknown group profile references, and ambiguous direct or group profile
-  references
-- Non-blocking outcomes cover redundant selection and ineffective exclusion of group members
-- Outcomes retain group, Custom Format, profile, and ambiguity candidate context as applicable
+- A planning outcome blocks the instance when the configuration it describes cannot be resolved
+  unambiguously, because dependent pipelines would then sync an incomplete or wrong selection
+- A planning outcome that leaves the resolved selection intact is non-blocking
+- Outcomes retain the configuration context needed to locate and fix the problem
 
 #### Custom Formats
 
@@ -133,7 +132,6 @@ successful. Batch and singleton pipelines follow their API request granularity.
 - Create, update, and delete are concrete delta variants
 - Update details describe changed components, not full service resources
 - Selection provenance may explain configuration, profile, or group selection
-- Outcomes cover ambiguous matches, adoption, reference mismatches, and state conflicts
 - Unchanged formats and counts are omitted
 - Disabled deletion produces no deletion delta
 
@@ -144,8 +142,6 @@ successful. Batch and singleton pipelines follow their API request granularity.
 - One profile create or update is one resource delta
 - Updates contain explicit value, quality-layout, and Custom Format score deltas
 - Created profiles contain only effective state controlled by Recyclarr
-- Outcomes cover reference mismatches, validation constraints, adoption, rename conflicts, ambiguous
-  matches, and score collisions
 - Quality Profile resources are independent, so recognized per-profile failures may continue
 - Unchanged profiles and full service resource snapshots are omitted
 
@@ -154,7 +150,6 @@ successful. Batch and singleton pipelines follow their API request granularity.
 - Reuse the domain `QualitySizeValue` numeric and unlimited variants
 - One changed service quality is one delta
 - Only changed minimum, preferred, and maximum values are present
-- Outcomes cover missing definitions, missing qualities, and invalid ordering
 - Service limits, magic unlimited values, and unchanged resources are omitted
 
 #### Media Naming
@@ -200,3 +195,4 @@ independent instances.
 - 2026-09-13: Planning outcomes belong to the instance.
 - 2026-09-17: Fault attribution moves to ADR-017.
 - 2026-11-02: Unknown Custom Formats are blocking planning outcomes.
+- 2026-11-03: Blocking planning outcomes are defined by a criterion instead of a list.

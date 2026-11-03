@@ -39,6 +39,18 @@ Rationale and the full resource model live in ADR-011; config representation in 
 - An outcome appears under the resource it affects, even when repeated; responses never reference
   resources elsewhere by identity (ADR-016).
 
+## API Evolution
+
+Clients built against an older spec MUST keep working against a newer server within one API
+version (versioning rules: ADR-016).
+
+- Model a value set that can grow as a `string`, never an `enum`; generated clients may switch
+  exhaustively, so a new enum member breaks them. Closed sets (`{service}`) may stay enums.
+- Make changes additive: new optional properties, collections, or discriminator values. Removing,
+  renaming, or changing a field's meaning needs a new API version.
+- Polymorphic types fall back to their base type for unknown discriminators; consumers MUST handle
+  that base type without throwing.
+
 ## Long-Running Operations
 
 Model as job resources, never verb endpoints (ADR-011):
