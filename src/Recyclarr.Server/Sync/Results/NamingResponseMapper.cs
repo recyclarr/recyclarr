@@ -10,20 +10,10 @@ internal static partial class NamingResponseMapper
 {
     public static SonarrNamingPipelineResponse ToResponse(SonarrNamingPipelineResult result)
     {
-        var outcomes = result
-            .Outcomes.OfType<SonarrNamingReferenceMismatchOutcome>()
-            .Select(x => MapSonarrMismatch(x))
-            .ToList();
-        ResultValueMapper.EnsureAllMapped(
-            "Sonarr naming outcome",
-            result.Outcomes.Count,
-            outcomes.Count
-        );
-
         return new SonarrNamingPipelineResponse
         {
             Status = ResultValueMapper.MapStatus(result.Status),
-            Outcomes = new SonarrNamingOutcomesResponse(outcomes),
+            Outcomes = result.Outcomes.Select(OutcomeResponseMapper.Map).ToList(),
             Updates = result.Delta is null ? [] : [MapSonarrUpdate(result.Delta)],
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
@@ -31,20 +21,10 @@ internal static partial class NamingResponseMapper
 
     public static RadarrNamingPipelineResponse ToResponse(RadarrNamingPipelineResult result)
     {
-        var outcomes = result
-            .Outcomes.OfType<RadarrNamingReferenceMismatchOutcome>()
-            .Select(x => MapRadarrMismatch(x))
-            .ToList();
-        ResultValueMapper.EnsureAllMapped(
-            "Radarr naming outcome",
-            result.Outcomes.Count,
-            outcomes.Count
-        );
-
         return new RadarrNamingPipelineResponse
         {
             Status = ResultValueMapper.MapStatus(result.Status),
-            Outcomes = new RadarrNamingOutcomesResponse(outcomes),
+            Outcomes = result.Outcomes.Select(OutcomeResponseMapper.Map).ToList(),
             Updates = result.Delta is null ? [] : [MapRadarrUpdate(result.Delta)],
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
@@ -72,12 +52,4 @@ internal static partial class NamingResponseMapper
     private static ValueChangeResponse<T>? MapNullableValue<T>(
         Recyclarr.Sync.Results.ValueDelta<T>? value
     ) => value is null ? null : ResultValueMapper.MapValue(value);
-
-    private static partial NamingReferenceMismatchResponse<SonarrNamingField> MapSonarrMismatch(
-        SonarrNamingReferenceMismatchOutcome source
-    );
-
-    private static partial NamingReferenceMismatchResponse<RadarrNamingField> MapRadarrMismatch(
-        RadarrNamingReferenceMismatchOutcome source
-    );
 }

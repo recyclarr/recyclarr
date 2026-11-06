@@ -95,7 +95,8 @@ public record DuplicateCustomFormatNameOutcome(string Name, IReadOnlyList<string
 
 public record InvalidQualityProfileTrashIdOutcome(string TrashId) : SyncOutcome
 {
-    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
 }
 
 /// <summary>
@@ -107,9 +108,14 @@ public record InvalidCustomFormatTrashIdOutcome(string TrashId) : SyncOutcome
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
 }
 
+/// <summary>
+/// A <c>custom_format_groups.skip</c> ID matches no guide group. The group the user meant to skip
+/// still syncs and adds its formats and scores to every matching profile, so this blocks every
+/// pipeline of the instance.
+/// </summary>
 public record InvalidCfGroupSkipIdOutcome(string TrashId) : SyncOutcome
 {
-    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
 }
 
 public record IncompatibleCfGroupOutcome(string Name, string TrashId) : SyncOutcome

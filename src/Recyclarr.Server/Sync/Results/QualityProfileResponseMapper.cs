@@ -147,45 +147,8 @@ internal static partial class QualityProfileResponseMapper
         };
     }
 
-    private static QualityProfileOutcomesResponse MapOutcomes(QualityProfilePipelineResult result)
-    {
-        var outcomes = MapOutcomes(result.Outcomes);
-        ResultValueMapper.EnsureAllMapped(
-            "Quality Profile outcome",
-            result.Outcomes.Count,
-            outcomes.ReferenceMismatches.Count,
-            outcomes.DuplicateNames.Count,
-            outcomes.NotFound.Count,
-            outcomes.Adopted.Count,
-            outcomes.MinimumScoresUnsatisfied.Count,
-            outcomes.InvalidCutoffs.Count,
-            outcomes.UnavailableCutoffs.Count,
-            outcomes.QualitiesRequired.Count,
-            outcomes.QualityReferenceMismatches.Count,
-            outcomes.ResetScoreReferenceMismatches.Count,
-            outcomes.RenameBlocked.Count,
-            outcomes.AmbiguousMatches.Count,
-            outcomes.CreateRejected.Count,
-            outcomes.UpdateRejected.Count,
-            result.Outcomes.OfType<QualityProfileQualitySizeOutcome>().Count(),
-            outcomes.QualityDefinitionsIgnored.Count,
-            outcomes.QualityDefinitionUnused ? 1 : 0
-        );
-        return outcomes;
-    }
-
-    // Groups per-profile quality size outcomes by profile, preserving first-seen order.
-    private static List<QualityProfileQualitySizeOutcomesResponse> MapQualitySizeOutcomes(
-        IReadOnlyList<QualityProfileOutcome> outcomes
-    ) =>
-        outcomes
-            .OfType<QualityProfileQualitySizeOutcome>()
-            .GroupBy(x => x.Identity)
-            .Select(g => new QualityProfileQualitySizeOutcomesResponse(
-                MapIdentity(g.Key),
-                QualitySizeResponseMapper.MapOutcomes(g.Select(x => x.Outcome).ToList())
-            ))
-            .ToList();
+    private static List<OutcomeResponse> MapOutcomes(QualityProfilePipelineResult result) =>
+        result.Outcomes.Select(OutcomeResponseMapper.Map).ToList();
 
     private static QualitySizeResponse MapQualitySize(QualityProfileQualitySize size) =>
         new()
@@ -293,95 +256,6 @@ internal static partial class QualityProfileResponseMapper
             .Select(x => ResultValueMapper.MapValue(select(x)))
             .SingleOrDefault();
 
-    private static QualityProfileOutcomesResponse MapOutcomes(
-        IReadOnlyList<QualityProfileOutcome> outcomes
-    ) =>
-        new()
-        {
-            ReferenceMismatches = outcomes
-                .OfType<QualityProfileReferenceMismatchOutcome>()
-                .Select(x => x.TrashId)
-                .ToList(),
-            DuplicateNames = outcomes
-                .OfType<QualityProfileDuplicateNameOutcome>()
-                .Select(x => new QualityProfileNamedOutcomeResponse(x.Name))
-                .ToList(),
-            NotFound = outcomes
-                .OfType<QualityProfileNotFoundOutcome>()
-                .Select(x => MapIdentityOutcome(x.Identity))
-                .ToList(),
-            Adopted = outcomes
-                .OfType<QualityProfileAdoptedOutcome>()
-                .Select(x => new QualityProfileAdoptedResponse(
-                    MapIdentity(x.Identity),
-                    x.ServiceId
-                ))
-                .ToList(),
-            MinimumScoresUnsatisfied = outcomes
-                .OfType<QualityProfileMinimumScoreUnsatisfiedOutcome>()
-                .Select(x => new QualityProfileMinimumScoreResponse(
-                    MapIdentity(x.Identity),
-                    x.MinimumScore,
-                    x.TotalPositiveScore,
-                    x.MaximumScore
-                ))
-                .ToList(),
-            InvalidCutoffs = outcomes
-                .OfType<QualityProfileInvalidCutoffOutcome>()
-                .Select(x => MapQualityName(x.Identity, x.QualityName))
-                .ToList(),
-            UnavailableCutoffs = outcomes
-                .OfType<QualityProfileUnavailableCutoffOutcome>()
-                .Select(x => MapQualityName(x.Identity, x.QualityName))
-                .ToList(),
-            QualitiesRequired = outcomes
-                .OfType<QualityProfileQualitiesRequiredOutcome>()
-                .Select(x => MapIdentityOutcome(x.Identity))
-                .ToList(),
-            QualityReferenceMismatches = outcomes
-                .OfType<QualityProfileQualityReferenceMismatchOutcome>()
-                .Select(x => new QualityProfileNamesResponse(MapIdentity(x.Identity), x.Names))
-                .ToList(),
-            ResetScoreReferenceMismatches = outcomes
-                .OfType<QualityProfileResetScoreReferenceMismatchOutcome>()
-                .Select(x => new QualityProfileResetReferencesResponse(
-                    MapIdentity(x.Identity),
-                    x.Names,
-                    x.Patterns
-                ))
-                .ToList(),
-            RenameBlocked = outcomes
-                .OfType<QualityProfileRenameBlockedOutcome>()
-                .Select(x => new QualityProfileRenameBlockedResponse(
-                    MapIdentity(x.Identity),
-                    MapServiceMatch(x.Conflict)
-                ))
-                .ToList(),
-            AmbiguousMatches = outcomes
-                .OfType<QualityProfileAmbiguousMatchOutcome>()
-                .Select(x => new QualityProfileAmbiguousMatchResponse(
-                    MapIdentity(x.Identity),
-                    x.ServiceMatches.Select(MapServiceMatch).ToList()
-                ))
-                .ToList(),
-            CreateRejected = outcomes
-                .OfType<QualityProfileCreateRejectedOutcome>()
-                .Select(x => MapIdentityOutcome(x.Identity))
-                .ToList(),
-            UpdateRejected = outcomes
-                .OfType<QualityProfileUpdateRejectedOutcome>()
-                .Select(x => MapIdentityOutcome(x.Identity))
-                .ToList(),
-            QualitySizeOutcomes = MapQualitySizeOutcomes(outcomes),
-            QualityDefinitionsIgnored = outcomes
-                .OfType<QualityProfileQualityDefinitionIgnoredOutcome>()
-                .Select(x => MapIdentityOutcome(x.Identity))
-                .ToList(),
-            QualityDefinitionUnused = outcomes
-                .OfType<QualityProfileQualityDefinitionUnusedOutcome>()
-                .Any(),
-        };
-
     private static QualityProfileIdentityResponse MapIdentity(QualityProfileIdentity identity) =>
         identity switch
         {
@@ -418,15 +292,6 @@ internal static partial class QualityProfileResponseMapper
             _ => throw new ArgumentOutOfRangeException(nameof(item), item, null),
         };
 
-    private static QualityProfileIdentityOutcomeResponse MapIdentityOutcome(
-        QualityProfileIdentity identity
-    ) => new(MapIdentity(identity));
-
-    private static QualityProfileQualityNameResponse MapQualityName(
-        QualityProfileIdentity identity,
-        string qualityName
-    ) => new(MapIdentity(identity), qualityName);
-
     private static QualityProfileScoreChangeResponse MapScoreChange(
         QualityProfileCustomFormatScoreChanged change
     ) =>
@@ -445,9 +310,5 @@ internal static partial class QualityProfileResponseMapper
 
     private static partial QualityProfileScoreResponse MapScore(
         QualityProfileCustomFormatScore source
-    );
-
-    private static partial NamedServiceResourceResponse MapServiceMatch(
-        QualityProfileServiceMatch source
     );
 }

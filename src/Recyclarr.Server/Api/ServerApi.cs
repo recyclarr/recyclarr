@@ -68,7 +68,7 @@ internal static class ServerApi
         }
     }
 
-    private static void ConfigureWireJson(JsonSerializerOptions options)
+    public static void ConfigureWireJson(JsonSerializerOptions options)
     {
         options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -111,6 +111,7 @@ internal static class ServerApi
             options.AddDocumentTransformer(DescribeDocument);
             options.AddDocumentTransformer(DocumentUnauthorizedResponses);
             options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
+            options.AddDocumentTransformer<OutcomeDataDocumentTransformer>();
             options.AddSchemaTransformer<EnumDescriptionSchemaTransformer>();
         };
     }

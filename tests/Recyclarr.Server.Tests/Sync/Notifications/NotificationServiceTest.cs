@@ -69,7 +69,7 @@ internal sealed class NotificationServiceTest
                         new CustomFormatPipelineResult(
                             completedResources: 0,
                             incompleteResources: 1,
-                            [new CustomFormatGroupReferenceMismatchOutcome("missing-group")],
+                            [new EmptyCustomFormatGroupOutcome("Empty", "missing-group")],
                             []
                         ),
                     ],
@@ -111,12 +111,14 @@ internal sealed class NotificationServiceTest
                 "movies",
                 "group-id",
                 "selected-cf",
-                "required-cf",
                 "missing-cf",
                 "missing-group",
                 "offline",
                 "service is unavailable"
             );
+
+        // Selecting a required format is info, which minimal verbosity leaves out
+        _capturedNotification.Body.Should().NotContain("required-cf");
     }
 
     [Test]

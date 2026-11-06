@@ -74,6 +74,10 @@ Terminal pipeline status has four values:
 - `Failed`: no resource completed, or a pipeline-wide failure prevented a usable result
 - `Blocked`: the pipeline did not run because a dependency was not `Succeeded`
 
+An intended resource is incomplete when its planned change did not apply, so the service still holds
+stale or wrong data for it. A planned target that does not exist in the service (for example, a
+guide quality an older service version lacks) has no data to be wrong and is not incomplete.
+
 No resources and fully up-to-date resources are no-op successes. Pipelines that are not configured
 or do not apply to the service are absent from the terminal result.
 
@@ -93,8 +97,8 @@ status.
 - Progress is transient and is not part of a terminal result
 
 Core outcomes contain no diagnostic severity or rendered message. Pipeline status and blocking
-planning outcome types communicate hard stops. Adapters may assign presentation severity from the
-typed contract.
+planning outcome types communicate hard stops. The server assigns each outcome type one severity by
+the criteria of ADR-033.
 
 ### Shared execution invariants
 
@@ -196,3 +200,4 @@ independent instances.
 - 2026-09-17: Fault attribution moves to ADR-017.
 - 2026-11-02: Unknown Custom Formats are blocking planning outcomes.
 - 2026-11-03: Blocking planning outcomes are defined by a criterion instead of a list.
+- 2026-11-05: Targets missing from the service are not incomplete resources.

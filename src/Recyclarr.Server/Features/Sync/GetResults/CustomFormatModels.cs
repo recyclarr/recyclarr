@@ -64,76 +64,10 @@ internal sealed record CustomFormatUpdateResponse
     public IReadOnlyList<string> SpecificationsRemoved { get; init; } = [];
 }
 
-/// <summary>
-/// `identity` is the stale stored entry; `managedIdentity` is the custom format that uses
-/// `serviceId` now.
-/// </summary>
-internal sealed record CustomFormatStateConflictResponse(
-    TrashIdNameResponse Identity,
-    TrashIdNameResponse ManagedIdentity,
-    int ServiceId
-);
-
-internal sealed record CustomFormatAmbiguousMatchResponse(
-    TrashIdNameResponse Identity,
-    IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
-);
-
-internal sealed record CustomFormatDuplicateNameResponse(
-    string Name,
-    IReadOnlyList<string> TrashIds
-);
-
-internal sealed record CustomFormatOutcomesResponse
-{
-    /// <summary>Configured custom format group trash IDs that match no guide group.</summary>
-    public IReadOnlyList<string> GroupReferenceMismatches { get; init; } = [];
-
-    /// <summary>Groups that apply to none of the selected quality profiles.</summary>
-    public IReadOnlyList<TrashIdNameResponse> IncompatibleGroups { get; init; } = [];
-
-    /// <summary>Groups that contribute no custom formats.</summary>
-    public IReadOnlyList<TrashIdNameResponse> EmptyGroups { get; init; } = [];
-
-    /// <summary>
-    /// Names shared by more than one configured custom format (ignoring case). Services require
-    /// unique names, so none of these custom formats are synced.
-    /// </summary>
-    public IReadOnlyList<CustomFormatDuplicateNameResponse> DuplicateNames { get; init; } = [];
-
-    /// <summary>
-    /// Custom formats that already existed in the service with the same name. Recyclarr now
-    /// manages them.
-    /// </summary>
-    public IReadOnlyList<NamedIdentityResponse> Adopted { get; init; } = [];
-
-    /// <summary>
-    /// Custom formats whose name matches more than one service custom format; they are not synced.
-    /// </summary>
-    public IReadOnlyList<CustomFormatAmbiguousMatchResponse> AmbiguousMatches { get; init; } = [];
-
-    /// <summary>
-    /// Stored sync state that maps a custom format to a service ID that another managed custom
-    /// format uses.
-    /// </summary>
-    public IReadOnlyList<CustomFormatStateConflictResponse> StateConflicts { get; init; } = [];
-
-    /// <summary>Custom formats the service refused to create.</summary>
-    public IReadOnlyList<TrashIdNameResponse> CreateRejected { get; init; } = [];
-
-    /// <summary>Custom formats the service refused to update.</summary>
-    public IReadOnlyList<TrashIdNameResponse> UpdateRejected { get; init; } = [];
-
-    /// <summary>Custom formats the service refused to delete.</summary>
-    public IReadOnlyList<TrashIdNameResponse> DeleteRejected { get; init; } = [];
-}
-
-internal sealed record NamedIdentityResponse(TrashIdNameResponse Identity, int ServiceId);
-
 internal sealed record CustomFormatPipelineResponse
 {
     public required PipelineStatus Status { get; init; }
-    public required CustomFormatOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<OutcomeResponse> Outcomes { get; init; }
     public required IReadOnlyList<CustomFormatCreateResponse> Creates { get; init; }
     public required IReadOnlyList<CustomFormatUpdateResponse> Updates { get; init; }
 

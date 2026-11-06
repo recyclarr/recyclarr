@@ -1035,21 +1035,6 @@
           }
         }
       },
-      "CustomFormatAmbiguousMatchResponse": {
-        "required": [
-          "identity",
-          "serviceMatches"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/TrashIdNameResponse"
-          },
-          "serviceMatches": {
-            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
-          }
-        }
-      },
       "CustomFormatCreateResponse": {
         "required": [
           "identity",
@@ -1065,20 +1050,29 @@
           }
         }
       },
-      "CustomFormatDuplicateNameResponse": {
+      "CustomFormatDuplicateNameOutcomeData": {
         "required": [
-          "name",
           "trashIds"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
           "trashIds": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "The trash IDs of the custom formats that share one name."
+      },
+      "CustomFormatGroupMemberOutcomeData": {
+        "required": [
+          "customFormatTrashId"
+        ],
+        "type": "object",
+        "properties": {
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        },
+        "description": "A custom format named in a group's configuration."
       },
       "CustomFormatInclusionReason": {
         "enum": [
@@ -1096,51 +1090,6 @@
           "selected": "The configuration selects the format from the group."
         }
       },
-      "CustomFormatOutcomesResponse": {
-        "type": "object",
-        "properties": {
-          "groupReferenceMismatches": {
-            "description": "Configured custom format group trash IDs that match no guide group.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "incompatibleGroups": {
-            "description": "Groups that apply to none of the selected quality profiles.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
-          },
-          "emptyGroups": {
-            "description": "Groups that contribute no custom formats.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
-          },
-          "duplicateNames": {
-            "description": "Names shared by more than one configured custom format (ignoring case). Services require\nunique names, so none of these custom formats are synced.",
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatDuplicateNameResponse"
-          },
-          "adopted": {
-            "description": "Custom formats that already existed in the service with the same name. Recyclarr now\nmanages them.",
-            "$ref": "#/components/schemas/IReadOnlyListOfNamedIdentityResponse"
-          },
-          "ambiguousMatches": {
-            "description": "Custom formats whose name matches more than one service custom format; they are not synced.",
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatAmbiguousMatchResponse"
-          },
-          "stateConflicts": {
-            "description": "Stored sync state that maps a custom format to a service ID that another managed custom\nformat uses.",
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatStateConflictResponse"
-          },
-          "createRejected": {
-            "description": "Custom formats the service refused to create.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
-          },
-          "updateRejected": {
-            "description": "Custom formats the service refused to update.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
-          },
-          "deleteRejected": {
-            "description": "Custom formats the service refused to delete.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
-          }
-        }
-      },
       "CustomFormatPipelineResponse": {
         "required": [
           "status",
@@ -1155,7 +1104,7 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/CustomFormatOutcomesResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "creates": {
             "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatCreateResponse"
@@ -1223,17 +1172,13 @@
           "cfGroupExplicit": "A group listed in `custom_format_groups.add`."
         }
       },
-      "CustomFormatStateConflictResponse": {
+      "CustomFormatStateConflictOutcomeData": {
         "required": [
-          "identity",
           "managedIdentity",
           "serviceId"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/TrashIdNameResponse"
-          },
           "managedIdentity": {
             "$ref": "#/components/schemas/TrashIdNameResponse"
           },
@@ -1242,7 +1187,7 @@
             "format": "int32"
           }
         },
-        "description": "`identity` is the stale stored entry; `managedIdentity` is the custom format that uses\n`serviceId` now."
+        "description": "The managed custom format that uses `serviceId` now."
       },
       "CustomFormatUpdateResponse": {
         "required": [
@@ -1761,28 +1706,10 @@
           "$ref": "#/components/schemas/ConfigTemplateSummaryResponse"
         }
       },
-      "IReadOnlyListOfCustomFormatAmbiguousMatchResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CustomFormatAmbiguousMatchResponse"
-        }
-      },
       "IReadOnlyListOfCustomFormatCreateResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/CustomFormatCreateResponse"
-        }
-      },
-      "IReadOnlyListOfCustomFormatDuplicateNameResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CustomFormatDuplicateNameResponse"
-        }
-      },
-      "IReadOnlyListOfCustomFormatStateConflictResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CustomFormatStateConflictResponse"
         }
       },
       "IReadOnlyListOfCustomFormatUpdateResponse": {
@@ -1857,100 +1784,22 @@
           "$ref": "#/components/schemas/MediaManagementUpdateResponse"
         }
       },
-      "IReadOnlyListOfNamedIdentityResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/NamedIdentityResponse"
-        }
-      },
       "IReadOnlyListOfNamedServiceResourceResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/NamedServiceResourceResponse"
         }
       },
-      "IReadOnlyListOfNamingReferenceMismatchResponseOfRadarrNamingField": {
+      "IReadOnlyListOfOutcomeResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/NamingReferenceMismatchResponseOfRadarrNamingField"
-        }
-      },
-      "IReadOnlyListOfNamingReferenceMismatchResponseOfSonarrNamingField": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/NamingReferenceMismatchResponseOfSonarrNamingField"
-        }
-      },
-      "IReadOnlyListOfPlanningOutcomeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/PlanningOutcomeResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileAdoptedResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileAdoptedResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileAmbiguousMatchResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileAmbiguousMatchResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileIdentityOutcomeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileIdentityOutcomeResponse"
+          "$ref": "#/components/schemas/OutcomeResponse"
         }
       },
       "IReadOnlyListOfQualityProfileLayoutResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileMinimumScoreResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileMinimumScoreResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileNamedOutcomeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileNamedOutcomeResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileNamesResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileNamesResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileQualityNameResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileQualityNameResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileQualitySizeOutcomesResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileQualitySizeOutcomesResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileRenameBlockedResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileRenameBlockedResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileResetReferencesResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileResetReferencesResponse"
         }
       },
       "IReadOnlyListOfQualityProfileScoreChangeResponse": {
@@ -1965,46 +1814,10 @@
           "$ref": "#/components/schemas/QualityProfileScoreResponse"
         }
       },
-      "IReadOnlyListOfQualitySizeGuideLabelsResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeGuideLabelsResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeGuideReferenceResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeGuideReferenceResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeMaximumComparisonResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeMaximumComparisonResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeMinimumComparisonResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeMinimumComparisonResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeReferenceResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeReferenceResponse"
-        }
-      },
       "IReadOnlyListOfQualitySizeResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/QualitySizeResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeTypeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeTypeResponse"
         }
       },
       "IReadOnlyListOfQualitySizeUpdateResponse": {
@@ -2071,12 +1884,6 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/TrashIdNameResponse"
-        }
-      },
-      "IReadOnlyListOfValueChangeResponseOfDecimal": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/ValueChangeResponseOfDecimal"
         }
       },
       "ListConfigIncludesResponse": {
@@ -2178,6 +1985,25 @@
           }
         }
       },
+      "MaximumComparisonOutcomeData": {
+        "required": [
+          "quality",
+          "preferred",
+          "maximum"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "maximum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          }
+        }
+      },
       "MediaManagementPipelineResponse": {
         "required": [
           "status",
@@ -2215,21 +2041,63 @@
           }
         }
       },
-      "NamedIdentityResponse": {
+      "MediaNamingReferenceOutcomeData": {
         "required": [
-          "identity",
-          "serviceId"
+          "field",
+          "configuredKey"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/TrashIdNameResponse"
+          "field": {
+            "type": "string"
           },
-          "serviceId": {
+          "configuredKey": {
+            "type": "string"
+          }
+        },
+        "description": "A media naming field, for example `seriesFolderFormat`, and the configured key that matches\nno guide format for it."
+      },
+      "MinimumComparisonOutcomeData": {
+        "required": [
+          "quality",
+          "minimum",
+          "preferred"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "minimum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          }
+        }
+      },
+      "MinimumScoreOutcomeData": {
+        "required": [
+          "minimumScore",
+          "totalPositiveScore",
+          "maximumScore"
+        ],
+        "type": "object",
+        "properties": {
+          "minimumScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPositiveScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maximumScore": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "description": "The minimum custom format score, the sum of positive scores, and the highest score."
       },
       "NamedServiceResourceResponse": {
         "required": [
@@ -2248,37 +2116,179 @@
         },
         "description": "A resource in Sonarr or Radarr; `serviceId` is its ID there."
       },
-      "NamingReferenceMismatchResponseOfRadarrNamingField": {
+      "OutcomeResponse": {
         "required": [
-          "field",
-          "configuredKey"
+          "code",
+          "severity",
+          "blocking",
+          "message"
         ],
         "type": "object",
         "properties": {
-          "field": {
-            "$ref": "#/components/schemas/RadarrNamingField"
+          "code": {
+            "type": "string",
+            "description": "Identifies the condition, for example `customFormatAdopted`."
           },
-          "configuredKey": {
-            "type": "string"
+          "severity": {
+            "$ref": "#/components/schemas/OutcomeSeverity"
+          },
+          "blocking": {
+            "type": "boolean",
+            "description": "True when the outcome stopped every pipeline of the instance."
+          },
+          "message": {
+            "type": "string",
+            "description": "A description of the outcome for people to read."
+          },
+          "subject": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Absent when the outcome is not about one resource.",
+                "$ref": "#/components/schemas/OutcomeSubjectResponse"
+              }
+            ]
+          },
+          "data": {
+            "description": "Facts specific to the code. Absent when the code has none. The `x-outcome-data` extension\nof this schema maps each code to the schema of its data."
           }
         },
-        "description": "A configured naming key that matches no guide format for the field."
+        "description": "One condition the sync reported, such as a configuration problem or a change the service\nrejected. New codes may be added; a client that does not know a code can still show\n`message`.",
+        "x-outcome-data": {
+          "customFormatGroupSelectReferenceMismatch": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatGroupExcludeReferenceMismatch": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatGroupQualityProfileReferenceMismatch": {
+            "$ref": "#/components/schemas/QualityProfileReferenceOutcomeData"
+          },
+          "customFormatQualityProfileReferenceAmbiguous": {
+            "$ref": "#/components/schemas/ProfileNamesOutcomeData"
+          },
+          "customFormatGroupQualityProfileReferenceAmbiguous": {
+            "$ref": "#/components/schemas/QualityProfileReferenceAmbiguousOutcomeData"
+          },
+          "customFormatGroupRequiredItemSelected": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatGroupDefaultItemSelected": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatGroupRequiredItemExcluded": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatGroupNonDefaultItemExcluded": {
+            "$ref": "#/components/schemas/CustomFormatGroupMemberOutcomeData"
+          },
+          "customFormatDuplicateName": {
+            "$ref": "#/components/schemas/CustomFormatDuplicateNameOutcomeData"
+          },
+          "customFormatAdopted": {
+            "$ref": "#/components/schemas/ServiceIdOutcomeData"
+          },
+          "customFormatAmbiguousMatch": {
+            "$ref": "#/components/schemas/ServiceMatchesOutcomeData"
+          },
+          "customFormatStateConflict": {
+            "$ref": "#/components/schemas/CustomFormatStateConflictOutcomeData"
+          },
+          "qualityProfileAdopted": {
+            "$ref": "#/components/schemas/ServiceIdOutcomeData"
+          },
+          "qualityProfileMinimumScoreUnsatisfied": {
+            "$ref": "#/components/schemas/MinimumScoreOutcomeData"
+          },
+          "qualityProfileInvalidCutoff": {
+            "$ref": "#/components/schemas/QualityNameOutcomeData"
+          },
+          "qualityProfileUnavailableCutoff": {
+            "$ref": "#/components/schemas/QualityNameOutcomeData"
+          },
+          "qualityProfileQualityReferenceMismatch": {
+            "$ref": "#/components/schemas/QualityNamesOutcomeData"
+          },
+          "qualityProfileResetScoreReferenceMismatch": {
+            "$ref": "#/components/schemas/ResetScoreReferencesOutcomeData"
+          },
+          "qualityProfileRenameBlocked": {
+            "$ref": "#/components/schemas/RenameBlockedOutcomeData"
+          },
+          "qualityProfileAmbiguousMatch": {
+            "$ref": "#/components/schemas/ServiceMatchesOutcomeData"
+          },
+          "qualitySizeDefinitionReferenceMismatch": {
+            "$ref": "#/components/schemas/QualityDefinitionTypeOutcomeData"
+          },
+          "qualitySizeReferenceMismatch": {
+            "$ref": "#/components/schemas/QualitySizeReferenceOutcomeData"
+          },
+          "qualitySizeServiceQualityNotFound": {
+            "$ref": "#/components/schemas/QualityNameOutcomeData"
+          },
+          "qualitySizePreferredRatioClamped": {
+            "$ref": "#/components/schemas/PreferredRatioClampedOutcomeData"
+          },
+          "qualitySizeMinimumGreaterThanPreferred": {
+            "$ref": "#/components/schemas/MinimumComparisonOutcomeData"
+          },
+          "qualitySizeUnlimitedPreferredGreaterThanMaximum": {
+            "$ref": "#/components/schemas/MaximumComparisonOutcomeData"
+          },
+          "qualitySizePreferredGreaterThanMaximum": {
+            "$ref": "#/components/schemas/MaximumComparisonOutcomeData"
+          },
+          "qualitySizeGuideReferenceMismatch": {
+            "$ref": "#/components/schemas/QualitySizeGuideReferenceOutcomeData"
+          },
+          "qualitySizeAmbiguousGuideReference": {
+            "$ref": "#/components/schemas/QualitySizeGuideLabelsOutcomeData"
+          },
+          "mediaNamingReferenceMismatch": {
+            "$ref": "#/components/schemas/MediaNamingReferenceOutcomeData"
+          }
+        }
       },
-      "NamingReferenceMismatchResponseOfSonarrNamingField": {
+      "OutcomeSeverity": {
+        "enum": [
+          "error",
+          "warning",
+          "info"
+        ],
+        "type": "string",
+        "x-enumDescriptions": {
+          "error": "The affected item did not sync.",
+          "warning": "The item synced, but the configuration likely needs attention.",
+          "info": "Something notable happened that needs no action."
+        }
+      },
+      "OutcomeSubjectResponse": {
         "required": [
-          "field",
-          "configuredKey"
+          "kind"
         ],
         "type": "object",
         "properties": {
-          "field": {
-            "$ref": "#/components/schemas/SonarrNamingField"
+          "kind": {
+            "type": "string",
+            "description": "The kind of resource, for example `customFormat`, `customFormatGroup`, or `qualityProfile`.\nNew kinds may be added."
           },
-          "configuredKey": {
-            "type": "string"
+          "trashId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
-        "description": "A configured naming key that matches no guide format for the field."
+        "description": "The resource an outcome is about. `trashId`, `name`, or both are present."
       },
       "PipelineStatus": {
         "enum": [
@@ -2296,224 +2306,35 @@
           "blocked": "Did not run because a pipeline it depends on did not succeed. See `blockedBy`."
         }
       },
-      "PlanningOutcomeResponse": {
+      "PreferredRatioClampedOutcomeData": {
         "required": [
-          "type"
+          "configured",
+          "used"
         ],
         "type": "object",
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatReferenceMismatch"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded"
-          },
-          {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded"
-          }
-        ],
-        "description": "A configuration problem found before the instance's pipelines ran. The `type` property names\nthe problem. Reference mismatches and ambiguous references block every pipeline of the\ninstance; the other types are warnings.",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "customFormatReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatReferenceMismatch",
-            "customFormatGroupReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch",
-            "customFormatGroupSelectReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch",
-            "customFormatGroupExcludeReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch",
-            "customFormatGroupQualityProfileReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch",
-            "customFormatQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous",
-            "customFormatGroupQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous",
-            "customFormatGroupRequiredItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected",
-            "customFormatGroupDefaultItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected",
-            "customFormatGroupRequiredItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded",
-            "customFormatGroupNonDefaultItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded"
-          }
-        }
-      },
-      "PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected": {
-        "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
         "properties": {
-          "groupTrashId": {
-            "type": "string"
+          "configured": {
+            "type": "number",
+            "format": "double"
           },
-          "customFormatTrashId": {
-            "type": "string"
+          "used": {
+            "type": "number",
+            "format": "double"
           }
         },
-        "description": "Warning. A default group member was selected; the group includes it by default."
+        "description": "A configured preferred ratio outside 0 to 1, and the value used instead."
       },
-      "PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch": {
+      "ProfileNamesOutcomeData": {
         "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Blocking. A custom format excluded from a group is not in that group."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded": {
-        "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Warning. A non-default group member was excluded without selecting all optional members, so\nthe exclusion has no effect."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous": {
-        "required": [
-          "groupTrashId",
-          "profileTrashId",
           "profileNames"
         ],
+        "type": "object",
         "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "profileTrashId": {
-            "type": "string"
-          },
           "profileNames": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         },
-        "description": "Blocking. A quality profile trash ID that a group assigns scores to matches more than one\nconfigured profile."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch": {
-        "required": [
-          "groupTrashId",
-          "profileTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "profileTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Blocking. A quality profile that a group assigns scores to does not exist in the guide."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupReferenceMismatch": {
-        "required": [
-          "groupTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Blocking. The configured custom format group does not exist in the guide."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded": {
-        "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Warning. A required group member was excluded; required members cannot be excluded."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected": {
-        "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Warning. A required group member was selected; the group always includes it."
-      },
-      "PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch": {
-        "required": [
-          "groupTrashId",
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "groupTrashId": {
-            "type": "string"
-          },
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Blocking. A custom format selected from a group is not in that group."
-      },
-      "PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous": {
-        "required": [
-          "profileTrashId",
-          "profileNames"
-        ],
-        "properties": {
-          "profileTrashId": {
-            "type": "string"
-          },
-          "profileNames": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        },
-        "description": "Blocking. A quality profile trash ID that custom formats assign scores to matches more than one\nconfigured profile."
-      },
-      "PlanningOutcomeResponseCustomFormatReferenceMismatch": {
-        "required": [
-          "customFormatTrashId"
-        ],
-        "properties": {
-          "customFormatTrashId": {
-            "type": "string"
-          }
-        },
-        "description": "Blocking. A configured custom format does not exist in the guide."
+        "description": "The configured profiles that one quality profile trash ID matches."
       },
       "PropersAndRepacksModeResponse": {
         "enum": [
@@ -2523,34 +2344,37 @@
         ],
         "type": "string"
       },
-      "QualityProfileAdoptedResponse": {
+      "QualityDefinitionTypeOutcomeData": {
         "required": [
-          "identity",
-          "serviceId"
+          "type"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "serviceId": {
-            "type": "integer",
-            "format": "int32"
+          "type": {
+            "type": "string"
+          }
+        },
+        "description": "A configured `quality_definition.type`."
+      },
+      "QualityNameOutcomeData": {
+        "required": [
+          "quality"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
           }
         }
       },
-      "QualityProfileAmbiguousMatchResponse": {
+      "QualityNamesOutcomeData": {
         "required": [
-          "identity",
-          "serviceMatches"
+          "qualities"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "serviceMatches": {
-            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
+          "qualities": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         }
       },
@@ -2564,17 +2388,6 @@
         "x-enumDescriptions": {
           "guideBacked": "A guide quality profile; `trashId` is present.",
           "userDefined": "A profile defined only in the configuration."
-        }
-      },
-      "QualityProfileIdentityOutcomeResponse": {
-        "required": [
-          "identity"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          }
         }
       },
       "QualityProfileIdentityResponse": {
@@ -2635,194 +2448,33 @@
         },
         "description": "A quality or quality group in a profile, in profile order."
       },
-      "QualityProfileMinimumScoreResponse": {
+      "QualityProfileReferenceAmbiguousOutcomeData": {
         "required": [
-          "identity",
-          "minimumScore",
-          "totalPositiveScore",
-          "maximumScore"
+          "profileTrashId",
+          "profileNames"
         ],
         "type": "object",
         "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          "profileTrashId": {
+            "type": "string"
           },
-          "minimumScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPositiveScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maximumScore": {
-            "type": "integer",
-            "format": "int32"
+          "profileNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "A quality profile trash ID that a group assigns scores to, and the configured profiles it\nmatches."
       },
-      "QualityProfileNamedOutcomeResponse": {
+      "QualityProfileReferenceOutcomeData": {
         "required": [
-          "name"
+          "profileTrashId"
         ],
         "type": "object",
         "properties": {
-          "name": {
+          "profileTrashId": {
             "type": "string"
           }
-        }
-      },
-      "QualityProfileNamesResponse": {
-        "required": [
-          "identity",
-          "names"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "names": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
-      },
-      "QualityProfileOutcomesResponse": {
-        "type": "object",
-        "properties": {
-          "referenceMismatches": {
-            "description": "Configured trash IDs that match no guide quality profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "duplicateNames": {
-            "description": "Profile names configured more than once; none of them sync.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamedOutcomeResponse"
-          },
-          "notFound": {
-            "description": "Profiles that only receive scores (Recyclarr does not create them) and do not exist in the\nservice.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
-          },
-          "adopted": {
-            "description": "Guide profiles that already existed in the service with the same name. Recyclarr now\nmanages them.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAdoptedResponse"
-          },
-          "minimumScoresUnsatisfied": {
-            "description": "Profiles whose minimum custom format score is higher than both the sum of positive scores\nand the highest score, so no release could qualify.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileMinimumScoreResponse"
-          },
-          "invalidCutoffs": {
-            "description": "Profiles whose upgrade-until quality is a name the service does not have.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
-          },
-          "unavailableCutoffs": {
-            "description": "Profiles whose upgrade-until quality is not an allowed quality or group in the profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
-          },
-          "qualitiesRequired": {
-            "description": "New profiles that have no qualities; the service requires at least one.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
-          },
-          "qualityReferenceMismatches": {
-            "description": "Configured quality names that the service does not have.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamesResponse"
-          },
-          "resetScoreReferenceMismatches": {
-            "description": "`reset_unmatched_scores.except` names that are not in the profile, and except patterns\nthat match no custom format in the profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileResetReferencesResponse"
-          },
-          "renameBlocked": {
-            "description": "Profiles that could not be renamed because another service profile has the new name.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileRenameBlockedResponse"
-          },
-          "ambiguousMatches": {
-            "description": "Profiles whose name matches more than one service profile; they are not synced.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAmbiguousMatchResponse"
-          },
-          "createRejected": {
-            "description": "Profiles the service refused to create.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
-          },
-          "updateRejected": {
-            "description": "Profiles the service refused to update.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
-          },
-          "qualitySizeOutcomes": {
-            "description": "Problems with the quality sizes resolved for a profile, on services that store sizes per\nquality profile (Sonarr v5). Affected qualities keep their service sizes; the rest of the\nprofile still syncs.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualitySizeOutcomesResponse"
-          },
-          "qualityDefinitionsIgnored": {
-            "description": "Profiles whose `quality_definition` was ignored because the service stores quality sizes\nglobally.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
-          },
-          "qualityDefinitionUnused": {
-            "type": "boolean",
-            "description": "True when the instance `quality_definition` applied to nothing: the service stores sizes\nper quality profile and no profile is listed under `quality_profiles`."
-          }
-        }
-      },
-      "QualityProfileQualityNameResponse": {
-        "required": [
-          "identity",
-          "qualityName"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "qualityName": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityProfileQualitySizeOutcomesResponse": {
-        "required": [
-          "identity",
-          "outcomes"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "outcomes": {
-            "$ref": "#/components/schemas/QualitySizeOutcomesResponse"
-          }
-        }
-      },
-      "QualityProfileRenameBlockedResponse": {
-        "required": [
-          "identity",
-          "conflict"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "conflict": {
-            "$ref": "#/components/schemas/NamedServiceResourceResponse"
-          }
-        }
-      },
-      "QualityProfileResetReferencesResponse": {
-        "required": [
-          "identity",
-          "names",
-          "patterns"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "names": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "patterns": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
+        },
+        "description": "A quality profile trash ID that a group assigns scores to."
       },
       "QualityProfileScoreChangeResponse": {
         "required": [
@@ -2883,7 +2535,7 @@
           }
         }
       },
-      "QualitySizeGuideLabelsResponse": {
+      "QualitySizeGuideLabelsOutcomeData": {
         "required": [
           "labels"
         ],
@@ -2892,9 +2544,10 @@
           "labels": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
-        }
+        },
+        "description": "The quality size sets that one guide quality profile links."
       },
-      "QualitySizeGuideReferenceResponse": {
+      "QualitySizeGuideReferenceOutcomeData": {
         "required": [
           "label",
           "trashId"
@@ -2907,7 +2560,8 @@
           "trashId": {
             "type": "string"
           }
-        }
+        },
+        "description": "A quality size set that a guide quality profile links by trash ID."
       },
       "QualitySizeKind": {
         "enum": [
@@ -2918,85 +2572,6 @@
         "x-enumDescriptions": {
           "numeric": "A size limit; `value` is present.",
           "unlimited": "No size limit; `value` is absent."
-        }
-      },
-      "QualitySizeMaximumComparisonResponse": {
-        "required": [
-          "quality",
-          "preferred",
-          "maximum"
-        ],
-        "type": "object",
-        "properties": {
-          "quality": {
-            "type": "string"
-          },
-          "preferred": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          },
-          "maximum": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          }
-        }
-      },
-      "QualitySizeMinimumComparisonResponse": {
-        "required": [
-          "quality",
-          "minimum",
-          "preferred"
-        ],
-        "type": "object",
-        "properties": {
-          "quality": {
-            "type": "string"
-          },
-          "minimum": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          },
-          "preferred": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          }
-        }
-      },
-      "QualitySizeOutcomesResponse": {
-        "type": "object",
-        "properties": {
-          "definitionReferenceMismatches": {
-            "description": "A configured `quality_definition.type` that the guide does not have.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeTypeResponse"
-          },
-          "referenceMismatches": {
-            "description": "Configured quality overrides that are not in the guide's quality size set.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeReferenceResponse"
-          },
-          "serviceQualitiesNotFound": {
-            "description": "Guide qualities that the service does not have.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "preferredRatiosClamped": {
-            "description": "A configured preferred ratio outside 0 to 1: `current` is the configured value and\n`desired` the value used.",
-            "$ref": "#/components/schemas/IReadOnlyListOfValueChangeResponseOfDecimal"
-          },
-          "minimumGreaterThanPreferred": {
-            "description": "Qualities not synced because the minimum is larger than the preferred size.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMinimumComparisonResponse"
-          },
-          "unlimitedPreferredGreaterThanMaximum": {
-            "description": "Qualities not synced because the preferred size is unlimited but the maximum is not.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
-          },
-          "preferredGreaterThanMaximum": {
-            "description": "Qualities not synced because the preferred size is larger than the maximum.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
-          },
-          "guideReferenceMismatches": {
-            "description": "A guide quality profile links a quality size set (by trash ID) that the guide does not\nhave. Reported only for services that store sizes per quality profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeGuideReferenceResponse"
-          },
-          "ambiguousGuideReferences": {
-            "description": "A guide quality profile links more than one quality size set, so none is applied. Reported\nonly for services that store sizes per quality profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeGuideLabelsResponse"
-          }
         }
       },
       "QualitySizePipelineResponse": {
@@ -3011,7 +2586,7 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/QualitySizeOutcomesResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "updates": {
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeUpdateResponse"
@@ -3029,7 +2604,7 @@
           }
         }
       },
-      "QualitySizeReferenceResponse": {
+      "QualitySizeReferenceOutcomeData": {
         "required": [
           "quality",
           "type"
@@ -3067,17 +2642,6 @@
           }
         },
         "description": "The size limits Recyclarr assigns to one quality."
-      },
-      "QualitySizeTypeResponse": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          }
-        }
       },
       "QualitySizeUpdateResponse": {
         "required": [
@@ -3139,24 +2703,6 @@
           }
         }
       },
-      "RadarrNamingField": {
-        "enum": [
-          "standardMovieFormat",
-          "movieFolderFormat"
-        ],
-        "type": "string"
-      },
-      "RadarrNamingOutcomesResponse": {
-        "required": [
-          "referenceMismatches"
-        ],
-        "type": "object",
-        "properties": {
-          "referenceMismatches": {
-            "$ref": "#/components/schemas/IReadOnlyListOfNamingReferenceMismatchResponseOfRadarrNamingField"
-          }
-        }
-      },
       "RadarrNamingPipelineResponse": {
         "required": [
           "status",
@@ -3169,7 +2715,7 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/RadarrNamingOutcomesResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "updates": {
             "$ref": "#/components/schemas/IReadOnlyListOfRadarrNamingUpdateResponse"
@@ -3376,7 +2922,8 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
+            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject.",
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "blockedBy": {
             "oneOf": [
@@ -3485,6 +3032,34 @@
           }
         }
       },
+      "RenameBlockedOutcomeData": {
+        "required": [
+          "conflict"
+        ],
+        "type": "object",
+        "properties": {
+          "conflict": {
+            "$ref": "#/components/schemas/NamedServiceResourceResponse"
+          }
+        },
+        "description": "The service profile that already has the new name."
+      },
+      "ResetScoreReferencesOutcomeData": {
+        "required": [
+          "names",
+          "patterns"
+        ],
+        "type": "object",
+        "properties": {
+          "names": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "patterns": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        },
+        "description": "`reset_unmatched_scores.except` names that are not in the profile, and except patterns that\nmatch no custom format in the profile."
+      },
       "ServiceFailureProblemDetails": {
         "type": "object",
         "properties": {
@@ -3527,6 +3102,31 @@
           }
         }
       },
+      "ServiceIdOutcomeData": {
+        "required": [
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "The ID of the service resource that Recyclarr now manages."
+      },
+      "ServiceMatchesOutcomeData": {
+        "required": [
+          "serviceMatches"
+        ],
+        "type": "object",
+        "properties": {
+          "serviceMatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
+          }
+        },
+        "description": "The service resources whose names match."
+      },
       "SkippedBecauseResponse": {
         "required": [
           "jobId"
@@ -3541,27 +3141,6 @@
         },
         "description": "Why a scheduled job did not run: another job was active at its scheduled time."
       },
-      "SonarrNamingField": {
-        "enum": [
-          "seriesFolderFormat",
-          "seasonFolderFormat",
-          "standardEpisodeFormat",
-          "dailyEpisodeFormat",
-          "animeEpisodeFormat"
-        ],
-        "type": "string"
-      },
-      "SonarrNamingOutcomesResponse": {
-        "required": [
-          "referenceMismatches"
-        ],
-        "type": "object",
-        "properties": {
-          "referenceMismatches": {
-            "$ref": "#/components/schemas/IReadOnlyListOfNamingReferenceMismatchResponseOfSonarrNamingField"
-          }
-        }
-      },
       "SonarrNamingPipelineResponse": {
         "required": [
           "status",
@@ -3574,7 +3153,7 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/SonarrNamingOutcomesResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "updates": {
             "$ref": "#/components/schemas/IReadOnlyListOfSonarrNamingUpdateResponse"
@@ -3809,7 +3388,8 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
+            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject.",
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
           "blockedBy": {
             "oneOf": [
@@ -4013,7 +3593,7 @@
           },
           "planningOutcomes": {
             "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance.",
-            "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           }
         }
       },
@@ -4057,7 +3637,7 @@
           },
           "planningOutcomes": {
             "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance.",
-            "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           }
         }
       },
@@ -4187,24 +3767,6 @@
           },
           "desired": {
             "type": "boolean"
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfDecimal": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": "number",
-            "format": "double"
-          },
-          "desired": {
-            "type": "number",
-            "format": "double"
           }
         },
         "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."

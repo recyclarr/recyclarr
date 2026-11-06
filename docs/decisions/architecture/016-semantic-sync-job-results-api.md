@@ -66,16 +66,28 @@ types use one `naming` pipeline property; its schema is selected by the instance
 is represented by that concrete type rather than by a second ordinary property on the DTO.
 
 Each pipeline response contains explicit create, update, and delete collections where applicable.
-Outcomes are grouped under one pipeline-specific `outcomes` object with named typed collections.
 Empty or inapplicable collections may be omitted.
+
+### Outcomes
+
+Planning and pipeline outcomes share one envelope, mapped once on the server from Core outcomes:
+
+- `code`: a string, never an enum, so a new code does not break generated clients
+- `severity` and `blocking`: fixed per code (ADR-033)
+- `message`: rendered by the server for people to read
+- `subject`: the resource the outcome is about, as a kind plus a trash ID, a name, or both
+- `data`: the facts specific to the code, as named values
+
+Clients display `message` and MUST handle an unknown code without failing. Each code's data shape is
+a server record; the OpenAPI document publishes those schemas and maps each code to its schema.
 
 An outcome appears under each resource it affects, even when that repeats it. A response never
 refers to a resource elsewhere in the response by identity. One instance-level source of a problem
 that affects several quality profiles, such as the instance `quality_definition` on Sonarr v5,
 appears under each affected profile; profiles that use their own source show nothing.
 
-The response does not include request settings, progress snapshots, diagnostic messages, unchanged
-resource counts, full Sonarr or Radarr resources, or raw Core models.
+The response does not include request settings, progress snapshots, unchanged resource counts, full
+Sonarr or Radarr resources, or raw Core models.
 
 ### Contract ownership
 
@@ -98,7 +110,8 @@ messages, stack traces, or C# type names.
 
 ### Versioning
 
-- Adding an optional pipeline or outcome collection is additive within an API version
+- Adding an optional pipeline or an outcome code is additive within an API version
+- Removing an outcome code, or renaming or removing a field of its data, is breaking
 - Adding a status value is breaking because generated clients may use exhaustive switches
 - Removing, renaming, or changing field meaning requires a new API version
 - Core changes do not affect API versioning unless the mapped HTTP contract changes
@@ -111,6 +124,9 @@ messages, stack traces, or C# type names.
 - Reporting a shared problem once with a list of affected resource identities: adds cross-references
   that no other part of the response uses.
 - An empty successful result while the job runs: hides that results do not exist yet.
+- A typed variant or named collection per outcome: each new outcome changes the schema, and an older
+  client that switches over variants fails on one it does not know.
+- Clients rendering messages from outcome data: every client repeats the wording, and copies drift.
 
 ## Consequences
 
@@ -126,3 +142,4 @@ messages, stack traces, or C# type names.
 - 2026-09-17: Faults attach to instances and jobs (ADR-017).
 - 2026-09-26: Job creation no longer validates configuration (ADR-019).
 - 2026-10-18: Outcomes appear under each affected resource; no cross-references by identity.
+- 2026-11-05: Outcomes use one envelope with a server-rendered message and string codes.

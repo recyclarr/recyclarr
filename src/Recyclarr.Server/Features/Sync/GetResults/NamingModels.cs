@@ -1,23 +1,5 @@
 namespace Recyclarr.Server.Features.Sync.GetResults;
 
-internal enum SonarrNamingField
-{
-    SeriesFolderFormat,
-    SeasonFolderFormat,
-    StandardEpisodeFormat,
-    DailyEpisodeFormat,
-    AnimeEpisodeFormat,
-}
-
-internal enum RadarrNamingField
-{
-    StandardMovieFormat,
-    MovieFolderFormat,
-}
-
-/// <summary>A configured naming key that matches no guide format for the field.</summary>
-internal sealed record NamingReferenceMismatchResponse<TField>(TField Field, string ConfiguredKey);
-
 internal sealed record SonarrNamingUpdateResponse
 {
     public ValueChangeResponse<bool?>? RenameEpisodes { get; init; }
@@ -35,18 +17,10 @@ internal sealed record RadarrNamingUpdateResponse
     public ValueChangeResponse<string?>? MovieFolderFormat { get; init; }
 }
 
-internal sealed record SonarrNamingOutcomesResponse(
-    IReadOnlyList<NamingReferenceMismatchResponse<SonarrNamingField>> ReferenceMismatches
-);
-
-internal sealed record RadarrNamingOutcomesResponse(
-    IReadOnlyList<NamingReferenceMismatchResponse<RadarrNamingField>> ReferenceMismatches
-);
-
 internal sealed record SonarrNamingPipelineResponse
 {
     public required PipelineStatus Status { get; init; }
-    public required SonarrNamingOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<OutcomeResponse> Outcomes { get; init; }
     public required IReadOnlyList<SonarrNamingUpdateResponse> Updates { get; init; }
 
     /// <summary>Present only when the status is `blocked`.</summary>
@@ -56,7 +30,7 @@ internal sealed record SonarrNamingPipelineResponse
 internal sealed record RadarrNamingPipelineResponse
 {
     public required PipelineStatus Status { get; init; }
-    public required RadarrNamingOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<OutcomeResponse> Outcomes { get; init; }
     public required IReadOnlyList<RadarrNamingUpdateResponse> Updates { get; init; }
 
     /// <summary>Present only when the status is `blocked`.</summary>

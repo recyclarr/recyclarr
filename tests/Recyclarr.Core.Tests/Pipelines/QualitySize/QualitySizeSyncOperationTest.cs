@@ -14,7 +14,7 @@ namespace Recyclarr.Core.Tests.Pipelines.QualitySize;
 internal sealed class QualitySizeSyncOperationTest
 {
     [Test]
-    public async Task Compute_returns_only_changed_semantic_values_and_retains_local_failure()
+    public async Task Compute_returns_only_changed_semantic_values_and_reports_missing_quality()
     {
         var api = Substitute.For<IQualityDefinitionService>();
         api.GetQualityDefinitions(default)
@@ -62,7 +62,7 @@ internal sealed class QualitySizeSyncOperationTest
         };
 
         var result = await Execute(sut, plan);
-        result.Status.Should().Be(SyncResultStatus.Partial);
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
         result
             .Outcomes.Should()
             .ContainSingle()
@@ -145,7 +145,8 @@ internal sealed class QualitySizeSyncOperationTest
     }
 
     [Test]
-    public async Task Missing_server_quality_retains_name_and_skips_item()
+    // A quality the service lacks has no service data to be wrong, so it is not incomplete
+    public async Task Missing_server_quality_is_reported_without_failing_the_pipeline()
     {
         var api = Substitute.For<IQualityDefinitionService>();
         api.GetQualityDefinitions(default).ReturnsForAnyArgs([]);
@@ -164,7 +165,7 @@ internal sealed class QualitySizeSyncOperationTest
         };
         var result = await Execute(sut, plan);
 
-        result.Status.Should().Be(SyncResultStatus.Failed);
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
         result
             .Outcomes.Should()
             .ContainSingle()

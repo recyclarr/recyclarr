@@ -442,9 +442,6 @@ internal class CustomFormatSyncOperation(
         {
             switch (outcome)
             {
-                case InvalidCfGroupSkipIdOutcome x:
-                    yield return new CustomFormatGroupReferenceMismatchOutcome(x.TrashId);
-                    break;
                 case IncompatibleCfGroupOutcome x:
                     yield return new IncompatibleCustomFormatGroupOutcome(x.Name, x.TrashId);
                     break;

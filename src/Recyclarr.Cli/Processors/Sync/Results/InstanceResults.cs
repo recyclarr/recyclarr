@@ -13,7 +13,7 @@ internal sealed record InstanceResults(
     SyncCompletionStatus Status,
     InstanceFailureCategory? Failure,
     SyncFaultResponse? Fault,
-    IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes,
+    IReadOnlyList<OutcomeResponse> PlanningOutcomes,
     CustomFormatPipelineResponse? CustomFormats,
     QualityProfileResults? QualityProfiles,
     QualitySizePipelineResponse? QualitySizes,
@@ -71,7 +71,7 @@ internal sealed record NamingResults(
     string Title,
     PipelineStatus Status,
     BlockingPipeline? BlockedBy,
-    IReadOnlyList<NamingMismatch> Mismatches,
+    IReadOnlyList<OutcomeResponse> Outcomes,
     IReadOnlyList<FieldChange> Changes
 )
 {
@@ -80,12 +80,7 @@ internal sealed record NamingResults(
             "Sonarr Media Naming",
             pipeline.Status,
             pipeline.BlockedBy,
-            [
-                .. pipeline.Outcomes.ReferenceMismatches.Select(x => new NamingMismatch(
-                    x.Field.ToString(),
-                    x.ConfiguredKey
-                )),
-            ],
+            [.. pipeline.Outcomes],
             [
                 .. pipeline.Updates.SelectMany(x =>
                     new[]
@@ -106,12 +101,7 @@ internal sealed record NamingResults(
             "Radarr Media Naming",
             pipeline.Status,
             pipeline.BlockedBy,
-            [
-                .. pipeline.Outcomes.ReferenceMismatches.Select(x => new NamingMismatch(
-                    x.Field.ToString(),
-                    x.ConfiguredKey
-                )),
-            ],
+            [.. pipeline.Outcomes],
             [
                 .. pipeline.Updates.SelectMany(x =>
                     new[]
@@ -125,8 +115,6 @@ internal sealed record NamingResults(
         );
 }
 
-internal sealed record NamingMismatch(string Field, string ConfiguredKey);
-
 /// <summary>
 /// Quality profile results for either service. Each created or updated profile is normalized into
 /// a <see cref="ProfileChange"/>, so fields only one service has (Radarr's language) appear as
@@ -135,7 +123,7 @@ internal sealed record NamingMismatch(string Field, string ConfiguredKey);
 internal sealed record QualityProfileResults(
     PipelineStatus Status,
     BlockingPipeline? BlockedBy,
-    QualityProfileOutcomesResponse Outcomes,
+    IReadOnlyList<OutcomeResponse> Outcomes,
     IReadOnlyList<ProfileChange> Changes
 )
 {
@@ -145,7 +133,7 @@ internal sealed record QualityProfileResults(
         new(
             pipeline.Status,
             pipeline.BlockedBy,
-            pipeline.Outcomes,
+            [.. pipeline.Outcomes],
             [
                 .. pipeline.Creates.Select(x =>
                     Create(
@@ -190,7 +178,7 @@ internal sealed record QualityProfileResults(
         new(
             pipeline.Status,
             pipeline.BlockedBy,
-            pipeline.Outcomes,
+            [.. pipeline.Outcomes],
             [
                 .. pipeline.Creates.Select(x =>
                     Create(

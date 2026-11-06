@@ -22,7 +22,6 @@ internal sealed class DiscriminatorDocumentTransformer : IOpenApiDocumentTransfo
         }
 
         RemoveDiscriminatorProperties(schemas, nameof(SyncInstanceResultsResponse), "service");
-        RemoveDiscriminatorProperties(schemas, nameof(PlanningOutcomeResponse), "type");
         RemoveDiscriminatorProperties(schemas, nameof(GuideNamingResponse), "service");
         return Task.CompletedTask;
     }

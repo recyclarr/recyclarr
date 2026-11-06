@@ -6,8 +6,10 @@ using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync.Notifications.Apprise;
 using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
@@ -105,10 +107,7 @@ internal sealed class NotificationService(
         }
 
         reports.AddRange(
-            instance.PlanningOutcomes.Select(outcome => new NotificationReport(
-                outcome is BlockingPlanningOutcome ? ReportLevel.Error : ReportLevel.Warning,
-                FormatPlanningOutcome(outcome)
-            ))
+            instance.PlanningOutcomes.Select(x => ToReport(OutcomeResponseMapper.Map(x)))
         );
 
         foreach (var pipeline in instance.Pipelines)
@@ -263,16 +262,30 @@ internal sealed class NotificationService(
     private static IEnumerable<NotificationReport> FormatPipelineOutcomes(
         PipelineResult pipeline
     ) =>
-        pipeline switch
-        {
-            CustomFormatPipelineResult x => x.Outcomes.Select(FormatCustomFormatOutcome),
-            QualityProfilePipelineResult x => x.Outcomes.Select(FormatQualityProfileOutcome),
-            QualitySizePipelineResult x => x.Outcomes.Select(FormatQualitySizeOutcome),
-            SonarrNamingPipelineResult x => x.Outcomes.Select(FormatSonarrNamingOutcome),
-            RadarrNamingPipelineResult x => x.Outcomes.Select(FormatRadarrNamingOutcome),
-            MediaManagementPipelineResult => [],
-            _ => throw new ArgumentOutOfRangeException(nameof(pipeline), pipeline, null),
-        };
+        (
+            pipeline switch
+            {
+                CustomFormatPipelineResult x => x.Outcomes.Select(OutcomeResponseMapper.Map),
+                QualityProfilePipelineResult x => x.Outcomes.Select(OutcomeResponseMapper.Map),
+                QualitySizePipelineResult x => x.Outcomes.Select(y => OutcomeResponseMapper.Map(y)),
+                SonarrNamingPipelineResult x => x.Outcomes.Select(OutcomeResponseMapper.Map),
+                RadarrNamingPipelineResult x => x.Outcomes.Select(OutcomeResponseMapper.Map),
+                MediaManagementPipelineResult => [],
+                _ => throw new ArgumentOutOfRangeException(nameof(pipeline), pipeline, null),
+            }
+        ).Select(ToReport);
+
+    private static NotificationReport ToReport(OutcomeResponse outcome) =>
+        new(
+            outcome.Severity switch
+            {
+                OutcomeSeverity.Error => ReportLevel.Error,
+                OutcomeSeverity.Warning => ReportLevel.Warning,
+                OutcomeSeverity.Info => ReportLevel.Information,
+                _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
+            },
+            outcome.Message
+        );
 
     private static bool HasOutcomes(PipelineResult pipeline) =>
         pipeline switch
@@ -308,44 +321,6 @@ internal sealed class NotificationService(
             _ => throw new ArgumentOutOfRangeException(nameof(pipeline), pipeline, null),
         };
 
-    private static string FormatPlanningOutcome(PlanningOutcome outcome) =>
-        outcome switch
-        {
-            CustomFormatReferenceMismatchPlanningOutcome x =>
-                $"Custom Format '{x.CustomFormatTrashId}' does not exist",
-            CustomFormatGroupReferenceMismatchPlanningOutcome x =>
-                $"Custom Format group '{x.GroupTrashId}' does not exist",
-            CustomFormatGroupSelectReferenceMismatchPlanningOutcome x =>
-                $"Custom Format group '{x.GroupTrashId}' does not contain selected format "
-                    + $"'{x.CustomFormatTrashId}'",
-            CustomFormatGroupExcludeReferenceMismatchPlanningOutcome x =>
-                $"Custom Format group '{x.GroupTrashId}' does not contain excluded format "
-                    + $"'{x.CustomFormatTrashId}'",
-            CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcome x =>
-                $"Custom Format group '{x.GroupTrashId}' references unknown quality profile "
-                    + $"'{x.ProfileTrashId}'",
-            CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome x =>
-                $"Quality profile '{x.ProfileTrashId}' matches multiple configured profiles: "
-                    + FormatNames(x.ProfileNames),
-            CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome x =>
-                $"Custom Format group '{x.GroupTrashId}' references quality profile "
-                    + $"'{x.ProfileTrashId}', which matches multiple configured profiles: "
-                    + FormatNames(x.ProfileNames),
-            CustomFormatGroupRequiredItemSelectedPlanningOutcome x =>
-                $"Custom Format '{x.CustomFormatTrashId}' is required by group "
-                    + $"'{x.GroupTrashId}' and does not need to be selected",
-            CustomFormatGroupDefaultItemSelectedPlanningOutcome x =>
-                $"Custom Format '{x.CustomFormatTrashId}' is included by default in group "
-                    + $"'{x.GroupTrashId}' and does not need to be selected",
-            CustomFormatGroupRequiredItemExcludedPlanningOutcome x =>
-                $"Custom Format '{x.CustomFormatTrashId}' is required by group "
-                    + $"'{x.GroupTrashId}' and cannot be excluded",
-            CustomFormatGroupNonDefaultItemExcludedPlanningOutcome x =>
-                $"Excluding Custom Format '{x.CustomFormatTrashId}' from group "
-                    + $"'{x.GroupTrashId}' has no effect unless all optional formats are selected",
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
     private static string FormatFailure(OperationalFailure failure) =>
         failure switch
         {
@@ -361,190 +336,6 @@ internal sealed class NotificationService(
             _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null),
         };
 
-    private static NotificationReport FormatCustomFormatOutcome(CustomFormatOutcome outcome) =>
-        outcome switch
-        {
-            CustomFormatGroupReferenceMismatchOutcome x => Error(
-                $"Custom Format group '{x.TrashId}' does not exist"
-            ),
-            IncompatibleCustomFormatGroupOutcome x => Warning(
-                $"Custom Format group '{x.Name}' ({x.TrashId}) is not compatible with any "
-                    + "selected quality profile"
-            ),
-            EmptyCustomFormatGroupOutcome x => Warning(
-                $"Custom Format group '{x.Name}' ({x.TrashId}) contains no selected formats"
-            ),
-            CustomFormatDuplicateNameOutcome x => Error(
-                $"Custom Format name '{x.Name}' is used by multiple trash IDs: "
-                    + string.Join(", ", x.TrashIds)
-            ),
-            CustomFormatAdoptedOutcome x => Information(
-                $"Adopted Custom Format '{x.Identity.Name}' ({x.Identity.TrashId}) from "
-                    + $"service ID {x.ServiceId}"
-            ),
-            CustomFormatAmbiguousMatchOutcome x => Error(
-                $"Custom Format '{x.Identity.Name}' ({x.Identity.TrashId}) matches multiple "
-                    + $"service formats: {FormatMatches(x.ServiceMatches)}"
-            ),
-            CustomFormatStateConflictOutcome x => Error(
-                $"Custom Format '{x.Identity.Name}' ({x.Identity.TrashId}) conflicts with "
-                    + $"managed format '{x.ManagedIdentity.Name}' "
-                    + $"({x.ManagedIdentity.TrashId}) at service ID {x.ServiceId}"
-            ),
-            CustomFormatCreateRejectedOutcome x => Error(
-                $"The service rejected creation of Custom Format '{x.Identity.Name}' "
-                    + $"({x.Identity.TrashId})"
-            ),
-            CustomFormatUpdateRejectedOutcome x => Error(
-                $"The service rejected update of Custom Format '{x.Identity.Name}' "
-                    + $"({x.Identity.TrashId})"
-            ),
-            CustomFormatDeleteRejectedOutcome x => Error(
-                $"The service rejected deletion of Custom Format '{x.Identity.Name}' "
-                    + $"({x.Identity.TrashId})"
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
-    private static NotificationReport FormatQualityProfileOutcome(QualityProfileOutcome outcome) =>
-        outcome switch
-        {
-            QualityProfileReferenceMismatchOutcome x => Error(
-                $"Quality profile '{x.TrashId}' does not exist"
-            ),
-            QualityProfileDuplicateNameOutcome x => Error(
-                $"Quality profile name '{x.Name}' is configured more than once"
-            ),
-            QualityProfileNotFoundOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' was not found"
-            ),
-            QualityProfileAdoptedOutcome x => Information(
-                $"Adopted quality profile '{GetQualityProfileName(x.Identity)}' from service ID "
-                    + $"{x.ServiceId}"
-            ),
-            QualityProfileMinimumScoreUnsatisfiedOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' cannot satisfy minimum "
-                    + $"score {x.MinimumScore}; positive score {x.TotalPositiveScore}, maximum "
-                    + $"{x.MaximumScore}"
-            ),
-            QualityProfileInvalidCutoffOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' has invalid cutoff "
-                    + $"'{x.QualityName}'"
-            ),
-            QualityProfileUnavailableCutoffOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' cannot use unavailable "
-                    + $"cutoff '{x.QualityName}'"
-            ),
-            QualityProfileQualitiesRequiredOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' must contain a quality"
-            ),
-            QualityProfileQualityReferenceMismatchOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' references unknown "
-                    + $"qualities: {FormatNames(x.Names)}"
-            ),
-            QualityProfileResetScoreReferenceMismatchOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' cannot reset scores for "
-                    + $"unknown Custom Formats ({FormatNames(x.Names)}) or unmatched patterns "
-                    + $"({FormatNames(x.Patterns)})"
-            ),
-            QualityProfileRenameBlockedOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' cannot be renamed because "
-                    + $"'{x.Conflict.Name}' already exists at service ID {x.Conflict.ServiceId}"
-            ),
-            QualityProfileAmbiguousMatchOutcome x => Error(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}' matches multiple service "
-                    + $"profiles: {FormatMatches(x.ServiceMatches)}"
-            ),
-            QualityProfileCreateRejectedOutcome x => Error(
-                $"The service rejected creation of quality profile "
-                    + $"'{GetQualityProfileName(x.Identity)}'"
-            ),
-            QualityProfileUpdateRejectedOutcome x => Error(
-                $"The service rejected update of quality profile "
-                    + $"'{GetQualityProfileName(x.Identity)}'"
-            ),
-            QualityProfileQualitySizeOutcome x => WithProfilePrefix(
-                x.Identity,
-                FormatQualitySizeOutcome(x.Outcome)
-            ),
-            QualityProfileQualityDefinitionIgnoredOutcome x => Warning(
-                $"Quality profile '{GetQualityProfileName(x.Identity)}': this service version "
-                    + "does not store quality sizes per profile, so the profile's "
-                    + "quality_definition is ignored"
-            ),
-            QualityProfileQualityDefinitionUnusedOutcome => Warning(
-                "This service version stores quality sizes per quality profile. "
-                    + "quality_definition only applies to profiles listed under "
-                    + "quality_profiles, and none are configured"
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
-    private static NotificationReport FormatQualitySizeOutcome(QualitySizeOutcome outcome) =>
-        outcome switch
-        {
-            QualitySizeDefinitionReferenceMismatchOutcome x => Error(
-                $"Quality definition type '{x.Type}' does not exist"
-            ),
-            QualitySizeReferenceMismatchOutcome x => Error(
-                $"Quality '{x.Quality}' does not exist in quality definition '{x.Type}'"
-            ),
-            QualitySizeServiceQualityNotFoundOutcome x => Warning(
-                $"The service does not contain quality '{x.Quality}'"
-            ),
-            QualitySizePreferredRatioClampedOutcome x => Warning(
-                $"Preferred ratio {x.Value.Current} was clamped to {x.Value.Desired}"
-            ),
-            QualitySizeMinimumGreaterThanPreferredOutcome x => Error(
-                $"Quality '{x.Quality}' minimum {x.Minimum} exceeds preferred {x.Preferred}"
-            ),
-            QualitySizeUnlimitedPreferredGreaterThanMaximumOutcome x => Error(
-                $"Quality '{x.Quality}' preferred value is unlimited and exceeds maximum "
-                    + $"{x.Maximum}"
-            ),
-            QualitySizePreferredGreaterThanMaximumOutcome x => Error(
-                $"Quality '{x.Quality}' preferred {x.Preferred} exceeds maximum {x.Maximum}"
-            ),
-            QualitySizeGuideReferenceMismatchOutcome x => Error(
-                $"The guide profile references a quality definition that does not exist: "
-                    + $"{x.Label} ({x.TrashId})"
-            ),
-            QualitySizeAmbiguousGuideReferenceOutcome x => Error(
-                $"The guide profile references more than one quality definition: "
-                    + FormatNames(x.Labels)
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
-    private static NotificationReport FormatSonarrNamingOutcome(SonarrNamingOutcome outcome) =>
-        outcome switch
-        {
-            SonarrNamingReferenceMismatchOutcome x => Error(
-                $"Media naming field '{x.Field}' references unknown format "
-                    + $"'{x.ConfiguredKey}'"
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
-    private static NotificationReport FormatRadarrNamingOutcome(RadarrNamingOutcome outcome) =>
-        outcome switch
-        {
-            RadarrNamingReferenceMismatchOutcome x => Error(
-                $"Media naming field '{x.Field}' references unknown format "
-                    + $"'{x.ConfiguredKey}'"
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
-        };
-
-    private static NotificationReport WithProfilePrefix(
-        QualityProfileIdentity identity,
-        NotificationReport report
-    ) =>
-        report with
-        {
-            Message = $"Quality profile '{GetQualityProfileName(identity)}': {report.Message}",
-        };
-
     private static string GetQualityProfileName(QualityProfileDelta delta) =>
         GetQualityProfileName(delta.Identity);
 
@@ -555,22 +346,6 @@ internal sealed class NotificationService(
             UserDefinedQualityProfileIdentity x => x.Name,
             _ => throw new ArgumentOutOfRangeException(nameof(identity), identity, null),
         };
-
-    private static string FormatNames(IEnumerable<string> names) =>
-        string.Join(", ", names.Select(name => $"'{name}'"));
-
-    private static string FormatMatches(IEnumerable<CustomFormatServiceMatch> matches) =>
-        string.Join(", ", matches.Select(match => $"'{match.Name}' (ID {match.ServiceId})"));
-
-    private static string FormatMatches(IEnumerable<QualityProfileServiceMatch> matches) =>
-        string.Join(", ", matches.Select(match => $"'{match.Name}' (ID {match.ServiceId})"));
-
-    private static NotificationReport Error(string message) => new(ReportLevel.Error, message);
-
-    private static NotificationReport Warning(string message) => new(ReportLevel.Warning, message);
-
-    private static NotificationReport Information(string message) =>
-        new(ReportLevel.Information, message);
 
     private sealed record NotificationReport(ReportLevel Level, string Message);
 
