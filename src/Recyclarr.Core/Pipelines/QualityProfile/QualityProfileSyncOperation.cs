@@ -401,31 +401,6 @@ internal class QualityProfileSyncOperation(
             incompleteResources++;
         }
 
-        foreach (var profile in CompletedProfiles(transactions))
-        {
-            var identity = CreateIdentity(profile.ProfileConfig);
-            if (profile.UpdatedQualities.InvalidQualityNames.Count > 0)
-            {
-                outcomes.Add(
-                    new QualityProfileQualityReferenceMismatchOutcome(
-                        identity,
-                        profile.UpdatedQualities.InvalidQualityNames.ToList()
-                    )
-                );
-            }
-
-            if (profile.InvalidExceptCfNames.Count > 0 || profile.InvalidExceptCfPatterns.Count > 0)
-            {
-                outcomes.Add(
-                    new QualityProfileResetScoreReferenceMismatchOutcome(
-                        identity,
-                        profile.InvalidExceptCfNames.ToList(),
-                        profile.InvalidExceptCfPatterns.ToList()
-                    )
-                );
-            }
-        }
-
         return outcomes;
     }
 
@@ -477,6 +452,19 @@ internal class QualityProfileSyncOperation(
                     break;
                 case QualityProfileValidationConstraint.QualitiesRequired:
                     yield return new QualityProfileQualitiesRequiredOutcome(identity);
+                    break;
+                case QualityProfileValidationConstraint.QualityReferenceMismatch:
+                    yield return new QualityProfileQualityReferenceMismatchOutcome(
+                        identity,
+                        profile.UpdatedQualities.InvalidQualityNames.ToList()
+                    );
+                    break;
+                case QualityProfileValidationConstraint.ResetScoreReferenceMismatch:
+                    yield return new QualityProfileResetScoreReferenceMismatchOutcome(
+                        identity,
+                        profile.InvalidExceptCfNames.ToList(),
+                        profile.InvalidExceptCfPatterns.ToList()
+                    );
                     break;
                 default:
                     throw new InvalidOperationException(
@@ -659,15 +647,6 @@ internal class QualityProfileSyncOperation(
                     }
             )
             .ToList();
-    }
-
-    private static IEnumerable<UpdatedQualityProfile> CompletedProfiles(
-        QualityProfileTransactionData transactions
-    )
-    {
-        return transactions
-            .NewProfiles.Concat(transactions.UpdatedProfiles.Select(x => x.Profile))
-            .Concat(transactions.UnchangedProfiles);
     }
 
     private static QualityProfileIdentity CreateIdentity(PlannedQualityProfile profile)

@@ -48,6 +48,7 @@ internal static class SyncResultScenarios
         [
             new CustomFormatReferenceMismatchPlanningOutcome("missing-cf"),
             new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
+            new CustomFormatGroupSkipReferenceMismatchPlanningOutcome("missing-skip"),
             new CustomFormatGroupSelectReferenceMismatchPlanningOutcome(
                 "select-group",
                 "missing-select"
@@ -100,7 +101,6 @@ internal static class SyncResultScenarios
 
         CustomFormatOutcome[] outcomes =
         [
-            new CustomFormatGroupReferenceMismatchOutcome("missing-group"),
             new IncompatibleCustomFormatGroupOutcome("Wrong Group", "wrong-group"),
             new EmptyCustomFormatGroupOutcome("Empty Group", "empty-group"),
             new CustomFormatDuplicateNameOutcome("Shared", ["cf-a", "cf-b"]),

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Recyclarr.Server.Api;
 using Recyclarr.Server.Features.Sync.GetResults;
 
 namespace Recyclarr.Server.Persistence;
@@ -9,15 +9,20 @@ namespace Recyclarr.Server.Persistence;
 /// </summary>
 /// <remarks>
 /// Storage is coupled to the v1 results DTO. A breaking change to that DTO needs a data migration
-/// of stored rows (or a stored-form version) before old jobs can be read again.
+/// of stored rows (or a stored-form version) before old jobs can be read again. Rows use the wire
+/// JSON format because outcome data is untyped in the DTO: it reads back as raw JSON and is
+/// returned to clients exactly as stored.
 /// </remarks>
 internal static class StoredInstanceResult
 {
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions Options = CreateOptions();
+
+    private static JsonSerializerOptions CreateOptions()
     {
-        Converters = { new JsonStringEnumConverter() },
-        RespectNullableAnnotations = true,
-    };
+        var options = new JsonSerializerOptions();
+        ServerApi.ConfigureWireJson(options);
+        return options;
+    }
 
     public static string Serialize(SyncInstanceResultsResponse result) =>
         JsonSerializer.Serialize(result, Options);

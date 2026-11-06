@@ -82,6 +82,24 @@ internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
         unsecured.Should().BeEmpty();
     }
 
+    // Data records are referenced only through this map, so clients depend on it for typed data
+    [Test]
+    public async Task Outcome_codes_map_to_published_data_schemas()
+    {
+        var document = await GetDocument();
+        var schemas = document!["components"]!["schemas"]!.AsObject();
+        var map = schemas["OutcomeResponse"]!["x-outcome-data"]!.AsObject();
+
+        map["customFormatAdopted"]!["$ref"]!
+            .GetValue<string>()
+            .Should()
+            .Be("#/components/schemas/ServiceIdOutcomeData");
+        map.Select(x => x.Value!["$ref"]!.GetValue<string>().Split('/')[^1])
+            .Should()
+            .OnlyContain(name => schemas.ContainsKey(name));
+        map.Should().NotContainKey("customFormatCreateRejected");
+    }
+
     private async Task<JsonNode?> GetDocument()
     {
         using var client = CreateClient();

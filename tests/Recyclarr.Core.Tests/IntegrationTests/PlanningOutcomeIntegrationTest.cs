@@ -173,6 +173,41 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
             .Equal(new CustomFormatReferenceMismatchPlanningOutcome("missing-cf"));
     }
 
+    // The group the user meant to skip would still sync and change scores (ADR-033)
+    [Test]
+    public async Task Unknown_custom_format_group_skip_id_fails_the_instance()
+    {
+        AddGuideData();
+        using var scope = Resolve<SyncRunScopeFactory>().Start<ISyncOrchestrator>(Guide);
+
+        var config = new RadarrConfiguration
+        {
+            InstanceName = "radarr",
+            BaseUrl = new Uri("http://localhost"),
+            ApiKey = "api-key",
+            CustomFormats = [new CustomFormatConfig { TrashIds = ["direct-cf"] }],
+            CustomFormatGroups = new CustomFormatGroupsConfig { Skip = ["missing-group"] },
+        };
+
+        var result = await scope.Entry.RunAsync(
+            [config],
+            Substitute.For<ISyncSettings>(),
+            Substitute.For<IInstanceSyncProgress>(),
+            CancellationToken.None
+        );
+
+        var instance = result.Instances.Should().ContainSingle().Subject;
+        instance.Status.Should().Be(SyncResultStatus.Failed);
+        instance
+            .Pipelines.Should()
+            .ContainSingle()
+            .Which.Status.Should()
+            .Be(SyncResultStatus.Failed);
+        instance
+            .PlanningOutcomes.Should()
+            .Equal(new CustomFormatGroupSkipReferenceMismatchPlanningOutcome("missing-group"));
+    }
+
     private void AddGuideData()
     {
         GuideData.AddCustomFormats(

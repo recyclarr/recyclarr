@@ -10,6 +10,8 @@ internal enum QualityProfileValidationConstraint
     InvalidCutoff,
     UnavailableCutoff,
     QualitiesRequired,
+    QualityReferenceMismatch,
+    ResetScoreReferenceMismatch,
 }
 
 internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQualityProfile>
@@ -33,6 +35,19 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
             .When(x => x.Profile.Id is null)
             .WithMessage("`qualities` is required when creating profiles for the first time")
             .WithErrorCode(nameof(QualityProfileValidationConstraint.QualitiesRequired));
+
+        // A mistyped name would sync a different profile than configured (ADR-033)
+        RuleFor(x => x.UpdatedQualities.InvalidQualityNames)
+            .Empty()
+            .WithMessage("`qualities` references qualities the service does not have")
+            .WithErrorCode(nameof(QualityProfileValidationConstraint.QualityReferenceMismatch));
+
+        RuleFor(x => x)
+            .Must(x => x.InvalidExceptCfNames.Count == 0 && x.InvalidExceptCfPatterns.Count == 0)
+            .WithMessage(
+                "`reset_unmatched_scores` exceptions match no custom format in the profile"
+            )
+            .WithErrorCode(nameof(QualityProfileValidationConstraint.ResetScoreReferenceMismatch));
     }
 
     private static void ValidateMinScoreSatisfied(

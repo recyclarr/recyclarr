@@ -9,7 +9,6 @@
   // need the response, not an exception.
   "returnIApiResponse": true,
   "usePolymorphicSerialization": true,
-  "trimUnusedSchema": true,
   "operationNameGenerator": "MultipleClientsFromPathSegments",
   "outputFolder": "Generated",
   "outputFilename": "RecyclarrApi.V1.g.cs",

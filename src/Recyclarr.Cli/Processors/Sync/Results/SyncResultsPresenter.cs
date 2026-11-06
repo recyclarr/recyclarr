@@ -56,13 +56,17 @@ internal class SyncResultsPresenter(IAnsiConsole console, ILogger log, PreviewRe
                 ? diagnostic.Message
                 : $"[{diagnostic.Instance}] {diagnostic.Message}";
 
-            if (diagnostic.Severity == DiagnosticSeverity.Error)
+            switch (diagnostic.Severity)
             {
-                log.Error("{Message:l}", message);
-            }
-            else
-            {
-                log.Warning("{Message:l}", message);
+                case DiagnosticSeverity.Error:
+                    log.Error("{Message:l}", message);
+                    break;
+                case DiagnosticSeverity.Warning:
+                    log.Warning("{Message:l}", message);
+                    break;
+                default:
+                    log.Information("{Message:l}", message);
+                    break;
             }
         }
     }

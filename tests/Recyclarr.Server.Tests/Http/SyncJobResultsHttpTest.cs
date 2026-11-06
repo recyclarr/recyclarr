@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Recyclarr.Client.V1;
 using Recyclarr.Pipelines.CustomFormat;
@@ -187,57 +188,52 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         var planningOutcomes = instance.PlanningOutcomes;
         planningOutcomes.Should().NotBeNull();
         planningOutcomes
-            .Select(x => x.GetType())
+            .Select(x => (x.Code, x.Severity, x.Blocking))
             .Should()
             .Equal(
-                typeof(PlanningOutcomeResponseCustomFormatReferenceMismatch),
-                typeof(PlanningOutcomeResponseCustomFormatGroupReferenceMismatch),
-                typeof(PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch),
-                typeof(PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch),
-                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch),
-                typeof(PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous),
-                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous),
-                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected),
-                typeof(PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected),
-                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded),
-                typeof(PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded)
+                ("customFormatReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatGroupReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatGroupSkipReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatGroupSelectReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatGroupExcludeReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatGroupQualityProfileReferenceMismatch", OutcomeSeverity.Error, true),
+                ("customFormatQualityProfileReferenceAmbiguous", OutcomeSeverity.Error, true),
+                ("customFormatGroupQualityProfileReferenceAmbiguous", OutcomeSeverity.Error, true),
+                ("customFormatGroupRequiredItemSelected", OutcomeSeverity.Info, false),
+                ("customFormatGroupDefaultItemSelected", OutcomeSeverity.Info, false),
+                ("customFormatGroupRequiredItemExcluded", OutcomeSeverity.Warning, false),
+                ("customFormatGroupNonDefaultItemExcluded", OutcomeSeverity.Warning, false)
             );
-        var ambiguity = planningOutcomes[6]
-            .Should()
-            .BeOfType<PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous>()
-            .Which;
-        ambiguity.GroupTrashId.Should().Be("ambiguous-group");
-        ambiguity.ProfileTrashId.Should().Be("group-profile");
-        ambiguity.ProfileNames.Should().Equal("Group A", "Group B");
+        planningOutcomes.Should().OnlyContain(x => !string.IsNullOrWhiteSpace(x.Message));
 
-        var raw = await client.GetStringAsync(
-            new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative)
-        );
-
-        raw.Should().Contain("\"planningOutcomes\":[{\"type\":\"customFormatReferenceMismatch\"");
-        string[] outcomeTypes =
-        [
-            "customFormatReferenceMismatch",
-            "customFormatGroupReferenceMismatch",
-            "customFormatGroupSelectReferenceMismatch",
-            "customFormatGroupExcludeReferenceMismatch",
-            "customFormatGroupQualityProfileReferenceMismatch",
-            "customFormatQualityProfileReferenceAmbiguous",
-            "customFormatGroupQualityProfileReferenceAmbiguous",
-            "customFormatGroupRequiredItemSelected",
-            "customFormatGroupDefaultItemSelected",
-            "customFormatGroupRequiredItemExcluded",
-            "customFormatGroupNonDefaultItemExcluded",
-        ];
-        outcomeTypes
-            .Select(type => raw.IndexOf($"\"type\":\"{type}\"", StringComparison.Ordinal))
+        var ambiguity = planningOutcomes[7];
+        ambiguity
+            .Subject.Should()
+            .BeEquivalentTo(new { Kind = "customFormatGroup", TrashId = "ambiguous-group" });
+        DataAs<QualityProfileReferenceAmbiguousOutcomeData>(ambiguity)
             .Should()
-            .BeInAscendingOrder()
-            .And.OnlyContain(index => index >= 0);
-        raw.Should().Contain("\"groupTrashId\":\"ambiguous-group\"");
-        raw.Should().Contain("\"profileTrashId\":\"group-profile\"");
-        raw.Should().Contain("\"profileNames\":[\"Group A\",\"Group B\"]");
+            .BeEquivalentTo(
+                new
+                {
+                    ProfileTrashId = "group-profile",
+                    ProfileNames = new[] { "Group A", "Group B" },
+                }
+            );
     }
+
+    // Outcome data is untyped in the envelope; clients convert it to the class the spec maps the
+    // code to.
+    private static T DataAs<T>(OutcomeResponse outcome)
+    {
+        var json = outcome.Data.Should().BeOfType<JsonElement>().Which;
+        return json.Deserialize<T>(DataJson)
+            ?? throw new InvalidOperationException("Outcome data is null");
+    }
+
+    private static readonly JsonSerializerOptions DataJson = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 
     private static void AssertCompletePlanningOutcomeInventory(SyncRunResult contract)
     {
@@ -381,21 +377,33 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         pipeline.Creates.Should().ContainSingle();
         pipeline.Updates.Should().ContainSingle();
         pipeline.Deletes.Should().ContainSingle();
-        var outcomes = pipeline.Outcomes;
-        int?[] counts =
-        [
-            outcomes.GroupReferenceMismatches?.Count,
-            outcomes.IncompatibleGroups?.Count,
-            outcomes.EmptyGroups?.Count,
-            outcomes.DuplicateNames?.Count,
-            outcomes.Adopted?.Count,
-            outcomes.AmbiguousMatches?.Count,
-            outcomes.StateConflicts?.Count,
-            outcomes.CreateRejected?.Count,
-            outcomes.UpdateRejected?.Count,
-            outcomes.DeleteRejected?.Count,
-        ];
-        counts.Should().HaveCount(10).And.OnlyContain(x => x == 1);
+        pipeline
+            .Outcomes.Select(x => x.Code)
+            .Should()
+            .Equal(
+                "customFormatGroupIncompatible",
+                "customFormatGroupEmpty",
+                "customFormatDuplicateName",
+                "customFormatAdopted",
+                "customFormatAmbiguousMatch",
+                "customFormatStateConflict",
+                "customFormatCreateRejected",
+                "customFormatUpdateRejected",
+                "customFormatDeleteRejected"
+            );
+        var adopted = pipeline.Outcomes[3];
+        adopted.Severity.Should().Be(OutcomeSeverity.Info);
+        adopted
+            .Subject.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Kind = "customFormat",
+                    TrashId = "cf-one",
+                    Name = "First CF",
+                }
+            );
+        DataAs<ServiceIdOutcomeData>(adopted).ServiceId.Should().Be(10);
     }
 
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
@@ -415,15 +423,16 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
                     Maximum = new { Kind = QualitySizeKind.Unlimited },
                 }
             );
-        AssertQualityProfileOutcomes(pipeline.Outcomes);
-        pipeline
-            .Outcomes.QualitySizeOutcomes.Should()
-            .ContainSingle()
-            .Which.Outcomes.GuideReferenceMismatches.Should()
-            .ContainSingle()
-            .Which.TrashId.Should()
-            .Be("qs-missing");
-        pipeline.Outcomes.QualityDefinitionUnused.Should().BeTrue();
+        AssertQualityProfileOutcomes(
+            pipeline.Outcomes,
+            "qualitySizeGuideReferenceMismatch",
+            "qualityProfileQualityDefinitionUnused"
+        );
+        var sizeOutcome = pipeline.Outcomes.Single(x =>
+            x.Code == "qualitySizeGuideReferenceMismatch"
+        );
+        sizeOutcome.Subject?.TrashId.Should().Be("qp-one");
+        DataAs<QualitySizeGuideReferenceOutcomeData>(sizeOutcome).TrashId.Should().Be("qs-missing");
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
         update
@@ -449,8 +458,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     {
         pipeline.Should().NotBeNull();
         pipeline.Creates.Should().ContainSingle().Which.State.Language.Should().Be("English");
-        AssertQualityProfileOutcomes(pipeline.Outcomes);
-        pipeline.Outcomes.QualityDefinitionsIgnored.Should().ContainSingle();
+        AssertQualityProfileOutcomes(pipeline.Outcomes, "qualityProfileQualityDefinitionIgnored");
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
         object?[] changes =
@@ -468,45 +476,53 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         update.CustomFormatScores.Should().HaveCount(2);
     }
 
-    private static void AssertQualityProfileOutcomes(QualityProfileOutcomesResponse outcomes)
+    private static void AssertQualityProfileOutcomes(
+        ICollection<OutcomeResponse> outcomes,
+        params string[] serviceCodes
+    )
     {
-        int?[] counts =
-        [
-            outcomes.ReferenceMismatches?.Count,
-            outcomes.DuplicateNames?.Count,
-            outcomes.NotFound?.Count,
-            outcomes.Adopted?.Count,
-            outcomes.MinimumScoresUnsatisfied?.Count,
-            outcomes.InvalidCutoffs?.Count,
-            outcomes.UnavailableCutoffs?.Count,
-            outcomes.QualitiesRequired?.Count,
-            outcomes.QualityReferenceMismatches?.Count,
-            outcomes.ResetScoreReferenceMismatches?.Count,
-            outcomes.RenameBlocked?.Count,
-            outcomes.AmbiguousMatches?.Count,
-            outcomes.CreateRejected?.Count,
-            outcomes.UpdateRejected?.Count,
-        ];
-        counts.Should().HaveCount(14).And.OnlyContain(x => x == 1);
+        outcomes
+            .Select(x => x.Code)
+            .Should()
+            .Equal([
+                "qualityProfileReferenceMismatch",
+                "qualityProfileDuplicateName",
+                "qualityProfileNotFound",
+                "qualityProfileAdopted",
+                "qualityProfileMinimumScoreUnsatisfied",
+                "qualityProfileInvalidCutoff",
+                "qualityProfileUnavailableCutoff",
+                "qualityProfileQualitiesRequired",
+                "qualityProfileQualityReferenceMismatch",
+                "qualityProfileResetScoreReferenceMismatch",
+                "qualityProfileRenameBlocked",
+                "qualityProfileAmbiguousMatch",
+                "qualityProfileCreateRejected",
+                "qualityProfileUpdateRejected",
+                .. serviceCodes,
+            ]);
     }
 
     private static void AssertQualitySizes(QualitySizePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        var outcomes = pipeline.Outcomes;
-        int?[] counts =
-        [
-            outcomes.DefinitionReferenceMismatches?.Count,
-            outcomes.ReferenceMismatches?.Count,
-            outcomes.ServiceQualitiesNotFound?.Count,
-            outcomes.PreferredRatiosClamped?.Count,
-            outcomes.MinimumGreaterThanPreferred?.Count,
-            outcomes.UnlimitedPreferredGreaterThanMaximum?.Count,
-            outcomes.PreferredGreaterThanMaximum?.Count,
-            outcomes.GuideReferenceMismatches?.Count,
-            outcomes.AmbiguousGuideReferences?.Count,
-        ];
-        counts.Should().HaveCount(9).And.OnlyContain(x => x == 1);
+        pipeline
+            .Outcomes.Select(x => x.Code)
+            .Should()
+            .Equal(
+                "qualitySizeDefinitionReferenceMismatch",
+                "qualitySizeReferenceMismatch",
+                "qualitySizeServiceQualityNotFound",
+                "qualitySizePreferredRatioClamped",
+                "qualitySizeMinimumGreaterThanPreferred",
+                "qualitySizeUnlimitedPreferredGreaterThanMaximum",
+                "qualitySizePreferredGreaterThanMaximum",
+                "qualitySizeGuideReferenceMismatch",
+                "qualitySizeAmbiguousGuideReference"
+            );
+        var minimum = DataAs<MinimumComparisonOutcomeData>(pipeline.Outcomes.ElementAt(4));
+        minimum.Minimum.Value.Should().Be(2.5);
+        minimum.Preferred.Value.Should().Be(1.25);
 
         var update = pipeline.Updates.Should().ContainSingle().Which;
         update.Minimum.Should().NotBeNull();
@@ -516,7 +532,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
 
     private static void AssertSonarrNaming(SonarrNamingPipelineResponse? pipeline)
     {
-        pipeline?.Outcomes.ReferenceMismatches.Should().HaveCount(5);
+        pipeline?.Outcomes.Should().HaveCount(5);
+        DataAs<MediaNamingReferenceOutcomeData>(pipeline!.Outcomes.First())
+            .Field.Should()
+            .Be("seriesFolderFormat");
         var update = pipeline?.Updates.Should().ContainSingle().Which;
         object?[] changes =
         [
@@ -532,7 +551,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
 
     private static void AssertRadarrNaming(RadarrNamingPipelineResponse? pipeline)
     {
-        pipeline?.Outcomes.ReferenceMismatches.Should().HaveCount(2);
+        pipeline?.Outcomes.Should().HaveCount(2);
         var update = pipeline?.Updates.Should().ContainSingle().Which;
         update?.RenameMovies.Should().NotBeNull();
         update?.StandardMovieFormat.Should().NotBeNull();

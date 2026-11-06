@@ -15,21 +15,6 @@ internal static partial class CustomFormatResponseMapper
             .Deltas.OfType<CustomFormatDeleteDelta>()
             .Select(x => MapIdentity(x.Identity))
             .ToList();
-        var outcomes = MapOutcomes(result.Outcomes);
-        ResultValueMapper.EnsureAllMapped(
-            "Custom Format outcome",
-            result.Outcomes.Count,
-            outcomes.GroupReferenceMismatches.Count,
-            outcomes.IncompatibleGroups.Count,
-            outcomes.EmptyGroups.Count,
-            outcomes.DuplicateNames.Count,
-            outcomes.Adopted.Count,
-            outcomes.AmbiguousMatches.Count,
-            outcomes.StateConflicts.Count,
-            outcomes.CreateRejected.Count,
-            outcomes.UpdateRejected.Count,
-            outcomes.DeleteRejected.Count
-        );
         ResultValueMapper.EnsureAllMapped(
             "Custom Format delta",
             result.Deltas.Count,
@@ -41,57 +26,13 @@ internal static partial class CustomFormatResponseMapper
         return new CustomFormatPipelineResponse
         {
             Status = ResultValueMapper.MapStatus(result.Status),
-            Outcomes = outcomes,
+            Outcomes = result.Outcomes.Select(OutcomeResponseMapper.Map).ToList(),
             Creates = creates,
             Updates = updates,
             Deletes = deletes,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
-
-    private static CustomFormatOutcomesResponse MapOutcomes(
-        IReadOnlyList<CustomFormatOutcome> outcomes
-    ) =>
-        new()
-        {
-            GroupReferenceMismatches = outcomes
-                .OfType<CustomFormatGroupReferenceMismatchOutcome>()
-                .Select(x => x.TrashId)
-                .ToList(),
-            IncompatibleGroups = outcomes
-                .OfType<IncompatibleCustomFormatGroupOutcome>()
-                .Select(x => new TrashIdNameResponse(x.TrashId, x.Name))
-                .ToList(),
-            EmptyGroups = outcomes
-                .OfType<EmptyCustomFormatGroupOutcome>()
-                .Select(x => new TrashIdNameResponse(x.TrashId, x.Name))
-                .ToList(),
-            DuplicateNames = outcomes
-                .OfType<CustomFormatDuplicateNameOutcome>()
-                .Select(x => new CustomFormatDuplicateNameResponse(x.Name, x.TrashIds))
-                .ToList(),
-            Adopted = outcomes.OfType<CustomFormatAdoptedOutcome>().Select(MapAdopted).ToList(),
-            AmbiguousMatches = outcomes
-                .OfType<CustomFormatAmbiguousMatchOutcome>()
-                .Select(MapAmbiguousMatch)
-                .ToList(),
-            StateConflicts = outcomes
-                .OfType<CustomFormatStateConflictOutcome>()
-                .Select(MapStateConflict)
-                .ToList(),
-            CreateRejected = outcomes
-                .OfType<CustomFormatCreateRejectedOutcome>()
-                .Select(x => MapIdentity(x.Identity))
-                .ToList(),
-            UpdateRejected = outcomes
-                .OfType<CustomFormatUpdateRejectedOutcome>()
-                .Select(x => MapIdentity(x.Identity))
-                .ToList(),
-            DeleteRejected = outcomes
-                .OfType<CustomFormatDeleteRejectedOutcome>()
-                .Select(x => MapIdentity(x.Identity))
-                .ToList(),
-        };
 
     private static CustomFormatUpdateResponse MapUpdate(CustomFormatUpdateDelta delta)
     {
@@ -139,19 +80,4 @@ internal static partial class CustomFormatResponseMapper
     private static partial CustomFormatSelectionResponse MapSelection(
         CustomFormatSourceInfo source
     );
-
-    private static partial NamedServiceResourceResponse MapServiceMatch(
-        CustomFormatServiceMatch source
-    );
-
-    private static NamedIdentityResponse MapAdopted(CustomFormatAdoptedOutcome source) =>
-        new(MapIdentity(source.Identity), source.ServiceId);
-
-    private static CustomFormatAmbiguousMatchResponse MapAmbiguousMatch(
-        CustomFormatAmbiguousMatchOutcome source
-    ) => new(MapIdentity(source.Identity), source.ServiceMatches.Select(MapServiceMatch).ToList());
-
-    private static CustomFormatStateConflictResponse MapStateConflict(
-        CustomFormatStateConflictOutcome source
-    ) => new(MapIdentity(source.Identity), MapIdentity(source.ManagedIdentity), source.ServiceId);
 }

@@ -201,12 +201,13 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         var result = await RunSync();
 
         const string ambiguous =
-            "[real-instance] Custom Format 'x264' (cf-x264) matches multiple service formats: "
-            + "'x264' (ID 1), 'x264 copy' (ID 2)";
+            "[real-instance] Custom Format 'x264' (cf-x264) cannot sync because multiple service "
+            + "formats match its name: 'x264' (ID 1), 'x264 copy' (ID 2)";
         const string adopted =
-            "[real-instance] Adopted Custom Format 'x264' (cf-x264) from service ID 7";
+            "[real-instance] Custom Format 'x264' (cf-x264) already existed in the service (ID 7)";
         const string duplicateName =
-            "[real-instance] Custom Format name 'Shared' is used by multiple trash IDs: cf-a, cf-b";
+            "[real-instance] Custom Format name 'Shared' is used by multiple trash IDs (cf-a, "
+            + "cf-b), so none of them sync";
         const string unreachable =
             "[other-instance] The service could not be reached. Check base_url and that the "
             + "service is up.";
@@ -460,7 +461,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     }
 
     [Test]
-    public async Task Diagnostics_list_errors_first_and_explain_pipelines_without_outcomes()
+    public async Task Diagnostics_list_by_severity_and_explain_pipelines_without_outcomes()
     {
         AddInstanceConfig(InstanceName);
         _result = new SyncRunResult([
@@ -481,7 +482,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 planningOutcomes:
                 [
                     new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
-                    new CustomFormatGroupRequiredItemSelectedPlanningOutcome("group", "cf"),
+                    new CustomFormatGroupRequiredItemExcludedPlanningOutcome("group", "cf"),
                 ]
             ),
         ]);
@@ -489,18 +490,20 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         await RunSync();
 
         const string blockingPlan =
-            "[real-instance] Custom Format group 'missing-group' does not exist";
+            "[real-instance] Custom Format group 'missing-group' does not exist in the guide";
         const string blocked = "[real-instance] Quality Profiles blocked by Custom Formats";
         const string failedStatus = "[real-instance] Quality Sizes completed with status Failed";
         const string advisoryPlan =
-            "[real-instance] Custom Format 'cf' is required by group 'group' and does not need "
-            + "to be selected";
+            "[real-instance] Excluding required Custom Format 'cf' from group 'group' has no "
+            + "effect (required formats are always included)";
         const string adopted =
-            "[real-instance] Adopted Custom Format 'x264' (cf-x264) from service ID 7";
+            "[real-instance] Custom Format 'x264' (cf-x264) already existed in the service (ID "
+            + "7); Recyclarr now manages it";
 
         var errors = ConsoleOutput.IndexOf("Errors", StringComparison.Ordinal);
         var warnings = ConsoleOutput.IndexOf("Warnings", StringComparison.Ordinal);
-        errors.Should().BeLessThan(warnings);
+        var information = ConsoleOutput.IndexOf("Information", StringComparison.Ordinal);
+        new[] { errors, warnings, information }.Should().BeInAscendingOrder();
         foreach (var error in new[] { blockingPlan, blocked, failedStatus })
         {
             ConsoleOutput
@@ -509,20 +512,21 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 .BeInRange(errors, warnings);
         }
 
-        foreach (var warning in new[] { advisoryPlan, adopted })
-        {
-            ConsoleOutput
-                .IndexOf(warning, StringComparison.Ordinal)
-                .Should()
-                .BeGreaterThan(warnings);
-        }
+        ConsoleOutput
+            .IndexOf(advisoryPlan, StringComparison.Ordinal)
+            .Should()
+            .BeInRange(warnings, information);
+        ConsoleOutput
+            .IndexOf(adopted, StringComparison.Ordinal)
+            .Should()
+            .BeGreaterThan(information);
 
         LogEntries
             .Should()
             .Contain((LogEventLevel.Error, blockingPlan))
             .And.Contain((LogEventLevel.Error, blocked))
             .And.Contain((LogEventLevel.Warning, advisoryPlan))
-            .And.Contain((LogEventLevel.Warning, adopted));
+            .And.Contain((LogEventLevel.Information, adopted));
     }
 
     [Test]
@@ -666,9 +670,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         string[] expectedOrder =
         [
-            "[alpha] The service does not contain quality 'A'",
-            "[alpha] The service does not contain quality 'B'",
-            "[zeta] The service does not contain quality 'B'",
+            "[alpha] The service has no quality 'A'",
+            "[alpha] The service has no quality 'B'",
+            "[zeta] The service has no quality 'B'",
         ];
 
         expectedOrder
@@ -726,13 +730,15 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         ConsoleOutput
             .Should()
             .Contain(
-                "[real-instance] Quality profile 'HD' cannot be renamed because 'HD Old' already "
-                    + "exists at service ID 4"
+                "[real-instance] Quality profile 'HD' cannot be renamed to 'HD Old' because a "
+                    + "profile with that name already exists (ID 4)"
             )
-            .And.Contain("[real-instance] Quality 'WEB' preferred 90 exceeds maximum 80")
             .And.Contain(
-                "[real-instance] Media naming field 'StandardMovieFormat' references unknown "
-                    + "format 'bogus'"
+                "[real-instance] Quality 'WEB': preferred (90) cannot be greater than max (80)"
+            )
+            .And.Contain(
+                "[real-instance] Media naming `standardMovieFormat` references unknown format "
+                    + "'bogus'"
             );
     }
 
@@ -792,7 +798,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 "[real-instance] Quality profile 'Series': The guide profile references a quality "
                     + "definition that does not exist: guide (qs-x)"
             )
-            .And.Contain("quality_definition only applies to profiles listed under");
+            .And.Contain("`quality_definition` only applies to profiles listed under");
     }
 
     private static QualityProfileUpdateDelta NewProfileUpdate(string name) =>

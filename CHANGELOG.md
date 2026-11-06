@@ -46,9 +46,12 @@ changes you may need to make.
 
 - Sync: An unknown custom format `trash_id` did not fail the sync and could reset its score to 0
   (#1013)
+- Sync: An unknown `custom_format_groups.skip` ID did not fail the sync, so the group still synced
+- Sync: Unknown qualities or `reset_unmatched_scores` exceptions in a quality profile only warned,
+  and the profile still synced
+- Sync: An unknown quality profile `trash_id` was a warning instead of an error
 - Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
 - Sync: Inconsistent results when two custom formats share the same name
-- Sync: Sonarr syncs reported a language change on some quality profiles every time
 - CLI: `list custom-formats` crashed when the guide had no custom formats for a service
 
 ## [8.8.1] - 2026-10-28

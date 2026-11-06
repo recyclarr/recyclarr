@@ -98,7 +98,7 @@ internal abstract record SyncInstanceResultsResponse
     /// Configuration problems found before any pipeline ran. A blocking outcome stops every
     /// pipeline of the instance.
     /// </summary>
-    public IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes { get; init; } = [];
+    public IReadOnlyList<OutcomeResponse> PlanningOutcomes { get; init; } = [];
 }
 
 internal sealed record SonarrInstanceResultsResponse : SyncInstanceResultsResponse

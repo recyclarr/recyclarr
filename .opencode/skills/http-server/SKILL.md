@@ -50,6 +50,8 @@ version (versioning rules: ADR-016).
   renaming, or changing a field's meaning needs a new API version.
 - Polymorphic types fall back to their base type for unknown discriminators; consumers MUST handle
   that base type without throwing.
+- Sync outcomes use the envelope (ADR-016): a new outcome is a code in `OutcomeCodes` plus a case
+  in `OutcomeResponseMapper`, never a new DTO or named collection. Choose its severity by ADR-033.
 
 ## Long-Running Operations
 

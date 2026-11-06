@@ -4,7 +4,8 @@ using Spectre.Console.Rendering;
 namespace Recyclarr.Cli.Processors.Sync.Results;
 
 /// <summary>
-/// Builds the "Sync Diagnostics" panel: errors, then warnings, each sorted by instance and message.
+/// Builds the "Sync Diagnostics" panel: errors, warnings, then information, each sorted by instance
+/// and message.
 /// Each instance keeps one prefix color across both sections so its messages are easy to follow.
 /// </summary>
 internal static class DiagnosticsPanel
@@ -29,6 +30,7 @@ internal static class DiagnosticsPanel
         var sections = new List<IRenderable>();
         AddSection(sections, "Errors", "red", DiagnosticSeverity.Error);
         AddSection(sections, "Warnings", "yellow", DiagnosticSeverity.Warning);
+        AddSection(sections, "Information", "blue", DiagnosticSeverity.Info);
 
         return new Panel(new Rows(sections))
             .Header("[bold]Sync Diagnostics[/]")

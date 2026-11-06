@@ -150,143 +150,6 @@ internal sealed record SonarrQualityProfileUpdateResponse : QualityProfileUpdate
     public IReadOnlyList<QualitySizeUpdateResponse> QualitySizes { get; init; } = [];
 }
 
-internal sealed record QualityProfileQualitySizeOutcomesResponse(
-    QualityProfileIdentityResponse Identity,
-    QualitySizeOutcomesResponse Outcomes
-);
-
-internal sealed record QualityProfileIdentityOutcomeResponse(
-    QualityProfileIdentityResponse Identity
-);
-
-internal sealed record QualityProfileNamedOutcomeResponse(string Name);
-
-internal sealed record QualityProfileAdoptedResponse(
-    QualityProfileIdentityResponse Identity,
-    int ServiceId
-);
-
-internal sealed record QualityProfileMinimumScoreResponse(
-    QualityProfileIdentityResponse Identity,
-    int MinimumScore,
-    int TotalPositiveScore,
-    int MaximumScore
-);
-
-internal sealed record QualityProfileQualityNameResponse(
-    QualityProfileIdentityResponse Identity,
-    string QualityName
-);
-
-internal sealed record QualityProfileNamesResponse(
-    QualityProfileIdentityResponse Identity,
-    IReadOnlyList<string> Names
-);
-
-internal sealed record QualityProfileResetReferencesResponse(
-    QualityProfileIdentityResponse Identity,
-    IReadOnlyList<string> Names,
-    IReadOnlyList<string> Patterns
-);
-
-internal sealed record QualityProfileRenameBlockedResponse(
-    QualityProfileIdentityResponse Identity,
-    NamedServiceResourceResponse Conflict
-);
-
-internal sealed record QualityProfileAmbiguousMatchResponse(
-    QualityProfileIdentityResponse Identity,
-    IReadOnlyList<NamedServiceResourceResponse> ServiceMatches
-);
-
-internal sealed record QualityProfileOutcomesResponse
-{
-    /// <summary>Configured trash IDs that match no guide quality profile.</summary>
-    public IReadOnlyList<string> ReferenceMismatches { get; init; } = [];
-
-    /// <summary>Profile names configured more than once; none of them sync.</summary>
-    public IReadOnlyList<QualityProfileNamedOutcomeResponse> DuplicateNames { get; init; } = [];
-
-    /// <summary>
-    /// Profiles that only receive scores (Recyclarr does not create them) and do not exist in the
-    /// service.
-    /// </summary>
-    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> NotFound { get; init; } = [];
-
-    /// <summary>
-    /// Guide profiles that already existed in the service with the same name. Recyclarr now
-    /// manages them.
-    /// </summary>
-    public IReadOnlyList<QualityProfileAdoptedResponse> Adopted { get; init; } = [];
-
-    /// <summary>
-    /// Profiles whose minimum custom format score is higher than both the sum of positive scores
-    /// and the highest score, so no release could qualify.
-    /// </summary>
-    public IReadOnlyList<QualityProfileMinimumScoreResponse> MinimumScoresUnsatisfied { get; init; } =
-    [];
-
-    /// <summary>Profiles whose upgrade-until quality is a name the service does not have.</summary>
-    public IReadOnlyList<QualityProfileQualityNameResponse> InvalidCutoffs { get; init; } = [];
-
-    /// <summary>
-    /// Profiles whose upgrade-until quality is not an allowed quality or group in the profile.
-    /// </summary>
-    public IReadOnlyList<QualityProfileQualityNameResponse> UnavailableCutoffs { get; init; } = [];
-
-    /// <summary>New profiles that have no qualities; the service requires at least one.</summary>
-    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> QualitiesRequired { get; init; } =
-    [];
-
-    /// <summary>Configured quality names that the service does not have.</summary>
-    public IReadOnlyList<QualityProfileNamesResponse> QualityReferenceMismatches { get; init; } =
-    [];
-
-    /// <summary>
-    /// `reset_unmatched_scores.except` names that are not in the profile, and except patterns
-    /// that match no custom format in the profile.
-    /// </summary>
-    public IReadOnlyList<QualityProfileResetReferencesResponse> ResetScoreReferenceMismatches { get; init; } =
-    [];
-
-    /// <summary>
-    /// Profiles that could not be renamed because another service profile has the new name.
-    /// </summary>
-    public IReadOnlyList<QualityProfileRenameBlockedResponse> RenameBlocked { get; init; } = [];
-
-    /// <summary>
-    /// Profiles whose name matches more than one service profile; they are not synced.
-    /// </summary>
-    public IReadOnlyList<QualityProfileAmbiguousMatchResponse> AmbiguousMatches { get; init; } = [];
-
-    /// <summary>Profiles the service refused to create.</summary>
-    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> CreateRejected { get; init; } = [];
-
-    /// <summary>Profiles the service refused to update.</summary>
-    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> UpdateRejected { get; init; } = [];
-
-    /// <summary>
-    /// Problems with the quality sizes resolved for a profile, on services that store sizes per
-    /// quality profile (Sonarr v5). Affected qualities keep their service sizes; the rest of the
-    /// profile still syncs.
-    /// </summary>
-    public IReadOnlyList<QualityProfileQualitySizeOutcomesResponse> QualitySizeOutcomes { get; init; } =
-    [];
-
-    /// <summary>
-    /// Profiles whose `quality_definition` was ignored because the service stores quality sizes
-    /// globally.
-    /// </summary>
-    public IReadOnlyList<QualityProfileIdentityOutcomeResponse> QualityDefinitionsIgnored { get; init; } =
-    [];
-
-    /// <summary>
-    /// True when the instance `quality_definition` applied to nothing: the service stores sizes
-    /// per quality profile and no profile is listed under `quality_profiles`.
-    /// </summary>
-    public bool QualityDefinitionUnused { get; init; }
-}
-
 /// <summary>
 /// Fields both services' quality profile results share. Each service's pipelines response names
 /// its concrete type, so no discriminator is needed (ADR-023).
@@ -294,7 +157,12 @@ internal sealed record QualityProfileOutcomesResponse
 internal abstract record QualityProfilePipelineResponse
 {
     public required PipelineStatus Status { get; init; }
-    public required QualityProfileOutcomesResponse Outcomes { get; init; }
+
+    /// <summary>
+    /// On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear
+    /// here with the affected profile as their subject.
+    /// </summary>
+    public required IReadOnlyList<OutcomeResponse> Outcomes { get; init; }
 
     /// <summary>Present only when the status is `blocked`.</summary>
     public BlockingPipeline? BlockedBy { get; init; }

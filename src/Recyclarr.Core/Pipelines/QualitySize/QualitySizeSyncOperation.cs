@@ -50,7 +50,6 @@ internal class QualitySizeSyncOperation(
             if (serverEntry == null)
             {
                 outcomes.Add(new QualitySizeServiceQualityNotFoundOutcome(plannedQuality.Quality));
-                incompleteResources++;
                 continue;
             }
 

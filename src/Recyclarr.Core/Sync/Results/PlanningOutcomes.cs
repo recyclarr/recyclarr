@@ -13,6 +13,13 @@ public sealed record CustomFormatGroupReferenceMismatchPlanningOutcome(string Gr
     : BlockingPlanningOutcome;
 
 /// <summary>
+/// A <c>custom_format_groups.skip</c> ID does not exist in the active guide resources, so the group
+/// the user meant to skip may still sync.
+/// </summary>
+public sealed record CustomFormatGroupSkipReferenceMismatchPlanningOutcome(string GroupTrashId)
+    : BlockingPlanningOutcome;
+
+/// <summary>
 /// A Custom Format selected from a group does not exist in that group's guide definition.
 /// </summary>
 public sealed record CustomFormatGroupSelectReferenceMismatchPlanningOutcome(

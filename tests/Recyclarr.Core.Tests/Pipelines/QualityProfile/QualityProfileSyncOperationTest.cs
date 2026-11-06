@@ -240,7 +240,7 @@ internal sealed class QualityProfileSyncOperationTest
         var harness = CreateHarness(
             [missing, adopted],
             [new QualityProfileData { Id = 7, Name = "Adopted" }],
-            Schema()
+            GuideProfileSchema()
         );
 
         var compute = await Compute(harness);
@@ -366,7 +366,7 @@ internal sealed class QualityProfileSyncOperationTest
     }
 
     [Test]
-    public async Task Non_blocking_reference_mismatches_preserve_success()
+    public async Task Unknown_quality_and_reset_references_skip_the_profile()
     {
         var config = new QualityProfileConfig
         {
@@ -388,7 +388,8 @@ internal sealed class QualityProfileSyncOperationTest
 
         var compute = await Compute(harness);
 
-        compute.Status.Should().Be(SyncResultStatus.Succeeded);
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute.Deltas.Should().BeEmpty();
         compute
             .Outcomes.OfType<QualityProfileQualityReferenceMismatchOutcome>()
             .Should()
@@ -516,7 +517,7 @@ internal sealed class QualityProfileSyncOperationTest
         var harness = CreateHarness(
             [rejected, accepted],
             [oldRejected, oldAccepted],
-            Schema(),
+            GuideProfileSchema(),
             [rejectedMapping, acceptedMapping]
         );
         var exception = await CreateApiException(HttpStatusCode.BadRequest);
@@ -623,6 +624,10 @@ internal sealed class QualityProfileSyncOperationTest
             NewPlan.QpResource(trashId, name)
         );
     }
+
+    // The service schema that contains the quality GuideProfile configures
+    private static QualityProfileData GuideProfileSchema() =>
+        Schema(NewQp.QualityItem(1, "Bluray-1080p", true));
 
     private static QualityProfileData Schema(params QualityProfileItem[] items)
     {
