@@ -79,6 +79,7 @@ internal static class CompositionRoot
     {
         builder.RegisterType<ServerConfigLoader>();
         builder.RegisterType<ResourceCoordinator>().SingleInstance();
+        builder.RegisterType<ConfigInputs>();
         builder.RegisterType<InstanceServiceCaller>();
 
         builder.RegisterInstance(TimeProvider.System);

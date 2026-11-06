@@ -48,6 +48,8 @@ configuration resolved against it.
 - Configuration counts as invalid when it does not load, for example when an include names a
   template that a provider update removed. Guide content that a sync cannot use, such as a removed
   custom format, is reported by the sync, not rolled back.
+- Each tick also checks the configuration inputs (ADR-019). When they changed, a failed resolve is
+  attributed to the configuration: provider updates from that tick are reverted without blame.
 
 ## Rejected Options
 
@@ -74,3 +76,4 @@ configuration resolved against it.
 
 - 2026-10-21: Refresh provider data in the background with a TTL, guard it with a reader-writer
   lock, and revert updates that make the configuration invalid.
+- 2026-11-05: Check configuration inputs on each tick and attribute failures to changed inputs.

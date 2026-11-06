@@ -1,5 +1,6 @@
 using Autofac;
 using DotNext.Threading;
+using Recyclarr.Config.Parsing;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.ResourceProviders.Storage;
 using Recyclarr.Server.Sync;
@@ -24,11 +25,18 @@ internal enum RefreshMode
 /// A refresh never waits for readers: a waiting writer blocks new readers, which would stall guide
 /// requests behind a long sync. When readers hold the lock, the refresh is skipped and the next
 /// one retries. At startup no readers exist yet, so the lock is always free.
+/// <para>
+/// Each refresh also checks the configuration inputs (ADR-019). Changed inputs resolve the
+/// configuration again; when that fails, the failure belongs to the edit, so provider updates
+/// from the same refresh are reverted without blame and the rejected inputs are not retried until
+/// they change again.
+/// </para>
 /// </remarks>
 internal sealed class ResourceCoordinator(
     ILogger log,
     ResourceSourceFactory sourceFactory,
     IResourceCacheCleanupService cleanup,
+    ConfigInputs configInputs,
     ILifetimeScope scope,
     TimeProvider time
 ) : IDisposable
@@ -39,6 +47,12 @@ internal sealed class ResourceCoordinator(
     private readonly AsyncReaderWriterLock _lock = new();
     private IReadOnlyList<IResourceSource>? _sources;
     private ResourceSnapshot? _current;
+
+    // Inputs of the published snapshot and of the last resolve that failed, plus the paths that
+    // resolve recorded beyond discovery, which the next check hashes too.
+    private ConfigInputFingerprint? _acceptedInputs;
+    private ConfigInputFingerprint? _rejectedInputs;
+    private IReadOnlyCollection<string> _recordedInputs = [];
 
     /// <summary>
     /// The published snapshot, for readers of configuration only. Guide data must be read through
@@ -99,30 +113,33 @@ internal sealed class ResourceCoordinator(
             cleanup.CleanupOrphans(sources.SelectMany(s => s.Roots));
         }
 
-        if (_current is not null && updated.Count == 0)
+        // Discovery and hashes are taken before resolving, so an edit made during the resolve
+        // differs from what is recorded here and is picked up by the next check.
+        var discovered = configInputs.Discover();
+        var inputs = configInputs.Capture(discovered.Concat(_recordedInputs));
+        var inputsSeen = inputs.Equals(_acceptedInputs) || inputs.Equals(_rejectedInputs);
+        if (_current is not null && updated.Count == 0 && inputsSeen)
         {
             return;
         }
 
-        var snapshot = Resolve(sources);
-        if (snapshot is null && updated.Count > 0)
+        var configEdited = _current is not null && !inputs.Equals(_acceptedInputs);
+        var resolved = Resolve(sources);
+        if (resolved.Snapshot is null && updated.Count > 0)
         {
-            snapshot = await RevertAsync(updated, ct) ? Resolve(sources) : null;
+            var reverted = await RevertAsync(updated, blameProviders: !configEdited, ct);
+            if (reverted && !configEdited)
+            {
+                resolved = Resolve(sources);
+            }
         }
 
-        if (snapshot is null)
-        {
-            if (_current is null)
-            {
-                throw new FatalException(
-                    "Server configuration is invalid; correct the errors logged above and restart"
-                );
-            }
+        _recordedInputs = resolved.RecordedInputs;
+        var resolvedInputs = configInputs.Capture(discovered.Concat(_recordedInputs), inputs);
 
-            log.Error(
-                "Updated guide data made the configuration invalid and could not be reverted; "
-                    + "correct the errors logged above"
-            );
+        if (resolved.Snapshot is not { } snapshot)
+        {
+            RejectConfiguration(configEdited, resolvedInputs);
             return;
         }
 
@@ -132,6 +149,37 @@ internal sealed class ResourceCoordinator(
         }
 
         _current = snapshot;
+        _acceptedInputs = resolvedInputs;
+        _rejectedInputs = null;
+        if (configEdited)
+        {
+            log.Information("Configuration changed and was reloaded");
+        }
+    }
+
+    private void RejectConfiguration(bool configEdited, ConfigInputFingerprint inputs)
+    {
+        if (_current is null)
+        {
+            throw new FatalException(
+                "Server configuration is invalid; correct the errors logged above and restart"
+            );
+        }
+
+        if (configEdited)
+        {
+            _rejectedInputs = inputs;
+            log.Error(
+                "Configuration changed but is invalid; the previous configuration stays in use "
+                    + "until the errors logged above are corrected"
+            );
+            return;
+        }
+
+        log.Error(
+            "Updated guide data made the configuration invalid and could not be reverted; "
+                + "correct the errors logged above"
+        );
     }
 
     private async Task<SourceUpdateOutcome?> UpdateIfDueAsync(
@@ -223,19 +271,28 @@ internal sealed class ResourceCoordinator(
         }.Write(tracking.StateFile);
     }
 
-    private async Task<bool> RevertAsync(List<IResourceSource> updated, CancellationToken ct)
+    private async Task<bool> RevertAsync(
+        List<IResourceSource> updated,
+        bool blameProviders,
+        CancellationToken ct
+    )
     {
         var reverted = false;
         foreach (var source in updated)
         {
-            if (await source.RevertToGoodAsync(ct))
+            if (!await source.RevertToGoodAsync(ct))
+            {
+                continue;
+            }
+
+            reverted = true;
+            if (blameProviders)
             {
                 log.Warning(
                     "Updated data from resource provider {Name} made the configuration invalid; "
                         + "reverted to the last data that validated",
                     source.Config.Name
                 );
-                reverted = true;
             }
         }
 
@@ -243,8 +300,9 @@ internal sealed class ResourceCoordinator(
     }
 
     // Configuration is resolved in its own scope bound to the new guide data, so template includes
-    // read that data and diagnostics from earlier loads are not repeated.
-    private ResourceSnapshot? Resolve(IReadOnlyList<IResourceSource> sources)
+    // read that data and diagnostics from earlier loads are not repeated. The scope's recorder
+    // holds the inputs this resolve read, whether or not it succeeded.
+    private ResolvedConfiguration Resolve(IReadOnlyList<IResourceSource> sources)
     {
         var guide = GuideIndex.Build(sources);
         using var resolveScope = scope.BeginLifetimeScope(c =>
@@ -252,6 +310,13 @@ internal sealed class ResourceCoordinator(
         );
 
         var configuration = resolveScope.Resolve<ServerConfigLoader>().TryLoadServerConfiguration();
-        return configuration is null ? null : new ResourceSnapshot(guide, configuration);
+        var recorded = resolveScope.Resolve<ConfigInputRecorder>().Paths.ToList();
+        var snapshot = configuration is null ? null : new ResourceSnapshot(guide, configuration);
+        return new ResolvedConfiguration(snapshot, recorded);
     }
+
+    private sealed record ResolvedConfiguration(
+        ResourceSnapshot? Snapshot,
+        IReadOnlyCollection<string> RecordedInputs
+    );
 }
