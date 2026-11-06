@@ -111,7 +111,9 @@ public class CoreAutofacModule : Module
 
     private static void RegisterConfig(ContainerBuilder builder)
     {
-        builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
+        // Per scope so each configuration load reads the current secrets file.
+        builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().InstancePerLifetimeScope();
+        builder.RegisterType<ConfigInputRecorder>().InstancePerLifetimeScope();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
         builder.RegisterType<ConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();

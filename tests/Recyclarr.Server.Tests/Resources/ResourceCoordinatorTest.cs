@@ -11,6 +11,8 @@ using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.VersionControl;
+using Serilog.Core;
+using Serilog.Events;
 using TickerQ.Utilities.Base;
 
 namespace Recyclarr.Server.Tests.Resources;
@@ -21,6 +23,7 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
     private const string Templates = "config-templates";
 
     private readonly TimerObservingTimeProvider _time = new();
+    private readonly RecordingSink _log = new();
     private FakeGitRemote _remote = null!;
 
     private ResourceCoordinator Coordinator => Resolve<ResourceCoordinator>();
@@ -28,6 +31,11 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
+        builder
+            .RegisterInstance(
+                new LoggerConfiguration().Enrich.FromLogContext().WriteTo.Sink(_log).CreateLogger()
+            )
+            .As<ILogger>();
         builder.RegisterInstance(_time).As<TimeProvider>();
         builder.RegisterType<FakeGitRemote>().As<IRepoUpdater>().AsSelf().SingleInstance();
         builder.RegisterType<FakeGitRemote.Repository>().As<IGitRepository>();
@@ -302,5 +310,215 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
         var act = Startup;
 
         await act.Should().ThrowAsync<FatalException>();
+    }
+
+    private void WriteConfig(string fileName, string yaml) =>
+        Fs.AddFile(Paths.ConfigDirectory.File(fileName), new MockFileData(yaml));
+
+    private static string Instance(string name, string apiKey = "asdf") =>
+        $"""
+            radarr:
+              {name}:
+                base_url: http://{name}:7878
+                api_key: {apiKey}
+            """;
+
+    private const string InvalidYaml = "radarr: [unclosed";
+
+    private int ErrorCount => _log.Events.Count(e => e.Level == LogEventLevel.Error);
+
+    [Test]
+    public async Task Edited_configuration_is_reloaded_without_a_guide_update()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        WriteConfig("recyclarr.yml", Instance("films"));
+
+        await Background();
+
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("films");
+        _remote.Fetches(Guides).Should().Be(1);
+    }
+
+    [Test]
+    public async Task Unchanged_inputs_are_not_resolved_again()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        var before = Coordinator.Current;
+        var events = _log.Events.Count;
+
+        await Background();
+
+        Coordinator.Current.Should().BeSameAs(before);
+        _log.Events.Count.Should().Be(events);
+    }
+
+    [Test]
+    public async Task Invalid_edit_keeps_the_previous_configuration_and_is_logged_once()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        WriteConfig("recyclarr.yml", InvalidYaml);
+
+        await Background();
+        var errorsAfterFirstCheck = ErrorCount;
+        await Background();
+
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("movies");
+        errorsAfterFirstCheck.Should().BePositive();
+        ErrorCount.Should().Be(errorsAfterFirstCheck);
+    }
+
+    [Test]
+    public async Task Fixed_edit_after_a_rejection_is_loaded()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        WriteConfig("recyclarr.yml", InvalidYaml);
+        await Background();
+        WriteConfig("recyclarr.yml", Instance("films"));
+
+        await Background();
+
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("films");
+    }
+
+    [Test]
+    public async Task Added_and_deleted_config_files_are_reloaded()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        var extra = Paths.YamlConfigDirectory.File("extra.yml");
+
+        Fs.AddFile(extra, new MockFileData(Instance("films")));
+        await Background();
+        var namesWithExtra = Coordinator.Current.Configuration.InstanceNames;
+        extra.Delete();
+        await Background();
+
+        namesWithExtra.Should().BeEquivalentTo("movies", "films");
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("movies");
+    }
+
+    [Test]
+    public async Task Edited_secrets_are_reloaded()
+    {
+        WriteConfig("secrets.yml", "movies_key: old");
+        WriteConfig("recyclarr.yml", Instance("movies", "!secret movies_key"));
+        await Startup();
+        WriteConfig("secrets.yml", "movies_key: new");
+
+        await Background();
+
+        Coordinator
+            .Current.Configuration.Instances.Should()
+            .ContainSingle()
+            .Which.ApiKey.Should()
+            .Be("new");
+    }
+
+    [Test]
+    public async Task Edited_file_tag_target_is_reloaded()
+    {
+        WriteConfig("movies.key", "old");
+        WriteConfig("recyclarr.yml", Instance("movies", "!file movies.key"));
+        await Startup();
+        WriteConfig("movies.key", "new");
+
+        await Background();
+
+        Coordinator
+            .Current.Configuration.Instances.Should()
+            .ContainSingle()
+            .Which.ApiKey.Should()
+            .Be("new");
+    }
+
+    [Test]
+    public async Task Edited_local_include_file_is_checked()
+    {
+        var include = Paths.YamlIncludeDirectory.File("local.yml");
+        Fs.AddFile(include, new MockFileData("quality_definition:\n  type: movie\n"));
+        WriteConfig(
+            "recyclarr.yml",
+            Instance("movies") + "\n    include:\n      - config: local.yml\n"
+        );
+        await Startup();
+
+        Fs.AddFile(include, new MockFileData(InvalidYaml));
+        await Background();
+
+        ErrorCount.Should().BePositive();
+    }
+
+    [Test]
+    public async Task Reload_message_has_no_config_file_scope()
+    {
+        AddInstanceUsingInclude("movie-include");
+        await Startup();
+        WriteConfig(
+            "recyclarr.yml",
+            Instance("films") + "\n    include:\n      - template: movie-include\n"
+        );
+
+        await Background();
+
+        _log.Events.Should()
+            .ContainSingle(e =>
+                e.MessageTemplate.Text.Contains("reloaded", StringComparison.Ordinal)
+            )
+            .Which.Properties.Should()
+            .NotContainKey("Scope");
+    }
+
+    [Test]
+    public async Task Edit_waits_while_readers_hold_the_data()
+    {
+        WriteConfig("recyclarr.yml", Instance("movies"));
+        await Startup();
+        WriteConfig("recyclarr.yml", Instance("films"));
+
+        using (await Coordinator.AcquireReadAsync(CancellationToken.None))
+        {
+            await Background();
+            Coordinator.Current.Configuration.InstanceNames.Should().Equal("movies");
+        }
+
+        await Background();
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("films");
+    }
+
+    [Test]
+    public async Task Invalid_edit_with_a_guide_update_keeps_both_at_the_last_good_state()
+    {
+        AddInstanceUsingInclude("movie-include");
+        await Startup();
+        CommitTemplates("movie-include", "added-include");
+        _time.Advance(ResourceCoordinator.Ttl);
+        WriteConfig("recyclarr.yml", InvalidYaml);
+
+        await Background();
+
+        Coordinator.Current.Configuration.InstanceNames.Should().Equal("movies");
+        var includes = Paths
+            .ResourceDirectory.SubDirectory(Templates)
+            .SubDirectory("git")
+            .SubDirectory("includes")
+            .File("includes.json");
+        (await Fs.File.ReadAllTextAsync(includes.FullName)).Should().NotContain("added-include");
+        _log.Events.Should()
+            .NotContain(e =>
+                e.Level == LogEventLevel.Warning
+                && e.MessageTemplate.Text.Contains("resource provider", StringComparison.Ordinal)
+            );
+    }
+
+    // Enriches from the log context like the server's logger, so leaked scopes are visible.
+    private sealed class RecordingSink : ILogEventSink
+    {
+        public List<LogEvent> Events { get; } = [];
+
+        public void Emit(LogEvent logEvent) => Events.Add(logEvent);
     }
 }
