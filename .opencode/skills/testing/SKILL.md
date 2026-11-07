@@ -12,7 +12,7 @@ description: >-
   updating E2E fixtures under `tests/Recyclarr.EndToEndTests/Fixtures/`
   (`recyclarr.yml`, `settings.yml`, `custom-formats-*`,
   `trash-guides-override/`); running `run-e2e-tests.sh` or
-  `scripts/coverage.py`; investigating flaky tests, coverage gaps, or
+  `scripts/coverage.py`; running the pre-completion smoke test; investigating flaky tests, coverage gaps, or
   Testcontainers setup. Triggers on phrases like "write a test", "fix this
   test", "improve coverage", "add an E2E case", "mock this dependency", or
   any edit to `*.Tests.csproj` or files under `tests/**`.
@@ -217,7 +217,22 @@ Output format: `path:pct:covered/total[:uncovered_lines]`
 CRITICAL: `--run` must succeed before querying. Investigate failures - coverage data is invalid on
 failure. Run coverage BEFORE writing tests to understand gaps.
 
----
+## Smoke Test
+
+AGENTS.md (Smoke Test) says when this is required.
+
+1. Run `git -C ../dev-configs pull`. Prefix server and CLI commands with `mise exec --`, which sets
+   `RECYCLARR_CONFIG_DIR` to `../dev-configs/appdata`.
+2. Run `docker compose up -d` to start the whole `compose.yaml` stack.
+3. Unless AGENTS.md Local Processes finds a server to reuse, start
+   `dotnet run --project src/Recyclarr.Server` as a background task and wait for `READY:` in its
+   output. It has no `--help`; any invocation starts the server. `cli.yml` points the CLI at this
+   server. Use the CLI's ephemeral server only when testing ephemeral mode itself.
+4. Run `dotnet run --project src/Recyclarr.Cli -- sync --preview`. A run with no changes proves
+   little; also run a config that exercises the changed behavior.
+5. Revert dev-configs edits unless they stay useful. Report useful edits to the user and commit them
+   in `../dev-configs` only after approval.
+6. Stop the processes and containers you started.
 
 ## End-to-End Tests
 

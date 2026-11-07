@@ -8,8 +8,8 @@ description: >-
   phrasing deprecation notices or migration guidance; preparing the
   `[Unreleased]` section for cut. Triggers on phrases like "update the
   changelog", "add a changelog entry", "bump the changelog", "release notes",
-  or any edit touching `CHANGELOG.md`. Do NOT use for commit message wording
-  (see commit agent) or for internal `refactor`/`chore`/`test`/`ci`/`build`
+  or any edit touching `CHANGELOG.md`. Do NOT use for commit types or scopes
+  (see `commit-conventions`) or for internal `refactor`/`chore`/`test`/`ci`/`build`
   commits that do not require a changelog entry.
 ---
 
@@ -36,6 +36,19 @@ user who never ran an unreleased build. Commits are evidence for finding candida
   feature without introducing it.
 - Test each entry: would a user upgrading from the last release recognize the "before" it implies?
   If not, the entry describes development history; remove or fold it into its feature entry.
+
+## Choosing a Section
+
+The `commit-conventions` skill decides whether a commit needs an entry. Pick the section by what
+happened:
+
+- **Added**: A capability that did not exist before (e.g. new command, new flag, new config option)
+- **Changed**: Existing behavior now works differently (e.g. enhanced output, modified defaults,
+  adjusted limits, breaking changes, performance improvements)
+- **Fixed**: Something was broken and now it works correctly
+
+`feat` produces either Added or Changed depending on whether the capability is new or an
+enhancement. `fix` almost always produces Fixed. Breaking changes (`!`) produce Changed or Removed.
 
 ## CHANGELOG Format
 

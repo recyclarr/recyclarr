@@ -293,100 +293,12 @@ shell.
 
 ### Smoke Test
 
-Before reporting a `feat`, `fix`, `perf`, or `src/` refactor complete, MUST run E2E tests and this
-smoke test unprompted:
-
-1. Run `git -C ../dev-configs pull`. Prefix server and CLI commands with `mise exec --`, which sets
-   `RECYCLARR_CONFIG_DIR` to `../dev-configs/appdata`.
-2. Run `docker compose up -d` to start the whole `compose.yaml` stack.
-3. Unless Local Processes finds a server to reuse, start `dotnet run --project src/Recyclarr.Server`
-   as a background task and wait for `READY:` in its output. It has no `--help`; any invocation
-   starts the server. `cli.yml` points the CLI at this server. Use the CLI's ephemeral server only
-   when testing ephemeral mode itself.
-4. Run `dotnet run --project src/Recyclarr.Cli -- sync --preview`. A run with no changes proves
-   little; also run a config that exercises the changed behavior.
-5. Revert dev-configs edits unless they stay useful. Report useful edits to the user and commit them
-   in `../dev-configs` only after approval.
-6. Stop the processes and containers you started.
+Before reporting a `feat`, `fix`, `perf`, or `src/` refactor complete, MUST run E2E tests and the
+smoke test from the `testing` skill unprompted.
 
 ## Commits and Changelog
 
-Use this priority order (highest to lowest) to determine commit type:
-
-### Tier 1: User-Facing (require CHANGELOG)
-
-Conventional Commits serves semver (2 buckets: feat/fix). Keep a Changelog serves users (3 buckets:
-Added/Changed/Fixed). These are two separate decisions made in order.
-
-**Step 1: Commit type (determines semver bump).**
-
-Ask: "Could a user report this as broken?" This includes crashes, garbled output, wrong results,
-missing data, or any behavior that fails to meet reasonable expectations. If yes: `fix`. Otherwise,
-ask: "Does this change user-visible behavior (e.g. new capability, enhanced output, modified
-defaults)?" If yes: `feat`. If neither: skip to Tier 2.
-
-- `fix:` -> Corrects behavior a user could report as broken (PATCH bump)
-- `feat:` -> User-visible change that is not a bug fix (MINOR bump)
-- `perf:` -> Significant, measurable performance improvement (PATCH bump)
-- Append `!` for breaking changes regardless of type (MAJOR bump)
-
-**Step 2: Changelog category (describes the change for users).**
-
-Given a Tier 1 commit, pick the changelog section by what happened:
-
-- **Added**: A capability that did not exist before (e.g. new command, new flag, new config option)
-- **Changed**: Existing behavior now works differently (e.g. enhanced output, modified defaults,
-  adjusted limits, breaking changes, performance improvements)
-- **Fixed**: Something was broken and now it works correctly
-
-A single commit type can map to different changelog categories. `feat` produces either Added or
-Changed depending on whether the capability is new or an enhancement. `fix` almost always produces
-Fixed. Breaking changes (`!`) produce Changed or Removed.
-
-Multi-commit features: use `refactor` for infrastructure commits, `feat` only for the commit that
-enables the user-visible capability.
-
-### Tier 2: Path-Based (no CHANGELOG)
-
-If Tier 1 doesn't apply, match file paths:
-
-- `test:` -> `tests/**`
-- `ci:` -> `.github/**`, `ci/**`
-- `build:` -> `*.props`, `*.csproj`, `*.slnx`, `.config/dotnet-tools.json`
-- `docs:` -> `docs/**`, `*.md` (including `CHANGELOG.md` if committed alone)
-
-### Tier 3: Catch-All (no CHANGELOG)
-
-If neither Tier 1 nor Tier 2 applies:
-
-- `refactor:` -> C# changes in `src/**` (internal restructuring, code reorganization)
-- `chore:` -> All other non-C# changes (`scripts/**`, `.renovate/*`, `renovate.json5`,
-  `.editorconfig`, `.vscode/*`, `schemas/*`, linter configs, etc.)
-
-### Scopes
-
-A scope names a durable boundary a user or maintainer would filter the log by, never a type and
-never a directory. MUST use one of these or omit the scope entirely:
-
-- `deps` -> dependency updates (Renovate)
-- `sync` -> `src/Recyclarr.Core/{Pipelines,Sync}/*`, sync orchestration
-- `config` -> `src/Recyclarr.Core/Config/*`
-- `yaml` -> `schemas/*`
-- `cli` -> `src/Recyclarr.Cli/*`
-- `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`, `src/Recyclarr.Core/ServarrApi/*`
-- `server` -> `src/Recyclarr.Server/*`
-- `client` -> `src/Recyclarr.Client/*`
-- `docker` -> Dockerfile and image assets (NOT Docker-related workflows; those are `ci:`)
-- `agents` -> `AGENTS.md`, `.opencode/*`, skills, agent definitions
-
-MUST NOT restate the type as a scope: `ci(ci)`, `docs(readme)`, `test(e2e)`, `docs(changelog)` and
-similar add nothing. Scopeless `chore:` beats a one-off scope.
-
-A new scope is justified only when all three hold: 3+ commits fit nothing existing, the name
-survives a refactor (`docker` does, `di` and `http` do not), and it partitions rather than nests (no
-`sync` plus `sync-qp`). Retire a scope by the same test once its boundary dissolves.
-
-### CHANGELOG Format
+Load the `commit-conventions` skill before choosing a commit type or scope.
 
 MUST NEVER read the entire `CHANGELOG.md`; the file is massive. MUST read only from the top with a
 limited line range (e.g. 50 lines) to capture the `[Unreleased]` section. The file follows Keep a
