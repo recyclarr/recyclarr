@@ -175,19 +175,10 @@ only to manufacture an exception can hang on one platform. `Recyclarr.Core.Tests
 
 ## Running Tests
 
-```bash
-# Unit and integration tests
-dotnet test -v q
-
-# Specific test project
-dotnet test -v q tests/Recyclarr.Cli.Tests/
-
-# Single test by name
-dotnet test -v q --filter "FullyQualifiedName~TestMethodName"
-
-# E2E tests (requires Docker services)
-./scripts/run-e2e-tests.sh
-```
+- Unit and integration tests: `dotnet test` at solution level.
+- One project: pass its path, such as `tests/Recyclarr.Cli.Tests/`.
+- One test: `--filter "FullyQualifiedName~TestMethodName"`.
+- E2E tests (requires Docker services): `./scripts/run-e2e-tests.sh`.
 
 ## Coverage Analysis
 

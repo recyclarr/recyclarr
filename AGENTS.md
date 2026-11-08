@@ -275,9 +275,8 @@ log.Information(message);
 
 Test conventions live in the `testing` skill.
 
-- Run `dotnet test -v q` at solution level; it excludes E2E tests. Use
-  `dotnet build --no-incremental -v q` for a clean rebuild. MUST limit build and test output to 200
-  lines.
+- Run `dotnet test` at solution level; it excludes E2E tests. Use `dotnet build --no-incremental`
+  for a clean rebuild.
 - E2E: MUST run `./scripts/run-e2e-tests.sh`, never `dotnet test`. Search its log with `rg`.
 
 ### Local Processes
