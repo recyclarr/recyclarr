@@ -20,7 +20,7 @@ components.
 
 - A field that both services have belongs on a shared type. A field that only one service has
   belongs on that service's type. This applies at every layer the field passes through: guide
-  resource, plan, domain data, desired state, deltas, results, and response DTOs.
+  resource, plan, domain data, desired state, planned resources, results, and response DTOs.
 - How many fields are shared changes only how much code is shared, never which structure applies. A
   resource with almost no shared fields, such as media naming, has mostly service-specific types; a
   resource with almost no service-only fields, such as quality profiles, has mostly shared types.

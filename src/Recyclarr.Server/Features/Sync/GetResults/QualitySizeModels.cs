@@ -19,28 +19,26 @@ internal sealed record QualitySizeValueResponse
     public decimal? Value { get; init; }
 }
 
-internal sealed record QualitySizeUpdateResponse
+/// <summary>The size limits Recyclarr manages on one quality.</summary>
+internal sealed record QualitySizeItemResponse
 {
+    public required ResourceAction Action { get; init; }
     public required string Quality { get; init; }
-    public ValueChangeResponse<QualitySizeValueResponse>? Minimum { get; init; }
-    public ValueChangeResponse<QualitySizeValueResponse>? Preferred { get; init; }
-    public ValueChangeResponse<QualitySizeValueResponse>? Maximum { get; init; }
-}
-
-/// <summary>The size limits Recyclarr assigns to one quality.</summary>
-internal sealed record QualitySizeResponse
-{
-    public required string Quality { get; init; }
-    public required QualitySizeValueResponse Minimum { get; init; }
-    public required QualitySizeValueResponse Preferred { get; init; }
-    public required QualitySizeValueResponse Maximum { get; init; }
+    public required PlannedValueResponse<QualitySizeValueResponse> Minimum { get; init; }
+    public required PlannedValueResponse<QualitySizeValueResponse> Preferred { get; init; }
+    public required PlannedValueResponse<QualitySizeValueResponse> Maximum { get; init; }
 }
 
 internal sealed record QualitySizePipelineResponse
 {
     public required PipelineStatus Status { get; init; }
     public required IReadOnlyList<OutcomeResponse> Outcomes { get; init; }
-    public required IReadOnlyList<QualitySizeUpdateResponse> Updates { get; init; }
+
+    /// <summary>
+    /// Every quality the configuration sizes, changed or not. Qualities the service does not have
+    /// are absent and reported as outcomes.
+    /// </summary>
+    public required IReadOnlyList<QualitySizeItemResponse> Items { get; init; }
 
     /// <summary>Present only when the status is `blocked`.</summary>
     public BlockingPipeline? BlockedBy { get; init; }

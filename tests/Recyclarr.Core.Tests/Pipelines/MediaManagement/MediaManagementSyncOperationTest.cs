@@ -11,7 +11,7 @@ namespace Recyclarr.Core.Tests.Pipelines.MediaManagement;
 internal sealed class MediaManagementSyncOperationTest
 {
     [Test]
-    public async Task Compute_returns_delta_for_changed_mode()
+    public async Task Compute_reports_changed_mode()
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.PreferAndUpgrade);
 
@@ -19,20 +19,19 @@ internal sealed class MediaManagementSyncOperationTest
 
         result.Status.Should().Be(SyncResultStatus.Succeeded);
         result
-            .Delta.Should()
-            .BeEquivalentTo(
-                new MediaManagementDelta(
-                    new ValueDelta<PropersAndRepacksMode?>(
-                        PropersAndRepacksMode.PreferAndUpgrade,
-                        PropersAndRepacksMode.DoNotUpgrade
-                    )
+            .Settings.Should()
+            .Be(
+                Settings(
+                    PlannedAction.Update,
+                    PropersAndRepacksMode.PreferAndUpgrade,
+                    PropersAndRepacksMode.DoNotUpgrade
                 )
             );
         await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
     }
 
     [Test]
-    public async Task Compute_omits_delta_for_unchanged_mode()
+    public async Task Compute_reports_unchanged_mode()
     {
         var mode = PropersAndRepacksMode.DoNotPrefer;
         var (sut, _) = CreateOperation(mode);
@@ -40,11 +39,11 @@ internal sealed class MediaManagementSyncOperationTest
         var result = await ExecuteOperation(sut, mode, preview: true);
 
         result.Status.Should().Be(SyncResultStatus.Succeeded);
-        result.Delta.Should().BeNull();
+        result.Settings.Should().Be(Settings(PlannedAction.Unchanged, mode, mode));
     }
 
     [Test]
-    public async Task Compute_preserves_null_current_value_in_delta()
+    public async Task Compute_preserves_null_current_value()
     {
         var (sut, _) = CreateOperation(null);
 
@@ -55,16 +54,15 @@ internal sealed class MediaManagementSyncOperationTest
         );
 
         result
-            .Delta.Should()
-            .BeEquivalentTo(
-                new MediaManagementDelta(
-                    new ValueDelta<PropersAndRepacksMode?>(
-                        null,
-                        PropersAndRepacksMode.PreferAndUpgrade
-                    )
-                )
-            );
+            .Settings.Should()
+            .Be(Settings(PlannedAction.Update, null, PropersAndRepacksMode.PreferAndUpgrade));
     }
+
+    private static PlannedMediaManagementResource Settings(
+        PlannedAction action,
+        PropersAndRepacksMode? current,
+        PropersAndRepacksMode? desired
+    ) => new() { Action = action, PropersAndRepacks = PlannedValue.Compared(current, desired) };
 
     [Test]
     public async Task Read_failure_propagates_without_write()
@@ -172,8 +170,8 @@ internal sealed class MediaManagementSyncOperationTest
         var first = await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
         var second = await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
 
-        first.Delta.Should().NotBeNull();
-        second.Delta.Should().BeNull();
+        first.Settings!.Action.Should().Be(PlannedAction.Update);
+        second.Settings!.Action.Should().Be(PlannedAction.Unchanged);
         await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
     }
 

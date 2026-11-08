@@ -53,13 +53,9 @@ internal class QualityProfileStatCalculator(ILogger log, IQualityProfileServiceF
             oldProfile.MinUpgradeFormatScore,
             newProfile.MinUpgradeFormatScore
         );
-        foreach (var change in serviceFields.FindChanges(oldProfile, newProfile))
-        {
-            log.Debug("{Change}", change);
-            changed = true;
-        }
-
-        return changed;
+        var serviceFieldsChanged = serviceFields.HasChanges(oldProfile, newProfile);
+        log.Debug("Service-specific fields changed: {Changed}", serviceFieldsChanged);
+        return changed || serviceFieldsChanged;
 
         void Check<T>(string msg, T oldValue, T newValue)
         {

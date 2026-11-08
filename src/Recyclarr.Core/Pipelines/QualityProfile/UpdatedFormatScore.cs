@@ -24,6 +24,11 @@ public enum FormatScoreUpdateReason
     Reset,
 
     /// <summary>
+    /// A score the configuration does not set and `reset_unmatched_scores` leaves alone.
+    /// </summary>
+    Unmanaged,
+
+    /// <summary>
     /// New custom format scores (format items) shouldn't exist normally. They do exist during
     /// `--preview` runs since new custom formats that aren't synced yet won't be available when
     /// processing quality profiles.
@@ -56,7 +61,9 @@ public record UpdatedFormatScore(
         var shouldReset = reset.Enabled && !IsExcepted(formatItem.Name, reset);
 
         var score = shouldReset ? 0 : formatItem.Score;
-        var reason = shouldReset ? FormatScoreUpdateReason.Reset : FormatScoreUpdateReason.NoChange;
+        var reason = shouldReset
+            ? FormatScoreUpdateReason.Reset
+            : FormatScoreUpdateReason.Unmanaged;
         return new UpdatedFormatScore(formatItem, score, reason);
     }
 

@@ -70,6 +70,7 @@ internal sealed class NotificationServiceTest
                             completedResources: 0,
                             incompleteResources: 1,
                             [new EmptyCustomFormatGroupOutcome("Empty", "missing-group")],
+                            [],
                             []
                         ),
                     ],
@@ -162,20 +163,7 @@ internal sealed class NotificationServiceTest
         var result = CreateCustomFormatResult([
             .. Enumerable
                 .Range(1, 25)
-                .Select(i =>
-                    (CustomFormatDelta)
-                        new CustomFormatUpdateDelta
-                        {
-                            Identity = new CustomFormatIdentity($"id-{i}", $"CF{i:D2}"),
-                            SelectionProvenance = new CustomFormatSourceInfo(
-                                CfSource.CfGroupExplicit,
-                                "Group",
-                                CfInclusionReason.Selected,
-                                []
-                            ),
-                            Components = [],
-                        }
-                ),
+                .Select(i => CustomFormat(PlannedAction.Update, $"id-{i}", $"CF{i:D2}")),
         ]);
 
         await sut.SendNotification(result);
@@ -188,44 +176,47 @@ internal sealed class NotificationServiceTest
     }
 
     private static SyncRunResult CreateCustomFormatResult(
-        IReadOnlyList<CustomFormatDelta>? deltas = null
+        IReadOnlyList<PlannedCustomFormatResource>? resources = null
     )
     {
-        deltas ??=
-        [
-            new CustomFormatCreateDelta
-            {
-                Identity = new CustomFormatIdentity("created", "NewCF"),
-                SelectionProvenance = new CustomFormatSourceInfo(
-                    CfSource.CfGroupExplicit,
-                    "Group",
-                    CfInclusionReason.Selected,
-                    []
-                ),
-            },
-            new CustomFormatUpdateDelta
-            {
-                Identity = new CustomFormatIdentity("updated", "UpdatedCF"),
-                SelectionProvenance = new CustomFormatSourceInfo(
-                    CfSource.CfGroupExplicit,
-                    "Group",
-                    CfInclusionReason.Selected,
-                    []
-                ),
-                Components = [],
-            },
-            new CustomFormatDeleteDelta
-            {
-                Identity = new CustomFormatIdentity("deleted", "DeletedCF"),
-            },
-        ];
+        IReadOnlyList<CustomFormatIdentity> deletes = [];
+        if (resources is null)
+        {
+            resources =
+            [
+                CustomFormat(PlannedAction.Create, "created", "NewCF"),
+                CustomFormat(PlannedAction.Update, "updated", "UpdatedCF"),
+                CustomFormat(PlannedAction.Unchanged, "unchanged", "UnchangedCF"),
+            ];
+            deletes = [new CustomFormatIdentity("deleted", "DeletedCF")];
+        }
 
         return new SyncRunResult([
             new SyncInstanceResult(
                 "movies",
                 SupportedServices.Radarr,
-                [new CustomFormatPipelineResult(deltas.Count, 0, [], deltas)]
+                [new CustomFormatPipelineResult(resources.Count, 0, [], resources, deletes)]
             ),
         ]);
     }
+
+    private static PlannedCustomFormatResource CustomFormat(
+        PlannedAction action,
+        string trashId,
+        string name
+    ) =>
+        new()
+        {
+            Action = action,
+            Identity = new CustomFormatIdentity(trashId, name),
+            SelectionProvenance = new CustomFormatSourceInfo(
+                CfSource.CfGroupExplicit,
+                "Group",
+                CfInclusionReason.Selected,
+                []
+            ),
+            Name = PlannedValue.Compared(name, name, action != PlannedAction.Unchanged),
+            IncludeWhenRenaming = PlannedValue.Compared(false, false),
+            Specifications = [],
+        };
 }

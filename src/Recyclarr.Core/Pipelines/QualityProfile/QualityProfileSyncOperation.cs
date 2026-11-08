@@ -68,7 +68,7 @@ internal class QualityProfileSyncOperation(
         AssignExistingProfiles(transactions, existingProfiles);
 
         var outcomes = BuildOutcomes(planOutcomes, transactions, out var incompleteResources);
-        var deltas = BuildDeltas(transactions);
+        var resources = BuildResources(transactions);
         var completedResources =
             transactions.NewProfiles.Count
             + transactions.UpdatedProfiles.Count
@@ -77,7 +77,7 @@ internal class QualityProfileSyncOperation(
             completedResources,
             incompleteResources,
             outcomes,
-            deltas
+            resources
         );
 
         logger.LogTransactionNotices(transactions);
@@ -230,7 +230,7 @@ internal class QualityProfileSyncOperation(
     }
 
     // Service-owned values go on the working profile, so every merged profile built from it
-    // (change detection, deltas, persist) carries them.
+    // (change detection, results, persist) carries them.
     private void ApplyServiceFields(IEnumerable<UpdatedQualityProfile> profiles)
     {
         foreach (var profile in profiles)
@@ -474,140 +474,104 @@ internal class QualityProfileSyncOperation(
         }
     }
 
-    private List<QualityProfileDelta> BuildDeltas(QualityProfileTransactionData transactions)
-    {
-        var deltas = transactions
-            .NewProfiles.Select<UpdatedQualityProfile, QualityProfileDelta>(
-                profile => new QualityProfileCreateDelta
-                {
-                    Identity = CreateIdentity(profile.ProfileConfig),
-                    State = BuildControlledState(profile),
-                }
-            )
-            .ToList();
-
-        deltas.AddRange(
-            transactions.UpdatedProfiles.Select(x => new QualityProfileUpdateDelta
-            {
-                Identity = CreateIdentity(x.Profile.ProfileConfig),
-                Components = BuildUpdateComponents(x),
-            })
-        );
-        return deltas;
-    }
-
-    private QualityProfileControlledState BuildControlledState(UpdatedQualityProfile profile)
-    {
-        var planned = profile.ProfileConfig;
-        var config = planned.Config;
-        var guide = planned.GuideResource;
-        var desired = profile.BuildMergedProfile();
-
-        var shared = new QualityProfileControlledState
-        {
-            Name = profile.EffectiveName,
-            UpgradeAllowed = config.UpgradeAllowed ?? guide?.UpgradeAllowed,
-            UpgradeUntilQuality = config.UpgradeUntilQuality ?? NullIfEmpty(guide?.Cutoff),
-            UpgradeUntilScore = config.UpgradeUntilScore ?? guide?.CutoffFormatScore,
-            MinimumFormatScore = config.MinFormatScore ?? guide?.MinFormatScore,
-            MinimumUpgradeFormatScore =
-                config.MinUpgradeFormatScore ?? guide?.MinUpgradeFormatScore,
-            Qualities = config.Qualities.Count > 0 ? MapQualityLayout(desired.Items) : [],
-            CustomFormatScores = MapControlledScores(profile),
-        };
-        return serviceFields.DescribeCreate(shared, desired, planned);
-    }
-
-    private List<QualityProfileUpdateComponent> BuildUpdateComponents(
-        ProfileWithStats profileWithStats
+    private List<PlannedQualityProfileResource> BuildResources(
+        QualityProfileTransactionData transactions
     )
     {
-        var profile = profileWithStats.Profile;
-        var current = profile.OriginalProfile ?? profile.Profile;
-        var desired = profile.BuildMergedProfile();
-        var components = new List<QualityProfileUpdateComponent>();
-
-        AddChanged(current.Name, desired.Name, value => new QualityProfileNameChanged(value));
-        AddChanged(
-            current.UpgradeAllowed,
-            desired.UpgradeAllowed,
-            value => new QualityProfileUpgradeAllowedChanged(value)
+        var resources = transactions.NewProfiles.Select(BuildCreatedResource).ToList();
+        resources.AddRange(
+            transactions.UpdatedProfiles.Select(x =>
+                BuildExistingResource(x.Profile, PlannedAction.Update, x.QualitiesChanged)
+            )
         );
-        AddChanged(
-            current.Items.FindCutoff(current.Cutoff),
-            desired.Items.FindCutoff(desired.Cutoff),
-            value => new QualityProfileUpgradeUntilQualityChanged(value)
+        resources.AddRange(
+            transactions.UnchangedProfiles.Select(x =>
+                BuildExistingResource(x, PlannedAction.Unchanged, qualitiesChanged: false)
+            )
         );
-        AddChanged(
-            current.CutoffFormatScore,
-            desired.CutoffFormatScore,
-            value => new QualityProfileUpgradeUntilScoreChanged(value)
-        );
-        AddChanged(
-            current.MinFormatScore,
-            desired.MinFormatScore,
-            value => new QualityProfileMinimumFormatScoreChanged(value)
-        );
-        AddChanged(
-            current.MinUpgradeFormatScore,
-            desired.MinUpgradeFormatScore,
-            value => new QualityProfileMinimumUpgradeFormatScoreChanged(value)
-        );
-        components.AddRange(serviceFields.FindChanges(current, desired));
-
-        if (profileWithStats.QualitiesChanged)
-        {
-            components.Add(
-                new QualityProfileQualityLayoutChanged(
-                    MapQualityLayout(current.Items),
-                    MapQualityLayout(desired.Items)
-                )
-            );
-        }
-
-        components.AddRange(
-            profile
-                .UpdatedScores.Where(x => x.FormatItem.Score != x.NewScore)
-                .Select(x =>
-                {
-                    var plannedScore = FindPlannedScore(profile, x);
-                    return new QualityProfileCustomFormatScoreChanged(
-                        x.FormatItem.Name,
-                        plannedScore?.TrashId,
-                        new ValueDelta<int>(x.FormatItem.Score, x.NewScore),
-                        x.Reason == FormatScoreUpdateReason.Reset
-                            ? QualityProfileScoreChangeReason.Reset
-                            : QualityProfileScoreChangeReason.Set
-                    );
-                })
-        );
-
-        return components;
-
-        void AddChanged<T>(
-            T currentValue,
-            T desiredValue,
-            Func<ValueDelta<T>, QualityProfileUpdateComponent> create
-        )
-        {
-            if (!EqualityComparer<T>.Default.Equals(currentValue, desiredValue))
-            {
-                components.Add(create(new ValueDelta<T>(currentValue, desiredValue)));
-            }
-        }
+        return resources;
     }
 
-    private static List<QualityProfileCustomFormatScore> MapControlledScores(
-        UpdatedQualityProfile profile
+    private PlannedQualityProfileResource BuildCreatedResource(UpdatedQualityProfile profile)
+    {
+        var desired = profile.BuildMergedProfile();
+        var shared = new PlannedQualityProfileResource
+        {
+            Action = PlannedAction.Create,
+            Identity = CreateIdentity(profile.ProfileConfig),
+            Name = PlannedValue.Created(desired.Name),
+            UpgradeAllowed = PlannedValue.Created(desired.UpgradeAllowed),
+            UpgradeUntilQuality = PlannedValue.Created(desired.Items.FindCutoff(desired.Cutoff)),
+            UpgradeUntilScore = PlannedValue.Created(desired.CutoffFormatScore),
+            MinimumFormatScore = PlannedValue.Created(desired.MinFormatScore),
+            MinimumUpgradeFormatScore = PlannedValue.Created(desired.MinUpgradeFormatScore),
+            Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                MapQualityLayout(desired.Items)
+            ),
+            CustomFormatScores = MapScores(profile, x => PlannedValue.Created(x.NewScore)),
+        };
+        return serviceFields.Describe(shared, null, desired, profile.ProfileConfig);
+    }
+
+    private PlannedQualityProfileResource BuildExistingResource(
+        UpdatedQualityProfile profile,
+        PlannedAction action,
+        bool qualitiesChanged
+    )
+    {
+        var current = profile.OriginalProfile ?? profile.Profile;
+        var desired = profile.BuildMergedProfile();
+        var shared = new PlannedQualityProfileResource
+        {
+            Action = action,
+            Identity = CreateIdentity(profile.ProfileConfig),
+            Name = PlannedValue.Compared(current.Name, desired.Name),
+            UpgradeAllowed = PlannedValue.Compared(current.UpgradeAllowed, desired.UpgradeAllowed),
+            UpgradeUntilQuality = PlannedValue.Compared(
+                current.Items.FindCutoff(current.Cutoff),
+                desired.Items.FindCutoff(desired.Cutoff)
+            ),
+            UpgradeUntilScore = PlannedValue.Compared(
+                current.CutoffFormatScore,
+                desired.CutoffFormatScore
+            ),
+            MinimumFormatScore = PlannedValue.Compared(
+                current.MinFormatScore,
+                desired.MinFormatScore
+            ),
+            MinimumUpgradeFormatScore = PlannedValue.Compared(
+                current.MinUpgradeFormatScore,
+                desired.MinUpgradeFormatScore
+            ),
+            Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                MapQualityLayout(current.Items),
+                MapQualityLayout(desired.Items),
+                qualitiesChanged
+            ),
+            CustomFormatScores = MapScores(
+                profile,
+                x => PlannedValue.Compared(x.FormatItem.Score, x.NewScore)
+            ),
+        };
+        return serviceFields.Describe(shared, current, desired, profile.ProfileConfig);
+    }
+
+    private static List<QualityProfileScoreResult> MapScores(
+        UpdatedQualityProfile profile,
+        Func<UpdatedFormatScore, PlannedValue<int>> toValue
     )
     {
         return profile
-            .UpdatedScores.Select(x => (Score: x, Planned: FindPlannedScore(profile, x)))
-            .Where(x => x.Score.Reason != FormatScoreUpdateReason.NoChange || x.Planned is not null)
-            .Select(x => new QualityProfileCustomFormatScore(
-                x.Score.FormatItem.Name,
-                x.Planned?.TrashId,
-                x.Score.NewScore
+            .UpdatedScores.Select(x => new QualityProfileScoreResult(
+                x.FormatItem.Name,
+                FindPlannedScore(profile, x)?.TrashId,
+                toValue(x),
+                x.Reason switch
+                {
+                    FormatScoreUpdateReason.Reset => QualityProfileScoreReason.Reset,
+                    FormatScoreUpdateReason.Unmanaged => QualityProfileScoreReason.Unmanaged,
+                    _ => QualityProfileScoreReason.Set,
+                }
             ))
             .ToList();
     }
@@ -661,10 +625,5 @@ internal class QualityProfileSyncOperation(
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(profile)),
         };
-    }
-
-    private static string? NullIfEmpty(string? value)
-    {
-        return string.IsNullOrEmpty(value) ? null : value;
     }
 }

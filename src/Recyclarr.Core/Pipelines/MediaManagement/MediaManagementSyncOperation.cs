@@ -1,4 +1,3 @@
-using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync;
@@ -26,16 +25,16 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
     {
         var current = await api.GetMediaManagement(ct);
         var desired = current with { PropersAndRepacks = planned.PropersAndRepacks };
-        var delta =
-            current.PropersAndRepacks != desired.PropersAndRepacks
-                ? new MediaManagementDelta(
-                    new ValueDelta<PropersAndRepacksMode?>(
-                        current.PropersAndRepacks,
-                        desired.PropersAndRepacks
-                    )
-                )
-                : null;
-        var result = new MediaManagementPipelineResult(SyncResultStatus.Succeeded, delta);
+        var propersAndRepacks = PlannedValue.Compared(
+            current.PropersAndRepacks,
+            desired.PropersAndRepacks
+        );
+        var settings = new PlannedMediaManagementResource
+        {
+            Action = propersAndRepacks.Changed ? PlannedAction.Update : PlannedAction.Unchanged,
+            PropersAndRepacks = propersAndRepacks,
+        };
+        var result = new MediaManagementPipelineResult(SyncResultStatus.Succeeded, settings);
         return new MediaManagementComputeResult(current, desired, result);
     }
 
@@ -46,7 +45,7 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
     {
         var (current, desired, result) = computeResult;
         var differences = current.GetDifferences(desired);
-        if (result.Delta is not null)
+        if (result.Settings is { Action: PlannedAction.Update })
         {
             await api.UpdateMediaManagement(desired, ct);
             log.Information("Media management has been updated");

@@ -10,8 +10,8 @@ from one small response, and progress must never decide terminal status.
 
 ## Decision
 
-Core reports instance lifecycle changes; the server reduces them into a cumulative instance
-snapshot that clients poll.
+Core reports instance lifecycle changes; the server reduces them into a cumulative instance snapshot
+that clients poll.
 
 Core reports when an instance starts and when its terminal result is available. The Server reduces
 those callbacks into an ordered snapshot. Polling exposes only the instance name and one of these
@@ -23,8 +23,8 @@ instances that never started become NotRun. Completed instances keep the status 
 terminal results.
 
 Progress reporting is best effort and cannot alter execution or terminal results. The final
-`SyncRunResult` remains authoritative for faults, planning outcomes, pipeline outcomes, and resource
-deltas. The polled job resource carries no pipeline counts, item changes, or event history.
+`SyncRunResult` remains authoritative for faults, planning outcomes, pipeline outcomes, and planned
+resources. The polled job resource carries no pipeline counts, item changes, or event history.
 
 Clients continue to poll. A client may miss a short Running state and move directly from Pending to
 a terminal status. SSE should be reconsidered only if measured polling latency or request volume

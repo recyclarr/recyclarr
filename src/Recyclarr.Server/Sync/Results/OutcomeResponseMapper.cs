@@ -325,10 +325,10 @@ internal static class OutcomeResponseMapper
                     new QualityNameOutcomeData(x.Quality)
                 ),
             QualitySizePreferredRatioClampedOutcome x => C.QualitySizePreferredRatioClamped.Create(
-                $"{prefix}`preferred_ratio` of {Number(x.Value.Current)} is out of range "
-                    + $"(0.0-1.0), clamped to {Number(x.Value.Desired)}",
+                $"{prefix}`preferred_ratio` of {Number(x.Configured)} is out of range "
+                    + $"(0.0-1.0), clamped to {Number(x.Used)}",
                 subject,
-                new PreferredRatioClampedOutcomeData(x.Value.Current, x.Value.Desired)
+                new PreferredRatioClampedOutcomeData(x.Configured, x.Used)
             ),
             QualitySizeMinimumGreaterThanPreferredOutcome x =>
                 C.QualitySizeMinimumGreaterThanPreferred.Create(

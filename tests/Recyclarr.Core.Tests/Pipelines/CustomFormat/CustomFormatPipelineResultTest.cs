@@ -15,7 +15,7 @@ internal sealed class CustomFormatPipelineResultTest
         SyncResultStatus expected
     )
     {
-        var result = new CustomFormatPipelineResult(completed, incomplete, [], []);
+        var result = new CustomFormatPipelineResult(completed, incomplete, [], [], []);
 
         result.Status.Should().Be(expected);
     }

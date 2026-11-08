@@ -224,35 +224,30 @@ internal sealed class NotificationService(
         pipeline switch
         {
             CustomFormatPipelineResult x => new ResourceChanges(
-                x.Deltas.OfType<CustomFormatCreateDelta>().Select(delta => delta.Identity.Name),
-                x.Deltas.OfType<CustomFormatUpdateDelta>().Select(delta => delta.Identity.Name),
-                x.Deltas.OfType<CustomFormatDeleteDelta>().Select(delta => delta.Identity.Name)
+                x.Resources.Where(y => y.Action == PlannedAction.Create)
+                    .Select(y => y.Identity.Name),
+                x.Resources.Where(y => y.Action == PlannedAction.Update)
+                    .Select(y => y.Identity.Name),
+                x.Deletes.Select(y => y.Name)
             ),
             QualityProfilePipelineResult x => new ResourceChanges(
-                x.Deltas.OfType<QualityProfileCreateDelta>().Select(GetQualityProfileName),
-                x.Deltas.OfType<QualityProfileUpdateDelta>().Select(GetQualityProfileName),
+                x.Resources.Where(y => y.Action == PlannedAction.Create)
+                    .Select(y => GetQualityProfileName(y.Identity)),
+                x.Resources.Where(y => y.Action == PlannedAction.Update)
+                    .Select(y => GetQualityProfileName(y.Identity)),
                 []
             ),
             QualitySizePipelineResult x => new ResourceChanges(
                 [],
-                x.Deltas.Select(delta => delta.Quality),
+                x.Resources.Where(y => y.Action == PlannedAction.Update).Select(y => y.Quality),
                 []
             ),
-            SonarrNamingPipelineResult { Delta: not null } => new ResourceChanges(
-                [],
-                ["Naming settings"],
-                []
-            ),
-            RadarrNamingPipelineResult { Delta: not null } => new ResourceChanges(
-                [],
-                ["Naming settings"],
-                []
-            ),
-            MediaManagementPipelineResult { Delta: not null } => new ResourceChanges(
-                [],
-                ["Media management settings"],
-                []
-            ),
+            SonarrNamingPipelineResult { Settings.Action: PlannedAction.Update } =>
+                new ResourceChanges([], ["Naming settings"], []),
+            RadarrNamingPipelineResult { Settings.Action: PlannedAction.Update } =>
+                new ResourceChanges([], ["Naming settings"], []),
+            MediaManagementPipelineResult { Settings.Action: PlannedAction.Update } =>
+                new ResourceChanges([], ["Media management settings"], []),
             SonarrNamingPipelineResult
             or RadarrNamingPipelineResult
             or MediaManagementPipelineResult => new ResourceChanges([], [], []),
@@ -335,9 +330,6 @@ internal sealed class NotificationService(
             SyncStateUnavailableFailure => "The persisted synchronization state is unavailable",
             _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null),
         };
-
-    private static string GetQualityProfileName(QualityProfileDelta delta) =>
-        GetQualityProfileName(delta.Identity);
 
     private static string GetQualityProfileName(QualityProfileIdentity identity) =>
         identity switch

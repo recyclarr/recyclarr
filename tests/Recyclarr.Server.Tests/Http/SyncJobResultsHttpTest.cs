@@ -11,6 +11,8 @@ using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Refit;
 using CoreService = Recyclarr.TrashGuide.SupportedServices;
+using CustomFormatSpecificationChange = Recyclarr.Client.V1.CustomFormatSpecificationChange;
+using QualityProfileScoreReason = Recyclarr.Client.V1.QualityProfileScoreReason;
 
 namespace Recyclarr.Server.Tests.Http;
 
@@ -51,7 +53,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     [Test]
     public async Task Generated_client_reads_the_service_specific_instance_result()
     {
-        var noOp = new CustomFormatPipelineResult(0, 0, [], []);
+        var noOp = new CustomFormatPipelineResult(0, 0, [], [], []);
         var result = new SyncRunResult([new SyncInstanceResult("tv", CoreService.Sonarr, [noOp])]);
         var job = CreateCompletedJob(result);
 
@@ -71,13 +73,13 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Which;
         instance.Name.Should().Be("tv");
         instance.Pipelines.CustomFormats?.Status.Should().Be(PipelineStatus.Succeeded);
-        instance.Pipelines.CustomFormats?.Creates.Should().BeEmpty();
+        instance.Pipelines.CustomFormats?.Items.Should().BeEmpty();
     }
 
     [Test]
     public async Task Instance_fault_retains_its_scope_and_buffered_semantic_data()
     {
-        var noOp = new CustomFormatPipelineResult(0, 0, [], []);
+        var noOp = new CustomFormatPipelineResult(0, 0, [], [], []);
         var result = new SyncRunResult([
             new SyncInstanceResult(
                 "faulted",
@@ -147,7 +149,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         AssertCustomFormats(sonarr.Pipelines.CustomFormats);
         AssertSonarrQualityProfiles(sonarr.Pipelines.QualityProfiles);
         AssertSonarrNaming(sonarr.Pipelines.Naming);
-        sonarr.Pipelines.MediaManagement?.Updates.Should().ContainSingle();
+        sonarr.Pipelines.MediaManagement?.Settings?.Action.Should().Be(ResourceAction.Update);
 
         var radarr = response
             .Content.Instances.Should()
@@ -163,8 +165,9 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative)
         );
         raw.Should().Contain("\"service\":\"sonarr\"");
-        raw.Should().Contain("\"upgradeAllowed\":null");
-        raw.Should().Contain("\"current\":null").And.Contain("\"desired\":false");
+        raw.Should()
+            .Contain("\"upgradeAllowed\":{\"desired\":null,\"current\":null,\"changed\":true}");
+        raw.Should().Contain("\"action\":\"unchanged\"").And.Contain("\"changed\":false");
         raw.Should().NotContain("sonarrNaming").And.NotContain("radarrNaming");
     }
 
@@ -265,6 +268,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             completedResources: 0,
             incompleteResources: 1,
             [new CustomFormatCreateRejectedOutcome(new CustomFormatIdentity("cf-one", "CF"))],
+            [],
             []
         );
         var qualityProfiles = new QualityProfilePipelineResult(0, 0, [], []).WithStatus(
@@ -374,8 +378,34 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertCustomFormats(CustomFormatPipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        pipeline.Creates.Should().ContainSingle();
-        pipeline.Updates.Should().ContainSingle();
+        pipeline
+            .Items.Select(x => x.Action)
+            .Should()
+            .Equal(ResourceAction.Create, ResourceAction.Update, ResourceAction.Unchanged);
+        var created = pipeline.Items.First();
+        created.Name.Should().BeEquivalentTo(new { Desired = "First CF", Current = (string?)null });
+        created.IncludeWhenRenaming.Should().BeEquivalentTo(new { Current = (bool?)null });
+        var updated = pipeline.Items.ElementAt(1);
+        updated
+            .Name.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Desired = "New",
+                    Current = "Old",
+                    Changed = true,
+                }
+            );
+        updated
+            .Specifications.Select(x => x.Change)
+            .Should()
+            .Equal(
+                CustomFormatSpecificationChange.Added,
+                CustomFormatSpecificationChange.Changed,
+                CustomFormatSpecificationChange.Removed,
+                CustomFormatSpecificationChange.Unchanged
+            );
+        pipeline.Items.Last().Name.Changed.Should().BeFalse();
         pipeline.Deletes.Should().ContainSingle();
         pipeline
             .Outcomes.Select(x => x.Code)
@@ -409,18 +439,19 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        pipeline
-            .Creates.Should()
-            .ContainSingle()
-            .Which.State.QualitySizes.Should()
+        var created = pipeline.Items.First();
+        created.Action.Should().Be(ResourceAction.Create);
+        created
+            .QualitySizes.Should()
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
                 new
                 {
+                    Action = ResourceAction.Create,
                     Quality = "HDTV-1080p",
-                    Minimum = new { Kind = QualitySizeKind.Numeric, Value = 5m },
-                    Maximum = new { Kind = QualitySizeKind.Unlimited },
+                    Minimum = new { Desired = new { Kind = QualitySizeKind.Numeric, Value = 5m } },
+                    Maximum = new { Desired = new { Kind = QualitySizeKind.Unlimited } },
                 }
             );
         AssertQualityProfileOutcomes(
@@ -434,46 +465,46 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         sizeOutcome.Subject?.TrashId.Should().Be("qp-one");
         DataAs<QualitySizeGuideReferenceOutcomeData>(sizeOutcome).TrashId.Should().Be("qs-missing");
 
-        var update = pipeline.Updates.Should().ContainSingle().Which;
+        var update = pipeline.Items.Last();
+        update.Action.Should().Be(ResourceAction.Update);
         update
             .QualitySizes.Should()
             .ContainSingle()
             .Which.Minimum.Should()
-            .BeEquivalentTo(new { Current = new { Value = 1m }, Desired = new { Value = 5m } });
-        object?[] changes =
-        [
-            update.Name,
-            update.UpgradeAllowed,
-            update.UpgradeUntilQuality,
-            update.UpgradeUntilScore,
-            update.MinimumFormatScore,
-            update.MinimumUpgradeFormatScore,
-            update.QualityLayout,
-        ];
-        changes.Should().OnlyContain(x => x != null);
-        update.CustomFormatScores.Should().HaveCount(2);
+            .BeEquivalentTo(
+                new
+                {
+                    Current = new { Value = 1m },
+                    Desired = new { Value = 5m },
+                    Changed = true,
+                }
+            );
+        AssertUpdatedProfileScores(update.CustomFormatScores);
+    }
+
+    private static void AssertUpdatedProfileScores(ICollection<QualityProfileScoreResponse> scores)
+    {
+        scores
+            .Select(x => (x.Name, x.Reason, x.Score.Desired, x.Score.Changed))
+            .Should()
+            .Equal(
+                ("CF", QualityProfileScoreReason.Set, 10, true),
+                ("Reset CF", QualityProfileScoreReason.Reset, 0, true),
+                ("Mine", QualityProfileScoreReason.Unmanaged, 7, false)
+            );
     }
 
     private static void AssertRadarrQualityProfiles(RadarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        pipeline.Creates.Should().ContainSingle().Which.State.Language.Should().Be("English");
+        pipeline.Items.First().Language.Desired.Should().Be("English");
         AssertQualityProfileOutcomes(pipeline.Outcomes, "qualityProfileQualityDefinitionIgnored");
 
-        var update = pipeline.Updates.Should().ContainSingle().Which;
-        object?[] changes =
-        [
-            update.Name,
-            update.UpgradeAllowed,
-            update.UpgradeUntilQuality,
-            update.UpgradeUntilScore,
-            update.MinimumFormatScore,
-            update.MinimumUpgradeFormatScore,
-            update.Language,
-            update.QualityLayout,
-        ];
-        changes.Should().OnlyContain(x => x != null);
-        update.CustomFormatScores.Should().HaveCount(2);
+        var update = pipeline.Items.Last();
+        update.Language.Should().BeEquivalentTo(new { Current = (string?)null, Changed = true });
+        update.MinimumUpgradeFormatScore.Changed.Should().BeFalse();
+        update.Qualities.Changed.Should().BeTrue();
+        AssertUpdatedProfileScores(update.CustomFormatScores);
     }
 
     private static void AssertQualityProfileOutcomes(
@@ -524,10 +555,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         minimum.Minimum.Value.Should().Be(2.5);
         minimum.Preferred.Value.Should().Be(1.25);
 
-        var update = pipeline.Updates.Should().ContainSingle().Which;
-        update.Minimum.Should().NotBeNull();
-        update.Preferred.Should().NotBeNull();
-        update.Maximum.Should().NotBeNull();
+        pipeline
+            .Items.Select(x => (x.Quality, x.Action))
+            .Should()
+            .Equal(("Bluray", ResourceAction.Update), ("WEB", ResourceAction.Unchanged));
     }
 
     private static void AssertSonarrNaming(SonarrNamingPipelineResponse? pipeline)
@@ -536,25 +567,19 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         DataAs<MediaNamingReferenceOutcomeData>(pipeline!.Outcomes.First())
             .Field.Should()
             .Be("seriesFolderFormat");
-        var update = pipeline?.Updates.Should().ContainSingle().Which;
-        object?[] changes =
-        [
-            update?.RenameEpisodes,
-            update?.SeriesFolderFormat,
-            update?.SeasonFolderFormat,
-            update?.StandardEpisodeFormat,
-            update?.DailyEpisodeFormat,
-            update?.AnimeEpisodeFormat,
-        ];
-        changes.Should().HaveCount(6).And.OnlyContain(x => x != null);
+        var settings = pipeline.Settings;
+        settings.Should().NotBeNull();
+        settings.Action.Should().Be(ResourceAction.Update);
+        settings.DailyEpisodeFormat?.Changed.Should().BeFalse();
+        settings.AnimeEpisodeFormat.Should().BeNull("an unconfigured field is absent");
     }
 
     private static void AssertRadarrNaming(RadarrNamingPipelineResponse? pipeline)
     {
         pipeline?.Outcomes.Should().HaveCount(2);
-        var update = pipeline?.Updates.Should().ContainSingle().Which;
-        update?.RenameMovies.Should().NotBeNull();
-        update?.StandardMovieFormat.Should().NotBeNull();
-        update?.MovieFolderFormat.Should().NotBeNull();
+        var settings = pipeline?.Settings;
+        settings?.RenameMovies.Should().NotBeNull();
+        settings?.StandardMovieFormat.Should().NotBeNull();
+        settings?.MovieFolderFormat.Should().NotBeNull();
     }
 }

@@ -219,15 +219,19 @@ internal sealed class SyncResultContractTest
     }
 
     [Test]
-    public void Semantic_contracts_are_presentation_free()
+    public void Created_value_has_no_service_value_and_counts_as_changed()
     {
-        PipelineOutcome outcome = new TestOutcome();
-        ResourceDelta resourceDelta = new TestResourceDelta();
-        var valueDelta = new ValueDelta<int>(Current: 1, Desired: 2);
+        PlannedValue.Created(5).Should().Be(new PlannedValue<int>(5, Current: null, Changed: true));
+    }
 
-        outcome.Should().BeOfType<TestOutcome>();
-        resourceDelta.Should().BeOfType<TestResourceDelta>();
-        valueDelta.Should().Be(new ValueDelta<int>(Current: 1, Desired: 2));
+    [Test]
+    public void Compared_value_keeps_a_null_service_value_and_detects_change()
+    {
+        PlannedValue
+            .Compared<string?>(null, "x")
+            .Should()
+            .Be(new PlannedValue<string?>("x", new ServiceValue<string?>(null), Changed: true));
+        PlannedValue.Compared(1, 1).Changed.Should().BeFalse();
     }
 
     [Test]
@@ -403,6 +407,4 @@ internal sealed class SyncResultContractTest
     private sealed record TestPlanningNotice(string Value) : PlanningOutcome;
 
     private sealed record TestBlockingPlanningOutcome : BlockingPlanningOutcome;
-
-    private sealed record TestResourceDelta : ResourceDelta;
 }

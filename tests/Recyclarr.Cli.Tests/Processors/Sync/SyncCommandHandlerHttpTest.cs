@@ -15,6 +15,7 @@ using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.TestLibrary.Autofac;
 using Serilog.Events;
+using QualityProfileScoreReason = Recyclarr.Pipelines.QualityProfile.QualityProfileScoreReason;
 using SupportedServices = Recyclarr.TrashGuide.SupportedServices;
 
 namespace Recyclarr.Cli.Tests.Processors.Sync;
@@ -280,23 +281,21 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                     NewPipelineResult.QualitySizes(
                         [],
                         [
-                            new QualitySizeDelta(
+                            Size(
                                 "Bluray-1080p",
-                                [
-                                    new QualitySizeMinimumChanged(
-                                        new ValueDelta<QualitySizeValue>(
-                                            new QualitySizeValue.Numeric(50),
-                                            new QualitySizeValue.Numeric(50.4m)
-                                        )
-                                    ),
-                                ]
+                                new QualitySizeValue.Numeric(50),
+                                new QualitySizeValue.Numeric(50.4m)
                             ),
                         ]
                     ),
                     NewPipelineResult.RadarrNaming(
-                        new RadarrNamingDelta
+                        new PlannedRadarrNamingResource
                         {
-                            StandardMovieFormat = new ValueDelta<string?>("{Movie}", "{Title}"),
+                            Action = PlannedAction.Update,
+                            StandardMovieFormat = PlannedValue.Compared<string?>(
+                                "{Movie}",
+                                "{Title}"
+                            ),
                         }
                     ),
                 ]
@@ -347,20 +346,15 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                     ),
                     NewPipelineResult.QualitySizes([], [], failed: 1),
                     NewPipelineResult.RadarrNaming(
-                        new RadarrNamingDelta
+                        new PlannedRadarrNamingResource
                         {
-                            RenameMovies = new ValueDelta<bool?>(false, true),
-                            StandardMovieFormat = new ValueDelta<string?>("a", "b"),
+                            Action = PlannedAction.Update,
+                            RenameMovies = PlannedValue.Compared<bool?>(false, true),
+                            StandardMovieFormat = PlannedValue.Compared<string?>("a", "b"),
+                            MovieFolderFormat = PlannedValue.Compared<string?>("c", "c"),
                         }
                     ),
-                    NewPipelineResult.MediaManagement(
-                        new MediaManagementDelta(
-                            new ValueDelta<PropersAndRepacksMode?>(
-                                PropersAndRepacksMode.PreferAndUpgrade,
-                                PropersAndRepacksMode.DoNotPrefer
-                            )
-                        )
-                    ),
+                    NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
                 ]
             ),
         ]);
@@ -411,28 +405,18 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 [
                     NewPipelineResult.CustomFormats(
                         [],
-                        [
-                            new CustomFormatCreateDelta
-                            {
-                                Identity = new("cf-x265", "x265 (HD)"),
-                                SelectionProvenance = groupSource,
-                            },
-                        ]
+                        [Cf(PlannedAction.Create, "cf-x265", "x265 (HD)", groupSource)]
                     ),
                     NewPipelineResult.QualityProfiles([], [NewProfile("HD Bluray")]),
                     NewPipelineResult.QualitySizes(
                         [],
                         [
-                            new QualitySizeDelta(
+                            Size(
                                 "Bluray-2160p",
-                                [
-                                    new QualitySizeMaximumChanged(
-                                        new ValueDelta<QualitySizeValue>(
-                                            new QualitySizeValue.Numeric(400),
-                                            new QualitySizeValue.Unlimited()
-                                        )
-                                    ),
-                                ]
+                                new QualitySizeValue.Numeric(1),
+                                new QualitySizeValue.Numeric(1),
+                                new QualitySizeValue.Numeric(400),
+                                new QualitySizeValue.Unlimited()
                             ),
                         ]
                     ),
@@ -455,6 +439,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .And.Contain("Profile Updates")
             .And.Contain("Quality Updates")
             .And.MatchRegex(@"x264\s+│\s+UNSET\s+│\s+50\s+│\s+Set")
+            .And.NotContain("Schema Default")
             .And.Contain("400 -> Unlimited")
             .And.MatchRegex(@"Radarr Media Naming \(Preview\) \[real-instance\] ──\s+No changes")
             .And.Contain("Not run: blocked by Custom Formats");
@@ -555,9 +540,11 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     }
 
     [Test]
-    public async Task The_final_table_counts_every_kind_of_change_per_pipeline()
+    public async Task The_final_table_counts_every_kind_of_change_but_not_unchanged_items()
     {
         AddInstanceConfig(InstanceName);
+        var one = new QualitySizeValue.Numeric(1);
+        var two = new QualitySizeValue.Numeric(2);
         var source = new CustomFormatSourceInfo(
             CfSource.FlatConfig,
             null,
@@ -573,22 +560,26 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                         [],
                         [
                             Create("cf1", "One"),
-                            new CustomFormatUpdateDelta
-                            {
-                                Identity = new("cf2", "Two"),
-                                SelectionProvenance = source,
-                                Components = [],
-                            },
-                            new CustomFormatDeleteDelta { Identity = new("cf3", "Three") },
-                        ]
+                            Cf(PlannedAction.Update, "cf2", "Two", source),
+                            Cf(PlannedAction.Unchanged, "cf4", "Four", source),
+                        ],
+                        [new CustomFormatIdentity("cf3", "Three")]
                     ),
                     NewPipelineResult.QualityProfiles(
                         [],
-                        [NewProfile("HD"), NewProfileUpdate("UHD")]
+                        [
+                            NewProfile("HD"),
+                            NewProfileUpdate("UHD"),
+                            NewProfileUpdate("SD", PlannedAction.Unchanged),
+                        ]
                     ),
                     NewPipelineResult.QualitySizes(
                         [],
-                        [new QualitySizeDelta("Bluray-1080p", []), new QualitySizeDelta("WEB", [])]
+                        [
+                            Size("Bluray-1080p", one, two),
+                            Size("WEB", one, two),
+                            Size("HDTV", one, one),
+                        ]
                     ),
                 ]
             ),
@@ -608,15 +599,11 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 InstanceName,
                 SupportedServices.Radarr,
                 [
-                    NewPipelineResult.QualityProfiles([], [NewProfileUpdate("UHD")]),
-                    NewPipelineResult.MediaManagement(
-                        new MediaManagementDelta(
-                            new ValueDelta<PropersAndRepacksMode?>(
-                                PropersAndRepacksMode.PreferAndUpgrade,
-                                PropersAndRepacksMode.DoNotPrefer
-                            )
-                        )
+                    NewPipelineResult.QualityProfiles(
+                        [],
+                        [NewProfileUpdate("UHD"), NewProfileUpdate("SD", PlannedAction.Unchanged)]
                     ),
+                    NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
                 ]
             ),
         ]);
@@ -634,7 +621,24 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .And.MatchRegex(
                 @"Download Propers and Repacks\s+│\s+PreferAndUpgrade\s+│\s+DoNotPrefer"
             );
+        ConsoleOutput
+            .Should()
+            .NotContain("SD (Change Reason")
+            .And.NotContain("Kept Score")
+            .And.NotMatchRegex(@"Upgrade Until Score\s+│");
     }
+
+    private static PlannedMediaManagementResource PropersAndRepacks(PlannedAction action) =>
+        new()
+        {
+            Action = action,
+            PropersAndRepacks = PlannedValue.Compared<PropersAndRepacksMode?>(
+                action == PlannedAction.Update
+                    ? PropersAndRepacksMode.PreferAndUpgrade
+                    : PropersAndRepacksMode.DoNotPrefer,
+                PropersAndRepacksMode.DoNotPrefer
+            ),
+        };
 
     [Test]
     public async Task Diagnostics_are_sorted_by_instance_then_message()
@@ -761,26 +765,25 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                             new QualityProfileQualityDefinitionUnusedOutcome(),
                         ],
                         [
-                            new QualityProfileUpdateDelta
-                            {
-                                Identity = identity,
-                                Components =
+                            new SonarrPlannedQualityProfileResource(
+                                NewProfileUpdate("Series", PlannedAction.Unchanged) with
+                                {
+                                    Action = PlannedAction.Update,
+                                    Identity = identity,
+                                },
                                 [
-                                    new SonarrQualityProfileQualitySizesChanged([
-                                        new QualitySizeDelta(
-                                            "HDTV-1080p",
-                                            [
-                                                new QualitySizeMinimumChanged(
-                                                    new ValueDelta<QualitySizeValue>(
-                                                        new QualitySizeValue.Numeric(1),
-                                                        new QualitySizeValue.Numeric(5)
-                                                    )
-                                                ),
-                                            ]
-                                        ),
-                                    ]),
-                                ],
-                            },
+                                    Size(
+                                        "HDTV-1080p",
+                                        new QualitySizeValue.Numeric(1),
+                                        new QualitySizeValue.Numeric(5)
+                                    ),
+                                    Size(
+                                        "WEB-1080p",
+                                        new QualitySizeValue.Numeric(1),
+                                        new QualitySizeValue.Numeric(1)
+                                    ),
+                                ]
+                            ),
                         ],
                         failed: 1
                     ),
@@ -794,6 +797,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .Should()
             .Contain("Quality Size Updates")
             .And.MatchRegex(@"HDTV-1080p\s+│\s+1 -> 5\s+│")
+            .And.NotContain("WEB-1080p")
             .And.Contain(
                 "[real-instance] Quality profile 'Series': The guide profile references a quality "
                     + "definition that does not exist: guide (qs-x)"
@@ -801,67 +805,123 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .And.Contain("`quality_definition` only applies to profiles listed under");
     }
 
-    private static QualityProfileUpdateDelta NewProfileUpdate(string name) =>
-        new()
-        {
-            Identity = new UserDefinedQualityProfileIdentity(name),
-            Components =
-            [
-                new QualityProfileMinimumFormatScoreChanged(new ValueDelta<int?>(0, 10)),
-                new RadarrQualityProfileLanguageChanged(
-                    new ValueDelta<string?>("English", "French")
-                ),
-                new QualityProfileQualityLayoutChanged(
+    // Every caller syncs a Radarr instance, so profiles carry Radarr's language.
+    private static RadarrPlannedQualityProfileResource NewProfileUpdate(
+        string name,
+        PlannedAction action = PlannedAction.Update
+    )
+    {
+        var changed = action == PlannedAction.Update;
+        return new RadarrPlannedQualityProfileResource(
+            new PlannedQualityProfileResource
+            {
+                Action = action,
+                Identity = new UserDefinedQualityProfileIdentity(name),
+                Name = PlannedValue.Compared(name, name),
+                UpgradeAllowed = PlannedValue.Compared<bool?>(true, true),
+                UpgradeUntilQuality = PlannedValue.Compared<string?>("Remux-2160p", "Remux-2160p"),
+                UpgradeUntilScore = PlannedValue.Compared<int?>(100, 100),
+                MinimumFormatScore = PlannedValue.Compared<int?>(changed ? 0 : 10, 10),
+                MinimumUpgradeFormatScore = PlannedValue.Compared<int?>(1, 1),
+                Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
                     [new QualityProfileQuality { Name = "Remux-2160p", Allowed = true }],
-                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = false }]
+                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = !changed }],
+                    changed
                 ),
-                new QualityProfileCustomFormatScoreChanged(
-                    "x265 (HD)",
-                    "cf-x265",
-                    new ValueDelta<int>(0, -10000),
-                    QualityProfileScoreChangeReason.Set
-                ),
-            ],
-        };
+                CustomFormatScores =
+                [
+                    new(
+                        "x265 (HD)",
+                        "cf-x265",
+                        PlannedValue.Compared(changed ? 0 : -10000, -10000),
+                        QualityProfileScoreReason.Set
+                    ),
+                    new(
+                        "Kept Score",
+                        null,
+                        PlannedValue.Compared(5, 5),
+                        QualityProfileScoreReason.Unmanaged
+                    ),
+                ],
+            },
+            PlannedValue.Compared<string?>(changed ? "English" : "French", "French")
+        );
+    }
 
-    // Every caller syncs a Radarr instance, so the created profile carries Radarr's state.
-    private static QualityProfileCreateDelta NewProfile(string name) =>
+    private static RadarrPlannedQualityProfileResource NewProfile(string name) =>
+        new(
+            new PlannedQualityProfileResource
+            {
+                Action = PlannedAction.Create,
+                Identity = new UserDefinedQualityProfileIdentity(name),
+                Name = PlannedValue.Created(name),
+                UpgradeAllowed = PlannedValue.Created<bool?>(true),
+                UpgradeUntilQuality = PlannedValue.Created<string?>("Bluray-1080p"),
+                UpgradeUntilScore = PlannedValue.Created<int?>(10000),
+                MinimumFormatScore = PlannedValue.Created<int?>(0),
+                MinimumUpgradeFormatScore = PlannedValue.Created<int?>(1),
+                Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
+                    new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true },
+                ]),
+                CustomFormatScores =
+                [
+                    new("x264", "cf-x264", PlannedValue.Created(50), QualityProfileScoreReason.Set),
+                    new(
+                        "Schema Default",
+                        null,
+                        PlannedValue.Created(0),
+                        QualityProfileScoreReason.Unmanaged
+                    ),
+                ],
+            },
+            PlannedValue.Created<string?>(null)
+        );
+
+    private static PlannedCustomFormatResource Create(string trashId, string name) =>
+        Cf(PlannedAction.Create, trashId, name);
+
+    private static PlannedCustomFormatResource Cf(
+        PlannedAction action,
+        string trashId,
+        string name,
+        CustomFormatSourceInfo? source = null
+    ) =>
         new()
         {
-            Identity = new UserDefinedQualityProfileIdentity(name),
-            State = new RadarrQualityProfileControlledState(
-                new QualityProfileControlledState
-                {
-                    Name = name,
-                    UpgradeAllowed = true,
-                    UpgradeUntilQuality = "Bluray-1080p",
-                    UpgradeUntilScore = 10000,
-                    MinimumFormatScore = 0,
-                    MinimumUpgradeFormatScore = 1,
-                    Qualities =
-                    [
-                        new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true },
-                    ],
-                    CustomFormatScores =
-                    [
-                        new QualityProfileCustomFormatScore("x264", "cf-x264", 50),
-                    ],
-                },
-                language: null
-            ),
-        };
-
-    private static CustomFormatCreateDelta Create(string trashId, string name) =>
-        new()
-        {
+            Action = action,
             Identity = new CustomFormatIdentity(trashId, name),
-            SelectionProvenance = new CustomFormatSourceInfo(
-                CfSource.FlatConfig,
-                null,
-                CfInclusionReason.None,
-                []
-            ),
+            SelectionProvenance =
+                source
+                ?? new CustomFormatSourceInfo(
+                    CfSource.FlatConfig,
+                    null,
+                    CfInclusionReason.None,
+                    []
+                ),
+            Name =
+                action == PlannedAction.Create
+                    ? PlannedValue.Created(name)
+                    : PlannedValue.Compared(name, name, action == PlannedAction.Update),
+            IncludeWhenRenaming = PlannedValue.Compared(false, false),
+            Specifications = [],
         };
+
+    private static PlannedQualitySizeResource Size(
+        string quality,
+        QualitySizeValue currentMinimum,
+        QualitySizeValue desiredMinimum,
+        QualitySizeValue? currentMaximum = null,
+        QualitySizeValue? desiredMaximum = null
+    )
+    {
+        QualitySizeValue unlimited = new QualitySizeValue.Unlimited();
+        return PlannedQualitySizeResource.Compared(
+            quality,
+            (currentMinimum, desiredMinimum),
+            (unlimited, unlimited),
+            (currentMaximum ?? unlimited, desiredMaximum ?? unlimited)
+        );
+    }
 
     private async Task<ExitStatus> RunSync(CreateSyncJobRequest? request = null)
     {

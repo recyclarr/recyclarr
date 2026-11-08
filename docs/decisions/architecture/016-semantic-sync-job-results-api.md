@@ -5,9 +5,9 @@
 ## Context
 
 Job progress is polled about every 500 ms for the 10-60 seconds a sync takes; terminal outcomes and
-deltas are read once, after completion, and can be tens of KB per instance. Generated clients need
-explicit schemas, HTTP status must describe the request rather than the background sync, and
-server-owned configuration details must not leak through the sync API.
+planned resources are read once, after completion, and can be tens of KB per instance. Generated
+clients need explicit schemas, HTTP status must describe the request rather than the background
+sync, and server-owned configuration details must not leak through the sync API.
 
 ## Decision
 
@@ -65,8 +65,15 @@ An instance's `service` field is the discriminator for its Sonarr or Radarr resp
 types use one `naming` pipeline property; its schema is selected by the instance type. The service
 is represented by that concrete type rather than by a second ordinary property on the DTO.
 
-Each pipeline response contains explicit create, update, and delete collections where applicable.
-Empty or inapplicable collections may be omitted.
+Each pipeline response lists every resource the sync manages once, changed or not, so a client can
+check the full planned state without reading Sonarr or Radarr. Each resource has an action
+(`create`, `update`, `unchanged`) and its managed values; settings pipelines (naming, media
+management) have one optional settings object instead of a list. Custom format deletes are a
+separate list of identities.
+
+Each managed value carries `desired` (the value after the sync), `current` (the service value, null
+on create), and `changed`. Clients use `changed` rather than comparing values, because the server
+compares some values semantically.
 
 ### Outcomes
 
@@ -86,8 +93,8 @@ refers to a resource elsewhere in the response by identity. One instance-level s
 that affects several quality profiles, such as the instance `quality_definition` on Sonarr v5,
 appears under each affected profile; profiles that use their own source show nothing.
 
-The response does not include request settings, progress snapshots, unchanged resource counts, full
-Sonarr or Radarr resources, or raw Core models.
+The response does not include request settings, progress snapshots, full Sonarr or Radarr resources,
+values Recyclarr does not manage, or raw Core models.
 
 ### Contract ownership
 
@@ -127,6 +134,9 @@ messages, stack traces, or C# type names.
 - A typed variant or named collection per outcome: each new outcome changes the schema, and an older
   client that switches over variants fails on one it does not know.
 - Clients rendering messages from outcome data: every client repeats the wording, and copies drift.
+- Changed values only: a client checking a planned profile against a policy must also read the
+  service.
+- Full planned state beside separate change lists: reports each change twice, in two places.
 
 ## Consequences
 
@@ -143,3 +153,4 @@ messages, stack traces, or C# type names.
 - 2026-09-26: Job creation no longer validates configuration (ADR-019).
 - 2026-10-18: Outcomes appear under each affected resource; no cross-references by identity.
 - 2026-11-05: Outcomes use one envelope with a server-rendered message and string codes.
+- 2026-11-08: Results include every managed resource and value, changed or not.

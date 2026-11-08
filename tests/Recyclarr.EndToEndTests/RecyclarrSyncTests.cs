@@ -325,14 +325,24 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         var because =
             "re-sync should detect no changes after guide-driven group rename; results:\n"
             + Describe(resyncResults);
-        var qualityProfiles = resyncResults
+        var pipelines = resyncResults
             .Instances.OfType<SyncInstanceResultsResponseSonarr>()
             .Should()
             .ContainSingle()
-            .Which.Pipelines.QualityProfiles;
+            .Which.Pipelines;
+        pipelines
+            .CustomFormats?.Items.Should()
+            .NotBeEmpty(because)
+            .And.OnlyContain(x => x.Action == ResourceAction.Unchanged, because);
+        var qualityProfiles = pipelines.QualityProfiles;
         qualityProfiles.Should().NotBeNull(because);
-        qualityProfiles.Creates.Should().BeEmpty(because);
-        qualityProfiles.Updates.Should().BeEmpty(because);
+        qualityProfiles
+            .Items.Should()
+            .NotBeEmpty(because)
+            .And.OnlyContain(x => x.Action == ResourceAction.Unchanged, because);
+        qualityProfiles
+            .Items.Should()
+            .OnlyContain(x => x.CustomFormatScores.Count > 0, "every profile score is reported");
     }
 
     /// <summary>

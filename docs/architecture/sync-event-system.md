@@ -1,8 +1,8 @@
 # Sync lifecycle reporting
 
-Sync execution reports a small instance lifecycle to the Server. Detailed pipeline outcomes,
-deltas, operational failures, and fault references live in terminal results. Progress never decides
-terminal status and does not duplicate pipeline result data.
+Sync execution reports a small instance lifecycle to the Server. Detailed pipeline outcomes, planned
+resources, operational failures, and fault references live in terminal results. Progress never
+decides terminal status and does not duplicate pipeline result data.
 
 The reporting path is synchronous and does not use observable streams. This keeps execution order
 explicit and lets the Server expose current snapshots without retaining an event history.
@@ -64,8 +64,8 @@ Start changes `Pending` to `Running`. Completion changes `Running` to a terminal
 the supplied `SyncInstanceResult`. Late, duplicate, and unknown-instance updates do not mutate the
 snapshot. Completed entries retain their exact instance result for terminal reconciliation.
 
-When a run stops, active entries become `Interrupted` and pending entries become `NotRun`.
-Completed entries do not regress. Stopped entries do not receive invented results.
+When a run stops, active entries become `Interrupted` and pending entries become `NotRun`. Completed
+entries do not regress. Stopped entries do not receive invented results.
 
 ## Terminal finalization
 
@@ -84,9 +84,9 @@ pipeline progress, counts, changes, or retained interim results. Clients retriev
 from the terminal results endpoint after the job reaches a terminal state.
 
 `SyncResultLogger` and `NotificationService` also consume the terminal result. They format typed
-outcomes and opaque fault references at the Server boundary; exception details remain in the
-server log. The CLI reads the same result through the results endpoint and renders the final
-status table, preview changes, and diagnostics from the response DTOs.
+outcomes and opaque fault references at the Server boundary; exception details remain in the server
+log. The CLI reads the same result through the results endpoint and renders the final status table,
+preview changes, and diagnostics from the response DTOs.
 
 See [Sync architecture](sync-pipeline-architecture.md) for operation ordering, dependency blocking,
 and semantic pipeline results.

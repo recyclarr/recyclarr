@@ -1,31 +1,31 @@
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Server.Features.Sync.GetResults;
-using Recyclarr.Sync.Results;
-using Riok.Mapperly.Abstractions;
 
 namespace Recyclarr.Server.Sync.Results;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class QualityProfileResponseMapper
+internal static class QualityProfileResponseMapper
 {
     public static SonarrQualityProfilePipelineResponse ToSonarrResponse(
         QualityProfilePipelineResult result
-    )
-    {
-        var creates = result
-            .Deltas.OfType<QualityProfileCreateDelta>()
-            .Select(x =>
-            {
-                var state =
-                    x.State as SonarrQualityProfileControlledState
-                    ?? throw new InvalidOperationException(
-                        "Sonarr Quality Profile create has no Sonarr state"
-                    );
-                var shared = MapSharedState(state);
-                return new SonarrQualityProfileCreateResponse(
-                    MapIdentity(x.Identity),
-                    new SonarrQualityProfileControlledStateResponse
+    ) =>
+        new()
+        {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = MapOutcomes(result),
+            BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
+            Items = result
+                .Resources.Select(x =>
+                {
+                    var sonarr =
+                        x as SonarrPlannedQualityProfileResource
+                        ?? throw new InvalidOperationException(
+                            "Sonarr Quality Profile result has no Sonarr fields"
+                        );
+                    var shared = MapShared(x);
+                    return new SonarrQualityProfileItemResponse
                     {
+                        Action = shared.Action,
+                        Identity = shared.Identity,
                         Name = shared.Name,
                         UpgradeAllowed = shared.UpgradeAllowed,
                         UpgradeUntilQuality = shared.UpgradeUntilQuality,
@@ -34,69 +34,35 @@ internal static partial class QualityProfileResponseMapper
                         MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
                         Qualities = shared.Qualities,
                         CustomFormatScores = shared.CustomFormatScores,
-                        QualitySizes = state.QualitySizes.Select(MapQualitySize).ToList(),
-                    }
-                );
-            })
-            .ToList();
-        var updates = result
-            .Deltas.OfType<QualityProfileUpdateDelta>()
-            .Select(x =>
-            {
-                var shared = MapSharedUpdate(x);
-                var sizeChanges = x
-                    .Components.OfType<SonarrQualityProfileQualitySizesChanged>()
-                    .ToList();
-                var response = new SonarrQualityProfileUpdateResponse
-                {
-                    Identity = shared.Identity,
-                    Name = shared.Name,
-                    UpgradeAllowed = shared.UpgradeAllowed,
-                    UpgradeUntilQuality = shared.UpgradeUntilQuality,
-                    UpgradeUntilScore = shared.UpgradeUntilScore,
-                    MinimumFormatScore = shared.MinimumFormatScore,
-                    MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
-                    QualityLayout = shared.QualityLayout,
-                    CustomFormatScores = shared.CustomFormatScores,
-                    QualitySizes = sizeChanges
-                        .SelectMany(y => y.Sizes)
-                        .Select(QualitySizeResponseMapper.MapUpdate)
-                        .ToList(),
-                };
-                EnsureUpdateMapped(x, response, sizeChanges.Count);
-                return response;
-            })
-            .ToList();
-        EnsureDeltasMapped(result, creates.Count, updates.Count);
-
-        return new SonarrQualityProfilePipelineResponse
-        {
-            Status = ResultValueMapper.MapStatus(result.Status),
-            Outcomes = MapOutcomes(result),
-            BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
-            Creates = creates,
-            Updates = updates,
+                        QualitySizes = sonarr
+                            .QualitySizes.Select(ResultValueMapper.MapQualitySizeItem)
+                            .ToList(),
+                    };
+                })
+                .ToList(),
         };
-    }
 
     public static RadarrQualityProfilePipelineResponse ToRadarrResponse(
         QualityProfilePipelineResult result
-    )
-    {
-        var creates = result
-            .Deltas.OfType<QualityProfileCreateDelta>()
-            .Select(x =>
-            {
-                var state =
-                    x.State as RadarrQualityProfileControlledState
-                    ?? throw new InvalidOperationException(
-                        "Radarr Quality Profile create has no Radarr state"
-                    );
-                var shared = MapSharedState(state);
-                return new RadarrQualityProfileCreateResponse(
-                    MapIdentity(x.Identity),
-                    new RadarrQualityProfileControlledStateResponse
+    ) =>
+        new()
+        {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = MapOutcomes(result),
+            BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
+            Items = result
+                .Resources.Select(x =>
+                {
+                    var radarr =
+                        x as RadarrPlannedQualityProfileResource
+                        ?? throw new InvalidOperationException(
+                            "Radarr Quality Profile result has no Radarr fields"
+                        );
+                    var shared = MapShared(x);
+                    return new RadarrQualityProfileItemResponse
                     {
+                        Action = shared.Action,
+                        Identity = shared.Identity,
                         Name = shared.Name,
                         UpgradeAllowed = shared.UpgradeAllowed,
                         UpgradeUntilQuality = shared.UpgradeUntilQuality,
@@ -105,156 +71,34 @@ internal static partial class QualityProfileResponseMapper
                         MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
                         Qualities = shared.Qualities,
                         CustomFormatScores = shared.CustomFormatScores,
-                        Language = state.Language,
-                    }
-                );
-            })
-            .ToList();
-        var updates = result
-            .Deltas.OfType<QualityProfileUpdateDelta>()
-            .Select(x =>
-            {
-                var shared = MapSharedUpdate(x);
-                var response = new RadarrQualityProfileUpdateResponse
-                {
-                    Identity = shared.Identity,
-                    Name = shared.Name,
-                    UpgradeAllowed = shared.UpgradeAllowed,
-                    UpgradeUntilQuality = shared.UpgradeUntilQuality,
-                    UpgradeUntilScore = shared.UpgradeUntilScore,
-                    MinimumFormatScore = shared.MinimumFormatScore,
-                    MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
-                    QualityLayout = shared.QualityLayout,
-                    CustomFormatScores = shared.CustomFormatScores,
-                    Language = GetValue<RadarrQualityProfileLanguageChanged, string?>(
-                        x,
-                        y => y.Value
-                    ),
-                };
-                EnsureUpdateMapped(x, response, response.Language is null ? 0 : 1);
-                return response;
-            })
-            .ToList();
-        EnsureDeltasMapped(result, creates.Count, updates.Count);
-
-        return new RadarrQualityProfilePipelineResponse
-        {
-            Status = ResultValueMapper.MapStatus(result.Status),
-            Outcomes = MapOutcomes(result),
-            BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
-            Creates = creates,
-            Updates = updates,
+                        Language = ResultValueMapper.MapValue(radarr.Language),
+                    };
+                })
+                .ToList(),
         };
-    }
 
     private static List<OutcomeResponse> MapOutcomes(QualityProfilePipelineResult result) =>
         result.Outcomes.Select(OutcomeResponseMapper.Map).ToList();
 
-    private static QualitySizeResponse MapQualitySize(QualityProfileQualitySize size) =>
+    private static QualityProfileItemResponse MapShared(PlannedQualityProfileResource resource) =>
         new()
         {
-            Quality = size.Quality,
-            Minimum = ResultValueMapper.MapQualitySize(size.Minimum),
-            Preferred = ResultValueMapper.MapQualitySize(size.Preferred),
-            Maximum = ResultValueMapper.MapQualitySize(size.Maximum),
+            Action = ResultValueMapper.MapAction(resource.Action),
+            Identity = MapIdentity(resource.Identity),
+            Name = ResultValueMapper.MapValue(resource.Name),
+            UpgradeAllowed = ResultValueMapper.MapValue(resource.UpgradeAllowed),
+            UpgradeUntilQuality = ResultValueMapper.MapValue(resource.UpgradeUntilQuality),
+            UpgradeUntilScore = ResultValueMapper.MapValue(resource.UpgradeUntilScore),
+            MinimumFormatScore = ResultValueMapper.MapValue(resource.MinimumFormatScore),
+            MinimumUpgradeFormatScore = ResultValueMapper.MapValue(
+                resource.MinimumUpgradeFormatScore
+            ),
+            Qualities = ResultValueMapper.MapValue<
+                IReadOnlyList<QualityProfileQualityLayoutItem>,
+                IReadOnlyList<QualityProfileLayoutResponse>
+            >(resource.Qualities, x => x.Select(MapLayout).ToList()),
+            CustomFormatScores = resource.CustomFormatScores.Select(MapScore).ToList(),
         };
-
-    private static void EnsureDeltasMapped(
-        QualityProfilePipelineResult result,
-        int creates,
-        int updates
-    ) =>
-        ResultValueMapper.EnsureAllMapped(
-            "Quality Profile delta",
-            result.Deltas.Count,
-            creates,
-            updates
-        );
-
-    private static QualityProfileControlledStateResponse MapSharedState(
-        QualityProfileControlledState state
-    ) =>
-        new()
-        {
-            Name = state.Name,
-            UpgradeAllowed = state.UpgradeAllowed,
-            UpgradeUntilQuality = state.UpgradeUntilQuality,
-            UpgradeUntilScore = state.UpgradeUntilScore,
-            MinimumFormatScore = state.MinimumFormatScore,
-            MinimumUpgradeFormatScore = state.MinimumUpgradeFormatScore,
-            Qualities = state.Qualities.Select(MapLayout).ToList(),
-            CustomFormatScores = state.CustomFormatScores.Select(MapScore).ToList(),
-        };
-
-    private static QualityProfileUpdateResponse MapSharedUpdate(QualityProfileUpdateDelta delta)
-    {
-        return new QualityProfileUpdateResponse
-        {
-            Identity = MapIdentity(delta.Identity),
-            Name = GetValue<QualityProfileNameChanged, string>(delta, x => x.Value),
-            UpgradeAllowed = GetValue<QualityProfileUpgradeAllowedChanged, bool?>(
-                delta,
-                x => x.Value
-            ),
-            UpgradeUntilQuality = GetValue<QualityProfileUpgradeUntilQualityChanged, string?>(
-                delta,
-                x => x.Value
-            ),
-            UpgradeUntilScore = GetValue<QualityProfileUpgradeUntilScoreChanged, int?>(
-                delta,
-                x => x.Value
-            ),
-            MinimumFormatScore = GetValue<QualityProfileMinimumFormatScoreChanged, int?>(
-                delta,
-                x => x.Value
-            ),
-            MinimumUpgradeFormatScore = GetValue<
-                QualityProfileMinimumUpgradeFormatScoreChanged,
-                int?
-            >(delta, x => x.Value),
-            QualityLayout = delta
-                .Components.OfType<QualityProfileQualityLayoutChanged>()
-                .Select(x => new ValueChangeResponse<IReadOnlyList<QualityProfileLayoutResponse>>(
-                    x.Current.Select(MapLayout).ToList(),
-                    x.Desired.Select(MapLayout).ToList()
-                ))
-                .SingleOrDefault(),
-            CustomFormatScores = delta
-                .Components.OfType<QualityProfileCustomFormatScoreChanged>()
-                .Select(MapScoreChange)
-                .ToList(),
-        };
-    }
-
-    // A component of the other service's type maps to no field, so it fails this check.
-    private static void EnsureUpdateMapped(
-        QualityProfileUpdateDelta delta,
-        QualityProfileUpdateResponse response,
-        int serviceComponents
-    ) =>
-        ResultValueMapper.EnsureAllMapped(
-            "Quality Profile update component",
-            delta.Components.Count,
-            response.Name is null ? 0 : 1,
-            response.UpgradeAllowed is null ? 0 : 1,
-            response.UpgradeUntilQuality is null ? 0 : 1,
-            response.UpgradeUntilScore is null ? 0 : 1,
-            response.MinimumFormatScore is null ? 0 : 1,
-            response.MinimumUpgradeFormatScore is null ? 0 : 1,
-            response.QualityLayout is null ? 0 : 1,
-            response.CustomFormatScores.Count,
-            serviceComponents
-        );
-
-    private static ValueChangeResponse<TValue>? GetValue<TComponent, TValue>(
-        QualityProfileUpdateDelta delta,
-        Func<TComponent, ValueDelta<TValue>> select
-    )
-        where TComponent : QualityProfileUpdateComponent =>
-        delta
-            .Components.OfType<TComponent>()
-            .Select(x => ResultValueMapper.MapValue(select(x)))
-            .SingleOrDefault();
 
     private static QualityProfileIdentityResponse MapIdentity(QualityProfileIdentity identity) =>
         identity switch
@@ -292,23 +136,30 @@ internal static partial class QualityProfileResponseMapper
             _ => throw new ArgumentOutOfRangeException(nameof(item), item, null),
         };
 
-    private static QualityProfileScoreChangeResponse MapScoreChange(
-        QualityProfileCustomFormatScoreChanged change
-    ) =>
+    private static QualityProfileScoreResponse MapScore(QualityProfileScoreResult score) =>
         new()
         {
-            Name = change.Name,
-            Value = ResultValueMapper.MapValue(change.Value),
-            Reason = change.Reason switch
+            Name = score.Name,
+            TrashId = score.TrashId,
+            Reason = score.Reason switch
             {
-                QualityProfileScoreChangeReason.Set => QualityProfileScoreReason.Set,
-                QualityProfileScoreChangeReason.Reset => QualityProfileScoreReason.Reset,
-                _ => throw new ArgumentOutOfRangeException(nameof(change)),
+                Pipelines.QualityProfile.QualityProfileScoreReason.Set => Features
+                    .Sync
+                    .GetResults
+                    .QualityProfileScoreReason
+                    .Set,
+                Pipelines.QualityProfile.QualityProfileScoreReason.Reset => Features
+                    .Sync
+                    .GetResults
+                    .QualityProfileScoreReason
+                    .Reset,
+                Pipelines.QualityProfile.QualityProfileScoreReason.Unmanaged => Features
+                    .Sync
+                    .GetResults
+                    .QualityProfileScoreReason
+                    .Unmanaged,
+                _ => throw new ArgumentOutOfRangeException(nameof(score), score.Reason, null),
             },
-            TrashId = change.TrashId,
+            Score = ResultValueMapper.MapNullableValue(score.Score),
         };
-
-    private static partial QualityProfileScoreResponse MapScore(
-        QualityProfileCustomFormatScore source
-    );
 }

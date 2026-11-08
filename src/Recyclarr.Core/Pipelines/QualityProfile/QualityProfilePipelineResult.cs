@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
@@ -16,7 +15,7 @@ public sealed record QualityProfilePipelineResult : PipelineResult
         int completedResources,
         int incompleteResources,
         IReadOnlyList<QualityProfileOutcome> outcomes,
-        IReadOnlyList<QualityProfileDelta> deltas
+        IReadOnlyList<PlannedQualityProfileResource> resources
     )
         : this(
             DeriveStatus(completedResources, incompleteResources),
@@ -24,7 +23,7 @@ public sealed record QualityProfilePipelineResult : PipelineResult
             completedResources,
             incompleteResources,
             outcomes,
-            deltas
+            resources
         ) { }
 
     private QualityProfilePipelineResult(
@@ -33,18 +32,18 @@ public sealed record QualityProfilePipelineResult : PipelineResult
         int completedResources,
         int incompleteResources,
         IReadOnlyList<QualityProfileOutcome> outcomes,
-        IReadOnlyList<QualityProfileDelta> deltas
+        IReadOnlyList<PlannedQualityProfileResource> resources
     )
         : base(status, blockedBy)
     {
         CompletedResources = completedResources;
         IncompleteResources = incompleteResources;
         Outcomes = outcomes;
-        Deltas = deltas;
+        Resources = resources;
     }
 
     public IReadOnlyList<QualityProfileOutcome> Outcomes { get; }
-    public IReadOnlyList<QualityProfileDelta> Deltas { get; }
+    public IReadOnlyList<PlannedQualityProfileResource> Resources { get; }
     internal int CompletedResources { get; }
     internal int IncompleteResources { get; }
 
@@ -58,7 +57,7 @@ public sealed record QualityProfilePipelineResult : PipelineResult
             CompletedResources,
             IncompleteResources,
             Outcomes,
-            Deltas
+            Resources
         );
 
     private static SyncResultStatus DeriveStatus(int completedResources, int incompleteResources)
@@ -166,80 +165,63 @@ public sealed record QualityProfileQualityDefinitionIgnoredOutcome(QualityProfil
 /// </summary>
 public sealed record QualityProfileQualityDefinitionUnusedOutcome : QualityProfileOutcome;
 
-public abstract record QualityProfileDelta : ResourceDelta
+/// <summary>
+/// One valid configured profile and every value the sync manages on it. Fields that only one
+/// service has live on that service's derived type (ADR-023). A profile skipped by an outcome has
+/// no entry.
+/// </summary>
+public record PlannedQualityProfileResource : PlannedResource
 {
     public required QualityProfileIdentity Identity { get; init; }
+    public required PlannedValue<string> Name { get; init; }
+    public required PlannedValue<bool?> UpgradeAllowed { get; init; }
+    public required PlannedValue<string?> UpgradeUntilQuality { get; init; }
+    public required PlannedValue<int?> UpgradeUntilScore { get; init; }
+    public required PlannedValue<int?> MinimumFormatScore { get; init; }
+    public required PlannedValue<int?> MinimumUpgradeFormatScore { get; init; }
+
+    public required PlannedValue<
+        IReadOnlyList<QualityProfileQualityLayoutItem>
+    > Qualities { get; init; }
+
+    /// <summary>Every custom format score in the profile, including scores the sync keeps.</summary>
+    public required IReadOnlyList<QualityProfileScoreResult> CustomFormatScores { get; init; }
 }
 
-public sealed record QualityProfileCreateDelta : QualityProfileDelta
-{
-    public required QualityProfileControlledState State { get; init; }
-}
-
-public sealed record QualityProfileUpdateDelta : QualityProfileDelta
-{
-    public required IReadOnlyList<QualityProfileUpdateComponent> Components { get; init; }
-}
-
-/// <summary>
-/// The profile fields Recyclarr controls when it creates a profile. Fields that only one service
-/// has live on that service's derived type (ADR-023).
-/// </summary>
-public record QualityProfileControlledState
-{
-    public required string Name { get; init; }
-    public required bool? UpgradeAllowed { get; init; }
-    public required string? UpgradeUntilQuality { get; init; }
-    public required int? UpgradeUntilScore { get; init; }
-    public required int? MinimumFormatScore { get; init; }
-    public required int? MinimumUpgradeFormatScore { get; init; }
-    public required IReadOnlyList<QualityProfileQualityLayoutItem> Qualities { get; init; }
-    public required IReadOnlyList<QualityProfileCustomFormatScore> CustomFormatScores { get; init; }
-}
-
-public sealed record RadarrQualityProfileControlledState : QualityProfileControlledState
+public sealed record RadarrPlannedQualityProfileResource : PlannedQualityProfileResource
 {
     [SetsRequiredMembers]
-    public RadarrQualityProfileControlledState(
-        QualityProfileControlledState shared,
-        string? language
+    public RadarrPlannedQualityProfileResource(
+        PlannedQualityProfileResource shared,
+        PlannedValue<string?> language
     )
         : base(shared)
     {
         Language = language;
     }
 
-    public string? Language { get; }
+    public PlannedValue<string?> Language { get; }
 }
 
 /// <summary>
-/// Controlled state for a Sonarr profile. Only Sonarr v5 stores quality sizes per profile; on
-/// earlier versions <see cref="QualitySizes"/> is empty.
+/// A Sonarr profile. Only Sonarr v5 stores quality sizes per profile; on earlier versions
+/// <see cref="QualitySizes"/> is empty.
 /// </summary>
-public sealed record SonarrQualityProfileControlledState : QualityProfileControlledState
+public sealed record SonarrPlannedQualityProfileResource : PlannedQualityProfileResource
 {
     [SetsRequiredMembers]
-    public SonarrQualityProfileControlledState(
-        QualityProfileControlledState shared,
-        IReadOnlyList<QualityProfileQualitySize> qualitySizes
+    public SonarrPlannedQualityProfileResource(
+        PlannedQualityProfileResource shared,
+        IReadOnlyList<PlannedQualitySizeResource> qualitySizes
     )
         : base(shared)
     {
         QualitySizes = qualitySizes;
     }
 
-    public IReadOnlyList<QualityProfileQualitySize> QualitySizes { get; }
+    /// <summary>The sizes of every planned quality the profile contains.</summary>
+    public IReadOnlyList<PlannedQualitySizeResource> QualitySizes { get; }
 }
-
-/// <summary>
-/// Size limits Recyclarr assigns to one quality of a profile, in MB per minute.
-/// </summary>
-public sealed record QualityProfileQualitySize(
-    string Quality,
-    QualitySizeValue Minimum,
-    QualitySizeValue Preferred,
-    QualitySizeValue Maximum
-);
 
 public abstract record QualityProfileQualityLayoutItem
 {
@@ -254,51 +236,22 @@ public sealed record QualityProfileQualityGroup : QualityProfileQualityLayoutIte
     public required IReadOnlyList<string> Qualities { get; init; }
 }
 
-public sealed record QualityProfileCustomFormatScore(string Name, string? TrashId, int Score);
-
-public abstract record QualityProfileUpdateComponent;
-
-public sealed record QualityProfileNameChanged(ValueDelta<string> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileUpgradeAllowedChanged(ValueDelta<bool?> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileUpgradeUntilQualityChanged(ValueDelta<string?> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileUpgradeUntilScoreChanged(ValueDelta<int?> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileMinimumFormatScoreChanged(ValueDelta<int?> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileMinimumUpgradeFormatScoreChanged(ValueDelta<int?> Value)
-    : QualityProfileUpdateComponent;
-
-public sealed record RadarrQualityProfileLanguageChanged(ValueDelta<string?> Value)
-    : QualityProfileUpdateComponent;
-
-/// <summary>
-/// Per-quality size changes on a Sonarr profile. Only Sonarr v5 stores sizes per profile.
-/// </summary>
-public sealed record SonarrQualityProfileQualitySizesChanged(IReadOnlyList<QualitySizeDelta> Sizes)
-    : QualityProfileUpdateComponent;
-
-public sealed record QualityProfileQualityLayoutChanged(
-    IReadOnlyList<QualityProfileQualityLayoutItem> Current,
-    IReadOnlyList<QualityProfileQualityLayoutItem> Desired
-) : QualityProfileUpdateComponent;
-
-public enum QualityProfileScoreChangeReason
+/// <summary>Why a custom format score has its desired value.</summary>
+public enum QualityProfileScoreReason
 {
+    /// <summary>The configuration or guide sets the score.</summary>
     Set,
+
+    /// <summary><c>reset_unmatched_scores</c> sets the score to 0.</summary>
     Reset,
+
+    /// <summary>Nothing sets the score, so it keeps its value in the service.</summary>
+    Unmanaged,
 }
 
-public sealed record QualityProfileCustomFormatScoreChanged(
+public sealed record QualityProfileScoreResult(
     string Name,
     string? TrashId,
-    ValueDelta<int> Value,
-    QualityProfileScoreChangeReason Reason
-) : QualityProfileUpdateComponent;
+    PlannedValue<int> Score,
+    QualityProfileScoreReason Reason
+);

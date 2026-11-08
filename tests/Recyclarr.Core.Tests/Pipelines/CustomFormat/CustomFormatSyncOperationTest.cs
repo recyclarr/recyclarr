@@ -19,9 +19,12 @@ namespace Recyclarr.Core.Tests.Pipelines.CustomFormat;
 internal sealed class CustomFormatSyncOperationTest
 {
     [Test]
-    public async Task Compute_returns_create_delta_with_selection_provenance()
+    public async Task Compute_returns_created_resource_with_selection_provenance()
     {
-        var cf = NewCf.Data("Release Title", "trash-id");
+        var cf = NewCf.Data("Release Title", "trash-id") with
+        {
+            Specifications = [Specification("Release Title", "value")],
+        };
         var planned = new PlannedCustomFormat(cf)
         {
             Source = CfSource.CfGroupExplicit,
@@ -34,13 +37,14 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
-        var delta = compute.Deltas.Should().ContainSingle().Which;
-        delta.Should().BeOfType<CustomFormatCreateDelta>();
-        delta
-            .Should()
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
             .BeEquivalentTo(
-                new CustomFormatCreateDelta
+                new PlannedCustomFormatResource
                 {
+                    Action = PlannedAction.Create,
                     Identity = new CustomFormatIdentity("trash-id", "Release Title"),
                     SelectionProvenance = new CustomFormatSourceInfo(
                         CfSource.CfGroupExplicit,
@@ -48,12 +52,64 @@ internal sealed class CustomFormatSyncOperationTest
                         CfInclusionReason.Required,
                         ["WEB-1080p"]
                     ),
+                    Name = PlannedValue.Created("Release Title"),
+                    IncludeWhenRenaming = PlannedValue.Created(false),
+                    Specifications =
+                    [
+                        new CustomFormatSpecificationResult(
+                            "Release Title",
+                            CustomFormatSpecificationChange.Added
+                        ),
+                    ],
                 }
             );
     }
 
     [Test]
-    public async Task Compute_returns_explicit_update_components()
+    public async Task Unchanged_custom_format_is_reported_with_provenance()
+    {
+        var desired = NewCf.Data("Same", "trash-id", 7) with
+        {
+            Specifications = [Specification("Release Title", "value")],
+        };
+        var harness = CreateHarness(
+            [new PlannedCustomFormat(desired)],
+            [desired with { TrashId = "" }],
+            [NewSyncState.Mapping("trash-id", "Same", 7)]
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(
+                new PlannedCustomFormatResource
+                {
+                    Action = PlannedAction.Unchanged,
+                    Identity = new CustomFormatIdentity("trash-id", "Same"),
+                    SelectionProvenance = new CustomFormatSourceInfo(
+                        CfSource.FlatConfig,
+                        null,
+                        CfInclusionReason.None,
+                        []
+                    ),
+                    Name = PlannedValue.Compared("Same", "Same"),
+                    IncludeWhenRenaming = PlannedValue.Compared(false, false),
+                    Specifications =
+                    [
+                        new CustomFormatSpecificationResult(
+                            "Release Title",
+                            CustomFormatSpecificationChange.Unchanged
+                        ),
+                    ],
+                }
+            );
+    }
+
+    [Test]
+    public async Task Compute_returns_every_value_of_an_updated_resource()
     {
         var desired = NewCf.Data("New Name", "trash-id", 7) with
         {
@@ -80,21 +136,23 @@ internal sealed class CustomFormatSyncOperationTest
 
         var compute = await Compute(harness);
 
-        var delta = compute
-            .Deltas.Should()
-            .ContainSingle()
-            .Which.Should()
-            .BeOfType<CustomFormatUpdateDelta>()
-            .Which;
-        CustomFormatUpdateComponent[] expected =
-        [
-            new CustomFormatNameChanged(new ValueDelta<string>("Old Name", "New Name")),
-            new CustomFormatIncludeWhenRenamingChanged(new ValueDelta<bool>(false, true)),
-            new CustomFormatSpecificationChanged("Release Title"),
-            new CustomFormatSpecificationAdded("Added"),
-            new CustomFormatSpecificationRemoved("Removed"),
-        ];
-        delta.Components.Should().Equal(expected);
+        var resource = compute.Resources.Should().ContainSingle().Which;
+        resource.Action.Should().Be(PlannedAction.Update);
+        resource.Name.Should().Be(PlannedValue.Compared("Old Name", "New Name"));
+        resource.IncludeWhenRenaming.Should().Be(PlannedValue.Compared(false, true));
+        resource
+            .Specifications.Should()
+            .Equal(
+                new CustomFormatSpecificationResult(
+                    "Release Title",
+                    CustomFormatSpecificationChange.Changed
+                ),
+                new CustomFormatSpecificationResult("Added", CustomFormatSpecificationChange.Added),
+                new CustomFormatSpecificationResult(
+                    "Removed",
+                    CustomFormatSpecificationChange.Removed
+                )
+            );
     }
 
     [Test]
@@ -109,7 +167,11 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
-        compute.Deltas.Should().BeEmpty();
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Action.Should()
+            .Be(PlannedAction.Unchanged);
         compute
             .Outcomes.OfType<CustomFormatAdoptedOutcome>()
             .Should()
@@ -133,7 +195,7 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Partial);
-        compute.Deltas.OfType<CustomFormatCreateDelta>().Should().ContainSingle();
+        compute.Resources.Should().ContainSingle().Which.Action.Should().Be(PlannedAction.Create);
         var outcome = compute
             .Outcomes.OfType<CustomFormatAmbiguousMatchOutcome>()
             .Should()
@@ -172,11 +234,12 @@ internal sealed class CustomFormatSyncOperationTest
 
         var compute = await Compute(harness);
 
-        compute.Deltas.Should().BeEmpty();
+        compute.Resources.Should().BeEmpty();
+        compute.Deletes.Should().BeEmpty();
     }
 
     [Test]
-    public async Task Disabled_deletion_produces_no_delta()
+    public async Task Disabled_deletion_produces_no_delete()
     {
         var serviceCf = NewCf.Data("Orphan", "", 7);
         var harness = CreateHarness(
@@ -189,11 +252,11 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
-        compute.Deltas.Should().BeEmpty();
+        compute.Deletes.Should().BeEmpty();
     }
 
     [Test]
-    public async Task Enabled_deletion_produces_concrete_delete_delta()
+    public async Task Enabled_deletion_reports_the_deleted_custom_format()
     {
         var serviceCf = NewCf.Data("Orphan", "", 7);
         var harness = CreateHarness(
@@ -206,14 +269,7 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
-        compute
-            .Deltas.Should()
-            .Equal(
-                new CustomFormatDeleteDelta
-                {
-                    Identity = new CustomFormatIdentity("orphan-id", "Orphan"),
-                }
-            );
+        compute.Deletes.Should().Equal(new CustomFormatIdentity("orphan-id", "Orphan"));
     }
 
     [Test]
@@ -240,7 +296,7 @@ internal sealed class CustomFormatSyncOperationTest
             .Which;
         outcome.Identity.Should().Be(new CustomFormatIdentity("orphan-id", "Orphan"));
         outcome.ManagedIdentity.Should().Be(new CustomFormatIdentity("managed-id", "Managed"));
-        compute.Deltas.Should().BeEmpty();
+        compute.Deletes.Should().BeEmpty();
     }
 
     [Test]
@@ -261,11 +317,11 @@ internal sealed class CustomFormatSyncOperationTest
             .Returns(NewCf.Data("Accepted", "accepted-id", 9));
 
         var compute = await Compute(harness);
-        var calculatedDeltas = compute.Deltas;
+        var calculated = compute.Resources;
         compute = await Persist(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Partial);
-        compute.Deltas.Should().BeEquivalentTo(calculatedDeltas);
+        compute.Resources.Should().BeEquivalentTo(calculated);
         compute
             .Outcomes.OfType<CustomFormatCreateRejectedOutcome>()
             .Should()
@@ -276,7 +332,7 @@ internal sealed class CustomFormatSyncOperationTest
     }
 
     [Test]
-    public async Task Update_and_delete_rejections_retain_deltas_and_existing_state()
+    public async Task Update_and_delete_rejections_retain_results_and_existing_state()
     {
         var desired = NewCf.Data("Managed", "managed-id", 7) with
         {
@@ -297,7 +353,8 @@ internal sealed class CustomFormatSyncOperationTest
         var compute = await Persist(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Failed);
-        compute.Deltas.Should().HaveCount(2);
+        compute.Resources.Should().ContainSingle();
+        compute.Deletes.Should().ContainSingle();
         compute.Outcomes.OfType<CustomFormatUpdateRejectedOutcome>().Should().ContainSingle();
         compute.Outcomes.OfType<CustomFormatDeleteRejectedOutcome>().Should().ContainSingle();
         harness.State.Mappings.Should().Equal(managedMapping, orphanMapping);
@@ -321,7 +378,7 @@ internal sealed class CustomFormatSyncOperationTest
     }
 
     [Test]
-    public async Task Preview_returns_deltas_without_service_or_state_writes()
+    public async Task Preview_returns_results_without_service_or_state_writes()
     {
         var cf = NewCf.Data("Preview", "trash-id");
         var harness = CreateHarness([new PlannedCustomFormat(cf)], []);
@@ -341,7 +398,7 @@ internal sealed class CustomFormatSyncOperationTest
             .ContainSingle()
             .Which.Should()
             .BeOfType<CustomFormatPipelineResult>()
-            .Which.Deltas.Should()
+            .Which.Resources.Should()
             .ContainSingle();
         await harness.Api.DidNotReceive().CreateCustomFormat(cf, default);
         harness.StatePersister.DidNotReceive().Save(harness.State);

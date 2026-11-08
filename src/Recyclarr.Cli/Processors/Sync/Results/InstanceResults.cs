@@ -22,15 +22,22 @@ internal sealed record InstanceResults(
 )
 {
     public int CustomFormatChanges =>
-        CustomFormats is { } x ? x.Creates.Count + x.Updates.Count + x.Deletes.Count : 0;
+        CustomFormats is { } x ? x.Items.Count(IsChanged) + x.Deletes.Count : 0;
 
     public int QualityProfileChanges => QualityProfiles?.Changes.Count ?? 0;
 
-    public int QualitySizeChanges => QualitySizes?.Updates.Count ?? 0;
+    public int QualitySizeChanges => QualitySizes?.Items.Count(IsChanged) ?? 0;
 
     public int NamingChanges => Naming?.Changes.Count ?? 0;
 
-    public int MediaManagementChanges => MediaManagement?.Updates.Count ?? 0;
+    public int MediaManagementChanges =>
+        MediaManagement?.Settings is { Action: not ResourceAction.Unchanged } ? 1 : 0;
+
+    public static bool IsChanged(CustomFormatItemResponse item) =>
+        item.Action != ResourceAction.Unchanged;
+
+    public static bool IsChanged(QualitySizeItemResponse item) =>
+        item.Action != ResourceAction.Unchanged;
 
     public static InstanceResults From(SyncInstanceResultsResponse instance) =>
         instance switch
@@ -81,9 +88,11 @@ internal sealed record NamingResults(
             pipeline.Status,
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
-            [
-                .. pipeline.Updates.SelectMany(x =>
-                    new[]
+            pipeline.Settings is not { } x
+                ? []
+                :
+                [
+                    .. new[]
                     {
                         FieldChange.From("Enable Episode Renames?", x.RenameEpisodes),
                         FieldChange.From("Series Folder", x.SeriesFolderFormat),
@@ -91,9 +100,8 @@ internal sealed record NamingResults(
                         FieldChange.From("Standard Episodes", x.StandardEpisodeFormat),
                         FieldChange.From("Daily Episodes", x.DailyEpisodeFormat),
                         FieldChange.From("Anime Episodes", x.AnimeEpisodeFormat),
-                    }.OfType<FieldChange>()
-                ),
-            ]
+                    }.OfType<FieldChange>(),
+                ]
         );
 
     public static NamingResults From(RadarrNamingPipelineResponse pipeline) =>
@@ -102,16 +110,17 @@ internal sealed record NamingResults(
             pipeline.Status,
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
-            [
-                .. pipeline.Updates.SelectMany(x =>
-                    new[]
+            pipeline.Settings is not { } x
+                ? []
+                :
+                [
+                    .. new[]
                     {
                         FieldChange.From("Enable Movie Renames?", x.RenameMovies),
                         FieldChange.From("Movie", x.StandardMovieFormat),
                         FieldChange.From("Folder", x.MovieFolderFormat),
-                    }.OfType<FieldChange>()
-                ),
-            ]
+                    }.OfType<FieldChange>(),
+                ]
         );
 }
 
@@ -127,50 +136,38 @@ internal sealed record QualityProfileResults(
     IReadOnlyList<ProfileChange> Changes
 )
 {
-    private const string Unset = FieldChange.Unset;
-
     public static QualityProfileResults From(SonarrQualityProfilePipelineResponse pipeline) =>
         new(
             pipeline.Status,
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
             [
-                .. pipeline.Creates.Select(x =>
-                    Create(
-                        x.Identity,
-                        CreatedFields(
-                            x.State.Name,
-                            x.State.UpgradeAllowed,
-                            x.State.MinimumFormatScore,
-                            x.State.MinimumUpgradeFormatScore,
-                            x.State.UpgradeUntilQuality,
-                            x.State.UpgradeUntilScore
-                        ),
-                        x.State.Qualities,
-                        x.State.CustomFormatScores
-                    ) with
-                    {
-                        Sizes = [.. x.State.QualitySizes.Select(SizeChange.From)],
-                    }
-                ),
-                .. pipeline.Updates.Select(x =>
-                    Update(
-                        x.Identity,
-                        UpdatedFields(
-                            x.Name,
-                            x.UpgradeAllowed,
-                            x.MinimumFormatScore,
-                            x.MinimumUpgradeFormatScore,
-                            x.UpgradeUntilQuality,
-                            x.UpgradeUntilScore
-                        ),
-                        x.QualityLayout,
-                        x.CustomFormatScores
-                    ) with
-                    {
-                        Sizes = [.. (x.QualitySizes ?? []).Select(SizeChange.From)],
-                    }
-                ),
+                .. pipeline
+                    .Items.Where(x => x.Action != ResourceAction.Unchanged)
+                    .Select(x =>
+                        Change(
+                            x.Action,
+                            x.Identity,
+                            SharedFields(
+                                x.Name,
+                                x.UpgradeAllowed,
+                                x.MinimumFormatScore,
+                                x.MinimumUpgradeFormatScore,
+                                x.UpgradeUntilQuality,
+                                x.UpgradeUntilScore
+                            ),
+                            x.Qualities,
+                            x.CustomFormatScores
+                        ) with
+                        {
+                            Sizes =
+                            [
+                                .. x
+                                    .QualitySizes.Where(y => y.Action != ResourceAction.Unchanged)
+                                    .Select(SizeChange.From),
+                            ],
+                        }
+                    ),
             ]
         );
 
@@ -180,130 +177,82 @@ internal sealed record QualityProfileResults(
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
             [
-                .. pipeline.Creates.Select(x =>
-                    Create(
-                        x.Identity,
-                        [
-                            .. CreatedFields(
-                                x.State.Name,
-                                x.State.UpgradeAllowed,
-                                x.State.MinimumFormatScore,
-                                x.State.MinimumUpgradeFormatScore,
-                                x.State.UpgradeUntilQuality,
-                                x.State.UpgradeUntilScore
-                            ),
-                            new FieldChange("Language", Unset, FieldChange.Text(x.State.Language)),
-                        ],
-                        x.State.Qualities,
-                        x.State.CustomFormatScores
-                    )
-                ),
-                .. pipeline.Updates.Select(x =>
-                    Update(
-                        x.Identity,
-                        [
-                            .. UpdatedFields(
-                                x.Name,
-                                x.UpgradeAllowed,
-                                x.MinimumFormatScore,
-                                x.MinimumUpgradeFormatScore,
-                                x.UpgradeUntilQuality,
-                                x.UpgradeUntilScore
-                            ),
-                            .. new[]
-                            {
-                                FieldChange.From("Language", x.Language),
-                            }.OfType<FieldChange>(),
-                        ],
-                        x.QualityLayout,
-                        x.CustomFormatScores
-                    )
-                ),
+                .. pipeline
+                    .Items.Where(x => x.Action != ResourceAction.Unchanged)
+                    .Select(x =>
+                        Change(
+                            x.Action,
+                            x.Identity,
+                            [
+                                .. SharedFields(
+                                    x.Name,
+                                    x.UpgradeAllowed,
+                                    x.MinimumFormatScore,
+                                    x.MinimumUpgradeFormatScore,
+                                    x.UpgradeUntilQuality,
+                                    x.UpgradeUntilScore
+                                ),
+                                .. new[]
+                                {
+                                    FieldChange.From("Language", x.Language),
+                                }.OfType<FieldChange>(),
+                            ],
+                            x.Qualities,
+                            x.CustomFormatScores
+                        )
+                    ),
             ]
         );
 
-    private static List<FieldChange> CreatedFields(
-        string name,
-        bool? upgradeAllowed,
-        int? minimumFormatScore,
-        int? minimumUpgradeFormatScore,
-        string? upgradeUntilQuality,
-        int? upgradeUntilScore
+    private static IEnumerable<FieldChange> SharedFields(
+        PlannedValueResponseOfString name,
+        PlannedValueResponseOfNullableOfBoolean upgradeAllowed,
+        PlannedValueResponseOfNullableOfInt32 minimumFormatScore,
+        PlannedValueResponseOfNullableOfInt32 minimumUpgradeFormatScore,
+        PlannedValueResponseOfString upgradeUntilQuality,
+        PlannedValueResponseOfNullableOfInt32 upgradeUntilScore
     ) =>
-        [
-            new("Name", Unset, name),
-            new("Upgrades Allowed?", Unset, FieldChange.Text(upgradeAllowed)),
-            new("Minimum Format Score", Unset, FieldChange.Text(minimumFormatScore)),
-            new("Minimum Format Upgrade Score", Unset, FieldChange.Text(minimumUpgradeFormatScore)),
-            new("Upgrade Until Quality", Unset, FieldChange.Text(upgradeUntilQuality)),
-            new("Upgrade Until Score", Unset, FieldChange.Text(upgradeUntilScore)),
-        ];
+        new[]
+        {
+            FieldChange.From("Name", name),
+            FieldChange.From("Upgrades Allowed?", upgradeAllowed),
+            FieldChange.From("Minimum Format Score", minimumFormatScore),
+            FieldChange.From("Minimum Format Upgrade Score", minimumUpgradeFormatScore),
+            FieldChange.From("Upgrade Until Quality", upgradeUntilQuality),
+            FieldChange.From("Upgrade Until Score", upgradeUntilScore),
+        }.OfType<FieldChange>();
 
-    private static List<FieldChange> UpdatedFields(
-        ValueChangeResponseOfString? name,
-        ValueChangeResponseOfNullableOfBoolean? upgradeAllowed,
-        ValueChangeResponseOfNullableOfInt32? minimumFormatScore,
-        ValueChangeResponseOfNullableOfInt32? minimumUpgradeFormatScore,
-        ValueChangeResponseOfString? upgradeUntilQuality,
-        ValueChangeResponseOfNullableOfInt32? upgradeUntilScore
-    ) =>
-        [
-            .. new[]
-            {
-                FieldChange.From("Name", name),
-                FieldChange.From("Upgrades Allowed?", upgradeAllowed),
-                FieldChange.From("Minimum Format Score", minimumFormatScore),
-                FieldChange.From("Minimum Format Upgrade Score", minimumUpgradeFormatScore),
-                FieldChange.From("Upgrade Until Quality", upgradeUntilQuality),
-                FieldChange.From("Upgrade Until Score", upgradeUntilScore),
-            }.OfType<FieldChange>(),
-        ];
-
-    private static ProfileChange Create(
+    // A created profile lists every score it sets; an updated one lists only changed scores.
+    private static ProfileChange Change(
+        ResourceAction action,
         QualityProfileIdentityResponse identity,
-        IReadOnlyList<FieldChange> fields,
-        ICollection<QualityProfileLayoutResponse> qualities,
+        IEnumerable<FieldChange> fields,
+        PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse qualities,
         ICollection<QualityProfileScoreResponse> scores
-    ) =>
-        new(
-            identity,
-            "New",
-            fields,
-            [],
-            [.. qualities],
-            [
-                .. scores.Select(x => new ScoreChange(
-                    x.Name,
-                    Unset,
-                    FieldChange.Text(x.Score),
-                    "Set"
-                )),
-            ],
-            []
-        );
+    )
+    {
+        var created = action == ResourceAction.Create;
+        var shownScores = created
+            ? scores.Where(x => x.Reason != QualityProfileScoreReason.Unmanaged)
+            : scores.Where(x => x.Score.Changed);
 
-    private static ProfileChange Update(
-        QualityProfileIdentityResponse identity,
-        IReadOnlyList<FieldChange> fields,
-        ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse? layout,
-        ICollection<QualityProfileScoreChangeResponse>? scores
-    ) =>
-        new(
+        return new ProfileChange(
             identity,
-            "Changed",
-            fields,
-            [.. layout?.Current ?? []],
-            [.. layout?.Desired ?? []],
+            created ? "New" : "Changed",
+            [.. fields],
+            qualities.Changed ? [.. qualities.Current ?? []] : [],
+            qualities.Changed ? [.. qualities.Desired ?? []] : [],
             [
-                .. (scores ?? []).Select(x => new ScoreChange(
+                .. shownScores.Select(x => new ScoreChange(
                     x.Name,
-                    FieldChange.Text(x.Value.Current),
-                    FieldChange.Text(x.Value.Desired),
-                    x.Reason.ToString()
+                    FieldChange.Text(x.Score.Current),
+                    FieldChange.Text(x.Score.Desired),
+                    created ? "Set" : x.Reason.ToString()
                 )),
             ],
             []
         );
+    }
 }
 
 /// <summary>
@@ -329,21 +278,26 @@ internal sealed record SizeChange(string Quality, string Minimum, string Maximum
 {
     private const string Unchanged = "[dim]unchanged[/]";
 
-    public static SizeChange From(QualitySizeResponse size) =>
-        new(
-            size.Quality,
-            QualitySizeText.Of(size.Minimum),
-            QualitySizeText.Of(size.Maximum),
-            QualitySizeText.Of(size.Preferred)
-        );
+    // A created profile shows each size it sets; an updated one shows changes only.
+    public static SizeChange From(QualitySizeItemResponse size) =>
+        size.Action == ResourceAction.Create
+            ? new SizeChange(
+                size.Quality,
+                QualitySizeText.Of(size.Minimum.Desired),
+                QualitySizeText.Of(size.Maximum.Desired),
+                QualitySizeText.Of(size.Preferred.Desired)
+            )
+            : new SizeChange(
+                size.Quality,
+                Text(size.Minimum),
+                Text(size.Maximum),
+                Text(size.Preferred)
+            );
 
-    public static SizeChange From(QualitySizeUpdateResponse update) =>
-        new(update.Quality, Text(update.Minimum), Text(update.Maximum), Text(update.Preferred));
-
-    private static string Text(ValueChangeResponseOfQualitySizeValueResponse? change) =>
-        change is null
-            ? Unchanged
-            : $"{QualitySizeText.Of(change.Current)} -> {QualitySizeText.Of(change.Desired)}";
+    public static string Text(PlannedValueResponseOfQualitySizeValueResponse value) =>
+        value.Changed
+            ? $"{QualitySizeText.Of(value.Current)} -> {QualitySizeText.Of(value.Desired)}"
+            : Unchanged;
 }
 
 /// <summary>
@@ -354,19 +308,29 @@ internal sealed record FieldChange(string Field, string Current, string Desired)
 {
     public const string Unset = "UNSET";
 
-    public static FieldChange? From(string field, ValueChangeResponseOfString? change) =>
-        change is null ? null : new FieldChange(field, Text(change.Current), Text(change.Desired));
+    // Each returns null for an absent (unconfigured) or unchanged value.
+    public static FieldChange? From(string field, PlannedValueResponseOfString? value) =>
+        value is { Changed: true }
+            ? new FieldChange(field, Text(value.Current), Text(value.Desired))
+            : null;
 
-    public static FieldChange? From(string field, ValueChangeResponseOfNullableOfBoolean? change) =>
-        change is null ? null : new FieldChange(field, Text(change.Current), Text(change.Desired));
+    public static FieldChange? From(string field, PlannedValueResponseOfNullableOfBoolean? value) =>
+        value is { Changed: true }
+            ? new FieldChange(field, Text(value.Current), Text(value.Desired))
+            : null;
 
-    public static FieldChange? From(string field, ValueChangeResponseOfNullableOfInt32? change) =>
-        change is null ? null : new FieldChange(field, Text(change.Current), Text(change.Desired));
+    public static FieldChange? From(string field, PlannedValueResponseOfNullableOfInt32? value) =>
+        value is { Changed: true }
+            ? new FieldChange(field, Text(value.Current), Text(value.Desired))
+            : null;
 
     public static FieldChange? From(
         string field,
-        ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse? change
-    ) => change is null ? null : new FieldChange(field, Text(change.Current), Text(change.Desired));
+        PlannedValueResponseOfNullableOfPropersAndRepacksModeResponse? value
+    ) =>
+        value is { Changed: true }
+            ? new FieldChange(field, Text(value.Current), Text(value.Desired))
+            : null;
 
     public static string Text(string? value) => value ?? Unset;
 

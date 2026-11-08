@@ -14,7 +14,7 @@ namespace Recyclarr.Core.Tests.Pipelines.QualitySize;
 internal sealed class QualitySizeSyncOperationTest
 {
     [Test]
-    public async Task Compute_returns_only_changed_semantic_values_and_reports_missing_quality()
+    public async Task Compute_returns_every_planned_quality_and_reports_missing_quality()
     {
         var api = Substitute.For<IQualityDefinitionService>();
         api.GetQualityDefinitions(default)
@@ -68,32 +68,37 @@ internal sealed class QualitySizeSyncOperationTest
             .ContainSingle()
             .Which.Should()
             .Be(new QualitySizeServiceQualityNotFoundOutcome("Missing"));
-        result.Deltas.Should().ContainSingle();
-        var delta = result.Deltas[0];
-        delta.Quality.Should().Be("Bluray-1080p");
-        delta
-            .Components.Should()
+        QualitySizeValue unlimited = new QualitySizeValue.Unlimited();
+        result
+            .Resources.Should()
             .Equal(
-                new QualitySizeMinimumChanged(
-                    new ValueDelta<QualitySizeValue>(
-                        new QualitySizeValue.Numeric(1),
-                        new QualitySizeValue.Numeric(5)
-                    )
+                PlannedQualitySizeResource.Compared(
+                    "Bluray-1080p",
+                    (Numeric(1), Numeric(5)),
+                    (Numeric(80), unlimited),
+                    (Numeric(100), unlimited)
                 ),
-                new QualitySizePreferredChanged(
-                    new ValueDelta<QualitySizeValue>(
-                        new QualitySizeValue.Numeric(80),
-                        new QualitySizeValue.Unlimited()
-                    )
+                PlannedQualitySizeResource.Compared(
+                    "WEB-1080p",
+                    (Numeric(3), Numeric(3)),
+                    (Numeric(40), Numeric(40)),
+                    (Numeric(80), Numeric(80))
                 ),
-                new QualitySizeMaximumChanged(
-                    new ValueDelta<QualitySizeValue>(
-                        new QualitySizeValue.Numeric(100),
-                        new QualitySizeValue.Unlimited()
-                    )
+                // A service size at the limit already means unlimited
+                PlannedQualitySizeResource.Compared(
+                    "HDTV-1080p",
+                    (Numeric(2), Numeric(2)),
+                    (unlimited, unlimited),
+                    (unlimited, unlimited)
                 )
             );
+        result
+            .Resources.Select(x => x.Action)
+            .Should()
+            .Equal(PlannedAction.Update, PlannedAction.Unchanged, PlannedAction.Unchanged);
     }
+
+    private static QualitySizeValue.Numeric Numeric(decimal value) => new(value);
 
     [Test]
     public async Task Compute_maps_plan_rejections_to_typed_outcomes()
@@ -140,7 +145,7 @@ internal sealed class QualitySizeSyncOperationTest
                     new QualitySizeValue.Numeric(75),
                     new QualitySizeValue.Numeric(50)
                 ),
-                new QualitySizePreferredRatioClampedOutcome(new ValueDelta<decimal>(2, 1))
+                new QualitySizePreferredRatioClampedOutcome(2, 1)
             );
     }
 

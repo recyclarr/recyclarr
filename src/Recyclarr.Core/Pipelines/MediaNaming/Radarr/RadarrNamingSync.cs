@@ -35,12 +35,12 @@ internal class RadarrNamingSync(ILogger log, IRadarrNamingService api) : IMediaN
             MovieFolderFormat = planned.MovieFolderFormat ?? current.MovieFolderFormat,
         };
 
-        var delta = BuildDelta(current, desired, planned);
+        var settings = BuildSettings(current, desired, planned);
         var result = new RadarrNamingPipelineResult(
             completedFields,
             incompleteFields,
             outcomes,
-            delta
+            settings
         );
         return new RadarrNamingComputeResult(current, desired, result);
     }
@@ -48,7 +48,7 @@ internal class RadarrNamingSync(ILogger log, IRadarrNamingService api) : IMediaN
     public async Task Persist(IPipelineResultSource computeResult, CancellationToken ct)
     {
         var (current, desired, result) = (RadarrNamingComputeResult)computeResult;
-        if (result.Delta is null)
+        if (result.Settings is not { Action: PlannedAction.Update })
         {
             return;
         }
@@ -73,21 +73,28 @@ internal class RadarrNamingSync(ILogger log, IRadarrNamingService api) : IMediaN
         }
     }
 
-    private static RadarrNamingDelta? BuildDelta(
+    private static PlannedRadarrNamingResource BuildSettings(
         RadarrNamingData current,
         RadarrNamingData desired,
         RadarrNamingData planned
     )
     {
-        var changes = new ConfiguredValueChanges<RadarrNamingData>(current, desired, planned);
-        var delta = new RadarrNamingDelta
-        {
-            RenameMovies = changes.For(x => x.RenameMovies),
-            StandardMovieFormat = changes.For(x => x.StandardMovieFormat),
-            MovieFolderFormat = changes.For(x => x.MovieFolderFormat),
-        };
+        var values = new ConfiguredValues<RadarrNamingData>(current, desired, planned);
+        var renameMovies = values.For(x => x.RenameMovies);
+        var standardMovieFormat = values.For(x => x.StandardMovieFormat);
+        var movieFolderFormat = values.For(x => x.MovieFolderFormat);
 
-        return delta == new RadarrNamingDelta() ? null : delta;
+        return new PlannedRadarrNamingResource
+        {
+            Action = ConfiguredValues.ActionFor(
+                renameMovies?.Changed,
+                standardMovieFormat?.Changed,
+                movieFolderFormat?.Changed
+            ),
+            RenameMovies = renameMovies,
+            StandardMovieFormat = standardMovieFormat,
+            MovieFolderFormat = movieFolderFormat,
+        };
     }
 
     private static int CountConfiguredFields(RadarrNamingData planned)

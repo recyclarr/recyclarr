@@ -1,7 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
-using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
 
@@ -39,7 +38,7 @@ internal sealed class QualityProfileStatCalculatorTest
         QualityProfileStatCalculator sut
     )
     {
-        serviceFields.FindChanges(default!, default!).ReturnsForAnyArgs([]);
+        serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(false);
         var profile = CreateProfile(
             new QualityProfileData
             {
@@ -89,13 +88,7 @@ internal sealed class QualityProfileStatCalculatorTest
         QualityProfileStatCalculator sut
     )
     {
-        serviceFields
-            .FindChanges(default!, default!)
-            .ReturnsForAnyArgs([
-                new RadarrQualityProfileLanguageChanged(
-                    new ValueDelta<string?>("English", "French")
-                ),
-            ]);
+        serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(true);
         var profile = CreateProfile(new QualityProfileData { Id = 1, Name = "Profile" });
 
         var result = sut.Calculate(profile);

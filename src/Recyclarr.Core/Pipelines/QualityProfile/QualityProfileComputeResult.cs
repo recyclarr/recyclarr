@@ -53,7 +53,7 @@ internal sealed class QualityProfileComputeResult(
             completedResources,
             incompleteResources,
             [.. Result.Outcomes, .. persistenceOutcomes],
-            Result.Deltas
+            Result.Resources
         );
     }
 
