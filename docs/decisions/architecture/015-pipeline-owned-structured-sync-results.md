@@ -7,13 +7,15 @@
 Diagnostic prose cannot carry sync decisions to the HTTP API without transporting messages or
 reconstructing context that producers discarded. Every consumer (CLI rendering, HTTP results,
 notifications) needs the same facts. Core must stay free of console, logging, notification, HTTP,
-and serialization concerns; preview and apply must report the same deltas; and sync state must never
-claim a service write that was not acknowledged.
+and serialization concerns; preview and apply must report the same planned state; and sync state
+must never claim a service write that was not acknowledged. Clients that check a planned sync
+against a policy need every value the sync manages, not only the changed ones.
 
 ## Decision
 
-Core returns pipeline-owned semantic results: typed outcomes and deltas that each pipeline defines.
-Producers keep the facts every adapter needs, and no adapter's presentation shapes them.
+Core returns pipeline-owned semantic results: typed outcomes and planned resources that each
+pipeline defines. Producers keep the facts every adapter needs, and no adapter's presentation shapes
+them.
 
 ### Lifecycle
 
@@ -26,7 +28,7 @@ Plan
 
 Transaction
   fetch current service state
-  calculate outcomes and deltas
+  calculate outcomes and planned resources
 
 Persistence
   apply calculated changes
@@ -51,7 +53,7 @@ SyncRunResult
     ├── PlanningOutcomes
     └── PipelineResult
         ├── Outcomes
-        └── Deltas
+        └── Planned resources
 ```
 
 `SyncInstanceResult` includes the instance name and service type. Core results do not contain an
@@ -62,7 +64,7 @@ before any pipeline executes. Blocking planning outcomes fail the instance; non-
 outcomes retain semantic context without changing terminal status.
 
 Instances and pipeline results use ordered, self-identifying lists. Dictionaries are private lookup
-indexes only. Each pipeline owns concrete result, outcome, and delta types. A minimal
+indexes only. Each pipeline owns concrete result, outcome, and planned resource types. A minimal
 `PipelineResult` base carries common status; generic result abstractions are not required.
 
 ### Status and dependencies
@@ -91,8 +93,11 @@ status.
 
 - An outcome explains a decision, rejection, skip, or failure
 - A planning outcome explains a condition found before pipeline execution
-- A delta is a calculated semantic difference, not proof of application
-- A resource delta may contain value or structure deltas
+- A planned resource is one resource the sync manages, with every value it manages, changed or not;
+  it is calculated before persistence and is not proof of application
+- A planned resource's action is create, update (at least one managed value changes), or unchanged
+- A planned value carries the desired value, the service value (absent on create), and whether it
+  changes, decided by the same equality the pipeline uses to decide whether to write
 - A fault is unexpected and is not an outcome
 - Progress is transient and is not part of a terminal result
 
@@ -132,40 +137,37 @@ successful. Batch and singleton pipelines follow their API request granularity.
 #### Custom Formats
 
 - Managed identity is Trash ID; name is descriptive context
-- One create, update, or delete is one resource delta
-- Create, update, and delete are concrete delta variants
-- Update details describe changed components, not full service resources
+- Every configured format is one planned resource; a format skipped by an outcome has none
+- Deletes are a separate list of identities; disabled deletion produces none
+- Conditions are listed by name with their change, not as full specification contents
 - Selection provenance may explain configuration, profile, or group selection
-- Unchanged formats and counts are omitted
-- Disabled deletion produces no deletion delta
 
 #### Quality Profiles
 
 - Guide-backed identity reuses `MappingKey` for Trash ID and configured name
 - User-defined identity contains only the configured name
-- One profile create or update is one resource delta
-- Updates contain explicit value, quality-layout, and Custom Format score deltas
-- Created profiles contain only effective state controlled by Recyclarr
+- Every valid configured profile is one planned resource with every field the sync writes
+- Every Custom Format score in the profile is present, with a reason: set by configuration or guide,
+  reset by `reset_unmatched_scores`, or unmanaged (kept from the service)
 - Quality Profile resources are independent, so recognized per-profile failures may continue
-- Unchanged profiles and full service resource snapshots are omitted
+- Full service resource snapshots are omitted
 
 #### Quality Sizes
 
 - Reuse the domain `QualitySizeValue` numeric and unlimited variants
-- One changed service quality is one delta
-- Only changed minimum, preferred, and maximum values are present
-- Service limits, magic unlimited values, and unchanged resources are omitted
+- Every planned quality the service has is one planned resource; other qualities are not managed
+- Service limits and magic unlimited values are omitted
 
 #### Media Naming
 
-- Sonarr and Radarr have separate result and delta types
-- One naming settings resource is one delta with explicit value deltas
+- Sonarr and Radarr have separate result and planned resource types
+- One naming settings resource holds only configured fields; unconfigured fields are not managed
 - Unknown guide format keys are reference mismatch outcomes
 - Full current and desired naming resources are omitted
 
 #### Media Management
 
-- One settings resource is one optional delta
+- One settings resource is one optional planned resource
 - Reuse the domain `PropersAndRepacksMode`
 - No outcomes collection exists until a real outcome is identified
 
@@ -189,7 +191,8 @@ independent instances.
 
 - Preview and apply share one calculated result contract.
 - Status and dependency behavior are explicit and testable.
-- Every pipeline needs deliberate outcome and delta models.
+- Every pipeline needs deliberate outcome and planned resource models.
+- Consumers that report only changes filter by action and changed values.
 - Partial persistence needs careful sync-state bookkeeping.
 
 ## History
@@ -201,3 +204,4 @@ independent instances.
 - 2026-11-02: Unknown Custom Formats are blocking planning outcomes.
 - 2026-11-03: Blocking planning outcomes are defined by a criterion instead of a list.
 - 2026-11-05: Targets missing from the service are not incomplete resources.
+- 2026-11-08: Deltas become planned resources with every managed value, changed or not.

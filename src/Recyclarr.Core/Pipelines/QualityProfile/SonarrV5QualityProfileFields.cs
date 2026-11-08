@@ -60,85 +60,57 @@ internal class SonarrV5QualityProfileFields(IQualityItemLimitFactory limitFactor
         };
     }
 
-    public IReadOnlyList<QualityProfileUpdateComponent> FindChanges(
-        QualityProfileData current,
-        QualityProfileData desired
-    )
+    // Qualities without planned sizes are copied from the current profile, so only the desired
+    // sizes can differ.
+    public bool HasChanges(QualityProfileData current, QualityProfileData desired)
     {
         var currentSizes = AsSonarrV5(current).QualitySizes;
-        var deltas = AsSonarrV5(desired)
+        return AsSonarrV5(desired)
             .QualitySizes.Select(x =>
-                BuildDelta(x.Key, currentSizes.GetValueOrDefault(x.Key), x.Value)
+                Compare(x.Key, currentSizes.GetValueOrDefault(x.Key), x.Value)
             )
-            .OfType<QualitySizeDelta>()
-            .ToList();
-
-        return deltas.Count == 0 ? [] : [new SonarrQualityProfileQualitySizesChanged(deltas)];
+            .Any(x => x.Action == PlannedAction.Update);
     }
 
-    public QualityProfileControlledState DescribeCreate(
-        QualityProfileControlledState shared,
+    public PlannedQualityProfileResource Describe(
+        PlannedQualityProfileResource shared,
+        QualityProfileData? current,
         QualityProfileData desired,
         PlannedQualityProfile planned
     )
     {
         var desiredSizes = AsSonarrV5(desired).QualitySizes;
+        var currentSizes = current is null ? null : AsSonarrV5(current).QualitySizes;
         var sizes = (planned.QualitySizes?.Qualities ?? [])
-            .Where(x => desiredSizes.ContainsKey(x.Quality))
+            .Where(x => HasQuality(desired, x.Quality) && desiredSizes.ContainsKey(x.Quality))
             .Select(x =>
             {
                 var size = desiredSizes[x.Quality];
-                return new QualityProfileQualitySize(
-                    x.Quality,
-                    new QualitySizeValue.Numeric(size.Min),
-                    ToSemanticValue(size.Preferred),
-                    ToSemanticValue(size.Max)
-                );
+                return currentSizes is null
+                    ? PlannedQualitySizeResource.Created(
+                        x.Quality,
+                        new QualitySizeValue.Numeric(size.Min),
+                        ToSemanticValue(size.Preferred),
+                        ToSemanticValue(size.Max)
+                    )
+                    : Compare(x.Quality, currentSizes.GetValueOrDefault(x.Quality), size);
             })
             .ToList();
 
-        return new SonarrQualityProfileControlledState(shared, sizes);
+        return new SonarrPlannedQualityProfileResource(shared, sizes);
     }
 
-    private static QualitySizeDelta? BuildDelta(
+    private static PlannedQualitySizeResource Compare(
         string quality,
         QualityItemSize? current,
         QualityItemSize desired
-    )
-    {
-        var components = new List<QualitySizeUpdateComponent>();
-        AddChanged(
-            ToMinimumValue(current),
-            new QualitySizeValue.Numeric(desired.Min),
-            value => new QualitySizeMinimumChanged(value)
+    ) =>
+        PlannedQualitySizeResource.Compared(
+            quality,
+            (ToMinimumValue(current), new QualitySizeValue.Numeric(desired.Min)),
+            (ToSemanticValue(current?.Preferred), ToSemanticValue(desired.Preferred)),
+            (ToSemanticValue(current?.Max), ToSemanticValue(desired.Max))
         );
-        AddChanged(
-            ToSemanticValue(current?.Preferred),
-            ToSemanticValue(desired.Preferred),
-            value => new QualitySizePreferredChanged(value)
-        );
-        AddChanged(
-            ToSemanticValue(current?.Max),
-            ToSemanticValue(desired.Max),
-            value => new QualitySizeMaximumChanged(value)
-        );
-
-        return components.Count > 0 ? new QualitySizeDelta(quality, components) : null;
-
-        void AddChanged(
-            QualitySizeValue currentValue,
-            QualitySizeValue desiredValue,
-            Func<ValueDelta<QualitySizeValue>, QualitySizeUpdateComponent> create
-        )
-        {
-            if (currentValue != desiredValue)
-            {
-                components.Add(
-                    create(new ValueDelta<QualitySizeValue>(currentValue, desiredValue))
-                );
-            }
-        }
-    }
 
     // A quality the service reported no sizes for has an effective minimum of zero.
     private static QualitySizeValue.Numeric ToMinimumValue(QualityItemSize? size) =>

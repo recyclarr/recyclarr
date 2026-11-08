@@ -1035,21 +1035,6 @@
           }
         }
       },
-      "CustomFormatCreateResponse": {
-        "required": [
-          "identity",
-          "selectionProvenance"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/TrashIdNameResponse"
-          },
-          "selectionProvenance": {
-            "$ref": "#/components/schemas/CustomFormatSelectionResponse"
-          }
-        }
-      },
       "CustomFormatDuplicateNameOutcomeData": {
         "required": [
           "trashIds"
@@ -1090,12 +1075,43 @@
           "selected": "The configuration selects the format from the group."
         }
       },
+      "CustomFormatItemResponse": {
+        "required": [
+          "action",
+          "identity",
+          "selectionProvenance",
+          "name",
+          "includeWhenRenaming",
+          "specifications"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
+          },
+          "selectionProvenance": {
+            "$ref": "#/components/schemas/CustomFormatSelectionResponse"
+          },
+          "name": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          },
+          "includeWhenRenaming": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+          },
+          "specifications": {
+            "description": "Every condition of the guide definition, plus conditions the sync removes.",
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatSpecificationResponse"
+          }
+        }
+      },
       "CustomFormatPipelineResponse": {
         "required": [
           "status",
           "outcomes",
-          "creates",
-          "updates",
+          "items",
           "deletes"
         ],
         "type": "object",
@@ -1106,11 +1122,9 @@
           "outcomes": {
             "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
-          "creates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatCreateResponse"
-          },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatUpdateResponse"
+          "items": {
+            "description": "Every configured custom format, changed or not. A format skipped by an outcome is absent.",
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatItemResponse"
           },
           "deletes": {
             "description": "Managed custom formats removed from the configuration. Deletes happen only when\n`delete_old_custom_formats` is enabled.",
@@ -1172,6 +1186,36 @@
           "cfGroupExplicit": "A group listed in `custom_format_groups.add`."
         }
       },
+      "CustomFormatSpecificationChange": {
+        "enum": [
+          "added",
+          "changed",
+          "removed",
+          "unchanged"
+        ],
+        "type": "string",
+        "x-enumDescriptions": {
+          "added": "The sync adds the condition.",
+          "changed": "The sync changes the condition's settings.",
+          "removed": "The sync removes a condition the guide no longer has."
+        }
+      },
+      "CustomFormatSpecificationResponse": {
+        "required": [
+          "name",
+          "change"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "change": {
+            "$ref": "#/components/schemas/CustomFormatSpecificationChange"
+          }
+        },
+        "description": "One condition of the custom format, by name."
+      },
       "CustomFormatStateConflictOutcomeData": {
         "required": [
           "managedIdentity",
@@ -1188,53 +1232,6 @@
           }
         },
         "description": "The managed custom format that uses `serviceId` now."
-      },
-      "CustomFormatUpdateResponse": {
-        "required": [
-          "identity",
-          "selectionProvenance"
-        ],
-        "type": "object",
-        "properties": {
-          "identity": {
-            "$ref": "#/components/schemas/TrashIdNameResponse"
-          },
-          "selectionProvenance": {
-            "$ref": "#/components/schemas/CustomFormatSelectionResponse"
-          },
-          "name": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "includeWhenRenaming": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfBoolean"
-              }
-            ]
-          },
-          "specificationsAdded": {
-            "description": "Names of the conditions added to the custom format.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "specificationsChanged": {
-            "description": "Names of the conditions changed in the custom format.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "specificationsRemoved": {
-            "description": "Names of the conditions removed from the custom format.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
       },
       "GetSyncJobResponse": {
         "required": [
@@ -1706,16 +1703,16 @@
           "$ref": "#/components/schemas/ConfigTemplateSummaryResponse"
         }
       },
-      "IReadOnlyListOfCustomFormatCreateResponse": {
+      "IReadOnlyListOfCustomFormatItemResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/CustomFormatCreateResponse"
+          "$ref": "#/components/schemas/CustomFormatItemResponse"
         }
       },
-      "IReadOnlyListOfCustomFormatUpdateResponse": {
+      "IReadOnlyListOfCustomFormatSpecificationResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/CustomFormatUpdateResponse"
+          "$ref": "#/components/schemas/CustomFormatSpecificationResponse"
         }
       },
       "IReadOnlyListOfGuideCustomFormatGroupMemberResponse": {
@@ -1778,12 +1775,6 @@
           "$ref": "#/components/schemas/InstanceSnapshotResponse"
         }
       },
-      "IReadOnlyListOfMediaManagementUpdateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/MediaManagementUpdateResponse"
-        }
-      },
       "IReadOnlyListOfNamedServiceResourceResponse": {
         "type": "array",
         "items": {
@@ -1796,70 +1787,28 @@
           "$ref": "#/components/schemas/OutcomeResponse"
         }
       },
-      "IReadOnlyListOfQualityProfileLayoutResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileScoreChangeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileScoreChangeResponse"
-        }
-      },
       "IReadOnlyListOfQualityProfileScoreResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/QualityProfileScoreResponse"
         }
       },
-      "IReadOnlyListOfQualitySizeResponse": {
+      "IReadOnlyListOfQualitySizeItemResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/QualitySizeResponse"
+          "$ref": "#/components/schemas/QualitySizeItemResponse"
         }
       },
-      "IReadOnlyListOfQualitySizeUpdateResponse": {
+      "IReadOnlyListOfRadarrQualityProfileItemResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/QualitySizeUpdateResponse"
+          "$ref": "#/components/schemas/RadarrQualityProfileItemResponse"
         }
       },
-      "IReadOnlyListOfRadarrNamingUpdateResponse": {
+      "IReadOnlyListOfSonarrQualityProfileItemResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/RadarrNamingUpdateResponse"
-        }
-      },
-      "IReadOnlyListOfRadarrQualityProfileCreateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/RadarrQualityProfileCreateResponse"
-        }
-      },
-      "IReadOnlyListOfRadarrQualityProfileUpdateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/RadarrQualityProfileUpdateResponse"
-        }
-      },
-      "IReadOnlyListOfSonarrNamingUpdateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SonarrNamingUpdateResponse"
-        }
-      },
-      "IReadOnlyListOfSonarrQualityProfileCreateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SonarrQualityProfileCreateResponse"
-        }
-      },
-      "IReadOnlyListOfSonarrQualityProfileUpdateResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SonarrQualityProfileUpdateResponse"
+          "$ref": "#/components/schemas/SonarrQualityProfileItemResponse"
         }
       },
       "IReadOnlyListOfString": {
@@ -2006,16 +1955,23 @@
       },
       "MediaManagementPipelineResponse": {
         "required": [
-          "status",
-          "updates"
+          "status"
         ],
         "type": "object",
         "properties": {
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
           },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfMediaManagementUpdateResponse"
+          "settings": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Absent when the pipeline did not run.",
+                "$ref": "#/components/schemas/MediaManagementSettingsResponse"
+              }
+            ]
           },
           "blockedBy": {
             "oneOf": [
@@ -2030,14 +1986,18 @@
           }
         }
       },
-      "MediaManagementUpdateResponse": {
+      "MediaManagementSettingsResponse": {
         "required": [
+          "action",
           "propersAndRepacks"
         ],
         "type": "object",
         "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
+          },
           "propersAndRepacks": {
-            "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse"
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfPropersAndRepacksModeResponse"
           }
         }
       },
@@ -2306,6 +2266,186 @@
           "blocked": "Did not run because a pipeline it depends on did not succeed. See `blockedBy`."
         }
       },
+      "PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
+          },
+          "current": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfNullableOfBoolean": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "current": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfNullableOfInt32": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "current": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfNullableOfPropersAndRepacksModeResponse": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
+              }
+            ]
+          },
+          "current": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
+              }
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfQualitySizeValueResponse": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizeValueResponse"
+              }
+            ]
+          },
+          "current": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizeValueResponse"
+              }
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfString": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "current": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
       "PreferredRatioClampedOutcomeData": {
         "required": [
           "configured",
@@ -2476,46 +2616,24 @@
         },
         "description": "A quality profile trash ID that a group assigns scores to."
       },
-      "QualityProfileScoreChangeResponse": {
-        "required": [
-          "name",
-          "value",
-          "reason"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "value": {
-            "$ref": "#/components/schemas/ValueChangeResponseOfInt32"
-          },
-          "reason": {
-            "$ref": "#/components/schemas/QualityProfileScoreReason"
-          },
-          "trashId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "QualityProfileScoreReason": {
         "enum": [
           "set",
-          "reset"
+          "reset",
+          "unmanaged"
         ],
         "type": "string",
-        "description": "Why a custom format score changed.",
+        "description": "Why a custom format score has its desired value.",
         "x-enumDescriptions": {
           "set": "The configuration or guide sets the score.",
-          "reset": "`reset_unmatched_scores` sets the score to 0 because the configuration does not score the custom format."
+          "reset": "`reset_unmatched_scores` sets the score to 0 because the configuration does not score the custom format.",
+          "unmanaged": "Nothing sets the score, so it keeps its value in the service."
         }
       },
       "QualityProfileScoreResponse": {
         "required": [
           "name",
+          "reason",
           "score"
         ],
         "type": "object",
@@ -2523,15 +2641,18 @@
           "name": {
             "type": "string"
           },
-          "score": {
-            "type": "integer",
-            "format": "int32"
-          },
           "trashId": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "Null when the custom format is not in the configuration."
+          },
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileScoreReason"
+          },
+          "score": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
           }
         }
       },
@@ -2563,6 +2684,34 @@
         },
         "description": "A quality size set that a guide quality profile links by trash ID."
       },
+      "QualitySizeItemResponse": {
+        "required": [
+          "action",
+          "quality",
+          "minimum",
+          "preferred",
+          "maximum"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
+          },
+          "quality": {
+            "type": "string"
+          },
+          "minimum": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfQualitySizeValueResponse"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfQualitySizeValueResponse"
+          },
+          "maximum": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfQualitySizeValueResponse"
+          }
+        },
+        "description": "The size limits Recyclarr manages on one quality."
+      },
       "QualitySizeKind": {
         "enum": [
           "numeric",
@@ -2578,7 +2727,7 @@
         "required": [
           "status",
           "outcomes",
-          "updates"
+          "items"
         ],
         "type": "object",
         "properties": {
@@ -2588,8 +2737,9 @@
           "outcomes": {
             "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeUpdateResponse"
+          "items": {
+            "description": "Every quality the configuration sizes, changed or not. Qualities the service does not have\nare absent and reported as outcomes.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
           },
           "blockedBy": {
             "oneOf": [
@@ -2619,71 +2769,6 @@
           }
         }
       },
-      "QualitySizeResponse": {
-        "required": [
-          "quality",
-          "minimum",
-          "preferred",
-          "maximum"
-        ],
-        "type": "object",
-        "properties": {
-          "quality": {
-            "type": "string"
-          },
-          "minimum": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          },
-          "preferred": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          },
-          "maximum": {
-            "$ref": "#/components/schemas/QualitySizeValueResponse"
-          }
-        },
-        "description": "The size limits Recyclarr assigns to one quality."
-      },
-      "QualitySizeUpdateResponse": {
-        "required": [
-          "quality"
-        ],
-        "type": "object",
-        "properties": {
-          "quality": {
-            "type": "string"
-          },
-          "minimum": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
-              }
-            ]
-          },
-          "preferred": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
-              }
-            ]
-          },
-          "maximum": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
-              }
-            ]
-          }
-        }
-      },
       "QualitySizeValueResponse": {
         "required": [
           "kind"
@@ -2706,8 +2791,7 @@
       "RadarrNamingPipelineResponse": {
         "required": [
           "status",
-          "outcomes",
-          "updates"
+          "outcomes"
         ],
         "type": "object",
         "properties": {
@@ -2717,8 +2801,16 @@
           "outcomes": {
             "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfRadarrNamingUpdateResponse"
+          "settings": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Absent when no naming field is usable or the pipeline did not run.",
+                "$ref": "#/components/schemas/RadarrNamingSettingsResponse"
+              }
+            ]
           },
           "blockedBy": {
             "oneOf": [
@@ -2733,16 +2825,22 @@
           }
         }
       },
-      "RadarrNamingUpdateResponse": {
+      "RadarrNamingSettingsResponse": {
+        "required": [
+          "action"
+        ],
         "type": "object",
         "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
+          },
           "renameMovies": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+                "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
               }
             ]
           },
@@ -2752,7 +2850,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           },
@@ -2762,11 +2860,12 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           }
-        }
+        },
+        "description": "The naming settings Recyclarr manages. A field that is not configured is absent."
       },
       "RadarrPipelinesResponse": {
         "type": "object",
@@ -2824,9 +2923,11 @@
         },
         "description": "One result for each pipeline. A pipeline is absent when the configuration does not use it or\nthe instance stopped before it ran."
       },
-      "RadarrQualityProfileControlledStateResponse": {
+      "RadarrQualityProfileItemResponse": {
         "required": [
           "language",
+          "action",
+          "identity",
           "name",
           "upgradeAllowed",
           "upgradeUntilQuality",
@@ -2839,84 +2940,52 @@
         "type": "object",
         "properties": {
           "language": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
           },
-          "name": {
-            "type": "string"
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
           },
-          "upgradeAllowed": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "upgradeUntilQuality": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upgradeUntilScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumUpgradeFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "qualities": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
-          }
-        }
-      },
-      "RadarrQualityProfileCreateResponse": {
-        "required": [
-          "identity",
-          "state"
-        ],
-        "type": "object",
-        "properties": {
           "identity": {
             "$ref": "#/components/schemas/QualityProfileIdentityResponse"
           },
-          "state": {
-            "$ref": "#/components/schemas/RadarrQualityProfileControlledStateResponse"
+          "name": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          },
+          "upgradeAllowed": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+          },
+          "upgradeUntilQuality": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          },
+          "upgradeUntilScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "minimumFormatScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "minimumUpgradeFormatScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "qualities": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+          },
+          "customFormatScores": {
+            "description": "Every custom format score in the profile.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
           }
         }
       },
       "RadarrQualityProfilePipelineResponse": {
         "required": [
-          "creates",
-          "updates",
+          "items",
           "status",
           "outcomes"
         ],
         "type": "object",
         "properties": {
-          "creates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileCreateResponse"
-          },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileUpdateResponse"
+          "items": {
+            "description": "Every valid configured profile. A profile skipped by an outcome is absent.",
+            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileItemResponse"
           },
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
@@ -2935,100 +3004,6 @@
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
-          }
-        }
-      },
-      "RadarrQualityProfileUpdateResponse": {
-        "required": [
-          "identity"
-        ],
-        "type": "object",
-        "properties": {
-          "language": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "name": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeAllowed": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
-              }
-            ]
-          },
-          "upgradeUntilQuality": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeUntilScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumUpgradeFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "qualityLayout": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
-              }
-            ]
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
           }
         }
       },
@@ -3059,6 +3034,20 @@
           }
         },
         "description": "`reset_unmatched_scores.except` names that are not in the profile, and except patterns that\nmatch no custom format in the profile."
+      },
+      "ResourceAction": {
+        "enum": [
+          "create",
+          "update",
+          "unchanged"
+        ],
+        "type": "string",
+        "description": "What the sync does to one managed resource.",
+        "x-enumDescriptions": {
+          "create": "The sync creates the resource; every `current` is null.",
+          "update": "At least one managed value changes.",
+          "unchanged": "Every managed value already matches."
+        }
       },
       "ServiceFailureProblemDetails": {
         "type": "object",
@@ -3144,8 +3133,7 @@
       "SonarrNamingPipelineResponse": {
         "required": [
           "status",
-          "outcomes",
-          "updates"
+          "outcomes"
         ],
         "type": "object",
         "properties": {
@@ -3155,8 +3143,16 @@
           "outcomes": {
             "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
           },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfSonarrNamingUpdateResponse"
+          "settings": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Absent when no naming field is usable or the pipeline did not run.",
+                "$ref": "#/components/schemas/SonarrNamingSettingsResponse"
+              }
+            ]
           },
           "blockedBy": {
             "oneOf": [
@@ -3171,16 +3167,22 @@
           }
         }
       },
-      "SonarrNamingUpdateResponse": {
+      "SonarrNamingSettingsResponse": {
+        "required": [
+          "action"
+        ],
         "type": "object",
         "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
+          },
           "renameEpisodes": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+                "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
               }
             ]
           },
@@ -3190,7 +3192,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           },
@@ -3200,7 +3202,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           },
@@ -3210,7 +3212,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           },
@@ -3220,7 +3222,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           },
@@ -3230,11 +3232,12 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+                "$ref": "#/components/schemas/PlannedValueResponseOfString"
               }
             ]
           }
-        }
+        },
+        "description": "The naming settings Recyclarr manages. A field that is not configured is absent."
       },
       "SonarrPipelinesResponse": {
         "type": "object",
@@ -3292,9 +3295,11 @@
         },
         "description": "One result for each pipeline. A pipeline is absent when the configuration does not use it or\nthe instance stopped before it ran."
       },
-      "SonarrQualityProfileControlledStateResponse": {
+      "SonarrQualityProfileItemResponse": {
         "required": [
           "qualitySizes",
+          "action",
+          "identity",
           "name",
           "upgradeAllowed",
           "upgradeUntilQuality",
@@ -3307,82 +3312,53 @@
         "type": "object",
         "properties": {
           "qualitySizes": {
-            "description": "Sizes assigned to the profile's qualities. Only Sonarr v5 stores sizes per quality profile;\nempty on earlier versions.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeResponse"
+            "description": "Sizes of every quality in the profile that the configuration sizes. Only Sonarr v5 stores\nsizes per quality profile; empty on earlier versions.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
           },
-          "name": {
-            "type": "string"
+          "action": {
+            "$ref": "#/components/schemas/ResourceAction"
           },
-          "upgradeAllowed": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "upgradeUntilQuality": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "upgradeUntilScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "minimumUpgradeFormatScore": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "qualities": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
-          }
-        }
-      },
-      "SonarrQualityProfileCreateResponse": {
-        "required": [
-          "identity",
-          "state"
-        ],
-        "type": "object",
-        "properties": {
           "identity": {
             "$ref": "#/components/schemas/QualityProfileIdentityResponse"
           },
-          "state": {
-            "$ref": "#/components/schemas/SonarrQualityProfileControlledStateResponse"
+          "name": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          },
+          "upgradeAllowed": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+          },
+          "upgradeUntilQuality": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          },
+          "upgradeUntilScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "minimumFormatScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "minimumUpgradeFormatScore": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          },
+          "qualities": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+          },
+          "customFormatScores": {
+            "description": "Every custom format score in the profile.",
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
           }
         }
       },
       "SonarrQualityProfilePipelineResponse": {
         "required": [
-          "creates",
-          "updates",
+          "items",
           "status",
           "outcomes"
         ],
         "type": "object",
         "properties": {
-          "creates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileCreateResponse"
-          },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileUpdateResponse"
+          "items": {
+            "description": "Every valid configured profile. A profile skipped by an outcome is absent.",
+            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileItemResponse"
           },
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
@@ -3401,94 +3377,6 @@
                 "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
-          }
-        }
-      },
-      "SonarrQualityProfileUpdateResponse": {
-        "required": [
-          "identity"
-        ],
-        "type": "object",
-        "properties": {
-          "qualitySizes": {
-            "description": "Per-quality size changes. Only Sonarr v5 stores sizes per quality profile; empty on earlier\nversions.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeUpdateResponse"
-          },
-          "identity": {
-            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
-          },
-          "name": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeAllowed": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
-              }
-            ]
-          },
-          "upgradeUntilQuality": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
-              }
-            ]
-          },
-          "upgradeUntilScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "minimumUpgradeFormatScore": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "qualityLayout": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
-              }
-            ]
-          },
-          "customFormatScores": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
           }
         }
       },
@@ -3754,196 +3642,6 @@
             "type": "string"
           }
         }
-      },
-      "ValueChangeResponseOfBoolean": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": "boolean"
-          },
-          "desired": {
-            "type": "boolean"
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfInt32": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "desired": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-            }
-          },
-          "desired": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-            }
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfNullableOfBoolean": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "desired": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfNullableOfInt32": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "desired": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
-              }
-            ]
-          },
-          "desired": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
-              }
-            ]
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfQualitySizeValueResponse": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/QualitySizeValueResponse"
-              }
-            ]
-          },
-          "desired": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/QualitySizeValueResponse"
-              }
-            ]
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
-      },
-      "ValueChangeResponseOfString": {
-        "required": [
-          "current",
-          "desired"
-        ],
-        "type": "object",
-        "properties": {
-          "current": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "desired": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "description": "A changed value: `current` is the value in the service and `desired` the value Recyclarr\nwrites. A preview job computes the change but does not write it."
       }
     },
     "securitySchemes": {

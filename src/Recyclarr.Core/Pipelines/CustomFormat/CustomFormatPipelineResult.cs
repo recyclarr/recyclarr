@@ -17,7 +17,8 @@ public sealed record CustomFormatPipelineResult : PipelineResult
         int completedResources,
         int incompleteResources,
         IReadOnlyList<CustomFormatOutcome> outcomes,
-        IReadOnlyList<CustomFormatDelta> deltas
+        IReadOnlyList<PlannedCustomFormatResource> resources,
+        IReadOnlyList<CustomFormatIdentity> deletes
     )
         : this(
             DeriveStatus(completedResources, incompleteResources),
@@ -25,7 +26,8 @@ public sealed record CustomFormatPipelineResult : PipelineResult
             completedResources,
             incompleteResources,
             outcomes,
-            deltas
+            resources,
+            deletes
         ) { }
 
     private CustomFormatPipelineResult(
@@ -34,18 +36,26 @@ public sealed record CustomFormatPipelineResult : PipelineResult
         int completedResources,
         int incompleteResources,
         IReadOnlyList<CustomFormatOutcome> outcomes,
-        IReadOnlyList<CustomFormatDelta> deltas
+        IReadOnlyList<PlannedCustomFormatResource> resources,
+        IReadOnlyList<CustomFormatIdentity> deletes
     )
         : base(status, blockedBy)
     {
         CompletedResources = completedResources;
         IncompleteResources = incompleteResources;
         Outcomes = outcomes;
-        Deltas = deltas;
+        Resources = resources;
+        Deletes = deletes;
     }
 
     public IReadOnlyList<CustomFormatOutcome> Outcomes { get; }
-    public IReadOnlyList<CustomFormatDelta> Deltas { get; }
+    public IReadOnlyList<PlannedCustomFormatResource> Resources { get; }
+
+    /// <summary>
+    /// Managed custom formats removed from the configuration, present only when
+    /// <c>delete_old_custom_formats</c> is enabled.
+    /// </summary>
+    public IReadOnlyList<CustomFormatIdentity> Deletes { get; }
     internal int CompletedResources { get; }
     internal int IncompleteResources { get; }
 
@@ -59,7 +69,8 @@ public sealed record CustomFormatPipelineResult : PipelineResult
             CompletedResources,
             IncompleteResources,
             Outcomes,
-            Deltas
+            Resources,
+            Deletes
         );
 
     private static SyncResultStatus DeriveStatus(int completedResources, int incompleteResources)
@@ -112,34 +123,32 @@ public sealed record CustomFormatUpdateRejectedOutcome(CustomFormatIdentity Iden
 public sealed record CustomFormatDeleteRejectedOutcome(CustomFormatIdentity Identity)
     : CustomFormatOutcome;
 
-public abstract record CustomFormatDelta : ResourceDelta
+/// <summary>
+/// One configured custom format and the values the sync manages on it. A format skipped by an
+/// outcome (duplicate name, ambiguous match) has no entry.
+/// </summary>
+public sealed record PlannedCustomFormatResource : PlannedResource
 {
     public required CustomFormatIdentity Identity { get; init; }
-}
-
-public sealed record CustomFormatCreateDelta : CustomFormatDelta
-{
     public required CustomFormatSourceInfo SelectionProvenance { get; init; }
+    public required PlannedValue<string> Name { get; init; }
+    public required PlannedValue<bool> IncludeWhenRenaming { get; init; }
+
+    /// <summary>
+    /// Every condition of the guide definition, plus conditions the sync removes from the service.
+    /// </summary>
+    public required IReadOnlyList<CustomFormatSpecificationResult> Specifications { get; init; }
 }
 
-public sealed record CustomFormatUpdateDelta : CustomFormatDelta
+public enum CustomFormatSpecificationChange
 {
-    public required CustomFormatSourceInfo SelectionProvenance { get; init; }
-    public required IReadOnlyList<CustomFormatUpdateComponent> Components { get; init; }
+    Added,
+    Changed,
+    Removed,
+    Unchanged,
 }
 
-public sealed record CustomFormatDeleteDelta : CustomFormatDelta;
-
-public abstract record CustomFormatUpdateComponent;
-
-public sealed record CustomFormatNameChanged(ValueDelta<string> Value)
-    : CustomFormatUpdateComponent;
-
-public sealed record CustomFormatIncludeWhenRenamingChanged(ValueDelta<bool> Value)
-    : CustomFormatUpdateComponent;
-
-public sealed record CustomFormatSpecificationAdded(string Name) : CustomFormatUpdateComponent;
-
-public sealed record CustomFormatSpecificationChanged(string Name) : CustomFormatUpdateComponent;
-
-public sealed record CustomFormatSpecificationRemoved(string Name) : CustomFormatUpdateComponent;
+public sealed record CustomFormatSpecificationResult(
+    string Name,
+    CustomFormatSpecificationChange Change
+);

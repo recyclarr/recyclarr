@@ -86,32 +86,25 @@ internal sealed class SyncResultLogger(ILogger log)
 
     private void LogPipeline(JobId jobId, string instance, PipelineResult pipeline)
     {
-        (
-            string Name,
-            IEnumerable<PipelineOutcome> Outcomes,
-            IEnumerable<ResourceDelta> Deltas
-        ) details = pipeline switch
-        {
-            CustomFormatPipelineResult x => ("CustomFormat", x.Outcomes, x.Deltas),
-            QualityProfilePipelineResult x => ("QualityProfile", x.Outcomes, x.Deltas),
-            QualitySizePipelineResult x => ("QualitySize", x.Outcomes, x.Deltas),
-            SonarrNamingPipelineResult x => (
-                "MediaNaming",
-                x.Outcomes,
-                x.Delta is null ? [] : [x.Delta]
-            ),
-            RadarrNamingPipelineResult x => (
-                "MediaNaming",
-                x.Outcomes,
-                x.Delta is null ? [] : [x.Delta]
-            ),
-            MediaManagementPipelineResult x => (
-                "MediaManagement",
-                [],
-                x.Delta is null ? [] : [x.Delta]
-            ),
-            _ => (pipeline.GetType().Name, [], []),
-        };
+        (string Name, IEnumerable<PipelineOutcome> Outcomes, IEnumerable<object> Changes) details =
+            pipeline switch
+            {
+                CustomFormatPipelineResult x => (
+                    "CustomFormat",
+                    x.Outcomes,
+                    [.. Changed(x.Resources), .. x.Deletes]
+                ),
+                QualityProfilePipelineResult x => (
+                    "QualityProfile",
+                    x.Outcomes,
+                    Changed(x.Resources)
+                ),
+                QualitySizePipelineResult x => ("QualitySize", x.Outcomes, Changed(x.Resources)),
+                SonarrNamingPipelineResult x => ("MediaNaming", x.Outcomes, Changed(x.Settings)),
+                RadarrNamingPipelineResult x => ("MediaNaming", x.Outcomes, Changed(x.Settings)),
+                MediaManagementPipelineResult x => ("MediaManagement", [], Changed(x.Settings)),
+                _ => (pipeline.GetType().Name, [], []),
+            };
         var level = GetLevel(pipeline.Status);
         log.Write(
             level,
@@ -137,19 +130,26 @@ internal sealed class SyncResultLogger(ILogger log)
             );
         }
 
-        foreach (var delta in details.Deltas)
+        foreach (var change in details.Changes)
         {
             log.Information(
-                "Pipeline change for {Instance:l}/{Pipeline:l}: {DeltaType:l} "
-                    + "{@Delta} (job {JobId})",
+                "Pipeline change for {Instance:l}/{Pipeline:l}: {ChangeType:l} "
+                    + "{@Change} (job {JobId})",
                 instance,
                 details.Name,
-                delta.GetType().Name,
-                delta,
+                change.GetType().Name,
+                change,
                 jobId.Value
             );
         }
     }
+
+    // Logs record what the sync changes; unchanged resources would only add noise.
+    private static IEnumerable<PlannedResource> Changed(IEnumerable<PlannedResource> resources) =>
+        resources.Where(x => x.Action != PlannedAction.Unchanged);
+
+    private static IEnumerable<PlannedResource> Changed(PlannedResource? resource) =>
+        resource is null ? [] : Changed([resource]);
 
     private static LogEventLevel GetLevel(SyncResultStatus status) =>
         status switch

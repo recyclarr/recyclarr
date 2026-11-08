@@ -37,10 +37,10 @@ internal class PreviewRenderer(IAnsiConsole console)
 
         if (instance.MediaManagement is { } mm)
         {
-            var changes = mm
-                .Updates.Select(x =>
-                    FieldChange.From("Download Propers and Repacks", x.PropersAndRepacks)
-                )
+            var changes = new[]
+            {
+                FieldChange.From("Download Propers and Repacks", mm.Settings?.PropersAndRepacks),
+            }
                 .OfType<FieldChange>()
                 .ToList();
 
@@ -80,13 +80,12 @@ internal class PreviewRenderer(IAnsiConsole console)
         const string flatSource = "(from custom_formats)";
 
         var groups = pipeline
-            .Creates.Select(x => new CfRow("[green]Create[/]", x.Identity, x.SelectionProvenance))
+            .Items.Where(x => x.Action == ResourceAction.Create)
+            .Select(x => new CfRow("[green]Create[/]", x.Identity, x.SelectionProvenance))
             .Concat(
-                pipeline.Updates.Select(x => new CfRow(
-                    "[yellow]Update[/]",
-                    x.Identity,
-                    x.SelectionProvenance
-                ))
+                pipeline
+                    .Items.Where(x => x.Action == ResourceAction.Update)
+                    .Select(x => new CfRow("[yellow]Update[/]", x.Identity, x.SelectionProvenance))
             )
             .Concat(pipeline.Deletes.Select(x => new CfRow("[red]Delete[/]", x, null)))
             .GroupBy(x => x.Provenance is null ? flatSource : Source(x.Provenance))
@@ -275,7 +274,8 @@ internal class PreviewRenderer(IAnsiConsole console)
 
     private static Table? QualitySizes(QualitySizePipelineResponse pipeline)
     {
-        if (pipeline.Updates.Count == 0)
+        var updates = pipeline.Items.Where(InstanceResults.IsChanged).ToList();
+        if (updates.Count == 0)
         {
             return null;
         }
@@ -286,22 +286,17 @@ internal class PreviewRenderer(IAnsiConsole console)
             .AddColumn("[bold]Max[/]")
             .AddColumn("[bold]Preferred[/]");
 
-        foreach (var update in pipeline.Updates)
+        foreach (var update in updates)
         {
             table.AddRow(
                 $"[dodgerblue1]{update.Quality.EscapeMarkup()}[/]",
-                Change(update.Minimum),
-                Change(update.Maximum),
-                Change(update.Preferred)
+                SizeChange.Text(update.Minimum),
+                SizeChange.Text(update.Maximum),
+                SizeChange.Text(update.Preferred)
             );
         }
 
         return table;
-
-        static string Change(ValueChangeResponseOfQualitySizeValueResponse? change) =>
-            change is null
-                ? "[dim]unchanged[/]"
-                : $"{QualitySizeText.Of(change.Current)} -> {QualitySizeText.Of(change.Desired)}";
     }
 
     private static Table? Fields(IReadOnlyList<FieldChange> changes) =>

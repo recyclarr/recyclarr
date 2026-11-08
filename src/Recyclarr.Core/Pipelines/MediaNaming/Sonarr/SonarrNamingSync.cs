@@ -38,12 +38,12 @@ internal class SonarrNamingSync(ILogger log, ISonarrNamingService api) : IMediaN
             AnimeEpisodeFormat = planned.AnimeEpisodeFormat ?? current.AnimeEpisodeFormat,
         };
 
-        var delta = BuildDelta(current, desired, planned);
+        var settings = BuildSettings(current, desired, planned);
         var result = new SonarrNamingPipelineResult(
             completedFields,
             incompleteFields,
             outcomes,
-            delta
+            settings
         );
         return new SonarrNamingComputeResult(current, desired, result);
     }
@@ -51,7 +51,7 @@ internal class SonarrNamingSync(ILogger log, ISonarrNamingService api) : IMediaN
     public async Task Persist(IPipelineResultSource computeResult, CancellationToken ct)
     {
         var (current, desired, result) = (SonarrNamingComputeResult)computeResult;
-        if (result.Delta is null)
+        if (result.Settings is not { Action: PlannedAction.Update })
         {
             return;
         }
@@ -76,24 +76,37 @@ internal class SonarrNamingSync(ILogger log, ISonarrNamingService api) : IMediaN
         }
     }
 
-    private static SonarrNamingDelta? BuildDelta(
+    private static PlannedSonarrNamingResource BuildSettings(
         SonarrNamingData current,
         SonarrNamingData desired,
         SonarrNamingData planned
     )
     {
-        var changes = new ConfiguredValueChanges<SonarrNamingData>(current, desired, planned);
-        var delta = new SonarrNamingDelta
-        {
-            RenameEpisodes = changes.For(x => x.RenameEpisodes),
-            SeriesFolderFormat = changes.For(x => x.SeriesFolderFormat),
-            SeasonFolderFormat = changes.For(x => x.SeasonFolderFormat),
-            StandardEpisodeFormat = changes.For(x => x.StandardEpisodeFormat),
-            DailyEpisodeFormat = changes.For(x => x.DailyEpisodeFormat),
-            AnimeEpisodeFormat = changes.For(x => x.AnimeEpisodeFormat),
-        };
+        var values = new ConfiguredValues<SonarrNamingData>(current, desired, planned);
+        var renameEpisodes = values.For(x => x.RenameEpisodes);
+        var seriesFolderFormat = values.For(x => x.SeriesFolderFormat);
+        var seasonFolderFormat = values.For(x => x.SeasonFolderFormat);
+        var standardEpisodeFormat = values.For(x => x.StandardEpisodeFormat);
+        var dailyEpisodeFormat = values.For(x => x.DailyEpisodeFormat);
+        var animeEpisodeFormat = values.For(x => x.AnimeEpisodeFormat);
 
-        return delta == new SonarrNamingDelta() ? null : delta;
+        return new PlannedSonarrNamingResource
+        {
+            Action = ConfiguredValues.ActionFor(
+                renameEpisodes?.Changed,
+                seriesFolderFormat?.Changed,
+                seasonFolderFormat?.Changed,
+                standardEpisodeFormat?.Changed,
+                dailyEpisodeFormat?.Changed,
+                animeEpisodeFormat?.Changed
+            ),
+            RenameEpisodes = renameEpisodes,
+            SeriesFolderFormat = seriesFolderFormat,
+            SeasonFolderFormat = seasonFolderFormat,
+            StandardEpisodeFormat = standardEpisodeFormat,
+            DailyEpisodeFormat = dailyEpisodeFormat,
+            AnimeEpisodeFormat = animeEpisodeFormat,
+        };
     }
 
     private static int CountConfiguredFields(SonarrNamingData planned)

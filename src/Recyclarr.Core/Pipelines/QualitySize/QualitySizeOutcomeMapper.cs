@@ -1,7 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.QualitySize;
 
@@ -18,7 +17,8 @@ internal static class QualitySizeOutcomeMapper
             ),
             QualityNotFoundOutcome x => new QualitySizeReferenceMismatchOutcome(x.Quality, x.Type),
             PreferredRatioClampedOutcome x => new QualitySizePreferredRatioClampedOutcome(
-                new ValueDelta<decimal>(x.Original, x.Clamped)
+                x.Original,
+                x.Clamped
             ),
             MinGreaterThanPreferredOutcome x => new QualitySizeMinimumGreaterThanPreferredOutcome(
                 x.Quality,

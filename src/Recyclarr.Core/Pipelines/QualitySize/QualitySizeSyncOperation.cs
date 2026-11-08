@@ -39,7 +39,7 @@ internal class QualitySizeSyncOperation(
         var serverQuality = await api.Value.GetQualityDefinitions(ct);
         var limits = await limitFactory.Create(config.ServiceType, ct);
         var updatedItems = new List<UpdatedQualityItem>();
-        var deltas = new List<QualitySizeDelta>();
+        var resources = new List<PlannedQualitySizeResource>();
         var completedResources = 0;
 
         foreach (var plannedQuality in planned.Qualities)
@@ -88,19 +88,14 @@ internal class QualitySizeSyncOperation(
 
             updatedItems.Add(item);
             completedResources++;
-
-            var delta = BuildDelta(item, limits);
-            if (delta is not null)
-            {
-                deltas.Add(delta);
-            }
+            resources.Add(BuildResource(item, limits));
         }
 
         var result = new QualitySizePipelineResult(
             completedResources,
             incompleteResources,
             outcomes,
-            deltas
+            resources
         );
         return new QualitySizeComputeResult(updatedItems, limits, planned.Type, result);
     }
@@ -166,45 +161,22 @@ internal class QualitySizeSyncOperation(
         return outcomes;
     }
 
-    private static QualitySizeDelta? BuildDelta(UpdatedQualityItem item, QualityItemLimits limits)
-    {
-        var components = new List<QualitySizeUpdateComponent>();
-        AddChangedValue(
-            components,
-            Numeric(item.ServerItem.MinSize),
-            Numeric(item.Min),
-            value => new QualitySizeMinimumChanged(value)
+    private static PlannedQualitySizeResource BuildResource(
+        UpdatedQualityItem item,
+        QualityItemLimits limits
+    ) =>
+        PlannedQualitySizeResource.Compared(
+            item.Quality,
+            (Numeric(item.ServerItem.MinSize), Numeric(item.Min)),
+            (
+                ToSemanticValue(item.ServerItem.PreferredSize, limits.PreferredLimit),
+                ToSemanticValue(item.Preferred, limits.PreferredLimit)
+            ),
+            (
+                ToSemanticValue(item.ServerItem.MaxSize, limits.MaxLimit),
+                ToSemanticValue(item.Max, limits.MaxLimit)
+            )
         );
-        AddChangedValue(
-            components,
-            ToSemanticValue(item.ServerItem.PreferredSize, limits.PreferredLimit),
-            ToSemanticValue(item.Preferred, limits.PreferredLimit),
-            value => new QualitySizePreferredChanged(value)
-        );
-        AddChangedValue(
-            components,
-            ToSemanticValue(item.ServerItem.MaxSize, limits.MaxLimit),
-            ToSemanticValue(item.Max, limits.MaxLimit),
-            value => new QualitySizeMaximumChanged(value)
-        );
-
-        return components.Count > 0 ? new QualitySizeDelta(item.Quality, components) : null;
-    }
-
-    private static void AddChangedValue(
-        List<QualitySizeUpdateComponent> components,
-        QualitySizeValue current,
-        QualitySizeValue desired,
-        Func<ValueDelta<QualitySizeValue>, QualitySizeUpdateComponent> createComponent
-    )
-    {
-        if (current == desired)
-        {
-            return;
-        }
-
-        components.Add(createComponent(new ValueDelta<QualitySizeValue>(current, desired)));
-    }
 
     private static QualitySizeValue.Numeric Numeric(decimal value) => new(value);
 

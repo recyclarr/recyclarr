@@ -21,7 +21,7 @@ namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
 internal sealed class QualityProfileSyncOperationTest
 {
     [Test]
-    public async Task Compute_returns_guide_backed_create_delta()
+    public async Task Compute_returns_guide_backed_created_profile()
     {
         var resource = NewPlan.QpResource("qp-trash-id", "WEB-1080p") with
         {
@@ -42,23 +42,21 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
-        var delta = compute
-            .Deltas.Should()
-            .ContainSingle()
-            .Which.Should()
-            .BeOfType<QualityProfileCreateDelta>()
-            .Which;
-        delta
+        var created = compute.Resources.Should().ContainSingle().Which;
+        created.Action.Should().Be(PlannedAction.Create);
+        created
             .Identity.Should()
             .Be(new GuideBackedQualityProfileIdentity(new MappingKey("qp-trash-id", "WEB-1080p")));
-        delta.State.Name.Should().Be("WEB-1080p");
-        delta
-            .State.Qualities.Should()
+        created.Name.Should().Be(PlannedValue.Created("WEB-1080p"));
+        created.UpgradeAllowed.Should().Be(PlannedValue.Created<bool?>(true));
+        created.Qualities.Current.Should().BeNull();
+        created
+            .Qualities.Desired.Should()
             .Equal(new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true });
     }
 
     [Test]
-    public async Task Compute_returns_explicit_update_components()
+    public async Task Compute_returns_every_value_of_an_updated_profile()
     {
         var current = new QualityProfileData
         {
@@ -95,16 +93,140 @@ internal sealed class QualityProfileSyncOperationTest
 
         var compute = await Compute(harness);
 
-        var components = compute
-            .Deltas.Should()
-            .ContainSingle()
-            .Which.Should()
-            .BeOfType<QualityProfileUpdateDelta>()
-            .Which.Components;
-        components.Should().ContainSingle(x => x is QualityProfileNameChanged);
-        components.Should().ContainSingle(x => x is QualityProfileUpgradeAllowedChanged);
-        components.Should().ContainSingle(x => x is QualityProfileQualityLayoutChanged);
-        components.Should().ContainSingle(x => x is QualityProfileCustomFormatScoreChanged);
+        var updated = compute.Resources.Should().ContainSingle().Which;
+        updated.Action.Should().Be(PlannedAction.Update);
+        updated.Name.Should().Be(PlannedValue.Compared("Old Name", "New Name"));
+        updated.UpgradeAllowed.Should().Be(PlannedValue.Compared<bool?>(false, true));
+        updated.Qualities.Changed.Should().BeTrue();
+        updated
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-trash-id",
+                    PlannedValue.Compared(0, 100),
+                    QualityProfileScoreReason.Set
+                )
+            );
+    }
+
+    [Test]
+    public async Task One_changed_score_lists_every_score_and_marks_only_that_one()
+    {
+        var current = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 100,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 11,
+                    Name = "DV",
+                    Score = 50,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 12,
+                    Name = "Mine",
+                    Score = 25,
+                },
+            ],
+        };
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Existing" },
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-hdr", 10)), 100),
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("DV", "cf-dv", 11)), 60)
+        );
+        var harness = CreateHarness([planned], [current], Schema(current.Items));
+
+        var compute = await Compute(harness);
+
+        var updated = compute.Resources.Should().ContainSingle().Which;
+        updated.Action.Should().Be(PlannedAction.Update);
+        updated
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-hdr",
+                    PlannedValue.Compared(100, 100),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "DV",
+                    "cf-dv",
+                    PlannedValue.Compared(50, 60),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "Mine",
+                    null,
+                    PlannedValue.Compared(25, 25),
+                    QualityProfileScoreReason.Unmanaged
+                )
+            );
+    }
+
+    [Test]
+    public async Task Unchanged_profile_reports_every_score_including_unmanaged_ones()
+    {
+        var current = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 100,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 11,
+                    Name = "Mine",
+                    Score = 25,
+                },
+            ],
+        };
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Existing" },
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-trash-id", 10)), 100)
+        );
+        var harness = CreateHarness([planned], [current], Schema(current.Items));
+
+        var compute = await Compute(harness);
+
+        var unchanged = compute.Resources.Should().ContainSingle().Which;
+        unchanged.Action.Should().Be(PlannedAction.Unchanged);
+        unchanged
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-trash-id",
+                    PlannedValue.Compared(100, 100),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "Mine",
+                    null,
+                    PlannedValue.Compared(25, 25),
+                    QualityProfileScoreReason.Unmanaged
+                )
+            );
     }
 
     [Test]
@@ -152,7 +274,7 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Failed);
-        compute.Deltas.Should().BeEmpty();
+        compute.Resources.Should().BeEmpty();
         compute
             .Outcomes.OfType<QualityProfileMinimumScoreUnsatisfiedOutcome>()
             .Should()
@@ -389,7 +511,7 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Failed);
-        compute.Deltas.Should().BeEmpty();
+        compute.Resources.Should().BeEmpty();
         compute
             .Outcomes.OfType<QualityProfileQualityReferenceMismatchOutcome>()
             .Should()
@@ -401,7 +523,7 @@ internal sealed class QualityProfileSyncOperationTest
     }
 
     [Test]
-    public async Task Reset_score_produces_an_explicit_score_delta()
+    public async Task Reset_score_is_reported_with_its_reason()
     {
         var config = new QualityProfileConfig
         {
@@ -426,17 +548,22 @@ internal sealed class QualityProfileSyncOperationTest
 
         var compute = await Compute(harness);
 
-        var component = compute
-            .Deltas.OfType<QualityProfileUpdateDelta>()
-            .Single()
-            .Components.OfType<QualityProfileCustomFormatScoreChanged>()
-            .Single();
-        component.Value.Should().Be(new ValueDelta<int>(100, 0));
-        component.Reason.Should().Be(QualityProfileScoreChangeReason.Reset);
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    null,
+                    PlannedValue.Compared(100, 0),
+                    QualityProfileScoreReason.Reset
+                )
+            );
     }
 
     [Test]
-    public async Task Missing_service_quality_produces_a_concrete_layout_delta()
+    public async Task Missing_service_quality_changes_the_layout()
     {
         var serviceProfile = new QualityProfileData
         {
@@ -455,12 +582,9 @@ internal sealed class QualityProfileSyncOperationTest
 
         var compute = await Compute(harness);
 
-        var layout = compute
-            .Deltas.OfType<QualityProfileUpdateDelta>()
-            .Single()
-            .Components.OfType<QualityProfileQualityLayoutChanged>()
-            .Single();
-        layout.Current.Should().ContainSingle();
+        var layout = compute.Resources.Should().ContainSingle().Which.Qualities;
+        layout.Changed.Should().BeTrue();
+        layout.Current!.Value.Should().ContainSingle();
         layout.Desired.Should().HaveCount(2);
     }
 
@@ -491,11 +615,11 @@ internal sealed class QualityProfileSyncOperationTest
             });
 
         var compute = await Compute(harness);
-        var calculatedDeltas = compute.Deltas;
+        var calculated = compute.Resources;
         compute = await Persist(harness);
 
         compute.Status.Should().Be(SyncResultStatus.Partial);
-        compute.Deltas.Should().BeEquivalentTo(calculatedDeltas);
+        compute.Resources.Should().BeEquivalentTo(calculated);
         compute
             .Outcomes.OfType<QualityProfileCreateRejectedOutcome>()
             .Should()
@@ -583,7 +707,7 @@ internal sealed class QualityProfileSyncOperationTest
     }
 
     [Test]
-    public async Task Preview_returns_deltas_without_service_or_state_writes()
+    public async Task Preview_returns_results_without_service_or_state_writes()
     {
         var profile = GuideProfile("Preview", "trash-id");
         var harness = CreateHarness(
@@ -607,7 +731,7 @@ internal sealed class QualityProfileSyncOperationTest
             .ContainSingle()
             .Which.Should()
             .BeOfType<QualityProfilePipelineResult>()
-            .Which.Deltas.Should()
+            .Which.Resources.Should()
             .ContainSingle();
         await harness.Service.DidNotReceiveWithAnyArgs().CreateQualityProfile(default!, default);
         harness.StatePersister.DidNotReceive().Save(harness.State);
@@ -676,17 +800,14 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
         await Persist(harness);
 
-        compute
-            .Deltas.Should()
+        var radarr = compute
+            .Resources.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<QualityProfileUpdateDelta>()
-            .Which.Components.Should()
-            .Equal(
-                new RadarrQualityProfileLanguageChanged(
-                    new ValueDelta<string?>("English", "French")
-                )
-            );
+            .BeOfType<RadarrPlannedQualityProfileResource>()
+            .Which;
+        radarr.Action.Should().Be(PlannedAction.Update);
+        radarr.Language.Should().Be(PlannedValue.Compared<string?>("English", "French"));
         await harness
             .Service.Received()
             .UpdateQualityProfile(
@@ -752,19 +873,18 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
         await Persist(harness);
 
-        compute
-            .Deltas.Should()
+        var sonarr = compute
+            .Resources.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<QualityProfileUpdateDelta>()
-            .Which.Components.Should()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
+            .Which;
+        sonarr.Action.Should().Be(PlannedAction.Update);
+        sonarr
+            .QualitySizes.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<SonarrQualityProfileQualitySizesChanged>()
-            .Which.Sizes.Should()
-            .ContainSingle()
-            .Which.Quality.Should()
-            .Be("HDTV-1080p");
+            .BeEquivalentTo(new { Quality = "HDTV-1080p", Action = PlannedAction.Update });
         await harness
             .Service.Received()
             .UpdateQualityProfile(
@@ -790,7 +910,18 @@ internal sealed class QualityProfileSyncOperationTest
 
         var compute = await Compute(harness);
 
-        compute.Deltas.Should().BeEmpty();
+        var sonarr = compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
+            .Which;
+        sonarr.Action.Should().Be(PlannedAction.Unchanged);
+        sonarr
+            .QualitySizes.Should()
+            .ContainSingle()
+            .Which.Action.Should()
+            .Be(PlannedAction.Unchanged);
     }
 
     [Test]
@@ -815,15 +946,13 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
 
         compute
-            .Deltas.Should()
+            .Resources.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<QualityProfileCreateDelta>()
-            .Which.State.Should()
-            .BeOfType<SonarrQualityProfileControlledState>()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
             .Which.QualitySizes.Should()
             .Equal(
-                new QualityProfileQualitySize(
+                PlannedQualitySizeResource.Created(
                     "WEBDL-1080p",
                     new QualitySizeValue.Numeric(5),
                     new QualitySizeValue.Numeric(30),

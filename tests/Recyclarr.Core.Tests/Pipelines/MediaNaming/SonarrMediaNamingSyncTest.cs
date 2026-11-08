@@ -10,7 +10,7 @@ namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
 internal sealed class SonarrMediaNamingSyncTest
 {
     [Test]
-    public async Task Compute_returns_changed_values_and_retains_reference_mismatch()
+    public async Task Compute_returns_configured_values_and_retains_reference_mismatch()
     {
         var api = Substitute.For<ISonarrNamingService>();
         api.GetNaming(default)
@@ -45,15 +45,21 @@ internal sealed class SonarrMediaNamingSyncTest
 
         result.Status.Should().Be(SyncResultStatus.Partial);
         result.Outcomes.Should().Equal(mismatch);
+        // Unconfigured fields are absent; a configured field that already matches is unchanged.
         result
-            .Delta.Should()
-            .BeEquivalentTo(
-                new SonarrNamingDelta
+            .Settings.Should()
+            .Be(
+                new PlannedSonarrNamingResource
                 {
-                    RenameEpisodes = new ValueDelta<bool?>(true, false),
-                    StandardEpisodeFormat = new ValueDelta<string?>(
+                    Action = PlannedAction.Update,
+                    RenameEpisodes = PlannedValue.Compared<bool?>(true, false),
+                    StandardEpisodeFormat = PlannedValue.Compared<string?>(
                         "standard-current",
                         "standard-desired"
+                    ),
+                    DailyEpisodeFormat = PlannedValue.Compared<string?>(
+                        "daily-current",
+                        "daily-current"
                     ),
                 }
             );
@@ -79,7 +85,7 @@ internal sealed class SonarrMediaNamingSyncTest
         var result = await Execute(sut, plan, preview: false);
 
         result.Status.Should().Be(SyncResultStatus.Failed);
-        result.Delta.Should().BeNull();
+        result.Settings.Should().BeNull();
         await api.DidNotReceiveWithAnyArgs().GetNaming(default);
         await api.DidNotReceiveWithAnyArgs().UpdateNaming(default!, default);
     }

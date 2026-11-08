@@ -13,29 +13,31 @@ public sealed record QualitySizePipelineResult : PipelineResult
         int completedResources,
         int incompleteResources,
         IReadOnlyList<QualitySizeOutcome> outcomes,
-        IReadOnlyList<QualitySizeDelta> deltas
+        IReadOnlyList<PlannedQualitySizeResource> resources
     )
-        : this(DeriveStatus(completedResources, incompleteResources), null, outcomes, deltas) { }
+        : this(DeriveStatus(completedResources, incompleteResources), null, outcomes, resources) { }
 
     private QualitySizePipelineResult(
         SyncResultStatus status,
         PipelineType? blockedBy,
         IReadOnlyList<QualitySizeOutcome> outcomes,
-        IReadOnlyList<QualitySizeDelta> deltas
+        IReadOnlyList<PlannedQualitySizeResource> resources
     )
         : base(status, blockedBy)
     {
         Outcomes = outcomes;
-        Deltas = deltas;
+        Resources = resources;
     }
 
     public IReadOnlyList<QualitySizeOutcome> Outcomes { get; }
-    public IReadOnlyList<QualitySizeDelta> Deltas { get; }
+
+    /// <summary>Every planned quality the service has.</summary>
+    public IReadOnlyList<PlannedQualitySizeResource> Resources { get; }
 
     internal override PipelineResult WithStatus(
         SyncResultStatus status,
         PipelineType? blockedBy = null
-    ) => new QualitySizePipelineResult(status, blockedBy, Outcomes, Deltas);
+    ) => new QualitySizePipelineResult(status, blockedBy, Outcomes, Resources);
 
     private static SyncResultStatus DeriveStatus(int completedResources, int incompleteResources)
     {
@@ -75,7 +77,7 @@ public sealed record QualitySizeGuideReferenceMismatchOutcome(string Label, stri
 public sealed record QualitySizeAmbiguousGuideReferenceOutcome(IReadOnlyList<string> Labels)
     : QualitySizeOutcome;
 
-public sealed record QualitySizePreferredRatioClampedOutcome(ValueDelta<decimal> Value)
+public sealed record QualitySizePreferredRatioClampedOutcome(decimal Configured, decimal Used)
     : QualitySizeOutcome;
 
 public sealed record QualitySizeMinimumGreaterThanPreferredOutcome(
@@ -96,18 +98,49 @@ public sealed record QualitySizePreferredGreaterThanMaximumOutcome(
     QualitySizeValue Maximum
 ) : QualitySizeOutcome;
 
-public sealed record QualitySizeDelta(
-    string Quality,
-    IReadOnlyList<QualitySizeUpdateComponent> Components
-) : ResourceDelta;
+/// <summary>The size limits the sync manages on one quality, in MB per minute.</summary>
+public sealed record PlannedQualitySizeResource : PlannedResource
+{
+    public required string Quality { get; init; }
+    public required PlannedValue<QualitySizeValue> Minimum { get; init; }
+    public required PlannedValue<QualitySizeValue> Preferred { get; init; }
+    public required PlannedValue<QualitySizeValue> Maximum { get; init; }
 
-public abstract record QualitySizeUpdateComponent;
+    public static PlannedQualitySizeResource Created(
+        string quality,
+        QualitySizeValue minimum,
+        QualitySizeValue preferred,
+        QualitySizeValue maximum
+    ) =>
+        new()
+        {
+            Action = PlannedAction.Create,
+            Quality = quality,
+            Minimum = PlannedValue.Created(minimum),
+            Preferred = PlannedValue.Created(preferred),
+            Maximum = PlannedValue.Created(maximum),
+        };
 
-public sealed record QualitySizeMinimumChanged(ValueDelta<QualitySizeValue> Value)
-    : QualitySizeUpdateComponent;
-
-public sealed record QualitySizePreferredChanged(ValueDelta<QualitySizeValue> Value)
-    : QualitySizeUpdateComponent;
-
-public sealed record QualitySizeMaximumChanged(ValueDelta<QualitySizeValue> Value)
-    : QualitySizeUpdateComponent;
+    public static PlannedQualitySizeResource Compared(
+        string quality,
+        (QualitySizeValue Current, QualitySizeValue Desired) minimum,
+        (QualitySizeValue Current, QualitySizeValue Desired) preferred,
+        (QualitySizeValue Current, QualitySizeValue Desired) maximum
+    )
+    {
+        var min = PlannedValue.Compared(minimum.Current, minimum.Desired);
+        var pref = PlannedValue.Compared(preferred.Current, preferred.Desired);
+        var max = PlannedValue.Compared(maximum.Current, maximum.Desired);
+        return new PlannedQualitySizeResource
+        {
+            Action =
+                min.Changed || pref.Changed || max.Changed
+                    ? PlannedAction.Update
+                    : PlannedAction.Unchanged,
+            Quality = quality,
+            Minimum = min,
+            Preferred = pref,
+            Maximum = max,
+        };
+    }
+}

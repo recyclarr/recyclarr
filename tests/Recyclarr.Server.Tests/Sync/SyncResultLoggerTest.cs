@@ -86,21 +86,23 @@ internal sealed class SyncResultLoggerTest
                 && PropertyContains(evt, "Outcome", "First CF")
             );
 
-        log.Events.Where(evt => evt.Properties.ContainsKey("DeltaType"))
-            .Select(evt => GetScalar(evt, "DeltaType"))
+        // Unchanged resources are not logged
+        log.Events.Where(evt => evt.Properties.ContainsKey("ChangeType"))
+            .Select(evt => GetScalar(evt, "ChangeType"))
             .Should()
             .Equal(
-                nameof(CustomFormatCreateDelta),
-                nameof(QualitySizeDelta),
-                nameof(SonarrNamingDelta),
-                nameof(MediaManagementDelta),
-                nameof(RadarrNamingDelta)
+                nameof(PlannedCustomFormatResource),
+                nameof(CustomFormatIdentity),
+                nameof(PlannedQualitySizeResource),
+                nameof(PlannedSonarrNamingResource),
+                nameof(PlannedMediaManagementResource),
+                nameof(PlannedRadarrNamingResource)
             );
         log.Events.Should()
             .ContainSingle(evt =>
-                HasScalar(evt, "DeltaType", nameof(CustomFormatCreateDelta))
-                && PropertyContains(evt, "Delta", "cf-one")
-                && PropertyContains(evt, "Delta", "First CF")
+                HasScalar(evt, "ChangeType", nameof(PlannedCustomFormatResource))
+                && PropertyContains(evt, "Change", "cf-one")
+                && PropertyContains(evt, "Change", "First CF")
             );
 
         var blockingPlanningOutcome = log
@@ -130,22 +132,37 @@ internal sealed class SyncResultLoggerTest
     private static SyncRunResult CreateResult()
     {
         var identity = new CustomFormatIdentity("cf-one", "First CF");
+        var selection = new CustomFormatSourceInfo(
+            CfSource.CfGroupExplicit,
+            "Group",
+            CfInclusionReason.Selected,
+            ["Profile"]
+        );
         var customFormats = new CustomFormatPipelineResult(
             completedResources: 1,
             incompleteResources: 0,
             [new CustomFormatAdoptedOutcome(identity, 10)],
             [
-                new CustomFormatCreateDelta
+                new PlannedCustomFormatResource
                 {
+                    Action = PlannedAction.Create,
                     Identity = identity,
-                    SelectionProvenance = new CustomFormatSourceInfo(
-                        CfSource.CfGroupExplicit,
-                        "Group",
-                        CfInclusionReason.Selected,
-                        ["Profile"]
-                    ),
+                    SelectionProvenance = selection,
+                    Name = PlannedValue.Created("First CF"),
+                    IncludeWhenRenaming = PlannedValue.Created(false),
+                    Specifications = [],
                 },
-            ]
+                new PlannedCustomFormatResource
+                {
+                    Action = PlannedAction.Unchanged,
+                    Identity = new CustomFormatIdentity("cf-same", "Same CF"),
+                    SelectionProvenance = selection,
+                    Name = PlannedValue.Compared("Same CF", "Same CF"),
+                    IncludeWhenRenaming = PlannedValue.Compared(false, false),
+                    Specifications = [],
+                },
+            ],
+            [new CustomFormatIdentity("cf-old", "Old CF")]
         );
         var qualityProfiles = new QualityProfilePipelineResult(
             completedResources: 0,
@@ -156,18 +173,19 @@ internal sealed class SyncResultLoggerTest
         var qualitySizes = new QualitySizePipelineResult(
             completedResources: 1,
             incompleteResources: 1,
-            [new QualitySizePreferredRatioClampedOutcome(new ValueDelta<decimal>(1.5m, 1m))],
+            [new QualitySizePreferredRatioClampedOutcome(1.5m, 1m)],
             [
-                new QualitySizeDelta(
+                PlannedQualitySizeResource.Compared(
                     "Bluray",
-                    [
-                        new QualitySizeMinimumChanged(
-                            new ValueDelta<QualitySizeValue>(
-                                new QualitySizeValue.Numeric(1m),
-                                new QualitySizeValue.Numeric(2m)
-                            )
-                        ),
-                    ]
+                    (new QualitySizeValue.Numeric(1m), new QualitySizeValue.Numeric(2m)),
+                    (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited()),
+                    (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited())
+                ),
+                PlannedQualitySizeResource.Compared(
+                    "WEB",
+                    (new QualitySizeValue.Numeric(1m), new QualitySizeValue.Numeric(1m)),
+                    (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited()),
+                    (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited())
                 ),
             ]
         );
@@ -180,13 +198,22 @@ internal sealed class SyncResultLoggerTest
                     "bad-series"
                 ),
             ],
-            new SonarrNamingDelta { SeriesFolderFormat = new ValueDelta<string?>("Old", "Series") }
+            new PlannedSonarrNamingResource
+            {
+                Action = PlannedAction.Update,
+                SeriesFolderFormat = PlannedValue.Compared<string?>("Old", "Series"),
+            }
         );
         var mediaManagement = new MediaManagementPipelineResult(
             SyncResultStatus.Succeeded,
-            new MediaManagementDelta(
-                new ValueDelta<PropersAndRepacksMode?>(null, PropersAndRepacksMode.DoNotPrefer)
-            )
+            new PlannedMediaManagementResource
+            {
+                Action = PlannedAction.Update,
+                PropersAndRepacks = PlannedValue.Compared<PropersAndRepacksMode?>(
+                    null,
+                    PropersAndRepacksMode.DoNotPrefer
+                ),
+            }
         );
         var radarrNaming = new RadarrNamingPipelineResult(
             completedFields: 1,
@@ -197,7 +224,11 @@ internal sealed class SyncResultLoggerTest
                     "bad-movie"
                 ),
             ],
-            new RadarrNamingDelta { StandardMovieFormat = new ValueDelta<string?>("Old", "Movie") }
+            new PlannedRadarrNamingResource
+            {
+                Action = PlannedAction.Update,
+                StandardMovieFormat = PlannedValue.Compared<string?>("Old", "Movie"),
+            }
         );
 
         return new SyncRunResult(

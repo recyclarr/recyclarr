@@ -24,7 +24,7 @@ internal class CustomFormatSyncOperation(
     protected override PipelineResult CreateEmptyResult(
         SyncResultStatus status,
         PipelineType? blockedBy
-    ) => new CustomFormatPipelineResult(0, 0, [], []).WithStatus(status, blockedBy);
+    ) => new CustomFormatPipelineResult(0, 0, [], [], []).WithStatus(status, blockedBy);
 
     protected override async Task<CustomFormatComputeResult> Compute(
         PlannedCustomFormats plan,
@@ -40,7 +40,8 @@ internal class CustomFormatSyncOperation(
         var plannedCfs = plan.Items;
         var transactions = new CustomFormatTransactionData();
         var outcomes = MapPlanOutcomes(planOutcomes).ToList();
-        var deltas = new List<CustomFormatDelta>();
+        var resources = new List<PlannedCustomFormatResource>();
+        var deletes = new List<CustomFormatIdentity>();
         var incompleteResources = planOutcomes
             .OfType<DuplicateCustomFormatNameOutcome>()
             .Sum(x => x.TrashIds.Count);
@@ -80,18 +81,18 @@ internal class CustomFormatSyncOperation(
                     transactions,
                     provenance,
                     outcomes,
-                    deltas
+                    resources
                 );
             }
             else
             {
-                ProcessUncachedCf(
+                ProcessNameCollision(
                     guideCf,
                     serviceCfsByName,
                     transactions,
                     provenance,
                     outcomes,
-                    deltas
+                    resources
                 );
             }
         }
@@ -139,7 +140,7 @@ internal class CustomFormatSyncOperation(
             else if (config.DeleteOldCustomFormats)
             {
                 transactions.DeletedCustomFormats.Add(candidate);
-                deltas.Add(new CustomFormatDeleteDelta { Identity = ToIdentity(candidate) });
+                deletes.Add(ToIdentity(candidate));
             }
         }
 
@@ -153,7 +154,8 @@ internal class CustomFormatSyncOperation(
             completedResources,
             incompleteResources,
             outcomes,
-            deltas
+            resources,
+            deletes
         );
 
         var validServiceIds = apiFetchOutput.Select(cf => cf.Id).ToList();
@@ -252,7 +254,7 @@ internal class CustomFormatSyncOperation(
         CustomFormatTransactionData transactions,
         CustomFormatSourceInfo provenance,
         ICollection<CustomFormatOutcome> outcomes,
-        ICollection<CustomFormatDelta> deltas
+        ICollection<PlannedCustomFormatResource> resources
     )
     {
         if (serviceCfsById.TryGetValue(storedId, out var serviceCf))
@@ -270,7 +272,7 @@ internal class CustomFormatSyncOperation(
                 );
             }
 
-            AddUpdatedOrUnchanged(guideCf, serviceCf, transactions, provenance, deltas);
+            AddUpdatedOrUnchanged(guideCf, serviceCf, transactions, provenance, resources);
         }
         else
         {
@@ -288,21 +290,9 @@ internal class CustomFormatSyncOperation(
                 transactions,
                 provenance,
                 outcomes,
-                deltas
+                resources
             );
         }
-    }
-
-    private static void ProcessUncachedCf(
-        CustomFormatResource guideCf,
-        ILookup<string, CustomFormatResource> serviceCfsByName,
-        CustomFormatTransactionData transactions,
-        CustomFormatSourceInfo provenance,
-        ICollection<CustomFormatOutcome> outcomes,
-        ICollection<CustomFormatDelta> deltas
-    )
-    {
-        ProcessNameCollision(guideCf, serviceCfsByName, transactions, provenance, outcomes, deltas);
     }
 
     private static void ProcessNameCollision(
@@ -311,7 +301,7 @@ internal class CustomFormatSyncOperation(
         CustomFormatTransactionData transactions,
         CustomFormatSourceInfo provenance,
         ICollection<CustomFormatOutcome> outcomes,
-        ICollection<CustomFormatDelta> deltas
+        ICollection<PlannedCustomFormatResource> resources
     )
     {
         var nameMatches = serviceCfsByName[guideCf.Name].ToList();
@@ -321,11 +311,22 @@ internal class CustomFormatSyncOperation(
             case 0:
                 // No collision - safe to create
                 transactions.NewCustomFormats.Add(guideCf);
-                deltas.Add(
-                    new CustomFormatCreateDelta
+                resources.Add(
+                    new PlannedCustomFormatResource
                     {
+                        Action = PlannedAction.Create,
                         Identity = ToIdentity(guideCf),
                         SelectionProvenance = provenance,
+                        Name = PlannedValue.Created(guideCf.Name),
+                        IncludeWhenRenaming = PlannedValue.Created(
+                            guideCf.IncludeCustomFormatWhenRenaming
+                        ),
+                        Specifications = guideCf
+                            .Specifications.Select(x => new CustomFormatSpecificationResult(
+                                x.Name,
+                                CustomFormatSpecificationChange.Added
+                            ))
+                            .ToList(),
                     }
                 );
                 break;
@@ -335,7 +336,7 @@ internal class CustomFormatSyncOperation(
                 guideCf.Id = nameMatches[0].Id;
                 transactions.ReplacedCustomFormats.Add(guideCf.Name);
                 outcomes.Add(new CustomFormatAdoptedOutcome(ToIdentity(guideCf), guideCf.Id));
-                AddUpdatedOrUnchanged(guideCf, nameMatches[0], transactions, provenance, deltas);
+                AddUpdatedOrUnchanged(guideCf, nameMatches[0], transactions, provenance, resources);
                 break;
 
             default:
@@ -363,75 +364,65 @@ internal class CustomFormatSyncOperation(
         CustomFormatResource serviceCf,
         CustomFormatTransactionData transactions,
         CustomFormatSourceInfo provenance,
-        ICollection<CustomFormatDelta> deltas
+        ICollection<PlannedCustomFormatResource> resources
     )
     {
-        if (!IsEquivalent(guideCf, serviceCf))
+        var changed = !IsEquivalent(guideCf, serviceCf);
+        if (changed)
         {
             transactions.UpdatedCustomFormats.Add(guideCf);
-            deltas.Add(
-                new CustomFormatUpdateDelta
-                {
-                    Identity = ToIdentity(guideCf),
-                    SelectionProvenance = provenance,
-                    Components = BuildUpdateComponents(serviceCf, guideCf),
-                }
-            );
         }
         else
         {
             transactions.UnchangedCustomFormats.Add(guideCf);
         }
+
+        resources.Add(
+            new PlannedCustomFormatResource
+            {
+                Action = changed ? PlannedAction.Update : PlannedAction.Unchanged,
+                Identity = ToIdentity(guideCf),
+                SelectionProvenance = provenance,
+                Name = PlannedValue.Compared(serviceCf.Name, guideCf.Name),
+                IncludeWhenRenaming = PlannedValue.Compared(
+                    serviceCf.IncludeCustomFormatWhenRenaming,
+                    guideCf.IncludeCustomFormatWhenRenaming
+                ),
+                Specifications = CompareSpecifications(serviceCf, guideCf),
+            }
+        );
     }
 
-    private static List<CustomFormatUpdateComponent> BuildUpdateComponents(
+    private static List<CustomFormatSpecificationResult> CompareSpecifications(
         CustomFormatResource current,
         CustomFormatResource desired
     )
     {
-        var components = new List<CustomFormatUpdateComponent>();
-        if (!string.Equals(current.Name, desired.Name, StringComparison.Ordinal))
-        {
-            components.Add(
-                new CustomFormatNameChanged(new ValueDelta<string>(current.Name, desired.Name))
-            );
-        }
-
-        if (current.IncludeCustomFormatWhenRenaming != desired.IncludeCustomFormatWhenRenaming)
-        {
-            components.Add(
-                new CustomFormatIncludeWhenRenamingChanged(
-                    new ValueDelta<bool>(
-                        current.IncludeCustomFormatWhenRenaming,
-                        desired.IncludeCustomFormatWhenRenaming
-                    )
-                )
-            );
-        }
-
-        foreach (var desiredSpec in desired.Specifications)
-        {
-            var currentSpec = current.Specifications.FirstOrDefault(x =>
-                x.Name == desiredSpec.Name
-            );
-            if (currentSpec is null)
+        var specifications = desired
+            .Specifications.Select(desiredSpec =>
             {
-                components.Add(new CustomFormatSpecificationAdded(desiredSpec.Name));
-                continue;
-            }
+                var currentSpec = current.Specifications.FirstOrDefault(x =>
+                    x.Name == desiredSpec.Name
+                );
+                var change = currentSpec switch
+                {
+                    null => CustomFormatSpecificationChange.Added,
+                    _ when currentSpec != desiredSpec => CustomFormatSpecificationChange.Changed,
+                    _ => CustomFormatSpecificationChange.Unchanged,
+                };
+                return new CustomFormatSpecificationResult(desiredSpec.Name, change);
+            })
+            .ToList();
 
-            if (currentSpec != desiredSpec)
-            {
-                components.Add(new CustomFormatSpecificationChanged(desiredSpec.Name));
-            }
-        }
-
-        components.AddRange(
+        specifications.AddRange(
             current
                 .Specifications.Where(x => desired.Specifications.All(y => y.Name != x.Name))
-                .Select(x => new CustomFormatSpecificationRemoved(x.Name))
+                .Select(x => new CustomFormatSpecificationResult(
+                    x.Name,
+                    CustomFormatSpecificationChange.Removed
+                ))
         );
-        return components;
+        return specifications;
     }
 
     private static IEnumerable<CustomFormatOutcome> MapPlanOutcomes(

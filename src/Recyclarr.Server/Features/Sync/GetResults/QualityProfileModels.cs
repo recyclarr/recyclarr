@@ -19,7 +19,7 @@ internal enum QualityProfileLayoutKind
     Group,
 }
 
-/// <summary>Why a custom format score changed.</summary>
+/// <summary>Why a custom format score has its desired value.</summary>
 internal enum QualityProfileScoreReason
 {
     [Description("The configuration or guide sets the score.")]
@@ -30,6 +30,9 @@ internal enum QualityProfileScoreReason
             + "the custom format."
     )]
     Reset,
+
+    [Description("Nothing sets the score, so it keeps its value in the service.")]
+    Unmanaged,
 }
 
 internal sealed record QualityProfileIdentityResponse
@@ -53,101 +56,51 @@ internal sealed record QualityProfileLayoutResponse
 internal sealed record QualityProfileScoreResponse
 {
     public required string Name { get; init; }
-    public required int Score { get; init; }
 
+    /// <summary>Null when the custom format is not in the configuration.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public string? TrashId { get; init; }
+
+    public required QualityProfileScoreReason Reason { get; init; }
+    public required PlannedValueResponse<int?> Score { get; init; }
 }
 
 /// <summary>
-/// The profile fields Recyclarr sets when it creates a profile. A null field means neither the
-/// configuration nor the guide gives a value.
+/// One configured profile and every value Recyclarr manages on it, changed or not. Values neither
+/// the configuration nor the guide sets keep their service value (or the service default for a
+/// created profile).
 /// </summary>
-internal record QualityProfileControlledStateResponse
+internal record QualityProfileItemResponse
 {
-    public required string Name { get; init; }
+    public required ResourceAction Action { get; init; }
+    public required QualityProfileIdentityResponse Identity { get; init; }
+    public required PlannedValueResponse<string> Name { get; init; }
+    public required PlannedValueResponse<bool?> UpgradeAllowed { get; init; }
+    public required PlannedValueResponse<string?> UpgradeUntilQuality { get; init; }
+    public required PlannedValueResponse<int?> UpgradeUntilScore { get; init; }
+    public required PlannedValueResponse<int?> MinimumFormatScore { get; init; }
+    public required PlannedValueResponse<int?> MinimumUpgradeFormatScore { get; init; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required bool? UpgradeAllowed { get; init; }
+    public required PlannedValueResponse<
+        IReadOnlyList<QualityProfileLayoutResponse>
+    > Qualities { get; init; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required string? UpgradeUntilQuality { get; init; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required int? UpgradeUntilScore { get; init; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required int? MinimumFormatScore { get; init; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required int? MinimumUpgradeFormatScore { get; init; }
-
-    public required IReadOnlyList<QualityProfileLayoutResponse> Qualities { get; init; }
+    /// <summary>Every custom format score in the profile.</summary>
     public required IReadOnlyList<QualityProfileScoreResponse> CustomFormatScores { get; init; }
 }
 
-internal sealed record RadarrQualityProfileControlledStateResponse
-    : QualityProfileControlledStateResponse
+internal sealed record RadarrQualityProfileItemResponse : QualityProfileItemResponse
 {
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required string? Language { get; init; }
+    public required PlannedValueResponse<string?> Language { get; init; }
 }
 
-internal sealed record SonarrQualityProfileControlledStateResponse
-    : QualityProfileControlledStateResponse
+internal sealed record SonarrQualityProfileItemResponse : QualityProfileItemResponse
 {
     /// <summary>
-    /// Sizes assigned to the profile's qualities. Only Sonarr v5 stores sizes per quality profile;
-    /// empty on earlier versions.
+    /// Sizes of every quality in the profile that the configuration sizes. Only Sonarr v5 stores
+    /// sizes per quality profile; empty on earlier versions.
     /// </summary>
-    public required IReadOnlyList<QualitySizeResponse> QualitySizes { get; init; }
-}
-
-internal sealed record SonarrQualityProfileCreateResponse(
-    QualityProfileIdentityResponse Identity,
-    SonarrQualityProfileControlledStateResponse State
-);
-
-internal sealed record RadarrQualityProfileCreateResponse(
-    QualityProfileIdentityResponse Identity,
-    RadarrQualityProfileControlledStateResponse State
-);
-
-internal sealed record QualityProfileScoreChangeResponse
-{
-    public required string Name { get; init; }
-    public required ValueChangeResponse<int> Value { get; init; }
-    public required QualityProfileScoreReason Reason { get; init; }
-    public string? TrashId { get; init; }
-}
-
-internal record QualityProfileUpdateResponse
-{
-    public required QualityProfileIdentityResponse Identity { get; init; }
-    public ValueChangeResponse<string>? Name { get; init; }
-    public ValueChangeResponse<bool?>? UpgradeAllowed { get; init; }
-    public ValueChangeResponse<string?>? UpgradeUntilQuality { get; init; }
-    public ValueChangeResponse<int?>? UpgradeUntilScore { get; init; }
-    public ValueChangeResponse<int?>? MinimumFormatScore { get; init; }
-    public ValueChangeResponse<int?>? MinimumUpgradeFormatScore { get; init; }
-    public ValueChangeResponse<
-        IReadOnlyList<QualityProfileLayoutResponse>
-    >? QualityLayout { get; init; }
-    public IReadOnlyList<QualityProfileScoreChangeResponse> CustomFormatScores { get; init; } = [];
-}
-
-internal sealed record RadarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
-{
-    public ValueChangeResponse<string?>? Language { get; init; }
-}
-
-internal sealed record SonarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
-{
-    /// <summary>
-    /// Per-quality size changes. Only Sonarr v5 stores sizes per quality profile; empty on earlier
-    /// versions.
-    /// </summary>
-    public IReadOnlyList<QualitySizeUpdateResponse> QualitySizes { get; init; } = [];
+    public required IReadOnlyList<QualitySizeItemResponse> QualitySizes { get; init; }
 }
 
 /// <summary>
@@ -170,12 +123,12 @@ internal abstract record QualityProfilePipelineResponse
 
 internal sealed record SonarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
 {
-    public required IReadOnlyList<SonarrQualityProfileCreateResponse> Creates { get; init; }
-    public required IReadOnlyList<SonarrQualityProfileUpdateResponse> Updates { get; init; }
+    /// <summary>Every valid configured profile. A profile skipped by an outcome is absent.</summary>
+    public required IReadOnlyList<SonarrQualityProfileItemResponse> Items { get; init; }
 }
 
 internal sealed record RadarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
 {
-    public required IReadOnlyList<RadarrQualityProfileCreateResponse> Creates { get; init; }
-    public required IReadOnlyList<RadarrQualityProfileUpdateResponse> Updates { get; init; }
+    /// <summary>Every valid configured profile. A profile skipped by an outcome is absent.</summary>
+    public required IReadOnlyList<RadarrQualityProfileItemResponse> Items { get; init; }
 }

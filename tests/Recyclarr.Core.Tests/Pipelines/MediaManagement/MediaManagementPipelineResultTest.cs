@@ -10,26 +10,24 @@ internal sealed class MediaManagementPipelineResultTest
     [TestCase(SyncResultStatus.Succeeded, false)]
     [TestCase(SyncResultStatus.Failed, true)]
     [TestCase(SyncResultStatus.Failed, false)]
-    public void Supports_terminal_status_with_optional_delta(SyncResultStatus status, bool hasDelta)
+    public void Supports_terminal_status_with_optional_settings(
+        SyncResultStatus status,
+        bool hasSettings
+    )
     {
-        var delta = new MediaManagementDelta(
-            new ValueDelta<PropersAndRepacksMode?>(
+        var settings = new PlannedMediaManagementResource
+        {
+            Action = PlannedAction.Update,
+            PropersAndRepacks = PlannedValue.Compared<PropersAndRepacksMode?>(
                 PropersAndRepacksMode.PreferAndUpgrade,
                 PropersAndRepacksMode.DoNotUpgrade
-            )
-        );
+            ),
+        };
 
-        var result = new MediaManagementPipelineResult(status, hasDelta ? delta : null);
+        var result = new MediaManagementPipelineResult(status, hasSettings ? settings : null);
 
         result.Status.Should().Be(status);
-        if (hasDelta)
-        {
-            result.Delta.Should().BeEquivalentTo(delta);
-        }
-        else
-        {
-            result.Delta.Should().BeNull();
-        }
+        result.Settings.Should().Be(hasSettings ? settings : null);
     }
 
     [TestCase(SyncResultStatus.Partial)]

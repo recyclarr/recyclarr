@@ -23,16 +23,15 @@ internal interface IQualityProfileServiceFields
     /// </summary>
     QualityProfileData ApplyDesired(QualityProfileData profile, PlannedQualityProfile planned);
 
-    IReadOnlyList<QualityProfileUpdateComponent> FindChanges(
-        QualityProfileData current,
-        QualityProfileData desired
-    );
+    bool HasChanges(QualityProfileData current, QualityProfileData desired);
 
     /// <summary>
-    /// Adds service-owned fields to the shared state reported for a profile that will be created.
+    /// Adds the service-owned values to the shared values reported for a profile. A null
+    /// <paramref name="current"/> means the sync creates the profile.
     /// </summary>
-    QualityProfileControlledState DescribeCreate(
-        QualityProfileControlledState shared,
+    PlannedQualityProfileResource Describe(
+        PlannedQualityProfileResource shared,
+        QualityProfileData? current,
         QualityProfileData desired,
         PlannedQualityProfile planned
     );

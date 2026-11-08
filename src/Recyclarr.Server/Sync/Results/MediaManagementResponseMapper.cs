@@ -11,16 +11,16 @@ internal static class MediaManagementResponseMapper
         new()
         {
             Status = ResultValueMapper.MapStatus(result.Status),
-            Updates = result.Delta is null ? [] : [MapUpdate(result.Delta)],
+            Settings = result.Settings is { } x ? MapSettings(x) : null,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
 
-    private static MediaManagementUpdateResponse MapUpdate(MediaManagementDelta delta) =>
+    private static MediaManagementSettingsResponse MapSettings(
+        PlannedMediaManagementResource settings
+    ) =>
         new(
-            new ValueChangeResponse<PropersAndRepacksModeResponse?>(
-                MapMode(delta.PropersAndRepacks.Current),
-                MapMode(delta.PropersAndRepacks.Desired)
-            )
+            ResultValueMapper.MapAction(settings.Action),
+            ResultValueMapper.MapValue(settings.PropersAndRepacks, MapMode)
         );
 
     private static PropersAndRepacksModeResponse? MapMode(

@@ -55,7 +55,8 @@ internal sealed class CustomFormatComputeResult(
             completedResources,
             incompleteResources,
             [.. Result.Outcomes, .. persistenceOutcomes],
-            Result.Deltas
+            Result.Resources,
+            Result.Deletes
         );
     }
 

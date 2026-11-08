@@ -12,29 +12,31 @@ public sealed record RadarrNamingPipelineResult : PipelineResult
         int completedFields,
         int incompleteFields,
         IReadOnlyList<RadarrNamingOutcome> outcomes,
-        RadarrNamingDelta? delta
+        PlannedRadarrNamingResource? settings
     )
-        : this(DeriveStatus(completedFields, incompleteFields), null, outcomes, delta) { }
+        : this(DeriveStatus(completedFields, incompleteFields), null, outcomes, settings) { }
 
     private RadarrNamingPipelineResult(
         SyncResultStatus status,
         PipelineType? blockedBy,
         IReadOnlyList<RadarrNamingOutcome> outcomes,
-        RadarrNamingDelta? delta
+        PlannedRadarrNamingResource? settings
     )
         : base(status, blockedBy)
     {
         Outcomes = outcomes;
-        Delta = delta;
+        Settings = settings;
     }
 
     public IReadOnlyList<RadarrNamingOutcome> Outcomes { get; }
-    public RadarrNamingDelta? Delta { get; }
+
+    /// <summary>Absent when no naming field is configured or the pipeline did not compute.</summary>
+    public PlannedRadarrNamingResource? Settings { get; }
 
     internal override PipelineResult WithStatus(
         SyncResultStatus status,
         PipelineType? blockedBy = null
-    ) => new RadarrNamingPipelineResult(status, blockedBy, Outcomes, Delta);
+    ) => new RadarrNamingPipelineResult(status, blockedBy, Outcomes, Settings);
 
     private static SyncResultStatus DeriveStatus(int completedFields, int incompleteFields)
     {
@@ -63,9 +65,10 @@ public enum RadarrNamingFormatField
     MovieFolderFormat,
 }
 
-public sealed record RadarrNamingDelta : ResourceDelta
+/// <summary>The naming settings the sync manages; a null field is not configured.</summary>
+public sealed record PlannedRadarrNamingResource : PlannedResource
 {
-    public ValueDelta<bool?>? RenameMovies { get; init; }
-    public ValueDelta<string?>? StandardMovieFormat { get; init; }
-    public ValueDelta<string?>? MovieFolderFormat { get; init; }
+    public PlannedValue<bool?>? RenameMovies { get; init; }
+    public PlannedValue<string?>? StandardMovieFormat { get; init; }
+    public PlannedValue<string?>? MovieFolderFormat { get; init; }
 }

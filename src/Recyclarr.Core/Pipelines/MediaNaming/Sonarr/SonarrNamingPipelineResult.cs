@@ -12,29 +12,31 @@ public sealed record SonarrNamingPipelineResult : PipelineResult
         int completedFields,
         int incompleteFields,
         IReadOnlyList<SonarrNamingOutcome> outcomes,
-        SonarrNamingDelta? delta
+        PlannedSonarrNamingResource? settings
     )
-        : this(DeriveStatus(completedFields, incompleteFields), null, outcomes, delta) { }
+        : this(DeriveStatus(completedFields, incompleteFields), null, outcomes, settings) { }
 
     private SonarrNamingPipelineResult(
         SyncResultStatus status,
         PipelineType? blockedBy,
         IReadOnlyList<SonarrNamingOutcome> outcomes,
-        SonarrNamingDelta? delta
+        PlannedSonarrNamingResource? settings
     )
         : base(status, blockedBy)
     {
         Outcomes = outcomes;
-        Delta = delta;
+        Settings = settings;
     }
 
     public IReadOnlyList<SonarrNamingOutcome> Outcomes { get; }
-    public SonarrNamingDelta? Delta { get; }
+
+    /// <summary>Absent when no naming field is configured or the pipeline did not compute.</summary>
+    public PlannedSonarrNamingResource? Settings { get; }
 
     internal override PipelineResult WithStatus(
         SyncResultStatus status,
         PipelineType? blockedBy = null
-    ) => new SonarrNamingPipelineResult(status, blockedBy, Outcomes, Delta);
+    ) => new SonarrNamingPipelineResult(status, blockedBy, Outcomes, Settings);
 
     private static SyncResultStatus DeriveStatus(int completedFields, int incompleteFields)
     {
@@ -66,12 +68,13 @@ public enum SonarrNamingFormatField
     AnimeEpisodeFormat,
 }
 
-public sealed record SonarrNamingDelta : ResourceDelta
+/// <summary>The naming settings the sync manages; a null field is not configured.</summary>
+public sealed record PlannedSonarrNamingResource : PlannedResource
 {
-    public ValueDelta<bool?>? RenameEpisodes { get; init; }
-    public ValueDelta<string?>? SeriesFolderFormat { get; init; }
-    public ValueDelta<string?>? SeasonFolderFormat { get; init; }
-    public ValueDelta<string?>? StandardEpisodeFormat { get; init; }
-    public ValueDelta<string?>? DailyEpisodeFormat { get; init; }
-    public ValueDelta<string?>? AnimeEpisodeFormat { get; init; }
+    public PlannedValue<bool?>? RenameEpisodes { get; init; }
+    public PlannedValue<string?>? SeriesFolderFormat { get; init; }
+    public PlannedValue<string?>? SeasonFolderFormat { get; init; }
+    public PlannedValue<string?>? StandardEpisodeFormat { get; init; }
+    public PlannedValue<string?>? DailyEpisodeFormat { get; init; }
+    public PlannedValue<string?>? AnimeEpisodeFormat { get; init; }
 }

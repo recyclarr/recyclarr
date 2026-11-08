@@ -1,12 +1,11 @@
 using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Server.Features.Sync.GetResults;
-using Riok.Mapperly.Abstractions;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.Sync.Results;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-internal static partial class NamingResponseMapper
+internal static class NamingResponseMapper
 {
     public static SonarrNamingPipelineResponse ToResponse(SonarrNamingPipelineResult result)
     {
@@ -14,7 +13,7 @@ internal static partial class NamingResponseMapper
         {
             Status = ResultValueMapper.MapStatus(result.Status),
             Outcomes = result.Outcomes.Select(OutcomeResponseMapper.Map).ToList(),
-            Updates = result.Delta is null ? [] : [MapSonarrUpdate(result.Delta)],
+            Settings = result.Settings is { } x ? MapSonarrSettings(x) : null,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
@@ -25,31 +24,36 @@ internal static partial class NamingResponseMapper
         {
             Status = ResultValueMapper.MapStatus(result.Status),
             Outcomes = result.Outcomes.Select(OutcomeResponseMapper.Map).ToList(),
-            Updates = result.Delta is null ? [] : [MapRadarrUpdate(result.Delta)],
+            Settings = result.Settings is { } x ? MapRadarrSettings(x) : null,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
 
-    private static SonarrNamingUpdateResponse MapSonarrUpdate(SonarrNamingDelta delta) =>
+    private static SonarrNamingSettingsResponse MapSonarrSettings(
+        PlannedSonarrNamingResource settings
+    ) =>
         new()
         {
-            RenameEpisodes = MapNullableValue(delta.RenameEpisodes),
-            SeriesFolderFormat = MapNullableValue(delta.SeriesFolderFormat),
-            SeasonFolderFormat = MapNullableValue(delta.SeasonFolderFormat),
-            StandardEpisodeFormat = MapNullableValue(delta.StandardEpisodeFormat),
-            DailyEpisodeFormat = MapNullableValue(delta.DailyEpisodeFormat),
-            AnimeEpisodeFormat = MapNullableValue(delta.AnimeEpisodeFormat),
+            Action = ResultValueMapper.MapAction(settings.Action),
+            RenameEpisodes = MapConfigured(settings.RenameEpisodes),
+            SeriesFolderFormat = MapConfigured(settings.SeriesFolderFormat),
+            SeasonFolderFormat = MapConfigured(settings.SeasonFolderFormat),
+            StandardEpisodeFormat = MapConfigured(settings.StandardEpisodeFormat),
+            DailyEpisodeFormat = MapConfigured(settings.DailyEpisodeFormat),
+            AnimeEpisodeFormat = MapConfigured(settings.AnimeEpisodeFormat),
         };
 
-    private static RadarrNamingUpdateResponse MapRadarrUpdate(RadarrNamingDelta delta) =>
+    private static RadarrNamingSettingsResponse MapRadarrSettings(
+        PlannedRadarrNamingResource settings
+    ) =>
         new()
         {
-            RenameMovies = MapNullableValue(delta.RenameMovies),
-            StandardMovieFormat = MapNullableValue(delta.StandardMovieFormat),
-            MovieFolderFormat = MapNullableValue(delta.MovieFolderFormat),
+            Action = ResultValueMapper.MapAction(settings.Action),
+            RenameMovies = MapConfigured(settings.RenameMovies),
+            StandardMovieFormat = MapConfigured(settings.StandardMovieFormat),
+            MovieFolderFormat = MapConfigured(settings.MovieFolderFormat),
         };
 
-    private static ValueChangeResponse<T>? MapNullableValue<T>(
-        Recyclarr.Sync.Results.ValueDelta<T>? value
-    ) => value is null ? null : ResultValueMapper.MapValue(value);
+    private static PlannedValueResponse<T>? MapConfigured<T>(PlannedValue<T>? value) =>
+        value is null ? null : ResultValueMapper.MapValue(value);
 }

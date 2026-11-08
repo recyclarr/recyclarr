@@ -9,25 +9,29 @@ namespace Recyclarr.Pipelines.MediaManagement;
 /// </summary>
 public sealed record MediaManagementPipelineResult : PipelineResult
 {
-    internal MediaManagementPipelineResult(SyncResultStatus status, MediaManagementDelta? delta)
-        : this(ValidateStatus(status), null, delta) { }
+    internal MediaManagementPipelineResult(
+        SyncResultStatus status,
+        PlannedMediaManagementResource? settings
+    )
+        : this(ValidateStatus(status), null, settings) { }
 
     private MediaManagementPipelineResult(
         SyncResultStatus status,
         PipelineType? blockedBy,
-        MediaManagementDelta? delta
+        PlannedMediaManagementResource? settings
     )
         : base(status, blockedBy)
     {
-        Delta = delta;
+        Settings = settings;
     }
 
-    public MediaManagementDelta? Delta { get; }
+    /// <summary>Absent when the pipeline did not compute.</summary>
+    public PlannedMediaManagementResource? Settings { get; }
 
     internal override PipelineResult WithStatus(
         SyncResultStatus status,
         PipelineType? blockedBy = null
-    ) => new MediaManagementPipelineResult(status, blockedBy, Delta);
+    ) => new MediaManagementPipelineResult(status, blockedBy, Settings);
 
     private static SyncResultStatus ValidateStatus(SyncResultStatus status) =>
         status is SyncResultStatus.Succeeded or SyncResultStatus.Failed
@@ -35,5 +39,7 @@ public sealed record MediaManagementPipelineResult : PipelineResult
             : throw new ArgumentOutOfRangeException(nameof(status));
 }
 
-public sealed record MediaManagementDelta(ValueDelta<PropersAndRepacksMode?> PropersAndRepacks)
-    : ResourceDelta;
+public sealed record PlannedMediaManagementResource : PlannedResource
+{
+    public required PlannedValue<PropersAndRepacksMode?> PropersAndRepacks { get; init; }
+}

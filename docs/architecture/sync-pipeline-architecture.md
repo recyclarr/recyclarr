@@ -115,7 +115,7 @@ reliability and state maintenance. Skipped entirely in preview mode.
 ## Terminal results and preview
 
 Preview runs Plan and Transaction but skips Persistence. It returns the same calculated outcomes and
-deltas that apply mode starts with, without writing service or sync state.
+planned resources that apply mode starts with, without writing service or sync state.
 
 `ISyncOrchestrator.RunAsync()` returns one `SyncRunResult` containing ordered instance and pipeline
 results. The Server stores this aggregate on the job before the run scope is disposed. No ambient

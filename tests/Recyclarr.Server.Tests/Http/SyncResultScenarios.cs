@@ -114,29 +114,48 @@ internal static class SyncResultScenarios
             new CustomFormatUpdateRejectedOutcome(identity),
             new CustomFormatDeleteRejectedOutcome(identity),
         ];
-        CustomFormatDelta[] deltas =
+        PlannedCustomFormatResource[] resources =
         [
-            new CustomFormatCreateDelta { Identity = identity, SelectionProvenance = selection },
-            new CustomFormatUpdateDelta
+            new()
             {
+                Action = PlannedAction.Create,
                 Identity = identity,
                 SelectionProvenance = selection,
-                Components =
+                Name = PlannedValue.Created("First CF"),
+                IncludeWhenRenaming = PlannedValue.Created(false),
+                Specifications = [new("Added", CustomFormatSpecificationChange.Added)],
+            },
+            new()
+            {
+                Action = PlannedAction.Update,
+                Identity = identity,
+                SelectionProvenance = selection,
+                Name = PlannedValue.Compared("Old", "New"),
+                IncludeWhenRenaming = PlannedValue.Compared(false, true),
+                Specifications =
                 [
-                    new CustomFormatNameChanged(new ValueDelta<string>("Old", "New")),
-                    new CustomFormatIncludeWhenRenamingChanged(new ValueDelta<bool>(false, true)),
-                    new CustomFormatSpecificationAdded("Added"),
-                    new CustomFormatSpecificationChanged("Changed"),
-                    new CustomFormatSpecificationRemoved("Removed"),
+                    new("Added", CustomFormatSpecificationChange.Added),
+                    new("Changed", CustomFormatSpecificationChange.Changed),
+                    new("Removed", CustomFormatSpecificationChange.Removed),
+                    new("Kept", CustomFormatSpecificationChange.Unchanged),
                 ],
             },
-            new CustomFormatDeleteDelta { Identity = managed },
+            new()
+            {
+                Action = PlannedAction.Unchanged,
+                Identity = identity,
+                SelectionProvenance = selection,
+                Name = PlannedValue.Compared("Same", "Same"),
+                IncludeWhenRenaming = PlannedValue.Compared(true, true),
+                Specifications = [new("Kept", CustomFormatSpecificationChange.Unchanged)],
+            },
         ];
         return new CustomFormatPipelineResult(
             completedResources: 1,
             incompleteResources: 1,
             outcomes,
-            deltas
+            resources,
+            [managed]
         );
     }
 
@@ -172,48 +191,83 @@ internal static class SyncResultScenarios
             Allowed = true,
             Qualities = ["One", "Two"],
         };
-        var sharedState = new QualityProfileControlledState
+        var created = new PlannedQualityProfileResource
         {
-            Name = "Guide",
-            UpgradeAllowed = null,
-            UpgradeUntilQuality = "Cutoff",
-            UpgradeUntilScore = 100,
-            MinimumFormatScore = 0,
-            MinimumUpgradeFormatScore = null,
-            Qualities = [desiredLayout],
-            CustomFormatScores = [new QualityProfileCustomFormatScore("CF", "cf-one", 10)],
+            Action = PlannedAction.Create,
+            Identity = guide,
+            Name = PlannedValue.Created("Guide"),
+            UpgradeAllowed = PlannedValue.Created<bool?>(null),
+            UpgradeUntilQuality = PlannedValue.Created<string?>("Cutoff"),
+            UpgradeUntilScore = PlannedValue.Created<int?>(100),
+            MinimumFormatScore = PlannedValue.Created<int?>(0),
+            MinimumUpgradeFormatScore = PlannedValue.Created<int?>(null),
+            Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
+                desiredLayout,
+            ]),
+            CustomFormatScores =
+            [
+                new("CF", "cf-one", PlannedValue.Created(10), QualityProfileScoreReason.Set),
+            ],
+        };
+        var updated = new PlannedQualityProfileResource
+        {
+            Action = PlannedAction.Update,
+            Identity = user,
+            Name = PlannedValue.Compared("Old", "New"),
+            UpgradeAllowed = PlannedValue.Compared<bool?>(null, false),
+            UpgradeUntilQuality = PlannedValue.Compared<string?>(null, "Bluray"),
+            UpgradeUntilScore = PlannedValue.Compared<int?>(0, null),
+            MinimumFormatScore = PlannedValue.Compared<int?>(null, 5),
+            MinimumUpgradeFormatScore = PlannedValue.Compared<int?>(6, 6),
+            Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                [currentLayout],
+                [desiredLayout],
+                changed: true
+            ),
+            CustomFormatScores =
+            [
+                new("CF", "cf-one", PlannedValue.Compared(0, 10), QualityProfileScoreReason.Set),
+                new("Reset CF", null, PlannedValue.Compared(5, 0), QualityProfileScoreReason.Reset),
+                new("Mine", null, PlannedValue.Compared(7, 7), QualityProfileScoreReason.Unmanaged),
+            ],
         };
         var isRadarr = service == SupportedServices.Radarr;
-        QualityProfileControlledState state = isRadarr
-            ? new RadarrQualityProfileControlledState(sharedState, "English")
-            : new SonarrQualityProfileControlledState(
-                sharedState,
-                [
-                    new QualityProfileQualitySize(
-                        "HDTV-1080p",
-                        new QualitySizeValue.Numeric(5),
-                        new QualitySizeValue.Numeric(30),
-                        new QualitySizeValue.Unlimited()
-                    ),
-                ]
-            );
-        QualityProfileUpdateComponent[] serviceComponents = isRadarr
-            ? [new RadarrQualityProfileLanguageChanged(new ValueDelta<string?>(null, "English"))]
+        PlannedQualityProfileResource[] resources = isRadarr
+            ?
+            [
+                new RadarrPlannedQualityProfileResource(
+                    created,
+                    PlannedValue.Created<string?>("English")
+                ),
+                new RadarrPlannedQualityProfileResource(
+                    updated,
+                    PlannedValue.Compared<string?>(null, "English")
+                ),
+            ]
             :
             [
-                new SonarrQualityProfileQualitySizesChanged([
-                    new QualitySizeDelta(
-                        "HDTV-1080p",
-                        [
-                            new QualitySizeMinimumChanged(
-                                new ValueDelta<QualitySizeValue>(
-                                    new QualitySizeValue.Numeric(1),
-                                    new QualitySizeValue.Numeric(5)
-                                )
-                            ),
-                        ]
-                    ),
-                ]),
+                new SonarrPlannedQualityProfileResource(
+                    created,
+                    [
+                        PlannedQualitySizeResource.Created(
+                            "HDTV-1080p",
+                            new QualitySizeValue.Numeric(5),
+                            new QualitySizeValue.Numeric(30),
+                            new QualitySizeValue.Unlimited()
+                        ),
+                    ]
+                ),
+                new SonarrPlannedQualityProfileResource(
+                    updated,
+                    [
+                        PlannedQualitySizeResource.Compared(
+                            "HDTV-1080p",
+                            (new QualitySizeValue.Numeric(1), new QualitySizeValue.Numeric(5)),
+                            (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited()),
+                            (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited())
+                        ),
+                    ]
+                ),
             ];
         if (!isRadarr)
         {
@@ -231,46 +285,11 @@ internal static class SyncResultScenarios
         {
             outcomes = [.. outcomes, new QualityProfileQualityDefinitionIgnoredOutcome(guide)];
         }
-        QualityProfileDelta[] deltas =
-        [
-            new QualityProfileCreateDelta { Identity = guide, State = state },
-            new QualityProfileUpdateDelta
-            {
-                Identity = user,
-                Components =
-                [
-                    new QualityProfileNameChanged(new ValueDelta<string>("Old", "New")),
-                    new QualityProfileUpgradeAllowedChanged(new ValueDelta<bool?>(null, false)),
-                    new QualityProfileUpgradeUntilQualityChanged(
-                        new ValueDelta<string?>(null, "Bluray")
-                    ),
-                    new QualityProfileUpgradeUntilScoreChanged(new ValueDelta<int?>(0, null)),
-                    new QualityProfileMinimumFormatScoreChanged(new ValueDelta<int?>(null, 5)),
-                    new QualityProfileMinimumUpgradeFormatScoreChanged(
-                        new ValueDelta<int?>(null, 6)
-                    ),
-                    .. serviceComponents,
-                    new QualityProfileQualityLayoutChanged([currentLayout], [desiredLayout]),
-                    new QualityProfileCustomFormatScoreChanged(
-                        "CF",
-                        "cf-one",
-                        new ValueDelta<int>(0, 10),
-                        QualityProfileScoreChangeReason.Set
-                    ),
-                    new QualityProfileCustomFormatScoreChanged(
-                        "Reset CF",
-                        null,
-                        new ValueDelta<int>(5, 0),
-                        QualityProfileScoreChangeReason.Reset
-                    ),
-                ],
-            },
-        ];
         return new QualityProfilePipelineResult(
             completedResources: 1,
             incompleteResources: 1,
             outcomes,
-            deltas
+            resources
         );
     }
 
@@ -284,31 +303,28 @@ internal static class SyncResultScenarios
             new QualitySizeDefinitionReferenceMismatchOutcome("movie"),
             new QualitySizeReferenceMismatchOutcome("Unknown", "movie"),
             new QualitySizeServiceQualityNotFoundOutcome("Missing"),
-            new QualitySizePreferredRatioClampedOutcome(new ValueDelta<decimal>(0.5m, 1m)),
+            new QualitySizePreferredRatioClampedOutcome(0.5m, 1m),
             new QualitySizeMinimumGreaterThanPreferredOutcome("One", two, one),
             new QualitySizeUnlimitedPreferredGreaterThanMaximumOutcome("Two", unlimited, two),
             new QualitySizePreferredGreaterThanMaximumOutcome("Three", two, one),
             new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-missing"),
             new QualitySizeAmbiguousGuideReferenceOutcome(["series", "anime"]),
         ];
-        QualitySizeDelta[] deltas =
+        PlannedQualitySizeResource[] resources =
         [
-            new QualitySizeDelta(
+            PlannedQualitySizeResource.Compared(
                 "Bluray",
-                [
-                    new QualitySizeMinimumChanged(new ValueDelta<QualitySizeValue>(one, two)),
-                    new QualitySizePreferredChanged(
-                        new ValueDelta<QualitySizeValue>(two, unlimited)
-                    ),
-                    new QualitySizeMaximumChanged(new ValueDelta<QualitySizeValue>(unlimited, two)),
-                ]
+                (one, two),
+                (two, unlimited),
+                (unlimited, two)
             ),
+            PlannedQualitySizeResource.Compared("WEB", (one, one), (two, two), (two, two)),
         ];
         return new QualitySizePipelineResult(
             completedResources: 1,
             incompleteResources: 1,
             outcomes,
-            deltas
+            resources
         );
     }
 
@@ -321,14 +337,14 @@ internal static class SyncResultScenarios
                     (SonarrNamingOutcome)new SonarrNamingReferenceMismatchOutcome(x, x.ToString())
                 )
                 .ToList(),
-            new SonarrNamingDelta
+            new PlannedSonarrNamingResource
             {
-                RenameEpisodes = new ValueDelta<bool?>(null, false),
-                SeriesFolderFormat = new ValueDelta<string?>(null, "Series"),
-                SeasonFolderFormat = new ValueDelta<string?>("Old", null),
-                StandardEpisodeFormat = new ValueDelta<string?>("Old", "Standard"),
-                DailyEpisodeFormat = new ValueDelta<string?>("Old", "Daily"),
-                AnimeEpisodeFormat = new ValueDelta<string?>("Old", "Anime"),
+                Action = PlannedAction.Update,
+                RenameEpisodes = PlannedValue.Compared<bool?>(null, false),
+                SeriesFolderFormat = PlannedValue.Compared<string?>(null, "Series"),
+                SeasonFolderFormat = PlannedValue.Compared<string?>("Old", null),
+                StandardEpisodeFormat = PlannedValue.Compared<string?>("Old", "Standard"),
+                DailyEpisodeFormat = PlannedValue.Compared<string?>("Daily", "Daily"),
             }
         );
 
@@ -341,19 +357,25 @@ internal static class SyncResultScenarios
                     (RadarrNamingOutcome)new RadarrNamingReferenceMismatchOutcome(x, x.ToString())
                 )
                 .ToList(),
-            new RadarrNamingDelta
+            new PlannedRadarrNamingResource
             {
-                RenameMovies = new ValueDelta<bool?>(true, false),
-                StandardMovieFormat = new ValueDelta<string?>(null, "Standard"),
-                MovieFolderFormat = new ValueDelta<string?>("Old", null),
+                Action = PlannedAction.Update,
+                RenameMovies = PlannedValue.Compared<bool?>(true, false),
+                StandardMovieFormat = PlannedValue.Compared<string?>(null, "Standard"),
+                MovieFolderFormat = PlannedValue.Compared<string?>("Old", null),
             }
         );
 
     private static MediaManagementPipelineResult MediaManagement() =>
         new(
             SyncResultStatus.Failed,
-            new MediaManagementDelta(
-                new ValueDelta<PropersAndRepacksMode?>(null, PropersAndRepacksMode.DoNotPrefer)
-            )
+            new PlannedMediaManagementResource
+            {
+                Action = PlannedAction.Update,
+                PropersAndRepacks = PlannedValue.Compared<PropersAndRepacksMode?>(
+                    null,
+                    PropersAndRepacksMode.DoNotPrefer
+                ),
+            }
         );
 }

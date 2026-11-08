@@ -15,14 +15,12 @@ internal class SonarrV3QualityProfileFields : IQualityProfileServiceFields
         PlannedQualityProfile planned
     ) => profile;
 
-    public IReadOnlyList<QualityProfileUpdateComponent> FindChanges(
-        QualityProfileData current,
-        QualityProfileData desired
-    ) => [];
+    public bool HasChanges(QualityProfileData current, QualityProfileData desired) => false;
 
-    public QualityProfileControlledState DescribeCreate(
-        QualityProfileControlledState shared,
+    public PlannedQualityProfileResource Describe(
+        PlannedQualityProfileResource shared,
+        QualityProfileData? current,
         QualityProfileData desired,
         PlannedQualityProfile planned
-    ) => new SonarrQualityProfileControlledState(shared, []);
+    ) => new SonarrPlannedQualityProfileResource(shared, []);
 }

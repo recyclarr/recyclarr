@@ -72,7 +72,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var partial = new SyncInstanceResult(
             "partial",
             SupportedServices.Radarr,
-            [new MediaManagementPipelineResult(SyncResultStatus.Succeeded, delta: null)],
+            [new MediaManagementPipelineResult(SyncResultStatus.Succeeded, settings: null)],
             fault: new SyncFault("partial-fault")
         );
         var failed = new SyncInstanceResult(

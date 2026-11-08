@@ -41,29 +41,24 @@ internal class RadarrQualityProfileFields(IRadarrLanguageService languageService
         return language is null ? radarrProfile : radarrProfile with { Language = language };
     }
 
-    public IReadOnlyList<QualityProfileUpdateComponent> FindChanges(
-        QualityProfileData current,
-        QualityProfileData desired
-    )
-    {
-        var currentLanguage = AsRadarr(current).Language?.Name;
-        var desiredLanguage = AsRadarr(desired).Language?.Name;
+    public bool HasChanges(QualityProfileData current, QualityProfileData desired) =>
+        LanguageOf(current) != LanguageOf(desired);
 
-        return currentLanguage == desiredLanguage
-            ? []
-            :
-            [
-                new RadarrQualityProfileLanguageChanged(
-                    new ValueDelta<string?>(currentLanguage, desiredLanguage)
-                ),
-            ];
-    }
-
-    public QualityProfileControlledState DescribeCreate(
-        QualityProfileControlledState shared,
+    public PlannedQualityProfileResource Describe(
+        PlannedQualityProfileResource shared,
+        QualityProfileData? current,
         QualityProfileData desired,
         PlannedQualityProfile planned
-    ) => new RadarrQualityProfileControlledState(shared, AsRadarr(desired).Language?.Name);
+    ) =>
+        new RadarrPlannedQualityProfileResource(
+            shared,
+            current is null
+                ? PlannedValue.Created(LanguageOf(desired))
+                : PlannedValue.Compared(LanguageOf(current), LanguageOf(desired))
+        );
+
+    private static string? LanguageOf(QualityProfileData profile) =>
+        AsRadarr(profile).Language?.Name;
 
     private static RadarrQualityProfileData AsRadarr(QualityProfileData profile)
     {

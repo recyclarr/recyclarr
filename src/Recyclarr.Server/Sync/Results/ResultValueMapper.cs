@@ -1,4 +1,5 @@
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
@@ -46,8 +47,31 @@ internal static class ResultValueMapper
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
 
-    public static ValueChangeResponse<T> MapValue<T>(ValueDelta<T> value) =>
-        new(value.Current, value.Desired);
+    public static ResourceAction MapAction(PlannedAction action) =>
+        action switch
+        {
+            PlannedAction.Create => ResourceAction.Create,
+            PlannedAction.Update => ResourceAction.Update,
+            PlannedAction.Unchanged => ResourceAction.Unchanged,
+            _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
+        };
+
+    public static PlannedValueResponse<T> MapValue<T>(PlannedValue<T> value) =>
+        MapValue(value, x => x);
+
+    // Value types map to their nullable form so a created resource's current value can be null.
+    public static PlannedValueResponse<T?> MapNullableValue<T>(PlannedValue<T> value)
+        where T : struct => MapValue(value, x => (T?)x);
+
+    public static PlannedValueResponse<TResponse> MapValue<T, TResponse>(
+        PlannedValue<T> value,
+        Func<T, TResponse> map
+    ) =>
+        new(
+            map(value.Desired),
+            value.Current is { } current ? map(current.Value) : default,
+            value.Changed
+        );
 
     public static QualitySizeValueResponse MapQualitySize(QualitySizeValue value) =>
         value switch
@@ -64,7 +88,13 @@ internal static class ResultValueMapper
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 
-    public static ValueChangeResponse<QualitySizeValueResponse> MapQualitySizeValue(
-        ValueDelta<QualitySizeValue> value
-    ) => new(MapQualitySize(value.Current), MapQualitySize(value.Desired));
+    public static QualitySizeItemResponse MapQualitySizeItem(PlannedQualitySizeResource size) =>
+        new()
+        {
+            Action = MapAction(size.Action),
+            Quality = size.Quality,
+            Minimum = MapValue(size.Minimum, MapQualitySize),
+            Preferred = MapValue(size.Preferred, MapQualitySize),
+            Maximum = MapValue(size.Maximum, MapQualitySize),
+        };
 }

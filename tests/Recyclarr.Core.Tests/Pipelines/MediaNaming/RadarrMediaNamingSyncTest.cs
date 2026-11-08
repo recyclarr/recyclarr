@@ -10,7 +10,7 @@ namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
 internal sealed class RadarrMediaNamingSyncTest
 {
     [Test]
-    public async Task Compute_returns_one_delta_with_only_changed_values()
+    public async Task Compute_returns_every_configured_value()
     {
         var api = Substitute.For<IRadarrNamingService>();
         api.GetNaming(default)
@@ -37,12 +37,17 @@ internal sealed class RadarrMediaNamingSyncTest
 
         result.Status.Should().Be(SyncResultStatus.Succeeded);
         result
-            .Delta.Should()
-            .BeEquivalentTo(
-                new RadarrNamingDelta
+            .Settings.Should()
+            .Be(
+                new PlannedRadarrNamingResource
                 {
-                    RenameMovies = new ValueDelta<bool?>(null, false),
-                    MovieFolderFormat = new ValueDelta<string?>("folder-current", ""),
+                    Action = PlannedAction.Update,
+                    RenameMovies = PlannedValue.Compared<bool?>(null, false),
+                    StandardMovieFormat = PlannedValue.Compared<string?>(
+                        "standard-current",
+                        "standard-current"
+                    ),
+                    MovieFolderFormat = PlannedValue.Compared<string?>("folder-current", ""),
                 }
             );
     }
@@ -67,7 +72,7 @@ internal sealed class RadarrMediaNamingSyncTest
 
         result.Status.Should().Be(SyncResultStatus.Partial);
         result.Outcomes.Should().Equal(mismatch);
-        result.Delta.Should().BeNull();
+        result.Settings!.Action.Should().Be(PlannedAction.Unchanged);
         await api.DidNotReceiveWithAnyArgs().UpdateNaming(default!, default);
     }
 
