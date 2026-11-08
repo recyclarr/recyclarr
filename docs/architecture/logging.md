@@ -39,8 +39,8 @@ persistent server also serves Prometheus metrics on its management port (ADR-029
 metrics, or request log entries.
 
 Each sync job run is its own trace. A job created by an API request links to that request's span;
-scheduled jobs have no link. The job runs in a clean execution context, so state inherited by the
-TickerQ worker (the logging scope and activity of the request that created it) never reaches the
+scheduled jobs have no link. The job runs in a clean execution context, so async-local state
+inherited by the queue worker (such as a request's logging scope and activity) never reaches the
 job's logs or spans.
 
 ## User-visible diagnostics

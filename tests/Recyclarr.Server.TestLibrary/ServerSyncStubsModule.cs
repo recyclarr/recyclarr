@@ -26,8 +26,6 @@ public sealed class ServerSyncStubsModule : Module
                 var database = ServerDatabase.InMemory();
                 using var server = DatabaseContextFactory.Server(database).CreateDbContext();
                 server.Database.Migrate();
-                using var queue = DatabaseContextFactory.TickerQueue(database).CreateDbContext();
-                queue.Database.Migrate();
                 return database;
             })
             .SingleInstance();

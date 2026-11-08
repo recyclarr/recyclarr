@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Recyclarr.Server.Persistence;
 
 /// <summary>
-/// Recyclarr-owned data in the server database: sync job records. Shares the database with
-/// <see cref="TickerQueueDbContext"/> but not its model or migration history, so Recyclarr services
-/// cannot reach TickerQ's tables and TickerQ upgrades never change these migrations.
+/// Recyclarr-owned data in the server database: sync job records. The job queue is not stored here;
+/// Quartz keeps it in memory, and these records are the only durable job data (ADR-024).
 /// </summary>
 /// <remarks>
 /// <para>

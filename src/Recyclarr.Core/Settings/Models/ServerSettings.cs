@@ -5,6 +5,13 @@ public record ServerSettings
     public int Port { get; init; } = 7982;
     public string BindAddress { get; init; } = "localhost";
     public ScheduleSettings Schedule { get; init; } = new();
+
+    /// <summary>
+    /// Minutes a sync job may run before it is canceled and fails, so a hung sync cannot block
+    /// every later job. The time counts from when the job starts running, not while it waits.
+    /// </summary>
+    public int SyncTimeout { get; init; } = 5;
+
     public ManagementSettings Management { get; init; } = new();
     public ServerLoggingSettings Logging { get; init; } = new();
 }

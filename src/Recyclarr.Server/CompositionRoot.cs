@@ -86,7 +86,7 @@ internal static class CompositionRoot
         builder.RegisterType<DatabaseSyncJobStore>().As<ISyncJobStore>().SingleInstance();
 
         builder.RegisterType<SyncJobLauncher>();
-        builder.RegisterType<SyncExecutionGate>().SingleInstance();
+        builder.RegisterType<SyncJobExecution>();
         builder.RegisterType<ScheduledSyncTrigger>();
         builder
             .Register(c =>
@@ -159,10 +159,6 @@ internal static class CompositionRoot
         builder
             .Register(c => DatabaseContextFactory.Server(c.Resolve<ServerDatabase>()))
             .As<IDbContextFactory<ServerDbContext>>()
-            .SingleInstance();
-        builder
-            .Register(c => DatabaseContextFactory.TickerQueue(c.Resolve<ServerDatabase>()))
-            .As<IDbContextFactory<TickerQueueDbContext>>()
             .SingleInstance();
     }
 

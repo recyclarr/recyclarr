@@ -11,7 +11,7 @@ and tests must drive time without the real clock.
 
 ## Decision
 
-Recyclarr computes occurrences with Cronos in a background service and enqueues TickerQ jobs.
+Recyclarr computes occurrences with Cronos in a background service and enqueues sync jobs (ADR-024).
 `settings.yml` is the only source of schedule state.
 
 - `SyncSchedule` parses `server.schedule` (`enabled`, `cron`) with Cronos at startup; an invalid
@@ -27,8 +27,8 @@ Recyclarr computes occurrences with Cronos in a background service and enqueues 
 
 ## Rejected Options
 
-- TickerQ cron tickers: they live in the database (reconciled with `settings.yml` on every start),
-  hide the next occurrence, and run on the real clock.
+- Scheduler-library cron triggers: persisted ones must be reconciled with `settings.yml` on every
+  start, and they hide the next occurrence from the API.
 
 ## Consequences
 

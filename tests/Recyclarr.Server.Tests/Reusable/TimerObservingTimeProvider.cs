@@ -11,7 +11,9 @@ namespace Recyclarr.Server.Tests.Reusable;
 /// </summary>
 /// <remarks>
 /// Timers are told apart by period: <c>Task.Delay</c> creates one-shot timers
-/// (<see cref="Timeout.InfiniteTimeSpan"/>); a <c>PeriodicTimer</c> uses its interval.
+/// (<see cref="Timeout.InfiniteTimeSpan"/>); a <c>PeriodicTimer</c> uses its interval. Timers that
+/// are never due (such as the job queue's idle waits) are not signaled: advancing the clock cannot
+/// fire them, so they are not waits a test drives.
 /// </remarks>
 internal sealed class TimerObservingTimeProvider : FakeTimeProvider
 {
@@ -40,7 +42,11 @@ internal sealed class TimerObservingTimeProvider : FakeTimeProvider
     )
     {
         var timer = base.CreateTimer(callback, state, dueTime, period);
-        Created(period).Writer.TryWrite(true);
+        if (dueTime != Timeout.InfiniteTimeSpan)
+        {
+            Created(period).Writer.TryWrite(true);
+        }
+
         return timer;
     }
 

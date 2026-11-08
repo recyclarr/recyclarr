@@ -1,32 +1,38 @@
+using System.Diagnostics;
 using System.IO.Abstractions;
+using System.Net;
 using System.Net.Http.Json;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
+using Recyclarr.Server.Features.Sync.CreateJob;
 using Recyclarr.Server.Features.Sync.GetSchedule;
 using Recyclarr.Server.Features.Sync.ListJobs;
 using Recyclarr.Server.Hosting;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.TestLibrary;
 using Recyclarr.Server.Tests.Reusable;
+using Recyclarr.Sync;
 using ISyncApi = Recyclarr.Client.V1.ISyncApi;
 using RestService = Refit.RestService;
 
 namespace Recyclarr.Server.Tests.Http;
 
-// The scheduler waits on the server's TimeProvider, so advancing fake time fires occurrences. Fake
-// time starts in the past: TickerQ runs queued jobs by the real clock. The fake clock's local time
-// zone (UTC unless a test sets it) stands in for the system time zone.
+// The scheduler waits on the server's TimeProvider, so advancing fake time fires occurrences. The
+// job queue reads the same clock, so a queued job is due as soon as it is created. The fake clock's
+// local time zone (UTC unless a test sets it) stands in for the system time zone.
 internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
 {
     private static readonly DateTimeOffset Start = new(2025, 1, 1, 12, 0, 0, TimeSpan.Zero);
     private static readonly DateTimeOffset Midnight = new(2025, 1, 2, 0, 0, 0, TimeSpan.Zero);
 
     private readonly TimerObservingTimeProvider _time = new(Start);
+    private readonly ScriptedOrchestrator _orchestrator = new();
     private ServerMode _mode = ServerMode.Persistent;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterInstance(_time).As<TimeProvider>();
+        builder.RegisterInstance(_orchestrator).As<ISyncOrchestrator>();
         var mode = _mode;
         builder.Register(_ => mode);
     }
@@ -102,6 +108,25 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         var schedule = await GetSchedule(client);
         schedule.PreviousOccurrence.Should().Be(Midnight);
         schedule.NextOccurrence.Should().Be(Midnight.AddDays(1));
+    }
+
+    [Test]
+    public async Task Scheduled_job_runs_in_its_own_trace_without_links()
+    {
+        using var spans = new RecordedSpans();
+        AddInstance();
+        using var client = CreateClient();
+
+        await SchedulerWait();
+        _time.SetUtcNow(Midnight);
+        await SchedulerWait();
+        var scheduled = await TheOnlyScheduledJob(client);
+        await FirstJobFinished(client);
+
+        var span = spans.ForJob(scheduled.Id);
+        span.ParentSpanId.Should().Be(default(ActivitySpanId));
+        span.Links.Should().BeEmpty();
+        span.GetTagItem("recyclarr.sync.job.trigger").Should().Be("scheduled");
     }
 
     [Test]
@@ -190,6 +215,18 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     /// moving the clock proves the occurrence's job exists.
     /// </summary>
     private Task SchedulerWait() => _time.NextTimer(Timeout.InfiniteTimeSpan);
+
+    // The queue finishes one job before it starts the next, so a later manual job starting proves
+    // the scheduled job (the first run) has finished.
+    private async Task FirstJobFinished(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync(
+            new Uri("/api/v1/sync/jobs", UriKind.Relative),
+            new CreateSyncJobRequest { Instances = ["movies"] }
+        );
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        await _orchestrator.Started(2);
+    }
 
     private static async Task<SyncJobSummaryResponse> TheOnlyScheduledJob(HttpClient client) =>
         (await ListScheduledJobs(client)).Should().ContainSingle().Subject;

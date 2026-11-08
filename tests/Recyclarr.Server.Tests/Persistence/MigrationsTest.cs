@@ -21,15 +21,6 @@ internal sealed class MigrationsTest
         PendingOperations(db).Should().BeEmpty(Hint<ServerDbContext>());
     }
 
-    [Test]
-    public void Ticker_queue_model_has_no_changes_without_a_migration()
-    {
-        using var database = ServerDatabase.InMemory();
-        using var db = DatabaseContextFactory.TickerQueue(database).CreateDbContext();
-
-        PendingOperations(db).Should().BeEmpty(Hint<TickerQueueDbContext>());
-    }
-
     private static string Hint<TContext>() =>
         $"a migration must capture the model; run: dotnet ef migrations add <Name> "
         + $"--project src/Recyclarr.Server --context {typeof(TContext).Name}";
