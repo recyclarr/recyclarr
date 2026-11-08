@@ -11,7 +11,7 @@ internal sealed class Endpoint(
     ResourceCoordinator resources,
     ISyncJobStore store,
     // Lazy: endpoints are constructed while routes are mapped, including during build-time OpenAPI
-    // generation, where TickerQ (the launcher's queue) is not registered.
+    // generation, where Quartz (the launcher's queue) is not registered.
     Lazy<SyncJobLauncher> launcher
 ) : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
 {

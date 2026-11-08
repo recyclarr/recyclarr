@@ -40,12 +40,6 @@ internal interface ISyncJobStore
     void Update(JobId id, Action<SyncJob> mutate);
 
     /// <summary>
-    /// Records the TickerQ ticker that executes the job, so evicting the job also removes the
-    /// ticker. Applies whatever the job's status.
-    /// </summary>
-    void AssignTicker(JobId id, Guid tickerId);
-
-    /// <summary>
     /// Marks every pending or running job <see cref="SyncJobStatus.Interrupted"/>. Only valid at
     /// startup, before any job can run.
     /// </summary>

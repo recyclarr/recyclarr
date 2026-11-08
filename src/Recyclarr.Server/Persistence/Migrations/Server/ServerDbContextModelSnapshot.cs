@@ -79,9 +79,6 @@ namespace ServerDatabaseMigrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("TickerId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("TraceParent")
                         .HasColumnType("TEXT");
 

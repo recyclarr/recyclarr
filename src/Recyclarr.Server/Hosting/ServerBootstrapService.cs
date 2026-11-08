@@ -21,7 +21,6 @@ internal sealed class ServerBootstrapService(
     ServerLogJanitor logJanitor,
     ServerLogger logger,
     IDbContextFactory<ServerDbContext> serverDb,
-    IDbContextFactory<TickerQueueDbContext> tickerQueueDb,
     ISyncJobStore jobs,
     SettingsBindResult settings,
     IConfiguration configuration,
@@ -88,23 +87,14 @@ internal sealed class ServerBootstrapService(
         migrations.RunAll();
         await resources.RefreshAsync(RefreshMode.Startup, ct);
 
-        // TickerQ's hosted services read their tables as soon as they start. The host runs every
-        // StartingAsync before any StartAsync, so its tables exist by then.
-        await MigrateAsync(serverDb, ct);
-        await MigrateAsync(tickerQueueDb, ct);
+        await using (var db = await serverDb.CreateDbContextAsync(ct))
+        {
+            await db.Database.MigrateAsync(ct);
+        }
 
-        // Nothing can be running yet, so any active job was cut off by the previous shutdown.
+        // The host runs every StartingAsync before any StartAsync, so the job queue has not started
+        // and any active job was cut off by the previous shutdown.
         jobs.InterruptActive();
-    }
-
-    private static async Task MigrateAsync<TContext>(
-        IDbContextFactory<TContext> factory,
-        CancellationToken ct
-    )
-        where TContext : DbContext
-    {
-        await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.MigrateAsync(ct);
     }
 
     public Task StartAsync(CancellationToken ct) => Task.CompletedTask;

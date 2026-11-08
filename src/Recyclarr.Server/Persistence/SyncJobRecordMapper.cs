@@ -15,12 +15,10 @@ internal static partial class SyncJobRecordMapper
     [MapperIgnoreSource(nameof(SyncJobRecord.Service))]
     [MapperIgnoreSource(nameof(SyncJobRecord.Instances))]
     [MapperIgnoreSource(nameof(SyncJobRecord.Preview))]
-    [MapperIgnoreSource(nameof(SyncJobRecord.TickerId))]
     public static partial SyncJob ToJob(SyncJobRecord record);
 
     [MapProperty(nameof(SyncJob.SkippedBy), nameof(SyncJobRecord.SkippedByJobId))]
     [MapNestedProperties(nameof(SyncJob.Request))]
-    [MapperIgnoreTarget(nameof(SyncJobRecord.TickerId))]
     public static partial SyncJobRecord ToRecord(SyncJob job);
 
     public static partial IQueryable<SyncJobSummary> ProjectToSummary(

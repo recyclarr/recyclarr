@@ -9,11 +9,10 @@ using Recyclarr.Server.Api;
 using Recyclarr.Server.Logging;
 using Recyclarr.Server.Observability;
 using Recyclarr.Server.OutboundHttp;
-using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Resources;
+using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Schedule;
 using Recyclarr.Settings.Configuration;
-using TickerQ.DependencyInjection;
 
 namespace Recyclarr.Server.Hosting;
 
@@ -93,7 +92,7 @@ internal static class ServerHost
 
         if (!launch.IsDocumentGeneration)
         {
-            services.AddServerPersistence();
+            services.AddSyncJobQueue();
             services.AddHostedService<ServerBootstrapService>();
             services.AddHostedService<SyncScheduler>();
             services.AddHostedService<ResourceRefreshWorker>();
@@ -193,11 +192,6 @@ internal static class ServerHost
         }
 
         app.UseServerApi();
-
-        if (!launch.IsDocumentGeneration)
-        {
-            app.UseTickerQ();
-        }
 
         return app;
     }

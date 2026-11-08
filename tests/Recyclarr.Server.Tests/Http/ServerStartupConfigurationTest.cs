@@ -127,6 +127,11 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
         "settings.yml line 3, column 5: `server.schedule.cron` must not be empty",
         TestName = "Invalid setting value stops startup"
     )]
+    [TestCase(
+        "server:\n  sync_timeout: 0\n",
+        "settings.yml line 2, column 3: `server.sync_timeout` must be at least 1 minute",
+        TestName = "Sync timeout below one minute stops startup"
+    )]
     public void Invalid_settings_stop_startup_with_their_position(string yaml, string expected)
     {
         Fs.AddFile(Paths.ConfigDirectory.File("settings.yml"), new MockFileData(yaml));

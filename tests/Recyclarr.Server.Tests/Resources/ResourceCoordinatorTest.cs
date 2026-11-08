@@ -1,10 +1,9 @@
 using System.IO.Abstractions;
 using Autofac;
-using Recyclarr.Config;
+using Quartz;
 using Recyclarr.Repo;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Storage;
-using Recyclarr.Server.Observability;
 using Recyclarr.Server.Resources;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Tests.Reusable;
@@ -13,7 +12,6 @@ using Recyclarr.Sync.Results;
 using Recyclarr.VersionControl;
 using Serilog.Core;
 using Serilog.Events;
-using TickerQ.Utilities.Base;
 
 namespace Recyclarr.Server.Tests.Resources;
 
@@ -284,22 +282,10 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
         await worker.StopAsync(CancellationToken.None);
     }
 
-    private Task RunSyncJob(JobId id)
+    private async Task RunSyncJob(JobId id)
     {
-        var function = new SyncJobTickerFunction(
-            Substitute.For<ILogger>(),
-            Resolve<ISyncJobStore>(),
-            Coordinator,
-            new SyncExecutionGate(),
-            Resolve<SyncRunScopeFactory>(),
-            Resolve<SyncJobFinalizer>(),
-            Resolve<SyncJobTelemetry>()
-        );
-        var context = new TickerFunctionContext<SyncJobTickerRequest>(
-            new TickerFunctionContext(),
-            new SyncJobTickerRequest(id.Value)
-        );
-        return function.ExecuteAsync(context, CancellationToken.None);
+        await Resolve<SyncJobExecution>()
+            .Execute(Substitute.For<IJobExecutionContext>(), new SyncJobInput(id.Value));
     }
 
     [Test]

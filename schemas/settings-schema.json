@@ -93,6 +93,13 @@
             }
           }
         },
+        "sync_timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "title": "Minutes a sync job may run before it is canceled",
+          "description": "A sync that runs longer is canceled and fails, so the next queued job can start. Time spent waiting behind another job does not count. Raise it for slow connections, many instances, or high-latency servers."
+        },
         "schedule": {
           "type": ["null", "object"],
           "additionalProperties": false,
