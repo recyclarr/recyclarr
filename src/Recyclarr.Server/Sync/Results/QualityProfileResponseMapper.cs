@@ -71,7 +71,7 @@ internal static class QualityProfileResponseMapper
                         MinimumUpgradeFormatScore = shared.MinimumUpgradeFormatScore,
                         Qualities = shared.Qualities,
                         CustomFormatScores = shared.CustomFormatScores,
-                        Language = ResultValueMapper.MapValue(radarr.Language),
+                        Language = MapField(radarr.Language, x => x),
                     };
                 })
                 .ToList(),
@@ -86,18 +86,39 @@ internal static class QualityProfileResponseMapper
             Action = ResultValueMapper.MapAction(resource.Action),
             Identity = MapIdentity(resource.Identity),
             Name = ResultValueMapper.MapValue(resource.Name),
-            UpgradeAllowed = ResultValueMapper.MapValue(resource.UpgradeAllowed),
-            UpgradeUntilQuality = ResultValueMapper.MapValue(resource.UpgradeUntilQuality),
-            UpgradeUntilScore = ResultValueMapper.MapValue(resource.UpgradeUntilScore),
-            MinimumFormatScore = ResultValueMapper.MapValue(resource.MinimumFormatScore),
-            MinimumUpgradeFormatScore = ResultValueMapper.MapValue(
-                resource.MinimumUpgradeFormatScore
-            ),
-            Qualities = ResultValueMapper.MapValue<
+            UpgradeAllowed = MapField(resource.UpgradeAllowed, x => x),
+            UpgradeUntilQuality = MapField(resource.UpgradeUntilQuality, x => x),
+            UpgradeUntilScore = MapField(resource.UpgradeUntilScore, x => x),
+            MinimumFormatScore = MapField(resource.MinimumFormatScore, x => x),
+            MinimumUpgradeFormatScore = MapField(resource.MinimumUpgradeFormatScore, x => x),
+            Qualities = MapField<
                 IReadOnlyList<QualityProfileQualityLayoutItem>,
                 IReadOnlyList<QualityProfileLayoutResponse>
             >(resource.Qualities, x => x.Select(MapLayout).ToList()),
             CustomFormatScores = resource.CustomFormatScores.Select(MapScore).ToList(),
+        };
+
+    private static QualityProfileFieldResponse<TResponse> MapField<T, TResponse>(
+        QualityProfileField<T> field,
+        Func<T, TResponse> map
+    ) =>
+        new()
+        {
+            Reason = field.Reason switch
+            {
+                Pipelines.QualityProfile.QualityProfileFieldReason.Set => Features
+                    .Sync
+                    .GetResults
+                    .QualityProfileFieldReason
+                    .Set,
+                Pipelines.QualityProfile.QualityProfileFieldReason.Unmanaged => Features
+                    .Sync
+                    .GetResults
+                    .QualityProfileFieldReason
+                    .Unmanaged,
+                _ => throw new ArgumentOutOfRangeException(nameof(field), field.Reason, null),
+            },
+            Value = ResultValueMapper.MapValue(field.Value, map),
         };
 
     private static QualityProfileIdentityResponse MapIdentity(QualityProfileIdentity identity) =>
@@ -160,6 +181,6 @@ internal static class QualityProfileResponseMapper
                     .Unmanaged,
                 _ => throw new ArgumentOutOfRangeException(nameof(score), score.Reason, null),
             },
-            Score = ResultValueMapper.MapNullableValue(score.Score),
+            Value = ResultValueMapper.MapNullableValue(score.Value),
         };
 }

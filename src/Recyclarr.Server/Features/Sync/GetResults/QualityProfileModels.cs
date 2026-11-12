@@ -19,6 +19,33 @@ internal enum QualityProfileLayoutKind
     Group,
 }
 
+/// <summary>Why a profile field has its desired value.</summary>
+internal enum QualityProfileFieldReason
+{
+    [Description(
+        "Recyclarr manages the value: the configuration or guide sets it, or Recyclarr picks it "
+            + "because the service requires one (for example, the first allowed quality as the "
+            + "upgrade-until quality)."
+    )]
+    Set,
+
+    [Description(
+        "Nothing sets the value, so it keeps its value in the service (the service default for a "
+            + "created profile)."
+    )]
+    Unmanaged,
+}
+
+/// <summary>
+/// A profile field and why it has its desired value. The reason sits beside the value, never in
+/// it.
+/// </summary>
+internal sealed record QualityProfileFieldResponse<T>
+{
+    public required QualityProfileFieldReason Reason { get; init; }
+    public required PlannedValueResponse<T> Value { get; init; }
+}
+
 /// <summary>Why a custom format score has its desired value.</summary>
 internal enum QualityProfileScoreReason
 {
@@ -62,26 +89,25 @@ internal sealed record QualityProfileScoreResponse
     public string? TrashId { get; init; }
 
     public required QualityProfileScoreReason Reason { get; init; }
-    public required PlannedValueResponse<int?> Score { get; init; }
+    public required PlannedValueResponse<int?> Value { get; init; }
 }
 
 /// <summary>
-/// One configured profile and every value Recyclarr manages on it, changed or not. Values neither
-/// the configuration nor the guide sets keep their service value (or the service default for a
-/// created profile).
+/// One configured profile and every value on it, changed or not. Each field's `reason` tells
+/// whether Recyclarr manages it or it keeps its service value.
 /// </summary>
 internal record QualityProfileItemResponse
 {
     public required ResourceAction Action { get; init; }
     public required QualityProfileIdentityResponse Identity { get; init; }
     public required PlannedValueResponse<string> Name { get; init; }
-    public required PlannedValueResponse<bool?> UpgradeAllowed { get; init; }
-    public required PlannedValueResponse<string?> UpgradeUntilQuality { get; init; }
-    public required PlannedValueResponse<int?> UpgradeUntilScore { get; init; }
-    public required PlannedValueResponse<int?> MinimumFormatScore { get; init; }
-    public required PlannedValueResponse<int?> MinimumUpgradeFormatScore { get; init; }
+    public required QualityProfileFieldResponse<bool?> UpgradeAllowed { get; init; }
+    public required QualityProfileFieldResponse<string?> UpgradeUntilQuality { get; init; }
+    public required QualityProfileFieldResponse<int?> UpgradeUntilScore { get; init; }
+    public required QualityProfileFieldResponse<int?> MinimumFormatScore { get; init; }
+    public required QualityProfileFieldResponse<int?> MinimumUpgradeFormatScore { get; init; }
 
-    public required PlannedValueResponse<
+    public required QualityProfileFieldResponse<
         IReadOnlyList<QualityProfileLayoutResponse>
     > Qualities { get; init; }
 
@@ -91,7 +117,7 @@ internal record QualityProfileItemResponse
 
 internal sealed record RadarrQualityProfileItemResponse : QualityProfileItemResponse
 {
-    public required PlannedValueResponse<string?> Language { get; init; }
+    public required QualityProfileFieldResponse<string?> Language { get; init; }
 }
 
 internal sealed record SonarrQualityProfileItemResponse : QualityProfileItemResponse

@@ -196,14 +196,32 @@ internal static class SyncResultScenarios
             Action = PlannedAction.Create,
             Identity = guide,
             Name = PlannedValue.Created("Guide"),
-            UpgradeAllowed = PlannedValue.Created<bool?>(null),
-            UpgradeUntilQuality = PlannedValue.Created<string?>("Cutoff"),
-            UpgradeUntilScore = PlannedValue.Created<int?>(100),
-            MinimumFormatScore = PlannedValue.Created<int?>(0),
-            MinimumUpgradeFormatScore = PlannedValue.Created<int?>(null),
-            Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
-                desiredLayout,
-            ]),
+            UpgradeAllowed = QualityProfileField.Of(
+                managed: false,
+                PlannedValue.Created<bool?>(null)
+            ),
+            UpgradeUntilQuality = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Created<string?>("Cutoff")
+            ),
+            UpgradeUntilScore = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Created<int?>(100)
+            ),
+            MinimumFormatScore = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Created<int?>(0)
+            ),
+            MinimumUpgradeFormatScore = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Created<int?>(null)
+            ),
+            Qualities = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
+                    desiredLayout,
+                ])
+            ),
             CustomFormatScores =
             [
                 new("CF", "cf-one", PlannedValue.Created(10), QualityProfileScoreReason.Set),
@@ -214,15 +232,33 @@ internal static class SyncResultScenarios
             Action = PlannedAction.Update,
             Identity = user,
             Name = PlannedValue.Compared("Old", "New"),
-            UpgradeAllowed = PlannedValue.Compared<bool?>(null, false),
-            UpgradeUntilQuality = PlannedValue.Compared<string?>(null, "Bluray"),
-            UpgradeUntilScore = PlannedValue.Compared<int?>(0, null),
-            MinimumFormatScore = PlannedValue.Compared<int?>(null, 5),
-            MinimumUpgradeFormatScore = PlannedValue.Compared<int?>(6, 6),
-            Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
-                [currentLayout],
-                [desiredLayout],
-                changed: true
+            UpgradeAllowed = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Compared<bool?>(null, false)
+            ),
+            UpgradeUntilQuality = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Compared<string?>(null, "Bluray")
+            ),
+            UpgradeUntilScore = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Compared<int?>(0, null)
+            ),
+            MinimumFormatScore = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Compared<int?>(null, 5)
+            ),
+            MinimumUpgradeFormatScore = QualityProfileField.Of(
+                managed: false,
+                PlannedValue.Compared<int?>(6, 6)
+            ),
+            Qualities = QualityProfileField.Of(
+                managed: true,
+                PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                    [currentLayout],
+                    [desiredLayout],
+                    changed: true
+                )
             ),
             CustomFormatScores =
             [
@@ -237,11 +273,14 @@ internal static class SyncResultScenarios
             [
                 new RadarrPlannedQualityProfileResource(
                     created,
-                    PlannedValue.Created<string?>("English")
+                    QualityProfileField.Of(managed: true, PlannedValue.Created<string?>("English"))
                 ),
                 new RadarrPlannedQualityProfileResource(
                     updated,
-                    PlannedValue.Compared<string?>(null, "English")
+                    QualityProfileField.Of(
+                        managed: true,
+                        PlannedValue.Compared<string?>(null, "English")
+                    )
                 ),
             ]
             :

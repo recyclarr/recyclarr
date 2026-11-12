@@ -64,6 +64,7 @@ Model as job resources, never verb endpoints (ADR-011):
 - Polling only; no SSE
 - Large result payloads belong on a sub-resource (`GET .../jobs/{id}/results`), never on the polled
   job resource (ADR-016); DTOs are shaped for what consumers render, not mirrors of domain types
+- Result value objects hold only plan state; identity and reason sit beside them (ADR-016)
 - "Is one running" = filter the jobs collection, never a singleton status resource
 
 ## FastEndpoints

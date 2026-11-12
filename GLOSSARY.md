@@ -59,6 +59,12 @@ contain smaller value or structure deltas. _Avoid_: Message
 
 **Value delta**: The current and desired values of one semantic value within a resource delta.
 
+**Managed value**: A value Recyclarr decides during a sync, whether configuration, guide data, or a
+Recyclarr rule chooses it. _Avoid_: Configured value, set value
+
+**Unmanaged value**: A value nothing in Recyclarr decides, so the sync keeps the service's value. On
+a created resource, that is the service default.
+
 **Fault**: An unexpected operational or software failure during a sync. A fault is not an outcome.
 
 **Progress**: A transient observation of ongoing sync execution. Progress is not part of a terminal

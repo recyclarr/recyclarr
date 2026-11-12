@@ -147,6 +147,8 @@ successful. Batch and singleton pipelines follow their API request granularity.
 - Guide-backed identity reuses `MappingKey` for Trash ID and configured name
 - User-defined identity contains only the configured name
 - Every valid configured profile is one planned resource with every field the sync writes
+- Fields that can hold an unmanaged value carry a reason: set (managed) or unmanaged (kept from the
+  service)
 - Every Custom Format score in the profile is present, with a reason: set by configuration or guide,
   reset by `reset_unmatched_scores`, or unmanaged (kept from the service)
 - Quality Profile resources are independent, so recognized per-profile failures may continue
