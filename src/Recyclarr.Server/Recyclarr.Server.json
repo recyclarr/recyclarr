@@ -2518,6 +2518,82 @@
           }
         }
       },
+      "QualityProfileFieldReason": {
+        "enum": [
+          "set",
+          "unmanaged"
+        ],
+        "type": "string",
+        "description": "Why a profile field has its desired value.",
+        "x-enumDescriptions": {
+          "set": "Recyclarr manages the value: the configuration or guide sets it, or Recyclarr picks it because the service requires one (for example, the first allowed quality as the upgrade-until quality).",
+          "unmanaged": "Nothing sets the value, so it keeps its value in the service (the service default for a created profile)."
+        }
+      },
+      "QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
+        "required": [
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileFieldReason"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+          }
+        },
+        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
+      },
+      "QualityProfileFieldResponseOfNullableOfBoolean": {
+        "required": [
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileFieldReason"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+          }
+        },
+        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
+      },
+      "QualityProfileFieldResponseOfNullableOfInt32": {
+        "required": [
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileFieldReason"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          }
+        },
+        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
+      },
+      "QualityProfileFieldResponseOfString": {
+        "required": [
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileFieldReason"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+          }
+        },
+        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
+      },
       "QualityProfileIdentityKind": {
         "enum": [
           "guideBacked",
@@ -2634,7 +2710,7 @@
         "required": [
           "name",
           "reason",
-          "score"
+          "value"
         ],
         "type": "object",
         "properties": {
@@ -2651,7 +2727,7 @@
           "reason": {
             "$ref": "#/components/schemas/QualityProfileScoreReason"
           },
-          "score": {
+          "value": {
             "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
           }
         }
@@ -2940,7 +3016,7 @@
         "type": "object",
         "properties": {
           "language": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfString"
           },
           "action": {
             "$ref": "#/components/schemas/ResourceAction"
@@ -2952,22 +3028,22 @@
             "$ref": "#/components/schemas/PlannedValueResponseOfString"
           },
           "upgradeAllowed": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfBoolean"
           },
           "upgradeUntilQuality": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfString"
           },
           "upgradeUntilScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "minimumFormatScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "minimumUpgradeFormatScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "qualities": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
           },
           "customFormatScores": {
             "description": "Every custom format score in the profile.",
@@ -3325,22 +3401,22 @@
             "$ref": "#/components/schemas/PlannedValueResponseOfString"
           },
           "upgradeAllowed": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfBoolean"
           },
           "upgradeUntilQuality": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfString"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfString"
           },
           "upgradeUntilScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "minimumFormatScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "minimumUpgradeFormatScore": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "qualities": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
           },
           "customFormatScores": {
             "description": "Every custom format score in the profile.",

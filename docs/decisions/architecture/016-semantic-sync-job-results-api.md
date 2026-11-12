@@ -71,9 +71,15 @@ check the full planned state without reading Sonarr or Radarr. Each resource has
 management) have one optional settings object instead of a list. Custom format deletes are a
 separate list of identities.
 
-Each managed value carries `desired` (the value after the sync), `current` (the service value, null
-on create), and `changed`. Clients use `changed` rather than comparing values, because the server
+Each value carries `desired` (the value after the sync), `current` (the service value, null on
+create), and `changed`. Clients use `changed` rather than comparing values, because the server
 compares some values semantically.
+
+A value object holds only that plan state, so clients read every value the same way. What identifies
+a value, and why it has its desired value, sit beside the value object on the entry that owns it,
+never inside it. Example: a custom format score entry has `name`, `trashId`, and `reason` next to
+its `value`. A `reason` appears only where a value can be either managed or unmanaged (glossary); a
+resource whose values are always managed has none.
 
 ### Outcomes
 
@@ -94,7 +100,7 @@ that affects several quality profiles, such as the instance `quality_definition`
 appears under each affected profile; profiles that use their own source show nothing.
 
 The response does not include request settings, progress snapshots, full Sonarr or Radarr resources,
-values Recyclarr does not manage, or raw Core models.
+values outside the resources Recyclarr manages, or raw Core models.
 
 ### Contract ownership
 
@@ -137,6 +143,8 @@ messages, stack traces, or C# type names.
 - Changed values only: a client checking a planned profile against a policy must also read the
   service.
 - Full planned state beside separate change lists: reports each change twice, in two places.
+- `reason` inside the value object: the value shape then differs by pipeline, and clients must know
+  where `reason` can appear and what its absence means.
 
 ## Consequences
 
@@ -154,3 +162,4 @@ messages, stack traces, or C# type names.
 - 2026-10-18: Outcomes appear under each affected resource; no cross-references by identity.
 - 2026-11-05: Outcomes use one envelope with a server-rendered message and string codes.
 - 2026-11-08: Results include every managed resource and value, changed or not.
+- 2026-11-12: Value objects hold only plan state; identity and reason sit beside them.

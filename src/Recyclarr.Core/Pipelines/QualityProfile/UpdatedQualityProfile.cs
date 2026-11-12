@@ -53,25 +53,45 @@ public record UpdatedQualityProfile
         }
     }
 
-    public bool? EffectiveUpgradeAllowed =>
-        ProfileConfig.Config.UpgradeAllowed
-        ?? ProfileConfig.GuideResource?.UpgradeAllowed
-        ?? Profile.UpgradeAllowed;
-
-    public int? EffectiveMinFormatScore =>
-        ProfileConfig.Config.MinFormatScore
-        ?? ProfileConfig.GuideResource?.MinFormatScore
-        ?? Profile.MinFormatScore;
+    public bool? EffectiveUpgradeAllowed => ManagedUpgradeAllowed ?? Profile.UpgradeAllowed;
+    public int? EffectiveMinFormatScore => ManagedMinFormatScore ?? Profile.MinFormatScore;
 
     public int? EffectiveMinUpgradeFormatScore =>
-        ProfileConfig.Config.MinUpgradeFormatScore
-        ?? ProfileConfig.GuideResource?.MinUpgradeFormatScore
-        ?? Profile.MinUpgradeFormatScore;
+        ManagedMinUpgradeFormatScore ?? Profile.MinUpgradeFormatScore;
 
-    public int? EffectiveCutoffFormatScore =>
-        ProfileConfig.Config.UpgradeUntilScore
-        ?? ProfileConfig.GuideResource?.CutoffFormatScore
-        ?? Profile.CutoffFormatScore;
+    public int? EffectiveCutoffFormatScore => ManagedCutoffFormatScore ?? Profile.CutoffFormatScore;
+
+    // Managed values: what configuration or guide data decides, null when neither does and the
+    // service value stays.
+    internal bool? ManagedUpgradeAllowed =>
+        ProfileConfig.Config.UpgradeAllowed ?? ProfileConfig.GuideResource?.UpgradeAllowed;
+
+    internal int? ManagedMinFormatScore =>
+        ProfileConfig.Config.MinFormatScore ?? ProfileConfig.GuideResource?.MinFormatScore;
+
+    internal int? ManagedMinUpgradeFormatScore =>
+        ProfileConfig.Config.MinUpgradeFormatScore
+        ?? ProfileConfig.GuideResource?.MinUpgradeFormatScore;
+
+    internal int? ManagedCutoffFormatScore =>
+        ProfileConfig.Config.UpgradeUntilScore ?? ProfileConfig.GuideResource?.CutoffFormatScore;
+
+    /// <summary>
+    /// Configured qualities manage the layout. Without them, Recyclarr still manages it when it
+    /// adds qualities the service has but the profile lacks.
+    /// </summary>
+    internal bool QualitiesManaged => ConfiguresQualities || MissingQualities.Count > 0;
+
+    private bool ConfiguresQualities => UpdatedQualities.NumWantedItems > 0;
+
+    /// <summary>
+    /// The service requires a cutoff, so Recyclarr also manages it when nothing configures one and
+    /// the profile has none; it then picks the first allowed quality.
+    /// </summary>
+    internal bool CutoffManaged => ManagedCutoffName is not null || Profile.Cutoff is null;
+
+    private string? ManagedCutoffName =>
+        ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.GuideResource?.Cutoff;
 
     public QualityProfileData BuildMergedProfile()
     {
@@ -87,7 +107,7 @@ public record UpdatedQualityProfile
                 .ToList(),
         };
 
-        if (UpdatedQualities.NumWantedItems > 0)
+        if (ConfiguresQualities)
         {
             merged = merged with { Items = UpdatedQualities.Items };
         }
@@ -105,13 +125,11 @@ public record UpdatedQualityProfile
         //
         // Additionally, there's no point in assigning a cutoff if the user didn't specify one in
         // their config.
-        var effectiveCutoff =
-            ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.GuideResource?.Cutoff;
-        if (merged.Cutoff is null || effectiveCutoff is not null)
+        if (CutoffManaged)
         {
             merged = merged with
             {
-                Cutoff = merged.Items.FindCutoff(effectiveCutoff) ?? merged.Items.FirstCutoffId(),
+                Cutoff = merged.Items.FindCutoff(ManagedCutoffName) ?? merged.Items.FirstCutoffId(),
             };
         }
 

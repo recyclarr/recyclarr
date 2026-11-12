@@ -194,7 +194,7 @@ internal sealed record QualityProfileResults(
                                 ),
                                 .. new[]
                                 {
-                                    FieldChange.From("Language", x.Language),
+                                    FieldChange.From("Language", x.Language.Value),
                                 }.OfType<FieldChange>(),
                             ],
                             x.Qualities,
@@ -206,20 +206,20 @@ internal sealed record QualityProfileResults(
 
     private static IEnumerable<FieldChange> SharedFields(
         PlannedValueResponseOfString name,
-        PlannedValueResponseOfNullableOfBoolean upgradeAllowed,
-        PlannedValueResponseOfNullableOfInt32 minimumFormatScore,
-        PlannedValueResponseOfNullableOfInt32 minimumUpgradeFormatScore,
-        PlannedValueResponseOfString upgradeUntilQuality,
-        PlannedValueResponseOfNullableOfInt32 upgradeUntilScore
+        QualityProfileFieldResponseOfNullableOfBoolean upgradeAllowed,
+        QualityProfileFieldResponseOfNullableOfInt32 minimumFormatScore,
+        QualityProfileFieldResponseOfNullableOfInt32 minimumUpgradeFormatScore,
+        QualityProfileFieldResponseOfString upgradeUntilQuality,
+        QualityProfileFieldResponseOfNullableOfInt32 upgradeUntilScore
     ) =>
         new[]
         {
             FieldChange.From("Name", name),
-            FieldChange.From("Upgrades Allowed?", upgradeAllowed),
-            FieldChange.From("Minimum Format Score", minimumFormatScore),
-            FieldChange.From("Minimum Format Upgrade Score", minimumUpgradeFormatScore),
-            FieldChange.From("Upgrade Until Quality", upgradeUntilQuality),
-            FieldChange.From("Upgrade Until Score", upgradeUntilScore),
+            FieldChange.From("Upgrades Allowed?", upgradeAllowed.Value),
+            FieldChange.From("Minimum Format Score", minimumFormatScore.Value),
+            FieldChange.From("Minimum Format Upgrade Score", minimumUpgradeFormatScore.Value),
+            FieldChange.From("Upgrade Until Quality", upgradeUntilQuality.Value),
+            FieldChange.From("Upgrade Until Score", upgradeUntilScore.Value),
         }.OfType<FieldChange>();
 
     // A created profile lists every score it sets; an updated one lists only changed scores.
@@ -227,14 +227,15 @@ internal sealed record QualityProfileResults(
         ResourceAction action,
         QualityProfileIdentityResponse identity,
         IEnumerable<FieldChange> fields,
-        PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse qualities,
+        QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse qualityField,
         ICollection<QualityProfileScoreResponse> scores
     )
     {
         var created = action == ResourceAction.Create;
         var shownScores = created
             ? scores.Where(x => x.Reason != QualityProfileScoreReason.Unmanaged)
-            : scores.Where(x => x.Score.Changed);
+            : scores.Where(x => x.Value.Changed);
+        var qualities = qualityField.Value;
 
         return new ProfileChange(
             identity,
@@ -245,8 +246,8 @@ internal sealed record QualityProfileResults(
             [
                 .. shownScores.Select(x => new ScoreChange(
                     x.Name,
-                    FieldChange.Text(x.Score.Current),
-                    FieldChange.Text(x.Score.Desired),
+                    FieldChange.Text(x.Value.Current),
+                    FieldChange.Text(x.Value.Desired),
                     created ? "Set" : x.Reason.ToString()
                 )),
             ],

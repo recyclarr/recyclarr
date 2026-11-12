@@ -818,15 +818,19 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 Action = action,
                 Identity = new UserDefinedQualityProfileIdentity(name),
                 Name = PlannedValue.Compared(name, name),
-                UpgradeAllowed = PlannedValue.Compared<bool?>(true, true),
-                UpgradeUntilQuality = PlannedValue.Compared<string?>("Remux-2160p", "Remux-2160p"),
-                UpgradeUntilScore = PlannedValue.Compared<int?>(100, 100),
-                MinimumFormatScore = PlannedValue.Compared<int?>(changed ? 0 : 10, 10),
-                MinimumUpgradeFormatScore = PlannedValue.Compared<int?>(1, 1),
-                Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
-                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = true }],
-                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = !changed }],
-                    changed
+                UpgradeAllowed = Set(PlannedValue.Compared<bool?>(true, true)),
+                UpgradeUntilQuality = Set(
+                    PlannedValue.Compared<string?>("Remux-2160p", "Remux-2160p")
+                ),
+                UpgradeUntilScore = Set(PlannedValue.Compared<int?>(100, 100)),
+                MinimumFormatScore = Set(PlannedValue.Compared<int?>(changed ? 0 : 10, 10)),
+                MinimumUpgradeFormatScore = Set(PlannedValue.Compared<int?>(1, 1)),
+                Qualities = Set(
+                    PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                        [new QualityProfileQuality { Name = "Remux-2160p", Allowed = true }],
+                        [new QualityProfileQuality { Name = "Remux-2160p", Allowed = !changed }],
+                        changed
+                    )
                 ),
                 CustomFormatScores =
                 [
@@ -844,9 +848,12 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                     ),
                 ],
             },
-            PlannedValue.Compared<string?>(changed ? "English" : "French", "French")
+            Set(PlannedValue.Compared<string?>(changed ? "English" : "French", "French"))
         );
     }
+
+    private static QualityProfileField<T> Set<T>(PlannedValue<T> value) =>
+        QualityProfileField.Of(managed: true, value);
 
     private static RadarrPlannedQualityProfileResource NewProfile(string name) =>
         new(
@@ -855,14 +862,16 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 Action = PlannedAction.Create,
                 Identity = new UserDefinedQualityProfileIdentity(name),
                 Name = PlannedValue.Created(name),
-                UpgradeAllowed = PlannedValue.Created<bool?>(true),
-                UpgradeUntilQuality = PlannedValue.Created<string?>("Bluray-1080p"),
-                UpgradeUntilScore = PlannedValue.Created<int?>(10000),
-                MinimumFormatScore = PlannedValue.Created<int?>(0),
-                MinimumUpgradeFormatScore = PlannedValue.Created<int?>(1),
-                Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
-                    new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true },
-                ]),
+                UpgradeAllowed = Set(PlannedValue.Created<bool?>(true)),
+                UpgradeUntilQuality = Set(PlannedValue.Created<string?>("Bluray-1080p")),
+                UpgradeUntilScore = Set(PlannedValue.Created<int?>(10000)),
+                MinimumFormatScore = Set(PlannedValue.Created<int?>(0)),
+                MinimumUpgradeFormatScore = Set(PlannedValue.Created<int?>(1)),
+                Qualities = Set(
+                    PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>([
+                        new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true },
+                    ])
+                ),
                 CustomFormatScores =
                 [
                     new("x264", "cf-x264", PlannedValue.Created(50), QualityProfileScoreReason.Set),
@@ -874,7 +883,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                     ),
                 ],
             },
-            PlannedValue.Created<string?>(null)
+            QualityProfileField.Of(managed: false, PlannedValue.Created<string?>(null))
         );
 
     private static PlannedCustomFormatResource Create(string trashId, string name) =>

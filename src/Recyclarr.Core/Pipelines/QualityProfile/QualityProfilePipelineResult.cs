@@ -174,13 +174,13 @@ public record PlannedQualityProfileResource : PlannedResource
 {
     public required QualityProfileIdentity Identity { get; init; }
     public required PlannedValue<string> Name { get; init; }
-    public required PlannedValue<bool?> UpgradeAllowed { get; init; }
-    public required PlannedValue<string?> UpgradeUntilQuality { get; init; }
-    public required PlannedValue<int?> UpgradeUntilScore { get; init; }
-    public required PlannedValue<int?> MinimumFormatScore { get; init; }
-    public required PlannedValue<int?> MinimumUpgradeFormatScore { get; init; }
+    public required QualityProfileField<bool?> UpgradeAllowed { get; init; }
+    public required QualityProfileField<string?> UpgradeUntilQuality { get; init; }
+    public required QualityProfileField<int?> UpgradeUntilScore { get; init; }
+    public required QualityProfileField<int?> MinimumFormatScore { get; init; }
+    public required QualityProfileField<int?> MinimumUpgradeFormatScore { get; init; }
 
-    public required PlannedValue<
+    public required QualityProfileField<
         IReadOnlyList<QualityProfileQualityLayoutItem>
     > Qualities { get; init; }
 
@@ -193,14 +193,14 @@ public sealed record RadarrPlannedQualityProfileResource : PlannedQualityProfile
     [SetsRequiredMembers]
     public RadarrPlannedQualityProfileResource(
         PlannedQualityProfileResource shared,
-        PlannedValue<string?> language
+        QualityProfileField<string?> language
     )
         : base(shared)
     {
         Language = language;
     }
 
-    public PlannedValue<string?> Language { get; }
+    public QualityProfileField<string?> Language { get; }
 }
 
 /// <summary>
@@ -236,6 +236,31 @@ public sealed record QualityProfileQualityGroup : QualityProfileQualityLayoutIte
     public required IReadOnlyList<string> Qualities { get; init; }
 }
 
+/// <summary>
+/// Why a profile field has its desired value. A set field is a managed value: configuration, guide
+/// data, or a Recyclarr rule decides it. An unmanaged field keeps the service value.
+/// </summary>
+public enum QualityProfileFieldReason
+{
+    Set,
+    Unmanaged,
+}
+
+/// <summary>
+/// A profile field whose value may be managed or unmanaged. The reason sits beside the value
+/// because a value holds only plan state (ADR-016).
+/// </summary>
+public sealed record QualityProfileField<T>(
+    QualityProfileFieldReason Reason,
+    PlannedValue<T> Value
+);
+
+public static class QualityProfileField
+{
+    public static QualityProfileField<T> Of<T>(bool managed, PlannedValue<T> value) =>
+        new(managed ? QualityProfileFieldReason.Set : QualityProfileFieldReason.Unmanaged, value);
+}
+
 /// <summary>Why a custom format score has its desired value.</summary>
 public enum QualityProfileScoreReason
 {
@@ -252,6 +277,6 @@ public enum QualityProfileScoreReason
 public sealed record QualityProfileScoreResult(
     string Name,
     string? TrashId,
-    PlannedValue<int> Score,
+    PlannedValue<int> Value,
     QualityProfileScoreReason Reason
 );

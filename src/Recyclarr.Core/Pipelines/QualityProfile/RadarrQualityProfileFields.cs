@@ -25,19 +25,7 @@ internal class RadarrQualityProfileFields(IRadarrLanguageService languageService
     )
     {
         var radarrProfile = AsRadarr(profile);
-        var guideLanguage = planned.GuideResource is RadarrQualityProfileResource guide
-            ? guide.Language
-            : "";
-
-        if (string.IsNullOrEmpty(guideLanguage))
-        {
-            return radarrProfile;
-        }
-
-        var language = _languages.FirstOrDefault(l =>
-            l.Name.Equals(guideLanguage, StringComparison.OrdinalIgnoreCase)
-        );
-
+        var language = FindGuideLanguage(planned);
         return language is null ? radarrProfile : radarrProfile with { Language = language };
     }
 
@@ -52,10 +40,29 @@ internal class RadarrQualityProfileFields(IRadarrLanguageService languageService
     ) =>
         new RadarrPlannedQualityProfileResource(
             shared,
-            current is null
-                ? PlannedValue.Created(LanguageOf(desired))
-                : PlannedValue.Compared(LanguageOf(current), LanguageOf(desired))
+            QualityProfileField.Of(
+                FindGuideLanguage(planned) is not null,
+                current is null
+                    ? PlannedValue.Created(LanguageOf(desired))
+                    : PlannedValue.Compared(LanguageOf(current), LanguageOf(desired))
+            )
         );
+
+    private ProfileLanguage? FindGuideLanguage(PlannedQualityProfile planned)
+    {
+        var guideLanguage = planned.GuideResource is RadarrQualityProfileResource guide
+            ? guide.Language
+            : "";
+
+        if (string.IsNullOrEmpty(guideLanguage))
+        {
+            return null;
+        }
+
+        return _languages.FirstOrDefault(l =>
+            l.Name.Equals(guideLanguage, StringComparison.OrdinalIgnoreCase)
+        );
+    }
 
     private static string? LanguageOf(QualityProfileData profile) =>
         AsRadarr(profile).Language?.Name;

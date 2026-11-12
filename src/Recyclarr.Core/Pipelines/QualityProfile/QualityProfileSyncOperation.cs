@@ -500,13 +500,31 @@ internal class QualityProfileSyncOperation(
             Action = PlannedAction.Create,
             Identity = CreateIdentity(profile.ProfileConfig),
             Name = PlannedValue.Created(desired.Name),
-            UpgradeAllowed = PlannedValue.Created(desired.UpgradeAllowed),
-            UpgradeUntilQuality = PlannedValue.Created(desired.Items.FindCutoff(desired.Cutoff)),
-            UpgradeUntilScore = PlannedValue.Created(desired.CutoffFormatScore),
-            MinimumFormatScore = PlannedValue.Created(desired.MinFormatScore),
-            MinimumUpgradeFormatScore = PlannedValue.Created(desired.MinUpgradeFormatScore),
-            Qualities = PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>(
-                MapQualityLayout(desired.Items)
+            UpgradeAllowed = QualityProfileField.Of(
+                profile.ManagedUpgradeAllowed is not null,
+                PlannedValue.Created(desired.UpgradeAllowed)
+            ),
+            UpgradeUntilQuality = QualityProfileField.Of(
+                profile.CutoffManaged,
+                PlannedValue.Created(desired.Items.FindCutoff(desired.Cutoff))
+            ),
+            UpgradeUntilScore = QualityProfileField.Of(
+                profile.ManagedCutoffFormatScore is not null,
+                PlannedValue.Created(desired.CutoffFormatScore)
+            ),
+            MinimumFormatScore = QualityProfileField.Of(
+                profile.ManagedMinFormatScore is not null,
+                PlannedValue.Created(desired.MinFormatScore)
+            ),
+            MinimumUpgradeFormatScore = QualityProfileField.Of(
+                profile.ManagedMinUpgradeFormatScore is not null,
+                PlannedValue.Created(desired.MinUpgradeFormatScore)
+            ),
+            Qualities = QualityProfileField.Of(
+                profile.QualitiesManaged,
+                PlannedValue.Created<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                    MapQualityLayout(desired.Items)
+                )
             ),
             CustomFormatScores = MapScores(profile, x => PlannedValue.Created(x.NewScore)),
         };
@@ -526,27 +544,36 @@ internal class QualityProfileSyncOperation(
             Action = action,
             Identity = CreateIdentity(profile.ProfileConfig),
             Name = PlannedValue.Compared(current.Name, desired.Name),
-            UpgradeAllowed = PlannedValue.Compared(current.UpgradeAllowed, desired.UpgradeAllowed),
-            UpgradeUntilQuality = PlannedValue.Compared(
-                current.Items.FindCutoff(current.Cutoff),
-                desired.Items.FindCutoff(desired.Cutoff)
+            UpgradeAllowed = QualityProfileField.Of(
+                profile.ManagedUpgradeAllowed is not null,
+                PlannedValue.Compared(current.UpgradeAllowed, desired.UpgradeAllowed)
             ),
-            UpgradeUntilScore = PlannedValue.Compared(
-                current.CutoffFormatScore,
-                desired.CutoffFormatScore
+            UpgradeUntilQuality = QualityProfileField.Of(
+                profile.CutoffManaged,
+                PlannedValue.Compared(
+                    current.Items.FindCutoff(current.Cutoff),
+                    desired.Items.FindCutoff(desired.Cutoff)
+                )
             ),
-            MinimumFormatScore = PlannedValue.Compared(
-                current.MinFormatScore,
-                desired.MinFormatScore
+            UpgradeUntilScore = QualityProfileField.Of(
+                profile.ManagedCutoffFormatScore is not null,
+                PlannedValue.Compared(current.CutoffFormatScore, desired.CutoffFormatScore)
             ),
-            MinimumUpgradeFormatScore = PlannedValue.Compared(
-                current.MinUpgradeFormatScore,
-                desired.MinUpgradeFormatScore
+            MinimumFormatScore = QualityProfileField.Of(
+                profile.ManagedMinFormatScore is not null,
+                PlannedValue.Compared(current.MinFormatScore, desired.MinFormatScore)
             ),
-            Qualities = PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
-                MapQualityLayout(current.Items),
-                MapQualityLayout(desired.Items),
-                qualitiesChanged
+            MinimumUpgradeFormatScore = QualityProfileField.Of(
+                profile.ManagedMinUpgradeFormatScore is not null,
+                PlannedValue.Compared(current.MinUpgradeFormatScore, desired.MinUpgradeFormatScore)
+            ),
+            Qualities = QualityProfileField.Of(
+                profile.QualitiesManaged,
+                PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                    MapQualityLayout(current.Items),
+                    MapQualityLayout(desired.Items),
+                    qualitiesChanged
+                )
             ),
             CustomFormatScores = MapScores(
                 profile,

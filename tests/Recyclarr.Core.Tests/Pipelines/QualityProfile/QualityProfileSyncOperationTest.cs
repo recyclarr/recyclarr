@@ -48,10 +48,13 @@ internal sealed class QualityProfileSyncOperationTest
             .Identity.Should()
             .Be(new GuideBackedQualityProfileIdentity(new MappingKey("qp-trash-id", "WEB-1080p")));
         created.Name.Should().Be(PlannedValue.Created("WEB-1080p"));
-        created.UpgradeAllowed.Should().Be(PlannedValue.Created<bool?>(true));
-        created.Qualities.Current.Should().BeNull();
         created
-            .Qualities.Desired.Should()
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Created<bool?>(true)));
+        created.Qualities.Reason.Should().Be(QualityProfileFieldReason.Set);
+        created.Qualities.Value.Current.Should().BeNull();
+        created
+            .Qualities.Value.Desired.Should()
             .Equal(new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true });
     }
 
@@ -96,8 +99,10 @@ internal sealed class QualityProfileSyncOperationTest
         var updated = compute.Resources.Should().ContainSingle().Which;
         updated.Action.Should().Be(PlannedAction.Update);
         updated.Name.Should().Be(PlannedValue.Compared("Old Name", "New Name"));
-        updated.UpgradeAllowed.Should().Be(PlannedValue.Compared<bool?>(false, true));
-        updated.Qualities.Changed.Should().BeTrue();
+        updated
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Compared<bool?>(false, true)));
+        updated.Qualities.Value.Changed.Should().BeTrue();
         updated
             .CustomFormatScores.Should()
             .Equal(
@@ -583,9 +588,71 @@ internal sealed class QualityProfileSyncOperationTest
         var compute = await Compute(harness);
 
         var layout = compute.Resources.Should().ContainSingle().Which.Qualities;
-        layout.Changed.Should().BeTrue();
-        layout.Current!.Value.Should().ContainSingle();
-        layout.Desired.Should().HaveCount(2);
+        layout.Reason.Should().Be(QualityProfileFieldReason.Set);
+        layout.Value.Changed.Should().BeTrue();
+        layout.Value.Current!.Value.Should().ContainSingle();
+        layout.Value.Desired.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task Fields_nothing_sets_keep_the_service_value_as_unmanaged()
+    {
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            UpgradeAllowed = true,
+            Cutoff = 1,
+            CutoffFormatScore = 5,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp(new QualityProfileConfig { Name = "Existing", UpgradeUntilScore = 10 })],
+            [serviceProfile],
+            Schema(serviceProfile.Items)
+        );
+
+        var compute = await Compute(harness);
+
+        var profile = compute.Resources.Should().ContainSingle().Which;
+        profile
+            .UpgradeUntilScore.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Compared<int?>(5, 10)));
+        profile
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: false, PlannedValue.Compared<bool?>(true, true)));
+        profile.UpgradeUntilQuality.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+        profile.MinimumFormatScore.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+        profile.Qualities.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+    }
+
+    [Test]
+    public async Task Cutoff_picked_because_the_service_requires_one_is_set()
+    {
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp("Existing")],
+            [serviceProfile],
+            Schema(serviceProfile.Items)
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.UpgradeUntilQuality.Should()
+            .Be(
+                QualityProfileField.Of(
+                    managed: true,
+                    PlannedValue.Compared<string?>(null, "Bluray-1080p")
+                )
+            );
     }
 
     [TestCase(HttpStatusCode.BadRequest)]
@@ -807,7 +874,14 @@ internal sealed class QualityProfileSyncOperationTest
             .BeOfType<RadarrPlannedQualityProfileResource>()
             .Which;
         radarr.Action.Should().Be(PlannedAction.Update);
-        radarr.Language.Should().Be(PlannedValue.Compared<string?>("English", "French"));
+        radarr
+            .Language.Should()
+            .Be(
+                QualityProfileField.Of(
+                    managed: true,
+                    PlannedValue.Compared<string?>("English", "French")
+                )
+            );
         await harness
             .Service.Received()
             .UpdateQualityProfile(

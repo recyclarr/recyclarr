@@ -12,6 +12,7 @@ using Recyclarr.Sync.Results;
 using Refit;
 using CoreService = Recyclarr.TrashGuide.SupportedServices;
 using CustomFormatSpecificationChange = Recyclarr.Client.V1.CustomFormatSpecificationChange;
+using QualityProfileFieldReason = Recyclarr.Client.V1.QualityProfileFieldReason;
 using QualityProfileScoreReason = Recyclarr.Client.V1.QualityProfileScoreReason;
 
 namespace Recyclarr.Server.Tests.Http;
@@ -166,7 +167,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         );
         raw.Should().Contain("\"service\":\"sonarr\"");
         raw.Should()
-            .Contain("\"upgradeAllowed\":{\"desired\":null,\"current\":null,\"changed\":true}");
+            .Contain(
+                "\"upgradeAllowed\":{\"reason\":\"unmanaged\","
+                    + "\"value\":{\"desired\":null,\"current\":null,\"changed\":true}}"
+            );
         raw.Should().Contain("\"action\":\"unchanged\"").And.Contain("\"changed\":false");
         raw.Should().NotContain("sonarrNaming").And.NotContain("radarrNaming");
     }
@@ -485,7 +489,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertUpdatedProfileScores(ICollection<QualityProfileScoreResponse> scores)
     {
         scores
-            .Select(x => (x.Name, x.Reason, x.Score.Desired, x.Score.Changed))
+            .Select(x => (x.Name, x.Reason, x.Value.Desired, x.Value.Changed))
             .Should()
             .Equal(
                 ("CF", QualityProfileScoreReason.Set, 10, true),
@@ -497,13 +501,31 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertRadarrQualityProfiles(RadarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        pipeline.Items.First().Language.Desired.Should().Be("English");
+        var created = pipeline.Items.First();
+        created.Language.Value.Desired.Should().Be("English");
+        created.UpgradeAllowed.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
         AssertQualityProfileOutcomes(pipeline.Outcomes, "qualityProfileQualityDefinitionIgnored");
 
         var update = pipeline.Items.Last();
-        update.Language.Should().BeEquivalentTo(new { Current = (string?)null, Changed = true });
-        update.MinimumUpgradeFormatScore.Changed.Should().BeFalse();
-        update.Qualities.Changed.Should().BeTrue();
+        update
+            .Language.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Reason = QualityProfileFieldReason.Set,
+                    Value = new { Current = (string?)null, Changed = true },
+                }
+            );
+        update
+            .MinimumUpgradeFormatScore.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    Reason = QualityProfileFieldReason.Unmanaged,
+                    Value = new { Changed = false },
+                }
+            );
+        update.Qualities.Value.Changed.Should().BeTrue();
         AssertUpdatedProfileScores(update.CustomFormatScores);
     }
 
