@@ -12,7 +12,6 @@ internal sealed class Endpoint(ConfigTemplateCatalog catalog, ConfigTemplateRend
     public override void Configure()
     {
         Get("/config-templates/{id}");
-        Version(1);
 
         Description(b =>
             b.Produces<string>(200, YamlContentType)

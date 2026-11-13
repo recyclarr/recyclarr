@@ -14,7 +14,6 @@ internal sealed class Endpoint(
     public override void Configure()
     {
         Get("/sync/schedule");
-        Version(1);
 
         Description(b => b.WithTags("Sync"));
         Summary(s =>

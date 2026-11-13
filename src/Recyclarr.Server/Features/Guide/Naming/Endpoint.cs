@@ -10,7 +10,6 @@ internal sealed class Endpoint(MediaNamingResourceQuery naming)
     public override void Configure()
     {
         Get("/guide/{service}/naming");
-        Version(1);
 
         Description(b => b.Produces<GuideNamingResponse>().WithTags("Guide"));
         Summary(s =>

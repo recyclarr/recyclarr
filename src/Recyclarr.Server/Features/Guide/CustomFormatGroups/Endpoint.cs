@@ -9,7 +9,6 @@ internal sealed class Endpoint(CfGroupResourceQuery groups)
     public override void Configure()
     {
         Get("/guide/{service}/custom-format-groups");
-        Version(1);
 
         Description(b => b.Produces<ListGuideCustomFormatGroupsResponse>().WithTags("Guide"));
         Summary(s =>

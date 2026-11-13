@@ -25,16 +25,19 @@ internal static class ServerApi
             // extension members, serialize with ASP.NET's options rather than FastEndpoints'.
             services.ConfigureHttpJsonOptions(o => ConfigureWireJson(o.SerializerOptions));
 
-            services
-                .AddFastEndpoints(o =>
-                {
-                    // Endpoints only ever live in this assembly. Auto-discovery reflects over every
-                    // loaded assembly, which throws when the host process has also loaded one whose
-                    // dependencies cannot be resolved (FastEndpoints#121).
-                    o.DisableAutoDiscovery = true;
-                    o.Assemblies = [typeof(CompositionRoot).Assembly];
-                })
-                .OpenApiDocument(ConfigureDocument);
+            services.AddFastEndpoints(o =>
+            {
+                // Endpoints only ever live in this assembly. Auto-discovery reflects over every
+                // loaded assembly, which throws when the host process has also loaded one whose
+                // dependencies cannot be resolved (FastEndpoints#121).
+                o.DisableAutoDiscovery = true;
+                o.Assemblies = [typeof(CompositionRoot).Assembly];
+            });
+
+            foreach (var version in ApiVersions.All)
+            {
+                services.OpenApiDocument(o => ConfigureDocument(o, version));
+            }
 
             // FastEndpoints requires authentication on every endpoint that does not opt out.
             services
@@ -53,7 +56,10 @@ internal static class ServerApi
         {
             app.UseFastEndpoints(c =>
             {
-                c.Versioning.Prefix = "api/v";
+                // Prefix and version stay separate segments: the OpenAPI version filter matches
+                // an endpoint's versions by stripping exactly `{prefix}` and `v{n}` from the route.
+                c.Endpoints.RoutePrefix = "api";
+                c.Versioning.Prefix = "v";
                 c.Versioning.PrependToRoute = true;
                 // FastEndpoints' own ProblemDetails is sealed, so endpoints cannot add RFC 9457
                 // extension members to it (FastEndpoints#637). ASP.NET's type can be subclassed
@@ -62,9 +68,17 @@ internal static class ServerApi
                 c.Errors.ResponseBuilder = ErrorResponses.Build;
                 ConfigureWireJson(c.Serializer.Options);
                 c.Endpoints.NameGenerator = OperationIds.Generate;
+                c.Endpoints.Configurator = ep =>
+                    ep.EndpointVersion(ApiVersions.Of(ep.EndpointType));
             });
             app.MapOpenApi();
-            app.MapScalarApiReference();
+            app.MapScalarApiReference(o =>
+            {
+                foreach (var version in ApiVersions.All)
+                {
+                    o.AddDocument(ApiVersions.DocumentName(version));
+                }
+            });
         }
     }
 
@@ -76,12 +90,12 @@ internal static class ServerApi
         options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
     }
 
-    private static void ConfigureDocument(DocumentOptions o)
+    private static void ConfigureDocument(DocumentOptions o, int version)
     {
-        o.MaxEndpointVersion = 1;
-        o.DocumentName = "v1";
+        o.MaxEndpointVersion = version;
+        o.DocumentName = ApiVersions.DocumentName(version);
         o.Title = "Recyclarr API";
-        o.Version = "v1";
+        o.Version = ApiVersions.DocumentName(version);
         o.ShortSchemaNames = true;
         o.EnableJWTBearerAuth = false;
 

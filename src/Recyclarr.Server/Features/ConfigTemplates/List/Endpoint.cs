@@ -9,7 +9,6 @@ internal sealed class Endpoint(ConfigTemplateCatalog catalog)
     public override void Configure()
     {
         Get("/config-templates");
-        Version(1);
 
         Description(b => b.Produces<ListConfigTemplatesResponse>().WithTags("Config Templates"));
         Summary(s =>

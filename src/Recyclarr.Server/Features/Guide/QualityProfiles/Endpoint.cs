@@ -9,7 +9,6 @@ internal sealed class Endpoint(QualityProfileResourceQuery profiles)
     public override void Configure()
     {
         Get("/guide/{service}/quality-profiles");
-        Version(1);
 
         Description(b => b.Produces<ListGuideQualityProfilesResponse>().WithTags("Guide"));
         Summary(s =>

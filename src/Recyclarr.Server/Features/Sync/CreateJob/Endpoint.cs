@@ -18,7 +18,6 @@ internal sealed class Endpoint(
     public override void Configure()
     {
         Post("/sync/jobs");
-        Version(1);
 
         Description(b =>
             b.ClearDefaultProduces()

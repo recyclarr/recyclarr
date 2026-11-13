@@ -10,7 +10,6 @@ internal sealed class Endpoint(ConfigIncludesResourceQuery includes)
     public override void Configure()
     {
         Get("/config-includes");
-        Version(1);
 
         Description(b => b.Produces<ListConfigIncludesResponse>().WithTags("Config Templates"));
         Summary(s =>

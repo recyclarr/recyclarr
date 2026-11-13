@@ -9,7 +9,6 @@ internal sealed class Endpoint(QualitySizeResourceQuery qualities)
     public override void Configure()
     {
         Get("/guide/{service}/qualities");
-        Version(1);
 
         Description(b => b.Produces<ListGuideQualitiesResponse>().WithTags("Guide"));
         Summary(s =>

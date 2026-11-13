@@ -9,7 +9,6 @@ internal sealed class Endpoint(CustomFormatResourceQuery customFormats)
     public override void Configure()
     {
         Get("/guide/{service}/score-sets");
-        Version(1);
 
         Description(b => b.Produces<ListGuideScoreSetsResponse>().WithTags("Guide"));
         Summary(s =>
