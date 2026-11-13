@@ -76,8 +76,7 @@ public class GetWidget : Endpoint<GetWidgetRequest, WidgetResponse>
 {
     public override void Configure()
     {
-        Get("/api/v1/widgets/{id}");
-        Version(1);
+        Get("/widgets/{id}");
     }
 
     public override async Task HandleAsync(GetWidgetRequest req, CancellationToken ct)
@@ -106,8 +105,11 @@ No `Mapper.cs` or `Data.cs`; that logic lives in Core.
 
 ### Versioning (Release Group Strategy)
 
-Only the changed endpoint gets a new class in a `V2/` subfolder. Unchanged endpoints are
-automatically included in higher-version specs via `MaxEndpointVersion`.
+An endpoint's folder sets its API version (`ApiVersions`): a `V{N}/` folder is version N,
+anything else is version 1. Endpoints MUST NOT call `Version()`. Only the changed endpoint gets a
+new class in a `V2/` subfolder, at the same route; the first one creates the `v2` OpenAPI document
+and its reference page. Each version's document includes the latest version (<= N) of every
+endpoint, so unchanged endpoints keep their `v1` routes in it.
 
 ```txt
 Features/
@@ -120,34 +122,22 @@ Features/
         Models.cs
 ```
 
-```csharp
-// v1 endpoint: Version(1) in Configure()
-// v2 endpoint: Version(2) in Configure(), same route
-```
-
-OpenAPI documents per version:
-
-```csharp
-bld.Services
-    .OpenApiDocument(o => { o.MaxEndpointVersion = 1; o.DocumentName = "v1"; o.Version = "v1"; })
-    .OpenApiDocument(o => { o.MaxEndpointVersion = 2; o.DocumentName = "v2"; o.Version = "v2"; });
-```
-
-The v2 doc includes the latest version (<= 2) of every endpoint. Unchanged v1 endpoints appear in
-both docs without re-registration.
-
 ## OpenAPI Spec Workflow
 
-The spec is committed to source control at `src/Recyclarr.Server/Recyclarr.Server.json`. Build-time
+Specs are committed to source control in `src/Recyclarr.Server/`: `Recyclarr.Server.json` for v1
+and `Recyclarr.Server_v{N}.json` for later versions (names fixed by the build tool). Build-time
 generation outputs to the project directory via `OpenApiDocumentsDirectory`. The committed spec is
-the input to Refitter, which generates the typed client (ADR-013).
+the input to Refitter, which generates the typed client (ADR-013). `ci/build-schemas.py` publishes
+each spec as `openapi-v{N}.json` beside the YAML schemas on `schemas.recyclarr.dev`, per release
+and in `next/` for the default branch.
 
 - Non-RID builds regenerate the spec (local dev, CI test step)
 - RID builds skip spec generation (cross-compilation); the committed file is always present
 - API version (`v1`) is independent from the application semver
 - `Recyclarr.Client` has a `ProjectReference` on Server for build ordering (not assembly reference)
-- One `.refitter` config per API version, scoped by `includePathMatches` into a version namespace
-  (`Recyclarr.Client.V1`), so the version stays out of the call chain
+- One `.refitter` config per API version the CLI uses, reading that version's spec into a version
+  namespace (`Recyclarr.Client.V1`), so the version stays out of the call chain. Beyond v1, do not
+  filter paths by version prefix: unchanged endpoints keep their `v1` routes in later specs
 
 ### API reference text
 

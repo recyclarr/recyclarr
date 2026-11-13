@@ -2,9 +2,15 @@
 # /// script
 # requires-python = ">=3.12"
 # ///
-"""Build versioned schema directory for deployment to Cloudflare Pages."""
+"""Build versioned schema directory for deployment to Cloudflare Pages.
+
+Each directory holds the YAML schemas plus one `openapi-v{N}.json` per server API version. The
+build names the v1 document `Recyclarr.Server.json` and later ones `Recyclarr.Server_v{N}.json`;
+those names are fixed by the ASP.NET OpenAPI build tool, so they are renamed here.
+"""
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -13,6 +19,8 @@ from pathlib import Path
 
 MAJOR_VERSIONS_TO_DEPLOY = 3
 SCHEMAS_SOURCE_DIR = "schemas"
+API_SPEC_SOURCE_DIR = "src/Recyclarr.Server"
+API_SPEC_NAME = re.compile(r"Recyclarr\.Server(?:_v(\d+))?\.json")
 OUTPUT_DIR = Path("schemas-dist")
 
 
@@ -73,12 +81,27 @@ def get_files_at_tag(tag: str, path: str) -> list[str]:
         return []
 
 
+def get_api_specs_at_tag(tag: str) -> list[tuple[str, str]]:
+    """Map each server API spec at a tag to its published name. Older tags have none."""
+    specs = []
+    for file_path in get_files_at_tag(tag, API_SPEC_SOURCE_DIR):
+        match = API_SPEC_NAME.fullmatch(Path(file_path).name)
+        if match:
+            specs.append((file_path, f"openapi-v{match.group(1) or 1}.json"))
+    return specs
+
+
 def copy_schemas_from_tag(tag: str, dest_dir: Path, dry_run: bool) -> int:
-    """Extract schemas from a tag to destination directory. Returns file count."""
-    files = get_files_at_tag(tag, SCHEMAS_SOURCE_DIR)
-    if not files:
+    """Extract schemas and API specs from a tag to destination directory. Returns file count."""
+    schema_files = get_files_at_tag(tag, SCHEMAS_SOURCE_DIR)
+    if not schema_files:
         print(f"  Warning: {SCHEMAS_SOURCE_DIR}/ not found at {tag}, skipping")
         return 0
+
+    files = [
+        (path, str(Path(path).relative_to(SCHEMAS_SOURCE_DIR))) for path in schema_files
+    ]
+    files += get_api_specs_at_tag(tag)
 
     if dry_run:
         print(f"  Would copy {len(files)} files to {dest_dir}")
@@ -86,8 +109,7 @@ def copy_schemas_from_tag(tag: str, dest_dir: Path, dry_run: bool) -> int:
 
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    for file_path in files:
-        relative_path = Path(file_path).relative_to(SCHEMAS_SOURCE_DIR)
+    for file_path, relative_path in files:
         dest_file = dest_dir / relative_path
 
         result = run(["git", "show", f"{tag}:{file_path}"])
@@ -173,6 +195,11 @@ def main() -> int:
     total_files += copy_schemas_from_tag(
         latest_tag, OUTPUT_DIR / "latest", args.dry_run
     )
+    total_dirs += 1
+
+    # Unreleased schemas and API specs for documentation of upcoming releases.
+    print("\nnext/ <- HEAD")
+    total_files += copy_schemas_from_tag("HEAD", OUTPUT_DIR / "next", args.dry_run)
     total_dirs += 1
 
     print(f"\nSummary: {total_dirs} directories, {total_files} total files")
