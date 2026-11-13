@@ -12,7 +12,6 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
     public override void Configure()
     {
         Delete("/instances/{name}/custom-formats/{id}");
-        Version(1);
 
         Description(b =>
             b.ClearDefaultProduces()

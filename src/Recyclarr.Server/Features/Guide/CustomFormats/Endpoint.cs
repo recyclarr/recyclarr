@@ -9,7 +9,6 @@ internal sealed class Endpoint(CategorizedCustomFormatProvider customFormats)
     public override void Configure()
     {
         Get("/guide/{service}/custom-formats");
-        Version(1);
 
         Description(b => b.Produces<ListGuideCustomFormatsResponse>().WithTags("Guide"));
         Summary(s =>

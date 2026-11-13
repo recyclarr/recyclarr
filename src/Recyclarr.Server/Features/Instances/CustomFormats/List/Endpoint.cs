@@ -10,7 +10,6 @@ internal sealed class Endpoint(InstanceServiceCaller caller)
     public override void Configure()
     {
         Get("/instances/{name}/custom-formats");
-        Version(1);
 
         Description(b =>
             b.Produces<ListInstanceCustomFormatsResponse>()

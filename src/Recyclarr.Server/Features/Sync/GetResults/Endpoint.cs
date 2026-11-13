@@ -11,7 +11,6 @@ internal sealed class Endpoint(ILogger log, ISyncJobStore jobStore)
     public override void Configure()
     {
         Get("/sync/jobs/{id}/results");
-        Version(1);
 
         Description(b =>
             b.Produces<SyncJobResultsResponse>()

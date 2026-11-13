@@ -11,7 +11,6 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
     public override void Configure()
     {
         Get("/sync/jobs/{id}");
-        Version(1);
 
         Description(b =>
             b.Produces<GetSyncJobResponse>().ProducesProblems(400, 404).WithTags("Sync")

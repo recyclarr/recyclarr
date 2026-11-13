@@ -9,7 +9,6 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
     public override void Configure()
     {
         Get("/sync/jobs");
-        Version(1);
 
         Description(b => b.WithTags("Sync"));
         Summary(s =>

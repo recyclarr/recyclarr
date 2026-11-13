@@ -47,8 +47,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Build-time input for Recyclarr.Client; the server never reads it at runtime. -->
-    <Content Update="Recyclarr.Server.json" CopyToPublishDirectory="Never" />
+    <!-- Build-time input for Recyclarr.Client, one per API version; the server never reads them
+         at runtime. -->
+    <Content Update="Recyclarr.Server.json;Recyclarr.Server_v*.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>
