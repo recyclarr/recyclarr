@@ -20,6 +20,12 @@ public sealed record ServiceRateLimitedFailure : OperationalFailure;
 public sealed record ServiceRedirectedFailure : OperationalFailure;
 
 /// <summary>
+/// The service rejected the request's hostname (the host part of <c>base_url</c>) before
+/// authentication, because the hostname is not in the service's Allowed Hosts setting.
+/// </summary>
+public sealed record ServiceHostRejectedFailure : OperationalFailure;
+
+/// <summary>
 /// The connected service does not match the configuration or supported capabilities.
 /// </summary>
 public sealed record ServiceIncompatibleFailure : OperationalFailure;

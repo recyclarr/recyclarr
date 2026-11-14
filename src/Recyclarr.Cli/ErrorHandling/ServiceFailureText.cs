@@ -21,6 +21,9 @@ internal static class ServiceFailureText
             InstanceFailureCategory.ServiceRedirected =>
                 "The service redirected the request (3xx). Check base_url, and that any reverse "
                     + "proxy in front of the service lets API calls through.",
+            InstanceFailureCategory.ServiceHostRejected =>
+                "The service rejected the hostname in base_url because of its Allowed Hosts "
+                    + "setting (400).",
             InstanceFailureCategory.ServiceIncompatible =>
                 "The service version is not supported by Recyclarr.",
             InstanceFailureCategory.SyncStateUnavailable =>

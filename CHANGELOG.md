@@ -51,6 +51,7 @@ changes you may need to make.
   and the profile still synced
 - Sync: An unknown quality profile `trash_id` was a warning instead of an error
 - Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
+- Sync: Unclear error when Sonarr's Allowed Hosts setting rejects the hostname in `base_url`
 - Sync: Inconsistent results when two custom formats share the same name
 - CLI: `list custom-formats` crashed when the guide had no custom formats for a service
 

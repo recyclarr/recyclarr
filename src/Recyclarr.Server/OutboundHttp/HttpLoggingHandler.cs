@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text.Json;
 using Recyclarr.Logging;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.OutboundHttp;
 
@@ -39,8 +41,32 @@ internal sealed class HttpLoggingHandler(ILogger log) : DelegatingHandler
         );
 
         WarnOnRedirect(response, sanitizedUrl);
+        await WarnOnHostRejection(response, originalUri, cancellationToken);
 
         return response;
+    }
+
+    private async Task WarnOnHostRejection(
+        HttpResponseMessage response,
+        Uri requestUri,
+        CancellationToken ct
+    )
+    {
+        if (response.StatusCode != HttpStatusCode.BadRequest)
+        {
+            return;
+        }
+
+        var body = await response.Content.ReadAsStringAsync(ct);
+        if (!OperationalFailureClassifier.IsHostRejection(response.StatusCode, body))
+        {
+            return;
+        }
+
+        log.Warning(
+            "The service rejected hostname {Host} because of its Allowed Hosts setting",
+            requestUri.IdnHost
+        );
     }
 
     [SuppressMessage(
