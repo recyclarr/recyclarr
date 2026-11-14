@@ -26,6 +26,12 @@ internal enum InstanceFailureCategory
     )]
     ServiceRedirected,
 
+    [Description(
+        "The instance rejected the hostname in the base URL because of its Allowed Hosts setting "
+            + "(400)."
+    )]
+    ServiceHostRejected,
+
     [Description("Recyclarr does not support the instance's version.")]
     ServiceIncompatible,
 
@@ -45,6 +51,7 @@ internal static class InstanceFailureCategoryMapping
                 ServiceUnauthorizedFailure => InstanceFailureCategory.ServiceUnauthorized,
                 ServiceRateLimitedFailure => InstanceFailureCategory.ServiceRateLimited,
                 ServiceRedirectedFailure => InstanceFailureCategory.ServiceRedirected,
+                ServiceHostRejectedFailure => InstanceFailureCategory.ServiceHostRejected,
                 ServiceIncompatibleFailure => InstanceFailureCategory.ServiceIncompatible,
                 SyncStateUnavailableFailure => InstanceFailureCategory.SyncStateUnavailable,
                 _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null),

@@ -221,7 +221,10 @@ HttpLoggingHandler -> HttpClientHandler -> network
 
 - **HttpLoggingHandler**: Logs request method + sanitized URL (Debug), response status (Debug), and
   request/response bodies (Verbose). Warns about URL/reverse proxy misconfiguration when a response
-  is a redirect. Replaces Flurl's `FlurlBeforeCallLogRedactor` and `FlurlAfterCallLogRedactor`.
+  is a redirect, and names the rejected hostname when a service's Allowed Hosts setting rejects the
+  request (ASP.NET Core host filtering: HTTP 400 with an HTML body). That rejection fails the
+  instance as `ServiceHostRejectedFailure`. Replaces Flurl's `FlurlBeforeCallLogRedactor` and
+  `FlurlAfterCallLogRedactor`.
 - **No redirects**: `AllowAutoRedirect = false`. A redirect usually means a wrong base URL or a
   reverse proxy sending API calls to a login page; following it ends in an HTML page that fails to
   parse. The 3xx response fails the instance as `ServiceRedirectedFailure`. Replaces Flurl's

@@ -325,6 +325,8 @@ internal sealed class NotificationService(
             ServiceRateLimitedFailure => "The service rate limit was exceeded",
             ServiceRedirectedFailure =>
                 "The service redirected the request; check base_url and any reverse proxy",
+            ServiceHostRejectedFailure =>
+                "The service rejected the base_url hostname because of its Allowed Hosts setting",
             ServiceIncompatibleFailure =>
                 "The connected service is incompatible with this configuration",
             SyncStateUnavailableFailure => "The persisted synchronization state is unavailable",

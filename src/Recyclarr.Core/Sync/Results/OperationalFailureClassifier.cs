@@ -27,6 +27,8 @@ public static class OperationalFailureClassifier
             {
                 StatusCode: >= HttpStatusCode.MultipleChoices and < HttpStatusCode.BadRequest
             } => new ServiceRedirectedFailure(),
+            ApiException e when IsHostRejection(e.StatusCode, e.Content) =>
+                new ServiceHostRejectedFailure(),
             ApiException { StatusCode: HttpStatusCode.Unauthorized } =>
                 new ServiceUnauthenticatedFailure(),
             ApiException { StatusCode: HttpStatusCode.Forbidden } =>
@@ -37,4 +39,13 @@ public static class OperationalFailureClassifier
                 new ServiceUnavailableFailure(),
             _ => null,
         };
+
+    /// <summary>
+    /// Whether a response is ASP.NET Core's host filtering rejection, which Sonarr (and any
+    /// service that adopts the same Allowed Hosts setting) sends when the request hostname is not
+    /// allowed. The rejection is an HTML page, so it is recognized by its fixed body text.
+    /// </summary>
+    public static bool IsHostRejection(HttpStatusCode statusCode, string? body) =>
+        statusCode == HttpStatusCode.BadRequest
+        && body?.Contains("Invalid Hostname", StringComparison.Ordinal) == true;
 }

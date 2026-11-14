@@ -106,6 +106,56 @@ internal sealed class InstanceSyncProcessorTest
     }
 
     [Test]
+    public async Task Host_filtering_rejection_is_classified_as_host_rejected()
+    {
+        // The body ASP.NET Core host filtering sends when the hostname is not in Allowed Hosts
+        var exception = await CreateApiException(
+            HttpStatusCode.BadRequest,
+            """
+            <HTML><HEAD><TITLE>Bad Request</TITLE></HEAD>
+            <BODY><h2>Bad Request - Invalid Hostname</h2>
+            <hr><p>HTTP Error 400. The request hostname is invalid.</p></BODY></HTML>
+            """
+        );
+        var serviceInfo = Substitute.For<IServiceInformation>();
+        serviceInfo.GetAppName(default).ThrowsAsync(exception);
+        var sut = CreateSut(
+            Substitute.For<ILogger>(),
+            serviceInfo,
+            new RecordingPipelineExecutor()
+        );
+
+        var result = await sut.Process(
+            Substitute.For<ISyncSettings>(),
+            CreateState(),
+            CancellationToken.None
+        );
+
+        result.Failure.Should().BeOfType<ServiceHostRejectedFailure>();
+    }
+
+    [Test]
+    public async Task Other_bad_request_is_not_classified()
+    {
+        var exception = await CreateApiException(
+            HttpStatusCode.BadRequest,
+            """[{"propertyName":"name","errorMessage":"Must be unique"}]"""
+        );
+        var serviceInfo = Substitute.For<IServiceInformation>();
+        serviceInfo.GetAppName(default).ThrowsAsync(exception);
+        var sut = CreateSut(
+            Substitute.For<ILogger>(),
+            serviceInfo,
+            new RecordingPipelineExecutor()
+        );
+
+        var act = () =>
+            sut.Process(Substitute.For<ISyncSettings>(), CreateState(), CancellationToken.None);
+
+        await act.Should().ThrowAsync<ApiException>();
+    }
+
+    [Test]
     public async Task Incompatible_service_fails_instance_without_running_pipelines()
     {
         var serviceInfo = Substitute.For<IServiceInformation>();
@@ -194,12 +244,19 @@ internal sealed class InstanceSyncProcessorTest
         }
     }
 
-    // Built the way Refit builds them, without a server: only the exception type and status code
-    // matter to the classifier under test.
-    private static async Task<ApiException> CreateApiException(HttpStatusCode statusCode)
+    // Built the way Refit builds them, without a server: only the exception type, status code,
+    // and body matter to the classifier under test.
+    private static async Task<ApiException> CreateApiException(
+        HttpStatusCode statusCode,
+        string body = ""
+    )
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, "http://service/");
-        using var response = new HttpResponseMessage(statusCode) { RequestMessage = request };
+        using var response = new HttpResponseMessage(statusCode)
+        {
+            RequestMessage = request,
+            Content = new StringContent(body),
+        };
         return await ApiException.Create(request, HttpMethod.Get, response, new RefitSettings());
     }
 
