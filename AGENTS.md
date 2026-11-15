@@ -111,6 +111,9 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
     base has no stored properties; otherwise it uses `required` properties.
   - Prefer `required` over positional parameters for serialized fields: System.Text.Json enforces
     `required` but fills missing constructor parameters with defaults.
+- Mark the base of a fixed variant set `closed` so `switch` expressions over it are exhaustive
+  without a `_ => throw` arm. Use a `union` instead when the cases are unrelated existing types
+  rather than subtypes of a base you own.
 - JSON serialization: configure naming policy, converters, and style via `JsonSerializerOptions` (or
   source-generated `JsonSerializerContext`). Check for existing options before creating new
   instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
