@@ -25,6 +25,8 @@ changes you may need to make.
 - **BREAKING**: Docker: Arguments after the image name no longer run CLI commands
 - **BREAKING**: Recyclarr no longer creates the `configs` and `includes` directories or an empty
   `settings.yml`
+- **BREAKING**: Older x86-64 processors without SSE4.2 and POPCNT support can no longer run
+  Recyclarr
 - CLI: `config create` and `config list templates` build templates from the TRaSH Guides, so they
   follow guide updates. The official config templates repository is no longer downloaded
 - CLI: `config create --path` also works with a single `--template`

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.1",
+  "openapi": "3.2.0",
   "info": {
     "title": "Recyclarr API",
     "description": "HTTP API of the Recyclarr server, which syncs TRaSH Guides to Sonarr and Radarr.",
@@ -1450,6 +1450,7 @@
           "movieFolder",
           "standardMovie"
         ],
+        "type": "object",
         "properties": {
           "movieFolder": {
             "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
@@ -1467,6 +1468,7 @@
           "dailyEpisode",
           "animeEpisode"
         ],
+        "type": "object",
         "properties": {
           "seasonFolder": {
             "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
@@ -3525,6 +3527,7 @@
           "name",
           "status"
         ],
+        "type": "object",
         "properties": {
           "pipelines": {
             "$ref": "#/components/schemas/RadarrPipelinesResponse"
@@ -3569,6 +3572,7 @@
           "name",
           "status"
         ],
+        "type": "object",
         "properties": {
           "pipelines": {
             "$ref": "#/components/schemas/SonarrPipelinesResponse"
@@ -3731,20 +3735,20 @@
   },
   "tags": [
     {
-      "name": "Sync",
-      "description": "Sync jobs, their progress and results, and the built-in sync schedule."
-    },
-    {
-      "name": "Instances",
-      "description": "Direct calls to a configured Sonarr or Radarr instance."
+      "name": "Config Templates",
+      "description": "Starter configurations generated from guide data, and include templates from resource providers."
     },
     {
       "name": "Guide",
       "description": "Read-only TRaSH Guides data, scoped to one service."
     },
     {
-      "name": "Config Templates",
-      "description": "Starter configurations generated from guide data, and include templates from resource providers."
+      "name": "Instances",
+      "description": "Direct calls to a configured Sonarr or Radarr instance."
+    },
+    {
+      "name": "Sync",
+      "description": "Sync jobs, their progress and results, and the built-in sync schedule."
     }
   ]
 }

@@ -10,7 +10,7 @@ namespace Recyclarr.TestLibrary;
 /// </summary>
 public sealed class TestEnvironment
 {
-    private readonly Dictionary<string, string?> _variables = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string?> _variables = [with(StringComparer.Ordinal)];
     private readonly IConfigurationRoot _configuration;
 
     public TestEnvironment()

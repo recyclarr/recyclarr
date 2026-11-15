@@ -25,7 +25,7 @@ internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
     internal class Settings : BaseCommandSettings;
 
     [SuppressMessage("Style", "REC001", Justification = "Explicit None marks ct as ignored")]
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         Settings settings,
         CancellationToken ct

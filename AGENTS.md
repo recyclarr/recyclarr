@@ -81,7 +81,7 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   values and domain objects locally; perform service construction in Autofac modules, composition
   roots, or explicit factories. Concrete implementations may be injected directly. Search existing
   registrations before adding new ones.
-- .NET 10.0 (C# 14) + nullable reference types
+- .NET 11.0 (C# 15) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
 - Use enums for closed labels or states. Use polymorphism when variants own distinct behavior or
   implementations must be substitutable or extensible.

@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.IO.Abstractions;
 using System.Net;
-using System.Net.Http.Json;
 using Autofac;
 using Recyclarr.Config.Models;
 using Recyclarr.Server.Features.Sync.CreateJob;

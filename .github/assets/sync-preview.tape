@@ -14,7 +14,7 @@ Set Framerate 10
 Hide
 Type "exec bash --norc --noprofile"
 Enter
-Type 'export PATH="$PWD/src/Recyclarr.Cli/bin/Debug/net10.0:$PATH" PS1="$ "'
+Type 'export PATH="$PWD/src/Recyclarr.Cli/bin/Debug/net11.0:$PATH" PS1="$ "'
 Enter
 Type 'export RECYCLARR_CONFIG_DIR=/tmp/recyclarr-demo/config'
 Enter

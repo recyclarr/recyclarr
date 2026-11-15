@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Net;
-using System.Net.Http.Json;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Recyclarr.Server.Features.Sync.CreateJob;

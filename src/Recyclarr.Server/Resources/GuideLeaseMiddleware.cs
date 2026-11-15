@@ -33,7 +33,7 @@ internal sealed class GuideLeaseMiddleware(RequestDelegate next, ResourceCoordin
         var segments = (path.Value ?? "").Split('/', StringSplitOptions.RemoveEmptyEntries);
         return segments.Length >= 3
             && segments[0].Equals("api", StringComparison.OrdinalIgnoreCase)
-            && segments[1].StartsWith('v')
+            && segments[1].StartsWith('v', StringComparison.Ordinal)
             && LeasedResources.Contains(segments[2]);
     }
 }

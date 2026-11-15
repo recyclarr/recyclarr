@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using Recyclarr.Server.Features.Guide.Qualities;
 using Recyclarr.Server.Features.Guide.QualityProfiles;
 

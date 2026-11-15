@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.ServiceProcess;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -18,6 +19,11 @@ internal static class ServerLifecycle
         /// Starts the server, reports readiness, and waits for it to stop. Returns the process exit
         /// code: 1 when startup fails or a background service faulted, otherwise 0.
         /// </summary>
+        [SuppressMessage(
+            "Design",
+            "CA1031:Do not catch general exception types",
+            Justification = "A faulted background service can throw any type; the exit code reports it"
+        )]
         public async Task<int> RunServerAsync()
         {
             if (!await app.StartServerAsync())
@@ -26,7 +32,15 @@ internal static class ServerLifecycle
             }
 
             var failed = await WaitForStopAsync(app);
-            await app.StopAsync();
+            try
+            {
+                await app.StopAsync();
+            }
+            catch when (failed)
+            {
+                // The host rethrows the faulted service's exception, which it already logged.
+            }
+
             return failed ? 1 : 0;
         }
 

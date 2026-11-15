@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Recyclarr.Server.Features.Guide.CustomFormatGroups;
 using Recyclarr.Server.Features.Guide.CustomFormats;
 using Recyclarr.Server.Features.Guide.ScoreSets;

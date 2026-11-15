@@ -114,5 +114,5 @@ internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
     // FastEndpoints fills an undocumented response with a reason phrase such as "Success", never a
     // sentence that states the condition.
     private static bool IsSentence(JsonNode? node) =>
-        node?.GetValue<string>().EndsWith('.') ?? false;
+        node?.GetValue<string>().EndsWith('.', StringComparison.Ordinal) ?? false;
 }

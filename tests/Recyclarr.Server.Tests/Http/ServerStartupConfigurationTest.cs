@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
-using System.Net.Http.Json;
 using Autofac;
 using Recyclarr.Server.Features.Sync.CreateJob;
 using Recyclarr.Server.TestLibrary;

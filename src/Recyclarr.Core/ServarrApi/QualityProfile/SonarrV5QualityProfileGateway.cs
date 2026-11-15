@@ -190,9 +190,9 @@ internal class SonarrV5QualityProfileGateway(
                 continue;
             }
 
-            item.MinSize = (double)size.Min;
-            item.MaxSize = (double?)size.Max;
-            item.PreferredSize = (double?)size.Preferred;
+            item.MinSize = size.Min;
+            item.MaxSize = size.Max;
+            item.PreferredSize = size.Preferred;
         }
     }
 

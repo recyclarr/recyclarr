@@ -12,7 +12,10 @@ namespace Recyclarr.Settings.Configuration;
 /// </remarks>
 public sealed class SettingsLoadReport
 {
-    private Dictionary<string, SettingsPosition> _positions = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, SettingsPosition> _positions =
+    [
+        with(StringComparer.OrdinalIgnoreCase),
+    ];
     private List<SettingsDiagnostic> _diagnostics = [];
 
     /// <summary>

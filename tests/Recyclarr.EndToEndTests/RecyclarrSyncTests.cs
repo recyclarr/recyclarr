@@ -452,12 +452,12 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .SonarrApi<SonarrApi.IQualityDefinitionApi>()
             .QualitydefinitionGet(ct);
         var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
-        hdtv1080P.MinSize.Should().BeApproximately(5, 0.1);
-        hdtv1080P.MaxSize.Should().BeApproximately(50, 0.1);
-        hdtv1080P.PreferredSize.Should().BeApproximately(30, 0.1);
+        hdtv1080P.MinSize.Should().Be(5);
+        hdtv1080P.MaxSize.Should().Be(50);
+        hdtv1080P.PreferredSize.Should().Be(30);
 
         var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
-        bluray1080P.MinSize.Should().BeApproximately(50.4, 0.1);
+        bluray1080P.MinSize.Should().Be(50.4m);
     }
 
     private async Task VerifySonarrState(CancellationToken ct)
@@ -638,12 +638,12 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         bluray1080P.PreferredSize.Should().BeNull();
 
         var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
-        hdtv1080P.MinSize.Should().BeApproximately(0, 0.1);
-        hdtv1080P.MaxSize.Should().BeApproximately(100, 0.1);
-        hdtv1080P.PreferredSize.Should().BeApproximately(50, 0.1);
+        hdtv1080P.MinSize.Should().Be(0);
+        hdtv1080P.MaxSize.Should().Be(100);
+        hdtv1080P.PreferredSize.Should().Be(50);
 
         var webdl1080P = qualityDefs.First(q => q.Quality?.Name == "WEBDL-1080p");
-        webdl1080P.MinSize.Should().BeApproximately(12.5, 0.1);
+        webdl1080P.MinSize.Should().Be(12.5m);
 
         // Media naming settings
         var radarrNaming = await _harness.RadarrApi<RadarrApi.INamingConfigApi>().NamingGet(ct);
@@ -704,7 +704,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
                 .SonarrApi<SonarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
             var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");
-            if (sonarrHdtv?.MinSize is >= 4.9 and <= 5.1)
+            if (sonarrHdtv?.MinSize is 5)
             {
                 break;
             }
@@ -718,7 +718,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
                 .RadarrApi<RadarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
             var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");
-            if (radarrHdtv?.MinSize is >= -0.1 and <= 0.1)
+            if (radarrHdtv?.MinSize is 0)
             {
                 break;
             }

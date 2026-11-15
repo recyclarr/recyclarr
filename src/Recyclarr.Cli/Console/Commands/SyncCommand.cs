@@ -36,7 +36,7 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
         public string[] Instances { get; init; } = [];
     }
 
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

@@ -21,7 +21,7 @@ done
 dotnet build src/Recyclarr.Cli -v q
 
 # Warm-up run fetches guide data so the recording shows only the sync itself
-RECYCLARR_CONFIG_DIR="$work/config" src/Recyclarr.Cli/bin/Debug/net10.0/recyclarr sync --preview
+RECYCLARR_CONFIG_DIR="$work/config" src/Recyclarr.Cli/bin/Debug/net11.0/recyclarr sync --preview
 
 vhs .github/assets/sync-preview.tape
 # VHS writes text and cursor layers per frame inside the tape's padding; composite them and

@@ -17,9 +17,16 @@
       "rollForward": false
     },
     "dotnet-ef": {
-      "version": "10.0.12",
+      "version": "11.0.0",
       "commands": [
         "dotnet-ef"
+      ],
+      "rollForward": false
+    },
+    "dotnet-outdated-tool": {
+      "version": "4.9.0",
+      "commands": [
+        "dotnet-outdated"
       ],
       "rollForward": false
     }

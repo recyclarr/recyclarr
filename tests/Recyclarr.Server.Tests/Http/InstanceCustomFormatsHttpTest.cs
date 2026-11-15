@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Net;
-using System.Net.Http.Json;
 using Autofac;
 using NSubstitute.ExceptionExtensions;
 using Recyclarr.ResourceProviders.Domain;

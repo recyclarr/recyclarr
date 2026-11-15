@@ -58,10 +58,6 @@ internal static partial class SonarrV5QualityProfileMapper
             return null;
         }
 
-        return new QualityItemSize(
-            (decimal)(dto.MinSize ?? 0),
-            (decimal?)dto.MaxSize,
-            (decimal?)dto.PreferredSize
-        );
+        return new QualityItemSize(dto.MinSize ?? 0, dto.MaxSize, dto.PreferredSize);
     }
 }

@@ -67,9 +67,9 @@ public class QualityProfileQualityItemResource : ExtensibleResource
     public Quality? Quality { get; set; }
     public ICollection<QualityProfileQualityItemResource>? Items { get; set; }
     public bool? Allowed { get; set; }
-    public double? MinSize { get; set; }
-    public double? MaxSize { get; set; }
-    public double? PreferredSize { get; set; }
+    public decimal? MinSize { get; set; }
+    public decimal? MaxSize { get; set; }
+    public decimal? PreferredSize { get; set; }
 }
 
 /// <summary>The score a profile assigns to one custom format, referenced by ID.</summary>
