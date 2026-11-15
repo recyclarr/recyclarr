@@ -146,7 +146,8 @@ internal sealed class SyncJobRunHttpTest : ServerHttpFixture
         span.TraceId.Should().NotBe(requestTrace);
         span.Links.Should().ContainSingle().Which.Context.TraceId.Should().Be(requestTrace);
         span.GetTagItem("recyclarr.sync.job.trigger").Should().Be("manual");
-        ambient.Value?.TraceId.Should().Be(span.TraceId);
+        ambient.Value.Should().NotBeNull();
+        ambient.Value.TraceId.Should().Be(span.TraceId);
     }
 
     private static async Task<Guid> CreateJob(HttpClient client, params string[] instances)
