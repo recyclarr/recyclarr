@@ -1,4 +1,7 @@
 [env]
+# Keep one SDK install sufficient: let build-time .NET tools that target older runtimes (e.g.
+# Refitter) run on the installed runtime. Permanent policy, not a workaround for one tool.
+DOTNET_ROLL_FORWARD = "Major"
 DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
 RECYCLARR_API_KEY = "dev-server-api-key-0123456789abcdef"
 

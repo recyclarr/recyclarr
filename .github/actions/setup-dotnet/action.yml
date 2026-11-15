@@ -12,6 +12,12 @@ runs:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         DOTNET_NOLOGO: 1
 
+    # Keep one SDK install sufficient: let build-time .NET tools that target older runtimes (e.g.
+    # Refitter) run on the installed runtime. Permanent policy, not a workaround for one tool.
+    - name: Allow major runtime roll-forward
+      shell: bash
+      run: echo DOTNET_ROLL_FORWARD=Major >> "$GITHUB_ENV"
+
     - name: Restore dotnet tools
       shell: bash
       run: dotnet tool restore
