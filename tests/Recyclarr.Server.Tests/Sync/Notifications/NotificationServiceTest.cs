@@ -1,5 +1,6 @@
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Server.Diagnostics;
 using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Sync.Notifications.Apprise;
 using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
@@ -16,6 +17,7 @@ internal sealed class NotificationServiceTest
 {
     private IAppriseNotificationApiService _api = null!;
     private AppriseNotification? _capturedNotification;
+    private readonly ServerDiagnostics _serverDiagnostics = new();
 
     private NotificationService CreateSut(VerbosityOptions verbosity)
     {
@@ -30,7 +32,7 @@ internal sealed class NotificationServiceTest
                 _capturedNotification = builder(new AppriseNotification());
             });
 
-        return new NotificationService(new TestableLogger(), _api, verbosity);
+        return new NotificationService(new TestableLogger(), _api, _serverDiagnostics, verbosity);
     }
 
     [Test]
@@ -41,6 +43,36 @@ internal sealed class NotificationServiceTest
         await sut.SendNotification(new SyncRunResult([]));
 
         await _api.DidNotReceiveWithAnyArgs().Notify(default!);
+    }
+
+    [Test]
+    public async Task Server_diagnostics_repeat_in_every_notification_while_they_last()
+    {
+        var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Minimal));
+        _serverDiagnostics.Replace(
+            "test",
+            [
+                DiagnosticCodes.EnvironmentVariableRemoved.Create(
+                    "CRON_SCHEDULE",
+                    "CRON_SCHEDULE is no longer used",
+                    new EnvironmentVariableDiagnosticData("CRON_SCHEDULE")
+                ),
+            ]
+        );
+
+        var bodies = new List<string?>();
+        for (var i = 0; i < 2; i++)
+        {
+            await sut.SendNotification(new SyncRunResult([]));
+            bodies.Add(_capturedNotification?.Body);
+        }
+
+        bodies
+            .Should()
+            .HaveCount(2)
+            .And.AllSatisfy(x =>
+                x.Should().Contain("### Server").And.Contain("- CRON_SCHEDULE is no longer used")
+            );
     }
 
     [Test]

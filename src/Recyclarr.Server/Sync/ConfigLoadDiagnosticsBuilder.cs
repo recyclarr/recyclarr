@@ -50,7 +50,7 @@ internal static class ConfigLoadDiagnosticsBuilder
             InvalidInstances = invalidInstances,
             DuplicateInstances = duplicateInstances,
             SplitInstanceGroups = splitGroups,
-            DeprecationWarnings = result.DeprecationWarnings.ToList(),
+            DeprecationWarnings = result.DeprecationWarnings,
         };
     }
 }

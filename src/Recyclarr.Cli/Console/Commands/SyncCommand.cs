@@ -51,6 +51,6 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
             Instances = [.. settings.Instances],
             Preview = settings.Preview,
         };
-        return (int)await handler.RunAsync(connection.Sync, request, ct);
+        return (int)await handler.RunAsync(connection.Sync, connection.Diagnostics, request, ct);
     }
 }

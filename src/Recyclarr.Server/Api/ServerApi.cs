@@ -109,6 +109,9 @@ internal static class ServerApi
             t["Config Templates"] =
                 "Starter configurations generated from guide data, and include templates from "
                 + "resource providers.";
+            t["Diagnostics"] =
+                "Problems the server has now, such as deprecated settings or a held-back guide "
+                + "update, listed until they are fixed.";
             t["Guide"] = "Read-only TRaSH Guides data, scoped to one service.";
             t["Instances"] = "Direct calls to a configured Sonarr or Radarr instance.";
             t["Sync"] = "Sync jobs, their progress and results, and the built-in sync schedule.";

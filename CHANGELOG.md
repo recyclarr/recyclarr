@@ -15,6 +15,8 @@ changes you may need to make.
 ### Added
 
 - Server: Recyclarr server with an HTTP API, scheduled syncs, and metrics
+- Sync: Notifications and `sync` output list ongoing problems, such as deprecated settings or a
+  held-back guide update, after every sync until they are fixed
 - Kubernetes: Official Helm chart
 - Config: `RECYCLARR_STATE_DIR` environment variable
 

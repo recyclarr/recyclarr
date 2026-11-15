@@ -11,6 +11,7 @@ using Recyclarr.Pipelines;
 using Recyclarr.Platform;
 using Recyclarr.ResourceProviders;
 using Recyclarr.Server.Api.Auth;
+using Recyclarr.Server.Diagnostics;
 using Recyclarr.Server.Features.Instances;
 using Recyclarr.Server.Hosting;
 using Recyclarr.Server.Logging;
@@ -79,6 +80,7 @@ internal static class CompositionRoot
     {
         builder.RegisterType<ServerConfigLoader>();
         builder.RegisterType<ResourceCoordinator>().SingleInstance();
+        builder.RegisterType<ServerDiagnostics>().SingleInstance();
         builder.RegisterType<ConfigInputs>();
         builder.RegisterType<InstanceServiceCaller>();
 

@@ -13,8 +13,17 @@ namespace Recyclarr.Server.Sync;
 internal sealed record ServerConfigLoadResult(
     IReadOnlyList<IServiceConfiguration> Configs,
     IReadOnlyList<ConfigParsingException> Failures,
-    IReadOnlyList<string> DeprecationWarnings,
+    IReadOnlyList<ConfigDeprecation> DeprecationWarnings,
     IReadOnlyList<IFilterResult> FilterResults
+);
+
+/// <summary>
+/// The configuration a load produced, or null when it had errors, plus every problem the load
+/// found either way.
+/// </summary>
+internal sealed record ServerConfigLoad(
+    ServerConfiguration? Configuration,
+    ConfigLoadDiagnostics Diagnostics
 );
 
 // Loads the server's configuration directory and resolves it against the guide data bound to the
@@ -28,27 +37,32 @@ internal sealed class ServerConfigLoader(
 )
 {
     /// <summary>
-    /// Loads every configured instance, logging each configuration problem and deprecation.
-    /// Returns null when any configuration error exists, so an invalid configuration never
-    /// produces a snapshot.
+    /// Loads every configured instance, logging each configuration problem and deprecation. The
+    /// configuration is null when any configuration error exists, so an invalid configuration
+    /// never produces a snapshot.
     /// </summary>
-    public ServerConfiguration? TryLoadServerConfiguration()
+    public ServerConfigLoad LoadServerConfiguration()
     {
         var result = LoadConfigs();
         var diagnostics = ConfigLoadDiagnosticsBuilder.Build(result);
         ConfigLoadDiagnosticsLogger.Log(log, diagnostics);
 
-        return diagnostics.HasServerConfigurationErrors
+        var configuration = diagnostics.HasServerConfigurationErrors
             ? null
             : new ServerConfiguration(result.Configs);
+        return new ServerConfigLoad(configuration, diagnostics);
     }
 
     private ServerConfigLoadResult LoadConfigs()
     {
         var allConfigs = new List<LoadedConfigYaml>();
         var failures = new List<ConfigParsingException>();
+        var deprecations = new List<ConfigDeprecation>();
         foreach (var file in FindConfigFiles(failures))
         {
+            // The collector is shared by every file in this load, so the deprecations a file adds
+            // are the ones past the count before it loaded.
+            var deprecationsBefore = diagnosticCollector.Deprecations.Count;
             try
             {
                 allConfigs.AddRange(loader.Load(file));
@@ -68,6 +82,12 @@ internal sealed class ServerConfigLoader(
             {
                 failures.Add(new ConfigParsingException(e.Message, line: 0, e) { FilePath = file });
             }
+
+            deprecations.AddRange(
+                diagnosticCollector
+                    .Deprecations.Skip(deprecationsBefore)
+                    .Select(x => new ConfigDeprecation(file.Name, x))
+            );
         }
 
         var allInstanceNames = allConfigs
@@ -101,7 +121,7 @@ internal sealed class ServerConfigLoader(
         return new ServerConfigLoadResult(
             configs,
             failures,
-            diagnosticCollector.Deprecations,
+            deprecations,
             filterResult.FilterResults.ToList()
         );
     }

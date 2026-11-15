@@ -117,6 +117,36 @@
         ]
       }
     },
+    "/api/v1/diagnostics": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "List current server diagnostics",
+        "description": "Returns the problems the server has now, such as deprecated settings, an invalid configuration change, or a guide update that was held back. Each one stays in the list until the server sees it is fixed. Reading the list changes nothing. The list is empty when the server has no problems.",
+        "operationId": "DiagnosticsList",
+        "responses": {
+          "200": {
+            "description": "The current diagnostics, errors first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDiagnosticsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The request has no valid server API key in its Authorization header."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/guide/{service}/custom-format-groups": {
       "get": {
         "tags": [
@@ -874,6 +904,33 @@
         ],
         "type": "string"
       },
+      "ConfigErrorsDiagnosticData": {
+        "required": [
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        },
+        "description": "The configuration errors that made the change invalid."
+      },
+      "ConfigFileDiagnosticData": {
+        "required": [
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "The configuration file the problem is in. Absent when it is not known."
+      },
       "ConfigIncludeSummaryResponse": {
         "required": [
           "id",
@@ -1232,6 +1289,68 @@
           }
         },
         "description": "The managed custom format that uses `serviceId` now."
+      },
+      "DiagnosticResponse": {
+        "required": [
+          "id",
+          "code",
+          "severity",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifies this problem. It stays the same while the problem lasts, so a client can track\nit across requests."
+          },
+          "code": {
+            "type": "string",
+            "description": "Identifies the kind of problem, for example `environmentVariableRemoved`."
+          },
+          "severity": {
+            "$ref": "#/components/schemas/OutcomeSeverity"
+          },
+          "message": {
+            "type": "string",
+            "description": "A description of the problem for people to read."
+          },
+          "data": {
+            "description": "Facts specific to the code. Absent when the code has none. The `x-diagnostic-data`\nextension of this schema maps each code to the schema of its data."
+          }
+        },
+        "description": "One problem the server has now, such as a deprecated setting or a held-back guide update. It\nstays in the list while the problem lasts and leaves it once the server sees the problem is\nfixed. New codes may be added; a client that does not know a code can still show `message`.",
+        "x-diagnostic-data": {
+          "environmentVariableRemoved": {
+            "$ref": "#/components/schemas/EnvironmentVariableDiagnosticData"
+          },
+          "settingDeprecated": {
+            "$ref": "#/components/schemas/SettingDiagnosticData"
+          },
+          "configPropertyDeprecated": {
+            "$ref": "#/components/schemas/ConfigFileDiagnosticData"
+          },
+          "configEditRejected": {
+            "$ref": "#/components/schemas/ConfigErrorsDiagnosticData"
+          },
+          "guideUpdateRejected": {
+            "$ref": "#/components/schemas/ProviderErrorsDiagnosticData"
+          },
+          "resourceProviderUpdateFailed": {
+            "$ref": "#/components/schemas/ProviderUpdateDiagnosticData"
+          }
+        }
+      },
+      "EnvironmentVariableDiagnosticData": {
+        "required": [
+          "variable"
+        ],
+        "type": "object",
+        "properties": {
+          "variable": {
+            "type": "string"
+          }
+        },
+        "description": "A Recyclarr 8 environment variable that is still set."
       },
       "GetSyncJobResponse": {
         "required": [
@@ -1719,6 +1838,12 @@
           "$ref": "#/components/schemas/CustomFormatSpecificationResponse"
         }
       },
+      "IReadOnlyListOfDiagnosticResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DiagnosticResponse"
+        }
+      },
       "IReadOnlyListOfGuideCustomFormatGroupMemberResponse": {
         "type": "array",
         "items": {
@@ -1858,6 +1983,17 @@
         "properties": {
           "items": {
             "$ref": "#/components/schemas/IReadOnlyListOfConfigTemplateSummaryResponse"
+          }
+        }
+      },
+      "ListDiagnosticsResponse": {
+        "required": [
+          "diagnostics"
+        ],
+        "type": "object",
+        "properties": {
+          "diagnostics": {
+            "$ref": "#/components/schemas/IReadOnlyListOfDiagnosticResponse"
           }
         }
       },
@@ -2487,6 +2623,42 @@
           "doNotPrefer"
         ],
         "type": "string"
+      },
+      "ProviderErrorsDiagnosticData": {
+        "required": [
+          "provider",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        },
+        "description": "The resource provider whose update was held back, and the configuration errors the update\ncaused."
+      },
+      "ProviderUpdateDiagnosticData": {
+        "required": [
+          "provider",
+          "lastSuccessAt"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "lastSuccessAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "description": "The resource provider that could not be updated, and when its data last updated. `lastSuccessAt`\nis absent when it never updated with its current source."
       },
       "QualityDefinitionTypeOutcomeData": {
         "required": [
@@ -3196,6 +3368,26 @@
         },
         "description": "The service resources whose names match."
       },
+      "SettingDiagnosticData": {
+        "required": [
+          "file",
+          "line"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "line": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A setting in a settings file. `line` is absent when the setting has no single location."
+      },
       "SkippedBecauseResponse": {
         "required": [
           "jobId"
@@ -3737,6 +3929,10 @@
     {
       "name": "Config Templates",
       "description": "Starter configurations generated from guide data, and include templates from resource providers."
+    },
+    {
+      "name": "Diagnostics",
+      "description": "Problems the server has now, such as deprecated settings or a held-back guide update, listed until they are fixed."
     },
     {
       "name": "Guide",

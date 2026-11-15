@@ -28,7 +28,7 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
         AddConfig(Paths.ConfigDirectory.File("recyclarr.yml"), "from-main-file");
         AddConfig(Paths.YamlConfigDirectory.File("extra.yml"), "from-configs-directory");
 
-        var configuration = Resolve<ServerConfigLoader>().TryLoadServerConfiguration();
+        var configuration = Resolve<ServerConfigLoader>().LoadServerConfiguration().Configuration;
 
         configuration.Should().NotBeNull();
         configuration
@@ -42,7 +42,7 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
         AddConfig(Paths.ConfigDirectory.File("recyclarr.yml"), "yml");
         AddConfig(Paths.ConfigDirectory.File("recyclarr.yaml"), "yaml");
 
-        Resolve<ServerConfigLoader>().TryLoadServerConfiguration().Should().BeNull();
+        Resolve<ServerConfigLoader>().LoadServerConfiguration().Configuration.Should().BeNull();
     }
 
     private const string SizeSection =
@@ -68,6 +68,6 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
             )
         );
 
-        return Resolve<ServerConfigLoader>().TryLoadServerConfiguration() is not null;
+        return Resolve<ServerConfigLoader>().LoadServerConfiguration().Configuration is not null;
     }
 }

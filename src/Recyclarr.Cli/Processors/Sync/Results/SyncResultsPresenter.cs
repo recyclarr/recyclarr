@@ -13,6 +13,7 @@ internal class SyncResultsPresenter(IAnsiConsole console, ILogger log, PreviewRe
 {
     public void Present(
         SyncJobResultsResponse results,
+        IEnumerable<DiagnosticResponse> serverDiagnostics,
         IEnumerable<InstanceSnapshotResponse> progress,
         bool isPreview
     )
@@ -31,7 +32,7 @@ internal class SyncResultsPresenter(IAnsiConsole console, ILogger log, PreviewRe
             instances.ForEach(preview.Render);
         }
 
-        var diagnostics = SyncDiagnostics.Build(results.Fault, instances);
+        var diagnostics = SyncDiagnostics.Build(results.Fault, instances, serverDiagnostics);
         if (DiagnosticsPanel.Build(diagnostics) is { } panel)
         {
             console.WriteLine();

@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Autofac;
+using NSubstitute.ExceptionExtensions;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Client.V1;
@@ -75,6 +76,59 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         result.Should().Be(ExitStatus.Succeeded);
         (await TerminalStatusOfTheOnlyJob()).Should().Be("Succeeded");
+    }
+
+    [Test]
+    public async Task Server_diagnostics_are_reported_with_the_sync_results()
+    {
+        Env.Set("CRON_SCHEDULE", "0 4 * * *");
+        AddInstanceConfig(InstanceName);
+
+        var result = await RunSync();
+
+        result.Should().Be(ExitStatus.Succeeded);
+        LogEntries
+            .Should()
+            .Contain(x =>
+                x.Level == LogEventLevel.Warning
+                && x.Message.Contains("CRON_SCHEDULE is no longer used", StringComparison.Ordinal)
+            );
+    }
+
+    [TestCase(false, ExitStatus.Succeeded)]
+    [TestCase(true, ExitStatus.Failed)]
+    public async Task Unavailable_server_diagnostics_leave_results_and_exit_status_unchanged(
+        bool syncFails,
+        ExitStatus expected
+    )
+    {
+        AddInstanceConfig(InstanceName);
+        if (syncFails)
+        {
+            _result = new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [],
+                    failure: new ServiceUnavailableFailure()
+                ),
+            ]);
+        }
+
+        var diagnostics = Substitute.For<IDiagnosticsApi>();
+        diagnostics
+            .Diagnostics()
+            .ThrowsAsyncForAnyArgs(new HttpRequestException("diagnostics unavailable"));
+
+        var result = await RunSync(diagnostics: diagnostics);
+
+        result.Should().Be(expected);
+        LogEntries
+            .Should()
+            .Contain(x =>
+                x.Level == LogEventLevel.Information
+                && x.Message.Contains("finished with status", StringComparison.Ordinal)
+            );
     }
 
     /// <summary>
@@ -932,11 +986,15 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         );
     }
 
-    private async Task<ExitStatus> RunSync(CreateSyncJobRequest? request = null)
+    private async Task<ExitStatus> RunSync(
+        CreateSyncJobRequest? request = null,
+        IDiagnosticsApi? diagnostics = null
+    )
     {
         return await ResolveCli<SyncCommandHandler>()
             .RunAsync(
                 Api,
+                diagnostics ?? Connection.Diagnostics,
                 request ?? new CreateSyncJobRequest(),
                 TestContext.CurrentContext.CancellationToken
             );

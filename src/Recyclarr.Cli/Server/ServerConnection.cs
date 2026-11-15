@@ -35,6 +35,9 @@ internal sealed class ServerConnection(HttpClient client, IAsyncDisposable? owne
     public ISyncApi Sync { get; } = RestService.For<ISyncApi>(client, SelfApiRefitSettings);
     public IGuideApi Guide { get; } = RestService.For<IGuideApi>(client, SelfApiRefitSettings);
 
+    public IDiagnosticsApi Diagnostics { get; } =
+        RestService.For<IDiagnosticsApi>(client, SelfApiRefitSettings);
+
     public IInstancesApi Instances { get; } =
         RestService.For<IInstancesApi>(client, SelfApiRefitSettings);
 

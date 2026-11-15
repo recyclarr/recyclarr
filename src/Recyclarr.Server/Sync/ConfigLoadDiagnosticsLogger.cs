@@ -1,7 +1,7 @@
 namespace Recyclarr.Server.Sync;
 
-// Writes startup configuration diagnostics to the server log, the only place they appear
-// (ADR-019).
+// Writes configuration diagnostics to the server log. The resource coordinator also publishes them
+// as server diagnostics (ADR-035).
 internal static class ConfigLoadDiagnosticsLogger
 {
     public static void Log(ILogger log, ConfigLoadDiagnostics diagnostics)
@@ -37,9 +37,9 @@ internal static class ConfigLoadDiagnosticsLogger
             );
         }
 
-        foreach (var message in diagnostics.DeprecationWarnings)
+        foreach (var deprecation in diagnostics.DeprecationWarnings)
         {
-            log.Warning("[DEPRECATED] {Message}", message);
+            log.Warning("[DEPRECATED] {Message}", deprecation.Message);
         }
     }
 }

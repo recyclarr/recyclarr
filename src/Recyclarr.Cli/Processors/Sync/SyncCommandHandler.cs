@@ -18,6 +18,7 @@ internal class SyncCommandHandler(
 {
     public async Task<ExitStatus> RunAsync(
         ISyncApi api,
+        IDiagnosticsApi diagnosticsApi,
         CreateSyncJobRequest request,
         CancellationToken ct
     )
@@ -35,13 +36,41 @@ internal class SyncCommandHandler(
 
         using var response = await api.Results(jobId.Value, ct);
         var results = response.ContentOrThrow();
-        resultsPresenter.Present(results, job.Progress, job.Preview);
+        var serverDiagnostics = await GetServerDiagnosticsAsync(diagnosticsApi, ct);
+        resultsPresenter.Present(results, serverDiagnostics, job.Progress, job.Preview);
 
         // Only an outright failure earns a non-zero exit code. A partial sync applied everything
         // it could, which is the outcome the CLI has always reported as success.
         return results.Status == SyncCompletionStatus.Failed
             ? ExitStatus.Failed
             : ExitStatus.Succeeded;
+    }
+
+    /// <summary>
+    /// The server's current problems, shown with the sync results. They add context to a sync
+    /// that already finished, so a failed request shows nothing rather than failing the command.
+    /// </summary>
+    private async Task<IReadOnlyList<DiagnosticResponse>> GetServerDiagnosticsAsync(
+        IDiagnosticsApi api,
+        CancellationToken ct
+    )
+    {
+        try
+        {
+            using var response = await api.Diagnostics(ct);
+            if (response is { IsSuccessful: true, Content: { } content })
+            {
+                return content.Diagnostics;
+            }
+
+            log.Debug("Server diagnostics unavailable: {Error}", response.Error?.Message);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            log.Debug(e, "Server diagnostics unavailable");
+        }
+
+        return [];
     }
 
     /// <summary>

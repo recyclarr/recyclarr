@@ -1,8 +1,13 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Autofac;
 using DotNext.Threading;
 using Recyclarr.Config.Parsing;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.ResourceProviders.Storage;
+using Recyclarr.Server.Diagnostics;
+using Recyclarr.Server.Features.Diagnostics.List;
 using Recyclarr.Server.Sync;
 
 namespace Recyclarr.Server.Resources;
@@ -38,9 +43,16 @@ internal sealed class ResourceCoordinator(
     IResourceCacheCleanupService cleanup,
     ConfigInputs configInputs,
     ILifetimeScope scope,
+    ServerDiagnostics diagnostics,
     TimeProvider time
 ) : IDisposable
 {
+    // Diagnostic sources this coordinator owns (ADR-035), one per condition it re-checks
+    private const string ConfigSource = "configuration";
+    private const string ConfigEditSource = "configuration-edit";
+    private const string GuideUpdateSource = "guide-update";
+    private const string ProviderUpdateSourcePrefix = "provider-update:";
+
     public static readonly TimeSpan Ttl = TimeSpan.FromHours(1);
     public static readonly TimeSpan FetchBackoff = TimeSpan.FromMinutes(5);
 
@@ -120,16 +132,37 @@ internal sealed class ResourceCoordinator(
         var inputsSeen = inputs.Equals(_acceptedInputs) || inputs.Equals(_rejectedInputs);
         if (_current is not null && updated.Count == 0 && inputsSeen)
         {
+            // Inputs back at the accepted state undo a rejected edit without a resolve
+            if (inputs.Equals(_acceptedInputs))
+            {
+                _rejectedInputs = null;
+                diagnostics.Clear(ConfigEditSource);
+            }
+
             return;
         }
 
         var configEdited = _current is not null && !inputs.Equals(_acceptedInputs);
         var resolved = Resolve(sources);
+        var heldBack = false;
         if (resolved.Snapshot is null && updated.Count > 0)
         {
+            var failure = resolved.Diagnostics;
             var reverted = await RevertAsync(updated, blameProviders: !configEdited, ct);
-            if (reverted && !configEdited)
+            if (reverted.Count > 0 && !configEdited)
             {
+                heldBack = true;
+                diagnostics.Replace(
+                    GuideUpdateSource,
+                    reverted.Select(x =>
+                        GuideUpdateRejected(
+                            x,
+                            failure,
+                            "made the configuration invalid, so syncs use the last data that "
+                                + "validated"
+                        )
+                    )
+                );
                 resolved = Resolve(sources);
             }
         }
@@ -139,7 +172,7 @@ internal sealed class ResourceCoordinator(
 
         if (resolved.Snapshot is not { } snapshot)
         {
-            RejectConfiguration(configEdited, resolvedInputs);
+            RejectConfiguration(configEdited, resolvedInputs, resolved.Diagnostics, updated);
             return;
         }
 
@@ -151,13 +184,41 @@ internal sealed class ResourceCoordinator(
         _current = snapshot;
         _acceptedInputs = resolvedInputs;
         _rejectedInputs = null;
+        PublishAccepted(resolved.Diagnostics, guideUpdateValidated: updated.Count > 0 && !heldBack);
         if (configEdited)
         {
             log.Information("Configuration changed and was reloaded");
         }
     }
 
-    private void RejectConfiguration(bool configEdited, ConfigInputFingerprint inputs)
+    // The configuration in use is now this one, so its deprecations replace the previous ones and
+    // no rejected edit remains. A held-back guide update stays held back until new guide data
+    // validates.
+    private void PublishAccepted(ConfigLoadDiagnostics accepted, bool guideUpdateValidated)
+    {
+        diagnostics.Replace(
+            ConfigSource,
+            accepted.DeprecationWarnings.Select(x =>
+                DiagnosticCodes.ConfigPropertyDeprecated.Create(
+                    $"{x.FileName}:{StableKey(x.Message)}",
+                    x.FileName is null ? x.Message : $"{x.FileName}: {x.Message}",
+                    new ConfigFileDiagnosticData(x.FileName)
+                )
+            )
+        );
+        diagnostics.Clear(ConfigEditSource);
+        if (guideUpdateValidated)
+        {
+            diagnostics.Clear(GuideUpdateSource);
+        }
+    }
+
+    private void RejectConfiguration(
+        bool configEdited,
+        ConfigInputFingerprint inputs,
+        ConfigLoadDiagnostics failure,
+        IReadOnlyCollection<IResourceSource> updated
+    )
     {
         if (_current is null)
         {
@@ -173,6 +234,18 @@ internal sealed class ResourceCoordinator(
                 "Configuration changed but is invalid; the previous configuration stays in use "
                     + "until the errors logged above are corrected"
             );
+            var errors = failure.DescribeErrors();
+            diagnostics.Replace(
+                ConfigEditSource,
+                [
+                    DiagnosticCodes.ConfigEditRejected.Create(
+                        "configuration",
+                        "The configuration changed but is invalid, so syncs use the previous "
+                            + $"configuration until these errors are corrected: {Join(errors)}",
+                        new ConfigErrorsDiagnosticData(errors)
+                    ),
+                ]
+            );
             return;
         }
 
@@ -180,7 +253,39 @@ internal sealed class ResourceCoordinator(
             "Updated guide data made the configuration invalid and could not be reverted; "
                 + "correct the errors logged above"
         );
+        diagnostics.Replace(
+            GuideUpdateSource,
+            updated.Select(x =>
+                GuideUpdateRejected(
+                    x,
+                    failure,
+                    "made the configuration invalid and could not be reverted, so syncs use the "
+                        + "previous configuration"
+                )
+            )
+        );
     }
+
+    private static DiagnosticResponse GuideUpdateRejected(
+        IResourceSource source,
+        ConfigLoadDiagnostics failure,
+        string effect
+    )
+    {
+        var name = source.Config.Name;
+        var errors = failure.DescribeErrors();
+        return DiagnosticCodes.GuideUpdateRejected.Create(
+            name,
+            $"Updated data from resource provider {name} {effect}. Errors: {Join(errors)}",
+            new ProviderErrorsDiagnosticData(name, errors)
+        );
+    }
+
+    private static string Join(IEnumerable<string> errors) => string.Join("; ", errors);
+
+    // A short key that is the same for the same text, for diagnostics identified by a message
+    private static string StableKey(string text) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(text)))[..12];
 
     private async Task<SourceUpdateOutcome?> UpdateIfDueAsync(
         IResourceSource source,
@@ -217,12 +322,14 @@ internal sealed class ResourceCoordinator(
             }
 
             Record(tracking, state, now, succeeded);
+            PublishUpdateResult(source, state, tracking, succeeded);
             return outcome;
         }
         catch (Exception e)
             when (mode == RefreshMode.Background && e is not OperationCanceledException)
         {
             Record(tracking, state, now, succeeded: false);
+            PublishUpdateResult(source, state, tracking, succeeded: false);
             log.Warning(e, "Resource provider {Name} could not be updated", source.Config.Name);
             return SourceUpdateOutcome.FailedUsingCache;
         }
@@ -271,13 +378,46 @@ internal sealed class ResourceCoordinator(
         }.Write(tracking.StateFile);
     }
 
-    private async Task<bool> RevertAsync(
+    private void PublishUpdateResult(
+        IResourceSource source,
+        ProviderRefreshState? previous,
+        SourceTracking tracking,
+        bool succeeded
+    )
+    {
+        var diagnosticSource = $"{ProviderUpdateSourcePrefix}{source.Config.Name}";
+        if (succeeded)
+        {
+            diagnostics.Clear(diagnosticSource);
+            return;
+        }
+
+        var name = source.Config.Name;
+        var lastSuccess =
+            previous?.SourceIdentity == tracking.Identity ? previous.LastSuccessAt : null;
+        var since = lastSuccess is { } at
+            ? string.Create(CultureInfo.InvariantCulture, $" from {at:u}")
+            : "";
+        diagnostics.Replace(
+            diagnosticSource,
+            [
+                DiagnosticCodes.ResourceProviderUpdateFailed.Create(
+                    name,
+                    $"Resource provider {name} could not be updated, so syncs use its cached "
+                        + $"data{since}",
+                    new ProviderUpdateDiagnosticData(name, lastSuccess)
+                ),
+            ]
+        );
+    }
+
+    private async Task<List<IResourceSource>> RevertAsync(
         List<IResourceSource> updated,
         bool blameProviders,
         CancellationToken ct
     )
     {
-        var reverted = false;
+        var reverted = new List<IResourceSource>();
         foreach (var source in updated)
         {
             if (!await source.RevertToGoodAsync(ct))
@@ -285,7 +425,7 @@ internal sealed class ResourceCoordinator(
                 continue;
             }
 
-            reverted = true;
+            reverted.Add(source);
             if (blameProviders)
             {
                 log.Warning(
@@ -309,14 +449,17 @@ internal sealed class ResourceCoordinator(
             c.RegisterInstance(ResourceScope.For(guide))
         );
 
-        var configuration = resolveScope.Resolve<ServerConfigLoader>().TryLoadServerConfiguration();
+        var load = resolveScope.Resolve<ServerConfigLoader>().LoadServerConfiguration();
         var recorded = resolveScope.Resolve<ConfigInputRecorder>().Paths.ToList();
-        var snapshot = configuration is null ? null : new ResourceSnapshot(guide, configuration);
-        return new ResolvedConfiguration(snapshot, recorded);
+        var snapshot = load.Configuration is null
+            ? null
+            : new ResourceSnapshot(guide, load.Configuration);
+        return new ResolvedConfiguration(snapshot, recorded, load.Diagnostics);
     }
 
     private sealed record ResolvedConfiguration(
         ResourceSnapshot? Snapshot,
-        IReadOnlyCollection<string> RecordedInputs
+        IReadOnlyCollection<string> RecordedInputs,
+        ConfigLoadDiagnostics Diagnostics
     );
 }

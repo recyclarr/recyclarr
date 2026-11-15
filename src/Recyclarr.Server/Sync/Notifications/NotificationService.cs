@@ -6,6 +6,7 @@ using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Server.Diagnostics;
 using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync.Notifications.Apprise;
 using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
@@ -18,6 +19,7 @@ namespace Recyclarr.Server.Sync.Notifications;
 internal sealed class NotificationService(
     ILogger log,
     IAppriseNotificationApiService api,
+    ServerDiagnostics serverDiagnostics,
     VerbosityOptions verbosity
 ) : INotificationService
 {
@@ -73,6 +75,8 @@ internal sealed class NotificationService(
             body.AppendLine();
         }
 
+        RenderServerDiagnostics(body);
+
         foreach (
             var instance in result.Instances.OrderBy(
                 x => x.InstanceName,
@@ -84,6 +88,31 @@ internal sealed class NotificationService(
         }
 
         return body.ToString();
+    }
+
+    // The server's current problems repeat in every notification until they are fixed (ADR-035)
+    private void RenderServerDiagnostics(StringBuilder body)
+    {
+        var reports = serverDiagnostics
+            .Current.Select(x => ToReport(x.Severity, x.Message))
+            .ToList();
+
+        var section = new StringBuilder();
+        AppendReports(section, "Errors", reports, ReportLevel.Error);
+        AppendReports(section, "Warnings", reports, ReportLevel.Warning);
+        if (verbosity.SendInfo)
+        {
+            AppendReports(section, "Information", reports, ReportLevel.Information);
+        }
+
+        if (section.Length == 0)
+        {
+            return;
+        }
+
+        body.AppendLine("### Server");
+        body.AppendLine();
+        body.Append(section);
     }
 
     private void RenderInstance(StringBuilder body, SyncInstanceResult instance)
@@ -271,15 +300,18 @@ internal sealed class NotificationService(
         ).Select(ToReport);
 
     private static NotificationReport ToReport(OutcomeResponse outcome) =>
+        ToReport(outcome.Severity, outcome.Message);
+
+    private static NotificationReport ToReport(OutcomeSeverity severity, string message) =>
         new(
-            outcome.Severity switch
+            severity switch
             {
                 OutcomeSeverity.Error => ReportLevel.Error,
                 OutcomeSeverity.Warning => ReportLevel.Warning,
                 OutcomeSeverity.Info => ReportLevel.Information,
-                _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
+                _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
             },
-            outcome.Message
+            message
         );
 
     private static bool HasOutcomes(PipelineResult pipeline) =>

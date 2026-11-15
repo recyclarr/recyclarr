@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Recyclarr.Migration;
+using Recyclarr.Server.Diagnostics;
+using Recyclarr.Server.Features.Diagnostics.List;
 using Recyclarr.Server.Logging;
 using Recyclarr.Server.Persistence;
 using Recyclarr.Server.Resources;
@@ -24,9 +26,12 @@ internal sealed class ServerBootstrapService(
     ISyncJobStore jobs,
     SettingsBindResult settings,
     IConfiguration configuration,
+    ServerDiagnostics diagnostics,
     ILogger log
 ) : IHostedLifecycleService
 {
+    private const string DiagnosticSource = "startup";
+
     private const string UpgradeGuide = "https://recyclarr.dev/guide/upgrade-guide/v9.0/";
 
     // Recyclarr 8 Docker variables that Recyclarr 9 ignores. Containers upgraded without reading
@@ -54,14 +59,25 @@ internal sealed class ServerBootstrapService(
     {
         logger.Reload();
 
-        // Logged once the configured outputs exist; settings errors stopped startup earlier.
+        // Settings and environment variables are read only at startup, so these entries last until
+        // the next restart. Logged once the configured outputs exist; settings errors stopped
+        // startup earlier.
+        var startupDiagnostics = new List<DiagnosticResponse>();
         foreach (
             var warning in settings.Diagnostics.Where(d =>
                 d.Severity == SettingsDiagnosticSeverity.Warning
             )
         )
         {
-            log.Warning("[DEPRECATED] {Message}", warning.Describe());
+            var message = warning.Describe();
+            log.Warning("[DEPRECATED] {Message}", message);
+            startupDiagnostics.Add(
+                DiagnosticCodes.SettingDeprecated.Create(
+                    $"{warning.File}:{warning.Position?.YamlPath ?? warning.Message}",
+                    message,
+                    new SettingDiagnosticData(warning.File, warning.Position?.Line)
+                )
+            );
         }
 
         foreach (var (variable, replacement, anchor) in RemovedVariables)
@@ -71,13 +87,23 @@ internal sealed class ServerBootstrapService(
                 continue;
             }
 
+            var url = $"{UpgradeGuide}#{anchor}";
             log.Warning(
                 "[REMOVED] {Variable} is no longer used; {Replacement}. See {Url}",
                 variable,
                 replacement,
-                $"{UpgradeGuide}#{anchor}"
+                url
+            );
+            startupDiagnostics.Add(
+                DiagnosticCodes.EnvironmentVariableRemoved.Create(
+                    variable,
+                    $"{variable} is no longer used; {replacement}. See {url}",
+                    new EnvironmentVariableDiagnosticData(variable)
+                )
             );
         }
+
+        diagnostics.Replace(DiagnosticSource, startupDiagnostics);
 
         if (logger.ActiveLogFiles.Count > 0)
         {

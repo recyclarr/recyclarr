@@ -26,9 +26,14 @@ internal sealed record SyncDiagnostic(
 /// </summary>
 internal static class SyncDiagnostics
 {
+    /// <remarks>
+    /// Server diagnostics describe the server rather than this run, but they belong with the
+    /// results because they explain why a sync may not match the configuration (ADR-035).
+    /// </remarks>
     public static IReadOnlyList<SyncDiagnostic> Build(
         SyncFaultResponse? runFault,
-        IEnumerable<InstanceResults> instances
+        IEnumerable<InstanceResults> instances,
+        IEnumerable<DiagnosticResponse> serverDiagnostics
     )
     {
         var diagnostics = new List<SyncDiagnostic>();
@@ -37,6 +42,14 @@ internal static class SyncDiagnostics
         {
             diagnostics.Add(new SyncDiagnostic(null, DiagnosticSeverity.Error, Fault(runFault)));
         }
+
+        diagnostics.AddRange(
+            serverDiagnostics.Select(x => new SyncDiagnostic(
+                null,
+                ToSeverity(x.Severity),
+                x.Message
+            ))
+        );
 
         foreach (var instance in instances)
         {
@@ -116,15 +129,15 @@ internal static class SyncDiagnostics
 
     // The server renders the message and assigns the severity; the CLI shows both as given
     private static (DiagnosticSeverity, string) FromOutcome(OutcomeResponse outcome) =>
-        (
-            outcome.Severity switch
-            {
-                OutcomeSeverity.Error => DiagnosticSeverity.Error,
-                OutcomeSeverity.Warning => DiagnosticSeverity.Warning,
-                _ => DiagnosticSeverity.Info,
-            },
-            outcome.Message
-        );
+        (ToSeverity(outcome.Severity), outcome.Message);
+
+    private static DiagnosticSeverity ToSeverity(OutcomeSeverity severity) =>
+        severity switch
+        {
+            OutcomeSeverity.Error => DiagnosticSeverity.Error,
+            OutcomeSeverity.Warning => DiagnosticSeverity.Warning,
+            _ => DiagnosticSeverity.Info,
+        };
 
     private static (DiagnosticSeverity, string) Error(string message) =>
         (DiagnosticSeverity.Error, message);

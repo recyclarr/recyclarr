@@ -41,8 +41,8 @@ configuration that validates is ever published.
 
 - Parse failures and invalid, duplicate, or split instances stop startup. The server logs every
   problem, exits with a non-zero status, and writes no READY handshake.
-- Deprecations are logged as warnings at startup and on each reload. No API exposes them, because
-  their only remedy is a change on the server.
+- Deprecations are logged as warnings at startup and on each reload, and listed as server
+  diagnostics (ADR-035).
 - A server with no configuration files starts. Guide and template resources remain available, and
   sync job creation returns 409.
 - If a git resource provider cannot refresh but data from an earlier run exists, the server logs a
@@ -91,7 +91,8 @@ Configuration is hand-edited YAML on the server. The server never writes configu
   sync in progress keeps the configuration it started with.
 - One invalid instance blocks all instances, at startup and on reload.
 - A provider update that breaks the configuration is logged and reverted; the server keeps running.
-- Clients never see deprecations; administrators read the server log.
+  Rejected edits, reverted provider updates, and deprecations stay visible to clients as server
+  diagnostics until fixed (ADR-035).
 
 ## History
 
@@ -100,3 +101,4 @@ Configuration is hand-edited YAML on the server. The server never writes configu
 - 2026-10-31: Allow returning generated configuration text; the server still never writes files.
 - 2026-11-05: Reload configuration when its input files change; `settings.yml` still needs a
   restart.
+- 2026-11-15: Deprecations and rejected changes are exposed to clients as server diagnostics.

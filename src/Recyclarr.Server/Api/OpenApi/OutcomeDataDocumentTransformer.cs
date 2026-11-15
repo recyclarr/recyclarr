@@ -1,16 +1,19 @@
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
+using Recyclarr.Server.Diagnostics;
+using Recyclarr.Server.Features.Diagnostics.List;
 using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync.Results;
 
 namespace Recyclarr.Server.Api.OpenApi;
 
 /// <summary>
-/// Publishes the data shape of every outcome code. No endpoint references the data records (the
-/// envelope types <c>data</c> as an untyped object), so the generator would not emit them. This
-/// adds each record as a component schema and writes an <c>x-outcome-data</c> map from code to
-/// schema on the <c>OutcomeResponse</c> schema, so generated clients get typed classes.
+/// Publishes the data shape of every outcome and diagnostic code. No endpoint references the data
+/// records (each envelope types <c>data</c> as an untyped object), so the generator would not emit
+/// them. This adds each record as a component schema and writes a map from code to schema on the
+/// envelope schema (<c>x-outcome-data</c> on <c>OutcomeResponse</c>, <c>x-diagnostic-data</c> on
+/// <c>DiagnosticResponse</c>), so generated clients get typed classes.
 /// </summary>
 internal sealed class OutcomeDataDocumentTransformer : IOpenApiDocumentTransformer
 {
@@ -20,14 +23,41 @@ internal sealed class OutcomeDataDocumentTransformer : IOpenApiDocumentTransform
         CancellationToken ct
     )
     {
+        await PublishAsync(
+            document,
+            context,
+            nameof(OutcomeResponse),
+            "x-outcome-data",
+            OutcomeCodes.All,
+            ct
+        );
+        await PublishAsync(
+            document,
+            context,
+            nameof(DiagnosticResponse),
+            "x-diagnostic-data",
+            DiagnosticCodes.All,
+            ct
+        );
+    }
+
+    private static async Task PublishAsync(
+        OpenApiDocument document,
+        OpenApiDocumentTransformerContext context,
+        string envelopeName,
+        string extensionName,
+        IEnumerable<IOutcomeCode> codes,
+        CancellationToken ct
+    )
+    {
         var schemas = document.Components?.Schemas;
-        if (schemas is null || !schemas.TryGetValue(nameof(OutcomeResponse), out var envelope))
+        if (schemas is null || !schemas.TryGetValue(envelopeName, out var envelope))
         {
             return;
         }
 
         var map = new JsonObject();
-        foreach (var code in OutcomeCodes.All)
+        foreach (var code in codes)
         {
             if (code.DataType is not { } dataType)
             {
@@ -50,7 +80,7 @@ internal sealed class OutcomeDataDocumentTransformer : IOpenApiDocumentTransform
         }
 
         target.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-        target.Extensions["x-outcome-data"] = new JsonNodeExtension(map);
+        target.Extensions[extensionName] = new JsonNodeExtension(map);
     }
 
     // A schema created outside the document pass inlines nested types instead of referencing their
