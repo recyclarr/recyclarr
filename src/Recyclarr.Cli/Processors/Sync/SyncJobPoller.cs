@@ -1,13 +1,12 @@
-using System.Runtime.CompilerServices;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 /// <summary>
-/// Polls a sync job until it finishes, yielding every snapshot along the way so callers can render
-/// progress as it happens. The job resource always answers 200; its status tells whether the job
-/// is still pending or running (ADR-016).
+/// Polls a sync job until it finishes, reporting every snapshot along the way so callers can render
+/// progress as it happens, and returns the terminal snapshot. The job resource always answers 200;
+/// its status tells whether the job is still pending or running (ADR-016).
 /// </summary>
 internal static class SyncJobPoller
 {
@@ -17,21 +16,22 @@ internal static class SyncJobPoller
     /// </summary>
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(250);
 
-    public static async IAsyncEnumerable<GetSyncJobResponse> PollAsync(
+    public static async Task<GetSyncJobResponse> PollAsync(
         ISyncApi api,
         Guid jobId,
-        [EnumeratorCancellation] CancellationToken ct
+        Action<GetSyncJobResponse> onSnapshot,
+        CancellationToken ct
     )
     {
         while (true)
         {
             using var response = await api.JobsGet(jobId, ct);
             var job = response.ContentOrThrow();
-            yield return job;
+            onSnapshot(job);
 
             if (job.Status is not ("Pending" or "Running"))
             {
-                yield break;
+                return job;
             }
 
             await Task.Delay(PollInterval, ct);

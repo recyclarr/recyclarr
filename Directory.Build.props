@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net11.0</TargetFramework>
+    <Features>$(Features);runtime-async=on</Features>
     <Nullable>enable</Nullable>
     <WarningLevel>9999</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

@@ -28,8 +28,10 @@ internal class SyncCommandHandler(
             return ExitStatus.Failed;
         }
 
-        var updates = SyncJobPoller.PollAsync(api, jobId.Value, ct);
-        var job = await progressRenderer.RenderProgressAsync(updates, ct);
+        var job = await progressRenderer.RenderProgressAsync(
+            onSnapshot => SyncJobPoller.PollAsync(api, jobId.Value, onSnapshot, ct),
+            ct
+        );
 
         using var response = await api.Results(jobId.Value, ct);
         var results = response.ContentOrThrow();

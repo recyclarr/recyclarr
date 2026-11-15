@@ -11,23 +11,21 @@ internal class SyncProgressRenderer(IAnsiConsole console)
     private IReadOnlyList<InstanceSnapshotResponse> _snapshot = [];
 
     /// <summary>
-    /// Renders a live table from job snapshots as they arrive, and returns the final one. The
-    /// display refreshes faster than snapshots arrive so the spinner keeps animating between polls.
-    /// The live table clears when the job ends; the caller replaces it with the results table.
-    /// A non-interactive console only waits for the final snapshot, because live-display cursor
-    /// operations can fail on a redirected stream.
+    /// Runs <paramref name="poll"/>, rendering a live table from each snapshot it reports, and
+    /// returns the final snapshot <paramref name="poll"/> returns. The display refreshes faster
+    /// than snapshots arrive so the spinner keeps animating between polls. The live table clears
+    /// when the job ends; the caller replaces it with the results table. A non-interactive console
+    /// only waits for the final snapshot, because live-display cursor operations can fail on a
+    /// redirected stream.
     /// </summary>
     public async Task<GetSyncJobResponse> RenderProgressAsync(
-        IAsyncEnumerable<GetSyncJobResponse> updates,
+        Func<Action<GetSyncJobResponse>, Task<GetSyncJobResponse>> poll,
         CancellationToken ct
     )
     {
-        GetSyncJobResponse? lastJob = null;
-
         if (!console.Profile.Capabilities.Interactive)
         {
-            await ConsumeUpdatesAsync();
-            return LastJobOrThrow();
+            return await poll(_ => { });
         }
 
         console.MarkupLine(
@@ -39,22 +37,16 @@ internal class SyncProgressRenderer(IAnsiConsole console)
                 + "\n"
         );
 
-        await console
+        return await console
             .Live(ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame()))
             .AutoClear(true)
             .StartAsync(RunPollLoop);
 
-        return LastJobOrThrow();
-
-        GetSyncJobResponse LastJobOrThrow() =>
-            lastJob
-            ?? throw new InvalidOperationException("The sync job reported no status at all");
-
-        async Task RunPollLoop(LiveDisplayContext ctx)
+        async Task<GetSyncJobResponse> RunPollLoop(LiveDisplayContext ctx)
         {
-            var consuming = ConsumeUpdatesAsync();
+            var polling = poll(job => _snapshot = [.. job.Progress]);
 
-            while (!consuming.IsCompleted)
+            while (!polling.IsCompleted)
             {
                 UpdateTable();
 
@@ -69,23 +61,13 @@ internal class SyncProgressRenderer(IAnsiConsole console)
             }
 
             UpdateTable();
-            await consuming;
-            return;
+            return await polling;
 
             void UpdateTable()
             {
                 ctx.UpdateTarget(
                     ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame())
                 );
-            }
-        }
-
-        async Task ConsumeUpdatesAsync()
-        {
-            await foreach (var job in updates.WithCancellation(ct))
-            {
-                lastJob = job;
-                _snapshot = [.. job.Progress];
             }
         }
     }
