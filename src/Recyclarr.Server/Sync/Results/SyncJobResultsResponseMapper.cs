@@ -1,0 +1,159 @@
+using Recyclarr.Pipelines.CustomFormat;
+using Recyclarr.Pipelines.MediaManagement;
+using Recyclarr.Pipelines.MediaNaming.Radarr;
+using Recyclarr.Pipelines.MediaNaming.Sonarr;
+using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Server.Api;
+using Recyclarr.Server.Features.Sync.GetResults;
+using Recyclarr.Sync.Results;
+using Recyclarr.TrashGuide;
+
+namespace Recyclarr.Server.Sync.Results;
+
+internal static class SyncJobResultsResponseMapper
+{
+    // Assembles results from what the job stored; instances that never finished are absent.
+    public static SyncJobResultsResponse Map(SyncJob job) =>
+        new()
+        {
+            Id = job.Id.Value,
+            Status = MapJobCompletion(job),
+            Instances = job
+                .Progress.Instances.Select(instance => instance.Result)
+                .OfType<SyncInstanceResultsResponse>()
+                .ToList(),
+            Fault = job.FaultReference is null ? null : new SyncFaultResponse(job.FaultReference),
+        };
+
+    private static SyncCompletionStatus MapJobCompletion(SyncJob job) =>
+        job.Status switch
+        {
+            SyncJobStatus.Succeeded => SyncCompletionStatus.Succeeded,
+            SyncJobStatus.Partial => SyncCompletionStatus.Partial,
+            SyncJobStatus.Failed => SyncCompletionStatus.Failed,
+            SyncJobStatus.Interrupted => job.Progress.HasCompletedWork
+                ? SyncCompletionStatus.Partial
+                : SyncCompletionStatus.Failed,
+            _ => throw new InvalidOperationException(
+                $"Sync job in status {job.Status} has no results"
+            ),
+        };
+
+    public static SyncInstanceResultsResponse MapInstance(SyncInstanceResult instance) =>
+        instance.ServiceType switch
+        {
+            SupportedServices.Sonarr => new SonarrInstanceResultsResponse
+            {
+                Name = instance.InstanceName,
+                Status = ResultValueMapper.MapCompletionStatus(instance.Status),
+                Pipelines = MapSonarrPipelines(instance.Pipelines),
+                Failure = instance.Failure?.ToCategory(),
+                Fault = MapFault(instance.Fault),
+                PlanningOutcomes = MapPlanningOutcomes(instance),
+            },
+            SupportedServices.Radarr => new RadarrInstanceResultsResponse
+            {
+                Name = instance.InstanceName,
+                Status = ResultValueMapper.MapCompletionStatus(instance.Status),
+                Pipelines = MapRadarrPipelines(instance.Pipelines),
+                Failure = instance.Failure?.ToCategory(),
+                Fault = MapFault(instance.Fault),
+                PlanningOutcomes = MapPlanningOutcomes(instance),
+            },
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(instance),
+                instance.ServiceType,
+                null
+            ),
+        };
+
+    private static SyncFaultResponse? MapFault(SyncFault? fault) =>
+        fault is null ? null : new SyncFaultResponse(fault.Reference);
+
+    private static List<OutcomeResponse> MapPlanningOutcomes(SyncInstanceResult instance) =>
+        instance.PlanningOutcomes.Select(OutcomeResponseMapper.Map).ToList();
+
+    private static SonarrPipelinesResponse MapSonarrPipelines(
+        IReadOnlyList<PipelineResult> pipelines
+    )
+    {
+        EnsureKnownPipelines(pipelines, typeof(SonarrNamingPipelineResult));
+
+        return new SonarrPipelinesResponse
+        {
+            CustomFormats = pipelines
+                .OfType<CustomFormatPipelineResult>()
+                .Select(CustomFormatResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            QualityProfiles = pipelines
+                .OfType<QualityProfilePipelineResult>()
+                .Select(QualityProfileResponseMapper.ToSonarrResponse)
+                .SingleOrDefault(),
+            QualitySizes = pipelines
+                .OfType<QualitySizePipelineResult>()
+                .Select(QualitySizeResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            Naming = pipelines
+                .OfType<SonarrNamingPipelineResult>()
+                .Select(NamingResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            MediaManagement = pipelines
+                .OfType<MediaManagementPipelineResult>()
+                .Select(MediaManagementResponseMapper.ToResponse)
+                .SingleOrDefault(),
+        };
+    }
+
+    private static RadarrPipelinesResponse MapRadarrPipelines(
+        IReadOnlyList<PipelineResult> pipelines
+    )
+    {
+        EnsureKnownPipelines(pipelines, typeof(RadarrNamingPipelineResult));
+
+        return new RadarrPipelinesResponse
+        {
+            CustomFormats = pipelines
+                .OfType<CustomFormatPipelineResult>()
+                .Select(CustomFormatResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            QualityProfiles = pipelines
+                .OfType<QualityProfilePipelineResult>()
+                .Select(QualityProfileResponseMapper.ToRadarrResponse)
+                .SingleOrDefault(),
+            QualitySizes = pipelines
+                .OfType<QualitySizePipelineResult>()
+                .Select(QualitySizeResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            Naming = pipelines
+                .OfType<RadarrNamingPipelineResult>()
+                .Select(NamingResponseMapper.ToResponse)
+                .SingleOrDefault(),
+            MediaManagement = pipelines
+                .OfType<MediaManagementPipelineResult>()
+                .Select(MediaManagementResponseMapper.ToResponse)
+                .SingleOrDefault(),
+        };
+    }
+
+    private static void EnsureKnownPipelines(
+        IReadOnlyList<PipelineResult> pipelines,
+        Type namingType
+    )
+    {
+        var unknown = pipelines.FirstOrDefault(x =>
+            x is not CustomFormatPipelineResult
+            && x is not QualityProfilePipelineResult
+            && x is not QualitySizePipelineResult
+            && x is not MediaManagementPipelineResult
+            && x.GetType() != namingType
+        );
+
+        if (unknown is not null)
+        {
+            throw new InvalidOperationException(
+                $"Unsupported pipeline result type: {unknown.GetType().FullName}"
+            );
+        }
+    }
+}

@@ -29,6 +29,12 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 
+  <!-- E2E tests drive a real server process and are exempt; see BannedSymbols.txt. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Recyclarr.EndToEndTests'">
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <Using Include="AutoFixture.NUnit4" />
     <Using Include="AwesomeAssertions" />

@@ -1,0 +1,26 @@
+# Unknown instance
+GET {{baseUrl}}/api/v1/instances/does-not-exist/custom-formats
+
+?? status == 404
+
+###
+
+# Unknown instance
+DELETE {{baseUrl}}/api/v1/instances/does-not-exist/custom-formats/1
+
+?? status == 404
+
+###
+
+# Unknown custom format id
+DELETE {{baseUrl}}/api/v1/instances/radarr/custom-formats/2147483647
+
+?? status == 404
+
+###
+
+# Wrong server API key
+GET {{baseUrl}}/api/v1/instances/does-not-exist/custom-formats
+Authorization: Bearer wrong-key
+
+?? status == 401

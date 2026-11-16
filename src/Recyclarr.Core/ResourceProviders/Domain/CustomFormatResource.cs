@@ -18,7 +18,7 @@ public record CustomFormatResource : IGuideResource, IServiceResource
     [JsonPropertyName("trash_scores")]
     [JsonNoSerialize]
     public Dictionary<string, int> TrashScores { get; init; } =
-        new(StringComparer.InvariantCultureIgnoreCase);
+    [with(StringComparer.InvariantCultureIgnoreCase)];
 
     [JsonIgnore]
     public int? DefaultScore => TrashScores.TryGetValue("default", out var score) ? score : null;

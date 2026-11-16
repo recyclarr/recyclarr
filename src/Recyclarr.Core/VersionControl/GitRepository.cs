@@ -69,7 +69,7 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
             }
             catch (GitCmdException e)
             {
-                log.Debug("Failed to fetch reference {Reference}: {Error}", reference, e.Message);
+                log.Debug(e, "Failed to fetch reference {Reference}", reference);
                 errors.Add(e);
             }
         }
@@ -105,5 +105,28 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
     public async Task ResetHard(string toBranchOrSha1, CancellationToken token)
     {
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
+    }
+
+    public async Task<string?> ResolveCommit(string revision, CancellationToken token)
+    {
+        try
+        {
+            return await RunGitCmd(
+                token,
+                "rev-parse",
+                "--verify",
+                "--quiet",
+                $"{revision}^{{commit}}"
+            );
+        }
+        catch (GitCmdException)
+        {
+            return null;
+        }
+    }
+
+    public async Task UpdateRef(string refName, string commit, CancellationToken token)
+    {
+        await RunGitCmd(token, "update-ref", refName, commit);
     }
 }

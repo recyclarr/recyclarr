@@ -1,0 +1,89 @@
+{{
+  // Prompt only when --var did not supply the value; a file-level @service would override --var.
+  if (typeof service === "undefined") {
+    exports.service = "{{$pick-askonce Service? $value: all,radarr,sonarr}}";
+  }
+}}
+
+###
+
+# @name createSyncJob
+{{
+  // "all" omits the service filter so the job syncs every configured instance.
+  const request = { preview: String(preview) === "true" };
+  if (service !== "all") request.service = service;
+  exports.createSyncJobBody = JSON.stringify(request);
+}}
+POST {{baseUrl}}/api/v1/sync/jobs
+Content-Type: application/json
+
+{{createSyncJobBody}}
+
+?? status == 202
+?? body id isString
+
+{{response
+  // Poll state lives in $global: exports from loop iterations do not reach later regions.
+  $global.poll = { status: "Pending", attempts: 0, deadline: Date.now() + 60_000 };
+}}
+
+###
+
+# @name poll
+# @loop while ["Pending", "Running"].includes($global.poll.status) && $global.poll.attempts < 60 && Date.now() < $global.poll.deadline
+# @sleep 1000
+GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
+
+?? status == 200
+
+{{response
+  $global.poll.response = response;
+  $global.poll.status = response.parsedBody.status;
+  $global.poll.attempts++;
+}}
+
+###
+
+{{
+  const assert = require("assert");
+  const { response: last } = $global.poll;
+  assert.ok(
+    !["Pending", "Running"].includes($global.poll.status),
+    "sync did not finish within 60 seconds"
+  );
+  assert.notEqual(last.parsedBody.status, "Failed", "sync job failed");
+  assert.equal(last.parsedBody.trigger, "Manual");
+  assert.ok(last.parsedBody.startedAt && last.parsedBody.finishedAt, "job timestamps missing");
+}}
+
+# @name getSyncJobResults
+GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}/results
+
+?? status == 200
+?? body id isString
+
+{{response
+  // Readability aid: logs the results without empty arrays and objects, recursively.
+  // Also hides meaningful empties such as a value change with `current: []`.
+  const isEmpty = (v) => Array.isArray(v)
+    ? v.length === 0
+    : v !== null && typeof v === "object" && Object.keys(v).length === 0;
+  const prune = (v) => {
+    if (Array.isArray(v)) return v.map(prune);
+    if (v === null || typeof v !== "object") return v;
+    return Object.fromEntries(
+      Object.entries(v).map(([k, x]) => [k, prune(x)]).filter(([, x]) => !isEmpty(x))
+    );
+  };
+  console.log(JSON.stringify(prune(response.parsedBody), null, 2));
+}}
+
+###
+
+# @name getSyncSchedule
+GET {{baseUrl}}/api/v1/sync/schedule
+
+?? status == 200
+?? body enabled isBoolean
+?? body cron isString
+?? body timeZone isString

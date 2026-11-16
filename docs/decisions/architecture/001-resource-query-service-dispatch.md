@@ -1,38 +1,37 @@
-# ADR-001: Resource Query Service Dispatch Pattern
+# ADR-001: Resource queries dispatch on service type with a switch
 
-- **Status:** Accepted
-- **Date:** 2025-11-27
+- **Scope:** `src/Recyclarr.Core/ResourceProviders/Domain/*ResourceQuery.cs` and their consumers
 
-## Context and Problem Statement
+## Context
 
-Resource query classes (e.g., `CustomFormatResourceQuery`, `QualitySizeResourceQuery`) need to
-return service-specific data (Radarr vs Sonarr). The current design uses explicit methods
-(`GetRadarr()`, `GetSonarr()`) with switch expressions in consumers. This technically violates the
-Open/Closed Principle since adding a new service requires modifying existing query classes and all
-consumer switch statements.
+Resource query classes (for example `CustomFormatResourceQuery`, `QualitySizeResourceQuery`) return
+guide data for Radarr or Sonarr. A switch on the service type violates the Open/Closed Principle:
+a new service means editing every query class. Recyclarr has supported only Radarr and Sonarr for
+years, and any new service would need far more domain work (API client, resource types, pipeline
+components) than query edits.
 
-## Decision Drivers
+## Decision
 
-- Adding new services is rare; Recyclarr has supported only Radarr and Sonarr for years
-- Domain work dominates any new service: API integration, resource types, pipeline phases, testing
-- Compile-time safety via switch exhaustiveness checking
-- Discoverability: `GetRadarr()` is self-documenting vs `queries[serviceType].Get()`
+Each resource query MUST select the service with a `switch` on `SupportedServices` inside the query
+(`Get(SupportedServices serviceType)` dispatching to a private generic method). A query whose
+services return unrelated types (`MediaNamingResourceQuery`) exposes one method per service
+(`GetRadarr()`, `GetSonarr()`) instead. MUST NOT introduce keyed DI strategies or a generic
+resolver to remove these switches; the compiler's exhaustiveness check is the extension mechanism.
 
-## Considered Options
+## Rejected Options
 
-1. Retain explicit service-specific methods (`GetRadarr()`, `GetSonarr()`)
-2. Keyed DI strategies with `IIndex<SupportedServices, T>`
-3. Generic bridge pattern with centralized resolver
+- Keyed DI strategies (`IIndex<SupportedServices, T>`): adds one type per service per query and
+  hides the call target, for a change that happens almost never.
+- Generic bridge with a central resolver: same cost, plus indirection at every call site.
 
-## Decision Outcome
+## Consequences
 
-Chosen option: "Retain explicit service-specific methods", because the abstraction cost exceeds the
-extensibility benefit given how rarely new services are added.
+- A new service requires editing every query class and every per-service consumer; the edits are
+  mechanical and found by searching for `SupportedServices`.
+- Call sites stay direct and traceable.
 
-### Consequences
+## History
 
-- Good, because direct method calls are self-documenting and easy to trace
-- Good, because compiler catches missing cases via switch exhaustiveness
-- Good, because no interface proliferation or DI complexity
-- Bad, because adding a new service requires modifying ~6 query classes and ~15 consumer locations
-- Bad, because the modification pattern is manual (though predictable and searchable)
+- 2025-11-27: Keep explicit per-service dispatch over keyed DI or a generic resolver.
+- 2026-10-16: Record matched to code: queries switch internally; only naming keeps per-service
+  methods.

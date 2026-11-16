@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Process and environment primitives shared by every Recyclarr executable. Code that does not
+       describe the platform or the process does not belong here (ADR-020). -->
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
+  </ItemGroup>
+</Project>

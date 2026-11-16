@@ -1,0 +1,258 @@
+using Recyclarr.Config.Models;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.MediaManagement;
+using Recyclarr.Pipelines.Plan;
+using Recyclarr.Servarr.MediaManagement;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
+
+namespace Recyclarr.Core.Tests.Pipelines.MediaManagement;
+
+internal sealed class MediaManagementSyncOperationTest
+{
+    [Test]
+    public async Task Compute_reports_changed_mode()
+    {
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.PreferAndUpgrade);
+
+        var result = await ExecuteOperation(sut, PropersAndRepacksMode.DoNotUpgrade, preview: true);
+
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
+        result
+            .Settings.Should()
+            .Be(
+                Settings(
+                    PlannedAction.Update,
+                    PropersAndRepacksMode.PreferAndUpgrade,
+                    PropersAndRepacksMode.DoNotUpgrade
+                )
+            );
+        await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Compute_reports_unchanged_mode()
+    {
+        var mode = PropersAndRepacksMode.DoNotPrefer;
+        var (sut, _) = CreateOperation(mode);
+
+        var result = await ExecuteOperation(sut, mode, preview: true);
+
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
+        result.Settings.Should().Be(Settings(PlannedAction.Unchanged, mode, mode));
+    }
+
+    [Test]
+    public async Task Compute_preserves_null_current_value()
+    {
+        var (sut, _) = CreateOperation(null);
+
+        var result = await ExecuteOperation(
+            sut,
+            PropersAndRepacksMode.PreferAndUpgrade,
+            preview: true
+        );
+
+        result
+            .Settings.Should()
+            .Be(Settings(PlannedAction.Update, null, PropersAndRepacksMode.PreferAndUpgrade));
+    }
+
+    private static PlannedMediaManagementResource Settings(
+        PlannedAction action,
+        PropersAndRepacksMode? current,
+        PropersAndRepacksMode? desired
+    ) => new() { Action = action, PropersAndRepacks = PlannedValue.Compared(current, desired) };
+
+    [Test]
+    public async Task Read_failure_propagates_without_write()
+    {
+        var api = Substitute.For<IMediaManagementService>();
+        api.GetMediaManagement(default)
+            .ReturnsForAnyArgs(Task.FromException<MediaManagementData>(new IOException("failed")));
+        var sut = new MediaManagementSyncOperation(Substitute.For<ILogger>(), api);
+
+        var act = () => ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: true);
+
+        await act.Should().ThrowAsync<IOException>().WithMessage("failed");
+        await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Read_cancellation_propagates_requested_token()
+    {
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        var ct = cts.Token;
+        var api = Substitute.For<IMediaManagementService>();
+        api.GetMediaManagement(ct).Returns(Task.FromCanceled<MediaManagementData>(ct));
+        var sut = new MediaManagementSyncOperation(Substitute.For<ILogger>(), api);
+
+        var act = () =>
+            ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: true, ct: ct);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        await api.Received(1).GetMediaManagement(ct);
+        await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Persist_writes_changed_mode_once()
+    {
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.PreferAndUpgrade);
+        MediaManagementData? written = null;
+        api.WhenForAnyArgs(x => x.UpdateMediaManagement(default!, default))
+            .Do(x => written = x.Arg<MediaManagementData>());
+        await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
+
+        await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
+        written.Should().NotBeNull();
+        written.Id.Should().Be(42);
+        written.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotPrefer);
+    }
+
+    [Test]
+    public async Task Persist_skips_unchanged_mode()
+    {
+        var mode = PropersAndRepacksMode.DoNotPrefer;
+        var (sut, api) = CreateOperation(mode);
+        await ExecuteOperation(sut, mode, preview: false);
+
+        await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Write_failure_propagates_after_one_attempt_and_keeps_delta()
+    {
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
+        api.UpdateMediaManagement(default!, default)
+            .ReturnsForAnyArgs(Task.FromException(new IOException("failed")));
+        var act = () => ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
+
+        await act.Should().ThrowAsync<IOException>().WithMessage("failed");
+        await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Write_cancellation_propagates_requested_token()
+    {
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        var ct = cts.Token;
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
+        var receivedToken = CancellationToken.None;
+        api.WhenForAnyArgs(x => x.UpdateMediaManagement(default!, default))
+            .Do(x => receivedToken = x.ArgAt<CancellationToken>(1));
+        api.UpdateMediaManagement(default!, ct).ReturnsForAnyArgs(Task.FromCanceled(ct));
+        var act = () =>
+            ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false, ct: ct);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
+        receivedToken.Should().Be(ct);
+    }
+
+    [Test]
+    public async Task Recompute_after_write_is_unchanged_without_second_write()
+    {
+        var mode = PropersAndRepacksMode.DoNotUpgrade;
+        var api = Substitute.For<IMediaManagementService>();
+        api.GetMediaManagement(default)
+            .ReturnsForAnyArgs(_ => new MediaManagementData { Id = 42, PropersAndRepacks = mode });
+        api.WhenForAnyArgs(x => x.UpdateMediaManagement(default!, default))
+            .Do(x =>
+                mode =
+                    x.Arg<MediaManagementData>().PropersAndRepacks
+                    ?? throw new InvalidOperationException("Expected configured mode")
+            );
+        var sut = new MediaManagementSyncOperation(Substitute.For<ILogger>(), api);
+
+        var first = await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
+        var second = await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
+
+        first.Settings!.Action.Should().Be(PlannedAction.Update);
+        second.Settings!.Action.Should().Be(PlannedAction.Unchanged);
+        await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Preview_and_apply_return_same_delta_but_only_apply_writes()
+    {
+        var preview = await Execute(preview: true);
+        var apply = await Execute(preview: false);
+
+        preview.Result.Should().BeEquivalentTo(apply.Result);
+        await preview.Api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
+        await apply.Api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
+    }
+
+    [Test]
+    public async Task Execute_omits_unconfigured_media_management()
+    {
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
+        var executor = CreateExecutor(sut);
+        var results = await executor.Execute(
+            Substitute.For<ISyncSettings>(),
+            PipelinePlanFor(null),
+            new PipelineExecutionBuffer(),
+            CancellationToken.None
+        );
+
+        results.Should().BeEmpty();
+        await api.DidNotReceiveWithAnyArgs().GetMediaManagement(default);
+    }
+
+    private static (MediaManagementSyncOperation Sut, IMediaManagementService Api) CreateOperation(
+        PropersAndRepacksMode? current
+    )
+    {
+        var api = Substitute.For<IMediaManagementService>();
+        api.GetMediaManagement(default)
+            .ReturnsForAnyArgs(new MediaManagementData { Id = 42, PropersAndRepacks = current });
+        return (new MediaManagementSyncOperation(Substitute.For<ILogger>(), api), api);
+    }
+
+    private static async Task<MediaManagementPipelineResult> ExecuteOperation(
+        MediaManagementSyncOperation sut,
+        PropersAndRepacksMode desired,
+        bool preview,
+        CancellationToken ct = default
+    )
+    {
+        var result = await ((ISyncOperation<PlannedMediaManagement>)sut).Execute(
+            preview,
+            new PlannedMediaManagement(desired),
+            [],
+            _ => { },
+            ct
+        );
+        return result.Should().BeOfType<MediaManagementPipelineResult>().Which;
+    }
+
+    private static async Task<(
+        MediaManagementPipelineResult Result,
+        IMediaManagementService Api
+    )> Execute(bool preview)
+    {
+        var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
+        var executor = CreateExecutor(sut);
+        var settings = Substitute.For<ISyncSettings>();
+        settings.Preview.Returns(preview);
+
+        var results = await executor.Execute(
+            settings,
+            PipelinePlanFor(new PlannedMediaManagement(PropersAndRepacksMode.DoNotPrefer)),
+            new PipelineExecutionBuffer(),
+            CancellationToken.None
+        );
+
+        var result = results.Should().ContainSingle().Which;
+        return (result.Should().BeOfType<MediaManagementPipelineResult>().Which, api);
+    }
+
+    private static CompositeSyncPipeline CreateExecutor(MediaManagementSyncOperation sut) =>
+        NewPipeline.Executor(PipelineType.MediaManagement, sut);
+
+    private static PipelinePlan PipelinePlanFor(PlannedMediaManagement? planned) =>
+        NewPipeline.Plan(planned);
+}

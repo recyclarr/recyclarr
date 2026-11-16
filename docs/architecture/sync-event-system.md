@@ -1,246 +1,92 @@
-# Sync Event System
+# Sync lifecycle reporting
 
-The sync event system provides a unified, observable-based approach for tracking sync run state. All
-status changes, diagnostics, and progress flow as events through typed observables. Producers emit
-events without knowing who consumes them; consumers subscribe to the streams they need.
+Sync execution reports a small instance lifecycle to the Server. Detailed pipeline outcomes, planned
+resources, operational failures, and fault references live in terminal results. Progress never
+decides terminal status and does not duplicate pipeline result data.
 
-This replaces three earlier systems that handled the same concerns inconsistently: a
-BehaviorSubject-based progress source, an imperative `Add()`/`Clear()` diagnostic storage, and
-ambient state for event attribution. The observable model eliminates all three in favor of a single
-pattern.
+The reporting path is synchronous and does not use observable streams. This keeps execution order
+explicit and lets the Server expose current snapshots without retaining an event history.
 
-## Scope Hierarchy
+## Scope hierarchy
 
-Sync execution uses nested Autofac lifetime scopes to manage component lifecycles and event
-boundaries. Each scope level owns a distinct set of services, and disposal propagates from outer to
-inner.
+Sync execution uses nested Autofac lifetime scopes:
 
 ```txt
-Root Container (singletons, shared infrastructure)
+Root container
   |
-  +-- "sync" scope (per sync run)
-  |     SyncRunScope (event hub: ISyncRunScope + ISyncRunPublisher)
-  |     SyncProcessor, SyncProgressRenderer, DiagnosticsRenderer
-  |     NotificationService
+  +-- "run" scope
+  |     ISyncOrchestrator, SyncJobRunner, NotificationService
   |
-  +----+-- "instance" scope (per service instance, child of sync)
-       |     InstancePublisher (IInstancePublisher)
-       |     InstanceSyncProcessor, CompositeSyncPipeline
-       |     IServiceConfiguration (the specific instance config)
-       |     Pipeline services (GenericSyncPipeline<T>, phases, API services)
-       |
-       +-- PipelinePublisher (runtime object, not a scope)
-             Created per pipeline by InstancePublisher.ForPipeline()
+  +----+-- "instance" scope
+       |     InstanceSyncProcessor, IPipelineExecutor
+       |     IServiceConfiguration
+       |     ISyncOperation implementations and API services
 ```
 
-### Scope Wrappers
+`SyncJobLauncher` opens the run scope as a child of the root container so a background job can
+outlive the HTTP request that created it. `SyncOrchestrator` opens and disposes one instance scope
+for each selected configuration.
 
-Named scopes are created through `LifetimeScopeFactory`, which begins a child scope and resolves a
-wrapper type from it. Each wrapper is the single service-locator touch point for its scope;
-everything else flows through constructor injection.
+The instance attempt includes scope creation, processing, and disposal. A catchable fault in that
+boundary produces one faulted instance result, then execution continues with the next instance.
+Cancellation and faults outside an instance boundary stop the run.
 
-- `SyncScope` resolves `SyncProcessor` from the "sync" child scope.
-- `InstanceScope` resolves `InstanceSyncProcessor` and `IInstancePublisher` from the "instance"
-  child scope.
+## Core lifecycle port
 
-Both extend `LifetimeScopeWrapper`, which implements `IDisposable` to dispose the underlying Autofac
-scope. `SyncCommand` creates and disposes the sync scope; `SyncProcessor` creates and disposes
-instance scopes in a loop over configurations.
+`IInstanceSyncProgress` has two callbacks:
 
-### DI Registration
+- `InstanceStarted(string instanceName)`
+- `InstanceCompleted(SyncInstanceResult result)`
 
-Scope-bound registrations use `InstancePerMatchingLifetimeScope` to tie component lifetime to the
-named scope:
+`SyncOrchestrator` calls `InstanceStarted` immediately before the instance attempt. It calls
+`InstanceCompleted` only after processing and cleanup have produced the final instance result.
+Callbacks are ordered because instances execute sequentially.
 
-```csharp
-// CoreAutofacModule
-builder.RegisterType<SyncRunScope>()
-    .AsImplementedInterfaces()
-    .InstancePerMatchingLifetimeScope("sync");
+The orchestrator guards both callbacks. A reporting failure cannot change execution, create an
+instance fault, or replace a terminal result. Core has no job ID, store, or HTTP dependency.
 
-builder.RegisterType<InstancePublisher>()
-    .As<IInstancePublisher>()
-    .InstancePerMatchingLifetimeScope("instance");
+## Server snapshots
 
-// CompositionRoot
-builder.RegisterMatchingScope("sync", b =>
-{
-    b.RegisterType<SyncScope>();
-    b.RegisterType<SyncProcessor>();
-    b.RegisterType<SyncProgressRenderer>();
-});
+`SyncJobProgress` binds the Core port to one job and reduces callbacks through
+`ISyncJobStore.Update`. The in-memory store applies every update under its existing lock.
 
-builder.RegisterType<InstanceScope>();
-builder.RegisterType<InstanceSyncProcessor>();
-```
+A new job starts with one ordered entry per resolved instance. Entries use these states:
 
-A noop `IInstancePublisher` is also registered at root scope for code paths that run outside a sync
-context (composition root tests, state repair).
+- `Pending`
+- `Running`
+- `Succeeded`
+- `Partial`
+- `Failed`
+- `Interrupted`
+- `NotRun`
 
-## Event Model
+Start changes `Pending` to `Running`. Completion changes `Running` to a terminal status derived from
+the supplied `SyncInstanceResult`. Late, duplicate, and unknown-instance updates do not mutate the
+snapshot. Completed entries retain their exact instance result for terminal reconciliation.
 
-Three typed event streams flow through `SyncRunScope`, which holds one `Subject<T>` per stream:
+When a run stops, active entries become `Interrupted` and pending entries become `NotRun`. Completed
+entries do not regress. Stopped entries do not receive invented results.
 
-| Stream        | Event type            | Carries                                                            |
-|---------------|-----------------------|--------------------------------------------------------------------|
-| `Instances`   | `InstanceEvent`       | Instance name, status (Pending/Running/Succeeded/Failed)           |
-| `Pipelines`   | `PipelineEvent`       | Instance name, pipeline type, status, optional count               |
-| `Diagnostics` | `SyncDiagnosticEvent` | Nullable instance name, level (Error/Warning/Deprecation), message |
+## Terminal finalization
 
-All three inherit from `SyncRunEvent`, which exists solely to enable `Observable.Merge` in the
-progress renderer. It is not used for polymorphic dispatch; consumers subscribe to the typed
-observables directly.
+`SyncJobFinalizer` is the shared terminal path for the runner and launcher fallback. Normal
+completion reconciles the snapshot from `SyncRunResult`, closes unfinished entries, then stores the
+result and job status atomically.
 
-### Why Three Separate Streams
-
-Separate observables give compile-time safety: consumers subscribe to exactly what they need with no
-`OfType<T>()` filtering. Rx composition operators (`Merge`, `Scan`, `CombineLatest`) work naturally
-across independently typed streams.
-
-### Producer/Consumer Interface Split
-
-`SyncRunScope` implements two interfaces:
-
-- `ISyncRunScope` (consumer-facing): exposes `IObservable<T>` properties for subscription.
-- `ISyncRunPublisher` (producer-facing): exposes `Publish()` methods for each event type.
-
-Consumers inject `ISyncRunScope`. Publishers never see it; they use `IInstancePublisher` or
-`IPipelinePublisher` which internally delegate to `ISyncRunPublisher`.
-
-On disposal, `SyncRunScope` calls `OnCompleted()` on all subjects, signaling end-of-run to any
-operator that depends on stream completion (e.g., `ToList()`).
-
-## Publishers
-
-Publishers are layered objects that capture identity at creation, so callers emit events without
-knowing their context. This provides the same ergonomics as ambient state but with explicit data
-flow.
-
-### IInstancePublisher
-
-DI-managed, scoped to the "instance" lifetime. Takes `IServiceConfiguration` and `ISyncRunPublisher`
-via constructor injection. Stamps the instance name on every event it emits.
-
-Key behaviors:
-
-- `SetStatus()` publishes an `InstanceEvent`.
-- `AddError()` / `AddWarning()` / `AddDeprecation()` publish `SyncDiagnosticEvent` with the instance
-  name.
-- `HasErrors` tracks whether any errors were emitted, used by `InstanceSyncProcessor` to
-  short-circuit after plan validation failures.
-- `ForPipeline(PipelineType)` creates a `PipelinePublisher` for a specific pipeline.
-
-### IPipelinePublisher
-
-Runtime object, not DI-managed. Created by `InstancePublisher.ForPipeline()` for each pipeline
-during orchestration. Stamps both instance name and pipeline type on events.
-
-`CompositeSyncPipeline` filters pipelines by service affinity (excluding pipelines that target a
-different service type), then creates one publisher per applicable pipeline and passes it to
-`GenericSyncPipeline.Execute()`, which sets it on `PipelineContext.Publisher`. Pipeline phases
-access the publisher through the context to emit status changes and diagnostics.
-
-### Noop Implementations
-
-Both interfaces provide static `Noop` properties (`IInstancePublisher.Noop`,
-`IPipelinePublisher.Noop`) for contexts where event emission is unnecessary (tests, code paths
-outside sync scope). `PipelineContext.Publisher` defaults to `IPipelinePublisher.Noop`.
+For cancellation or a run-wide fault, finalization preserves completed instance results from the
+snapshot, attaches a run fault, and closes unfinished entries. Cleanup after an already stored
+terminal result cannot overwrite it.
 
 ## Consumers
 
-All consumers inject `ISyncRunScope` and subscribe in their constructors. Events accumulate in lists
-during the sync run. Explicit method calls from `SyncProcessor` trigger final processing after the
-run completes.
+The polling endpoint projects each progress entry as `name` and `status`. It does not expose
+pipeline progress, counts, changes, or retained interim results. Clients retrieve pipeline details
+from the terminal results endpoint after the job reaches a terminal state.
 
-### SyncProgressRenderer
+`SyncResultLogger` and `NotificationService` also consume the terminal result. They format typed
+outcomes and opaque fault references at the Server boundary; exception details remain in the server
+log. The CLI reads the same result through the results endpoint and renders the final status table,
+preview changes, and diagnostics from the response DTOs.
 
-Renders a live progress table showing instance and pipeline status.
-
-Subscribes to both `Instances` and `Pipelines` streams via `Observable.Merge` (upcasting to
-`SyncRunEvent`), then folds events into immutable `ProgressSnapshot` records using `Scan`. The
-render loop polls the latest snapshot reference on a timer. Thread safety comes from `Scan`
-producing immutable snapshots and `Subscribe` performing an atomic reference swap.
-
-### DiagnosticsLogger
-
-Subscribes to the `Diagnostics` stream and logs each event immediately via `ILogger` at the
-appropriate level (Error, Warning). This ensures diagnostic messages appear when `--log` is active
-(where `IAnsiConsole` output is suppressed). Has no explicit call site; activated by DI resolution
-in `SyncProcessor`.
-
-### DiagnosticsRenderer
-
-Accumulates `SyncDiagnosticEvent` entries via a simple `Subscribe` that appends to a list.
-`Report()` formats and renders errors and warnings to the console, grouped by severity and color
-coded by instance.
-
-### NotificationService
-
-Subscribes to all three streams, accumulating events into separate lists. `SendNotification()`
-derives overall success from `InstanceEvent` statuses, builds per-instance pipeline snapshots from
-`PipelineEvent` groups, and formats diagnostics into the Apprise notification body.
-
-### Why Explicit Calls Instead of OnCompleted
-
-The original design had consumers react automatically when `SyncRunScope.Dispose()` fired
-`OnCompleted()`. This was rejected for two reasons:
-
-1. `NotificationService` does async HTTP work. Triggering it from an `OnCompleted` handler requires
-   fire-and-forget or blocking, neither of which is acceptable.
-2. Autofac disposes components in reverse-resolution order. Consumers that depend on `ISyncRunScope`
-   would be disposed before `SyncRunScope` fires `OnCompleted`, causing the signal to arrive after
-   the consumer is already torn down.
-
-The current approach (eager `Subscribe` for accumulation, explicit `Report()` / `SendNotification()`
-calls from `SyncProcessor`) is the least-surprise alternative.
-
-## Event Flow Walkthrough
-
-```mermaid
-sequenceDiagram
-    participant Proc as Processors
-    participant Hub as SyncRunScope
-    participant Con as Consumers
-    participant Pipe as Pipelines
-
-    Proc->>Hub: Start sync scope
-    activate Hub
-    Note over Hub,Con: Consumers subscribe in constructors
-
-    loop Each instance
-        Proc->>Hub: InstanceEvent Running
-        Hub-->>Con: Instances stream
-
-        loop Each pipeline
-            Proc->>Pipe: Execute with PipelinePublisher
-            activate Pipe
-            Pipe->>Hub: PipelineEvent Running
-            Pipe->>Hub: SyncDiagnosticEvent
-            Pipe->>Hub: PipelineEvent Succeeded or Failed
-            Hub-->>Con: Pipelines and Diagnostics streams
-            deactivate Pipe
-        end
-
-        Proc->>Hub: InstanceEvent Succeeded or Failed
-        Hub-->>Con: Instances stream
-    end
-
-    Proc->>Con: Report and SendNotification
-    Proc->>Hub: Dispose scope
-    Hub-->>Hub: OnCompleted
-    deactivate Hub
-```
-
-Participants map to concrete types as follows:
-
-- **Processors**: `SyncCommand`, `SyncProcessor`, `InstanceSyncProcessor`, `CompositeSyncPipeline`
-- **Hub**: `SyncRunScope` (the three Subjects behind `ISyncRunScope` / `ISyncRunPublisher`)
-- **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`,
-  `NotificationService`
-- **Pipelines**: `GenericSyncPipeline<TContext>` and its phases
-
-## Relationship to Pipeline Architecture
-
-This system handles status tracking and diagnostics for the sync run. It does not control pipeline
-execution flow. For pipeline ordering, dependency cascading, phase execution, and the plan/pipeline
-split, see [Sync Pipeline Architecture](sync-pipeline-architecture.md).
+See [Sync architecture](sync-pipeline-architecture.md) for operation ordering, dependency blocking,
+and semantic pipeline results.

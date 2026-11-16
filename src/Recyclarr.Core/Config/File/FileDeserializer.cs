@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Config.Parsing;
 using Recyclarr.Platform;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -8,7 +9,8 @@ namespace Recyclarr.Config.File;
 
 public record FileTag;
 
-public class FileDeserializer(IFileSystem fs, IAppPaths paths) : INodeDeserializer
+public class FileDeserializer(IFileSystem fs, IAppPaths paths, ConfigInputRecorder inputs)
+    : INodeDeserializer
 {
     public bool Deserialize(
         IParser reader,
@@ -26,18 +28,19 @@ public class FileDeserializer(IFileSystem fs, IAppPaths paths) : INodeDeserializ
         }
 
         var scalar = reader.Consume<Scalar>();
-        var resolvedPath = ResolveFilePath(scalar.Value);
-        value = fs.File.ReadAllText(resolvedPath).Trim();
+        var resolved = Resolve(fs, paths.ConfigDirectory, scalar.Value);
+        inputs.Record(resolved);
+        value = fs.File.ReadAllText(resolved).Trim();
         return true;
     }
 
-    private string ResolveFilePath(string path)
-    {
-        if (fs.Path.IsPathRooted(path))
-        {
-            return path;
-        }
+    /// <summary>
+    /// The trimmed contents of a <c>!file</c> tag's file; relative paths resolve against the
+    /// configuration directory.
+    /// </summary>
+    public static string Read(IFileSystem fs, IDirectoryInfo configDirectory, string path) =>
+        fs.File.ReadAllText(Resolve(fs, configDirectory, path)).Trim();
 
-        return paths.ConfigDirectory.File(path).FullName;
-    }
+    private static string Resolve(IFileSystem fs, IDirectoryInfo configDirectory, string path) =>
+        fs.Path.IsPathRooted(path) ? path : configDirectory.File(path).FullName;
 }

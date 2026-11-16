@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 using Riok.Mapperly.Abstractions;
@@ -5,7 +6,7 @@ using SonarrApi = Recyclarr.Api.Sonarr.V3;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, UseDeepCloning = true)]
 internal static partial class SonarrV3CustomFormatMapper
 {
     public static partial CustomFormatResource ToDomain(SonarrApi.CustomFormatResource dto);
@@ -16,16 +17,34 @@ internal static partial class SonarrV3CustomFormatMapper
         SonarrApi.CustomFormatSpecificationSchema dto
     );
 
-    private static partial SonarrApi.CustomFormatSpecificationSchema SpecFromDomain(
+    public static partial SonarrApi.CustomFormatSpecificationSchema SpecFromDomain(
         CustomFormatSpecificationData domain
+    );
+
+    public static partial SonarrApi.CustomFormatSpecificationSchema CloneSpec(
+        SonarrApi.CustomFormatSpecificationSchema schema
+    );
+
+    [MapperIgnoreSource(nameof(CustomFormatSpecificationData.Fields))]
+    public static partial void UpdateSpec(
+        CustomFormatSpecificationData domain,
+        [MappingTarget] SonarrApi.CustomFormatSpecificationSchema dto
     );
 
     private static partial CustomFormatFieldData FieldToDomain(SonarrApi.Field dto);
 
-    private static partial SonarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+    public static partial SonarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+
+    public static partial void UpdateField(
+        CustomFormatFieldData domain,
+        [MappingTarget] SonarrApi.Field dto
+    );
 
     // Normalizes object? (JsonElement from Refit) to FieldValue with proper equality semantics
     private static FieldValue MapFieldValue(object? value) => FieldValue.From(value);
 
     private static object? MapFieldValueToObject(FieldValue value) => value.Inner;
+
+    // Deep cloning of unmodeled extension data; JsonElement has no members Mapperly can copy
+    private static JsonElement CloneElement(JsonElement element) => element.Clone();
 }

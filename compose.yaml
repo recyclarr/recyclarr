@@ -1,0 +1,116 @@
+name: recyclarr
+
+x-radarr: &radarr
+  image: lscr.io/linuxserver/radarr:latest
+  pull_policy: always
+  environment:
+    TZ: America/Chicago
+    RADARR__AUTH__APIKEY: testkey
+    RADARR__AUTH__METHOD: Forms
+    RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
+
+x-sonarr: &sonarr
+  image: lscr.io/linuxserver/sonarr:latest
+  pull_policy: always
+  environment:
+    TZ: America/Chicago
+    SONARR__AUTH__APIKEY: testkey
+    SONARR__AUTH__METHOD: Forms
+    SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+
+volumes:
+  radarr_develop1:
+  radarr_develop2:
+  sonarr_develop1:
+  sonarr_develop2:
+
+services:
+  radarr_develop1:
+    <<: *radarr
+    ports: [7890:7878]
+    volumes: [radarr_develop1:/config]
+
+  # Radarr v7 (develop branch) with native OIDC; radarr_develop1 stays on stable
+  radarr_develop2:
+    <<: *radarr
+    image: lscr.io/linuxserver/radarr:develop
+    environment:
+      TZ: America/Chicago
+      RADARR__AUTH__APIKEY: testkey
+      RADARR__AUTH__METHOD: Oidc
+      RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
+    ports: [7891:7878]
+    volumes: [radarr_develop2:/config]
+
+  sonarr_develop1:
+    <<: *sonarr
+    ports: [8990:8989]
+    volumes: [sonarr_develop1:/config]
+
+  # Sonarr v5 (develop branch); sonarr_develop1 stays on v4
+  sonarr_develop2:
+    <<: *sonarr
+    image: lscr.io/linuxserver/sonarr:develop
+    ports: [8991:8989]
+    volumes: [sonarr_develop2:/config]
+
+  # http://localhost:8090/recyclarr
+  ntfy:
+    image: binwiederhier/ntfy
+    pull_policy: always
+    ports: [8090:80]
+    command: serve --base-url=http://localhost:8090
+    environment:
+      TZ: America/Chicago
+
+  # http://localhost:8000
+  apprise:
+    image: caronc/apprise
+    pull_policy: always
+    ports: [8000:8000]
+    init: true
+    tmpfs:
+      - /attach
+      - /plugin
+    volumes:
+      - ./docker/apprise/recyclarr.yml:/config/recyclarr.yml
+    environment:
+      TZ: America/Chicago
+      APPRISE_DEFAULT_THEME: dark
+      APPRISE_STATEFUL_MODE: simple
+      DEBUG: yes
+
+  sqlite:
+    image: keinos/sqlite3
+    pull_policy: always
+    profiles: [manual]
+    entrypoint: [sqlite3]
+    volumes:
+      - radarr_develop1:/radarr/develop1
+      - radarr_develop2:/radarr/develop2
+      - sonarr_develop1:/sonarr/develop1
+      - sonarr_develop2:/sonarr/develop2
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:edge
+    user: ${DOCKER_UID:-1000}:${DOCKER_GID:-1000}
+    profiles: [recyclarr]
+    read_only: true
+    tmpfs: /tmp
+    # Publish binaries first; scripts/docker-recyclarr.sh does this.
+    build:
+      context: .
+      # platforms:
+      #   - linux/arm/v7
+      #   - linux/arm64
+      #   - linux/amd64
+    ports: [7982:7982]
+    volumes:
+      - ${RECYCLARR_CONFIG_DIR:-./config}:/config
+    environment:
+      TZ: America/Chicago
+      RECYCLARR_API_KEY: ${RECYCLARR_API_KEY:-}
+      RADARR_URL: http://radarr_develop2:7878
+      SONARR_URL: http://sonarr_develop2:8989
+      SHOWS_URL: http://sonarr_develop1:8989
+      APPRISE_URL: http://apprise:8000

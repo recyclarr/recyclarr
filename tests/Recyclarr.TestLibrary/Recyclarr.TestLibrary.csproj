@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Recyclarr.Platform\Recyclarr.Platform.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" />

@@ -3,8 +3,9 @@ name: Build & Test
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
-    branches: [master]
+    branches: ["**"]
     tags: [v*]
     paths:
       # Source code and tests
@@ -22,12 +23,19 @@ on:
       - ".github/workflows/build.yml"
       - ".github/workflows/reusable-build.yml"
       - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-helm.yml"
+      - ".github/workflows/reusable-helm-publish.yml"
+      - ".github/workflows/reusable-precheck.yml"
       - ".github/actions/**"
       - "ci/**"
 
       # Docker
       - "Dockerfile"
       - "docker/**"
+
+      # Helm chart
+      - "charts/**"
+      - ".github/ct.yaml"
 
       # Versioning (affects build outputs)
       - "GitVersion.yml"
@@ -36,16 +44,51 @@ on:
       - "schemas/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   #############################################
+  pre-check:
+    uses: $/.github/workflows/reusable-precheck.yml
+
+  #############################################
+  # Runs apart from the publish jobs so neither waits for the other.
+  test:
+    name: Test
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
+    strategy:
+      matrix:
+        platform: >-
+          ${{ fromJSON(needs.pre-check.outputs.full_build == 'true'
+          && '["ubuntu-latest", "windows-latest", "macos-latest"]'
+          || '["ubuntu-latest"]') }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+          persist-credentials: false
+
+      - name: Setup .NET & Tools
+        uses: $/.github/actions/setup-dotnet
+
+      - name: Test
+        run: >-
+          dotnet test -c Release
+          --filter FullyQualifiedName!~Recyclarr.EndToEndTests
+
+  #############################################
   build-win:
     name: Build Windows
+    needs: pre-check
+    if: needs.pre-check.outputs.full_build == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -58,11 +101,16 @@ jobs:
   #############################################
   build-linux:
     name: Build Linux
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
-        runtime: [linux-x64, linux-arm64, linux-arm]
+        runtime: >-
+          ${{ fromJSON(needs.pre-check.outputs.full_build == 'true'
+          && '["linux-x64", "linux-arm64", "linux-arm"]'
+          || '["linux-x64"]') }}
     with:
       platform: ubuntu-latest
       runtime: ${{ matrix.runtime }}
@@ -70,6 +118,8 @@ jobs:
   #############################################
   build-osx:
     name: Build Mac OS
+    needs: pre-check
+    if: needs.pre-check.outputs.full_build == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -80,9 +130,11 @@ jobs:
       runtime: ${{ matrix.runtime }}
 
   #############################################
-  # Note: This builds the MUSL zip artifacts but isn't used in the actual docker image build
+  # Release archives and the Docker image both ship these binaries.
   build-musl:
     name: Build MUSL
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
     uses: $/.github/workflows/reusable-build.yml
     strategy:
@@ -91,8 +143,8 @@ jobs:
     with:
       platform: ubuntu-latest
       runtime: ${{ matrix.runtime }}
-      publish-args: -NoSingleFile
-      skip-test: true
+      publish-args: --no-single-file
+      skip-smoke: true
 
   #############################################
   codesign:
@@ -122,15 +174,19 @@ jobs:
           p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
           p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
+      # macOS publishes are single-file, so every executable in the directory is a shipped binary.
       - name: Code Sign
         env:
           CODESIGN_IDENTITY: ${{ secrets.MAC_CODESIGN_IDENTITY }}
-        run: >
-          codesign --timestamp --no-strict --force
-          --options=runtime
-          --entitlements ci/codesign/entitlements.plist
-          --sign "$CODESIGN_IDENTITY"
-          "publish/recyclarr"
+        run: |
+          for binary in publish/*; do
+            [[ -f "$binary" && -x "$binary" ]] || continue
+            codesign --timestamp --no-strict --force \
+              --options=runtime \
+              --entitlements ci/codesign/entitlements.plist \
+              --sign "$CODESIGN_IDENTITY" \
+              "$binary"
+          done
 
       - name: Notarize
         run: >-
@@ -138,12 +194,12 @@ jobs:
           "${{ secrets.MAC_DEV_USERNAME }}"
           "${{ secrets.MAC_DEV_PASSWORD }}"
           AVLRN599D8
-          publish/recyclarr
+          publish
 
       # Cannot staple directly to a binary:
       # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow?language=objc#3087720
       # - name: Staple
-      #   run: xcrun stapler staple -v publish/recyclarr
+      #   run: xcrun stapler staple -v publish/<binary>
 
       - name: Upload Artifacts
         uses: $/.github/actions/upload-tar
@@ -152,16 +208,19 @@ jobs:
           path: publish
 
   #############################################
-  docker-edge:
-    name: Docker (edge)
-    if: github.ref_type == 'branch'
-    # Wait on builds only to verify tests pass
-    needs: [build-win, build-linux, build-osx, build-musl]
+  # Publishes the branch's dev image after tests pass; fork pull requests only validate it.
+  docker:
+    name: Docker (dev)
+    needs: [pre-check, test, build-linux, build-musl]
+    if: github.ref_type != 'tag'
     permissions:
       contents: read
       packages: write
     uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
+    with:
+      target: dev
+      publish: ${{ needs.pre-check.outputs.publish_dev == 'true' }}
 
   #############################################
   docker-release:
@@ -175,6 +234,44 @@ jobs:
       packages: write
     uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
+    with:
+      target: release
+      publish: true
+
+  #############################################
+  # Gates the release: a published GitHub release cannot be recovered, so a chart that fails
+  # after it would leave that version without a chart.
+  # Runs on every PR because image changes can break the chart as much as chart changes can.
+  helm-validation:
+    name: Helm Chart Validation
+    needs: build-musl
+    uses: $/.github/workflows/reusable-helm.yml
+
+  #############################################
+  # Waits for the dev image so the dev chart never points at a missing one.
+  helm-dev:
+    name: Helm Chart (dev)
+    needs: [pre-check, docker, helm-validation]
+    if: needs.pre-check.outputs.publish_dev == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: $/.github/workflows/reusable-helm-publish.yml
+    with:
+      target: dev
+
+  #############################################
+  helm-release:
+    name: Helm Chart (release)
+    # Publish the chart only after the GitHub release exists, like the release images.
+    if: github.ref_type == 'tag'
+    needs: [release]
+    permissions:
+      contents: read
+      packages: write
+    uses: $/.github/workflows/reusable-helm-publish.yml
+    with:
+      target: release
 
   #############################################
   release:
@@ -182,10 +279,12 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
+      - test
       - build-win
       - build-linux
       - build-musl
       - codesign # Depends on build-osx, and reuploads artifacts after signing
+      - helm-validation
     env:
       XZ_OPT: "-T0 -9"
     steps:
@@ -203,13 +302,11 @@ jobs:
         uses: $/.github/actions/download-tar
         with:
           path: publish
+          # Every other artifact in the run is a release binary.
+          pattern: "!helm-chart"
 
       - name: Create Archive
-        shell: pwsh
-        run: >
-          ci/CreateArchive.ps1
-          -PublishDir publish
-          -OutputDir archive
+        run: ci/create-archive.sh publish archive
 
       - name: Extract Changelog
         id: changelog
@@ -242,3 +339,35 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+
+  #############################################
+  # Groups all jobs into one status that pull requests require before merging. The name predates
+  # the merge of the quick build into this workflow; renaming it requires updating the master
+  # ruleset's required checks.
+  post-check:
+    if: always() && needs.pre-check.outputs.should_run == 'true'
+    name: Report Quick Build Status
+    needs:
+      - pre-check
+      - test
+      - build-win
+      - build-linux
+      - build-osx
+      - build-musl
+      - codesign
+      - docker
+      - docker-release
+      - helm-validation
+      - helm-dev
+      - helm-release
+      - release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if all jobs succeeded
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        with:
+          # Skipped outside full builds, outside tag builds for release jobs, and on tag builds or
+          # fork pull requests for dev jobs
+          allowed-skips: >-
+            build-win, build-osx, codesign, docker, docker-release, helm-dev, helm-release, release
+          jobs: ${{ toJSON(needs) }}

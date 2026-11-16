@@ -1,17 +1,17 @@
 # Service Gateway Layer
 
 > For decision rationale, see [ADR-005](../decisions/architecture/005-service-gateway-layer.md)
-> (gateway layer) and [ADR-010](../decisions/architecture/010-hand-written-servarr-api-contracts.md)
-> (hand-written Refit contracts). For the Custom Format passthrough exception, see
-> [ADR-007](../decisions/architecture/007-custom-format-gateway-passthrough.md).
+> (gateway layer) and
+> [ADR-006](../decisions/architecture/006-refit-with-hand-written-servarr-contracts.md)
+> (hand-written Refit contracts).
 
 ## Overview
 
-The service gateway layer sits between pipeline phases and HTTP clients, abstracting
+The service gateway layer sits between sync operations and HTTP clients, abstracting
 service-specific API details behind domain interfaces. Each feature gets a **port** (domain
 interface) and one **gateway per service** (infrastructure implementation).
 
-Pipeline phases inject the port and operate on domain types. They have no knowledge of which service
+Sync operations inject the port and operate on domain types. They have no knowledge of which service
 is active or how HTTP requests are made.
 
 ## Port + Gateway Pattern
@@ -21,8 +21,8 @@ is active or how HTTP requests are made.
 Domain interface defined in `src/Recyclarr.Core/Servarr/{Feature}/`. Speaks domain types only.
 Methods use read-only collection types (`IReadOnlyList<T>`) for both parameters and return values.
 
-Ports are not pipeline-exclusive. System status is consumed by the compatibility layer, not a
-pipeline.
+Ports are not sync-exclusive. System status is consumed by the compatibility layer, not a sync
+operation.
 
 ```txt
 Servarr/
@@ -38,7 +38,7 @@ Servarr/
     IMediaManagementService.cs
     MediaManagementData.cs
   MediaNaming/
-    ISonarrNamingService.cs          # split pipeline: one port per service
+    ISonarrNamingService.cs          # no shared fields: one port per service
     IRadarrNamingService.cs
     SonarrNamingData.cs
     RadarrNamingData.cs
@@ -108,7 +108,7 @@ internal class SonarrV3QualityDefinitionGateway(IQualityDefinitionApiService api
 **Lifecycle:** Gateway instances are scoped to one sync instance (`InstancePerLifetimeScope`). State
 is created during fetch, consumed during persist, and discarded when the instance scope ends.
 
-**When not needed:** Pipelines with one-way sync (guide overwrites service) do not need stashed
+**When not needed:** Operations with one-way sync (guide overwrites service) do not need stashed
 DTOs. See the Custom Format passthrough exception below.
 
 ## DI Resolution
@@ -125,38 +125,40 @@ builder
 ```
 
 The target comes from `DetectedService`, produced by the capability check from the server version
-(see [ADR-009](../decisions/architecture/009-api-version-selection-by-server-major.md)).
-`InstanceSyncProcessor` runs the check, then begins a child scope with `BeginDetectedServiceScope`
-that registers `DetectedService`; planning and pipelines resolve from that scope. Resolving a port
-before detection fails with `DependencyResolutionException` instead of defaulting. `ISystemService`
-is the exception: it performs detection, so it stays keyed by `SupportedServices`.
+(see [ADR-028](../decisions/architecture/028-api-version-selection-by-server-major.md)).
+`InstanceSyncProcessor` and the server's `InstanceServiceCaller` run the check, then begin a child
+scope with `BeginDetectedServiceScope` that registers `DetectedService`; planning, sync operations,
+and instance calls resolve from that scope. Resolving a port before detection fails with
+`DependencyResolutionException` instead of defaulting. `ISystemService` is the exception: it
+performs detection, so it stays keyed by `SupportedServices`.
 
-Pipelines declare the targets they apply to (`IPipelineMetadata.AppliesTo`). Phases are resolved
-lazily, so a pipeline excluded for a target never resolves ports that target lacks (the quality size
-pipeline has no Sonarr v5 gateway).
+A sync operation whose port has no gateway on some target resolves it lazily and is skipped by its
+plan there (the quality size operation on Sonarr v5).
 
-Pipeline phases inject the port directly; they have no idea keying is involved.
+Sync operations and per-service components inject the port directly; they have no idea keying is
+involved.
 
-## Shared vs Split Pipeline
+## One operation per pipeline
 
-**Litmus test:** Is there a meaningful shared domain concept, or just a shared endpoint path?
+[ADR-023][adr-023] sets the rule: each field lives on a shared type or on the type of the one
+service that owns it, and each pipeline has one operation with per-service components resolved
+through DI with `RegisterServiceGateway`. Quality profiles (`IQualityProfileServiceFields`) and
+media naming (`IMediaNamingPlanner`, `IMediaNamingSync`) follow it. Components are keyed by API
+target, so a field one API generation owns gets its own component (Sonarr v5 per-profile quality
+sizes in `SonarrV5QualityProfileFields`).
 
-- **Shared pipeline + gateway:** Same resource with service-specific properties (e.g. quality
-  profiles with Radarr language).
-- **Split into service-specific pipelines:** Different resource concepts behind a shared path (e.g.
-  media naming).
+Shared logic lives in helper classes that both services' components depend on (e.g.
+`NamingFormatLookup`).
 
-Split pipelines don't mean "duplicate everything." Shared logic lives in helper classes that both
-pipelines depend on (e.g. `NamingFormatLookup`).
+## Gateway multiplicity
 
-## Gateway Multiplicity
+Every pipeline gets one gateway per API target it applies to, regardless of whether its port is
+shared. Sonarr has one gateway per API generation (`SonarrV3*`, `SonarrV5*`).
 
-Every pipeline gets one gateway per API target it applies to, regardless of whether the pipeline is
-shared or split. Sonarr has one gateway per API generation (`SonarrV3*`, `SonarrV5*`).
-
-- **Shared pipelines:** All gateways implement the same port. DI resolves the correct one by target.
-- **Split pipelines:** Each pipeline has its own port, with one gateway per target of that service
-  (e.g. `ISonarrNamingService` implemented by `SonarrV3NamingGateway` and `SonarrV5NamingGateway`).
+- **Shared ports:** All gateways implement the same port. DI resolves the correct one by target.
+- **Per-service ports:** Each service's component injects its own port, with one gateway per target
+  of that service (e.g. `ISonarrNamingService` implemented by `SonarrV3NamingGateway` and
+  `SonarrV5NamingGateway`).
 - **Target-specific ports:** `IQualityDefinitionService` has no Sonarr v5 gateway; v5 stores sizes
   on quality profile items, so the quality profile gateway owns them.
 
@@ -168,8 +170,8 @@ service backs a different API client.
 
 ### Required properties
 
-Driven by domain/pipeline invariants, not API schema. A property is `required` only when omitting it
-at construction would silently mask a bug in domain logic.
+Driven by domain invariants, not API schema. A property is `required` only when omitting it at
+construction would silently mask a bug in domain logic.
 
 Decision tree:
 
@@ -199,11 +201,6 @@ Custom Format gateways follow the standard DTO/domain split pattern. The Refit D
 types; gateways map to/from the domain `CustomFormatResource`. One-way sync still holds (guide is
 complete source of truth), so no stashed DTOs or hydrated resource pattern is needed.
 
-Previously, CF gateways used a passthrough exception (see [ADR-007][adr-007], now deprecated) where
-`CustomFormatResource` served directly as both guide and API type. The Refit migration introduced
-service DTOs as separate C# types, breaking the identical-schema condition that justified the
-exception.
-
 ## HTTP Pipeline
 
 Gateways use hand-written Refit interfaces backed by `IHttpClientFactory` named clients.
@@ -211,10 +208,10 @@ Cross-cutting concerns live in `DelegatingHandler` subclasses, configured once p
 
 ### Named clients
 
-| Client      | Handlers             | Primary handler config   |
-| ----------- | -------------------- | ------------------------ |
-| `"servarr"` | `HttpLoggingHandler` | SSL bypass (conditional) |
-| `"apprise"` | `HttpLoggingHandler` | (default)                |
+| Client      | Handlers             | Primary handler config                 |
+| ----------- | -------------------- | -------------------------------------- |
+| `"servarr"` | `HttpLoggingHandler` | No redirects; SSL bypass (conditional) |
+| `"apprise"` | `HttpLoggingHandler` | (default)                              |
 
 ### Handler pipeline (servarr)
 
@@ -223,9 +220,14 @@ HttpLoggingHandler -> HttpClientHandler -> network
 ```
 
 - **HttpLoggingHandler**: Logs request method + sanitized URL (Debug), response status (Debug), and
-  request/response bodies (Verbose). Also detects failed requests that were redirected (by comparing
-  original vs final URI) and logs a warning about potential URL/reverse proxy misconfiguration.
-  Replaces Flurl's `FlurlBeforeCallLogRedactor`, `FlurlAfterCallLogRedactor`, and
+  request/response bodies (Verbose). Warns about URL/reverse proxy misconfiguration when a response
+  is a redirect, and names the rejected hostname when a service's Allowed Hosts setting rejects the
+  request (ASP.NET Core host filtering: HTTP 400 with an HTML body). That rejection fails the
+  instance as `ServiceHostRejectedFailure`. Replaces Flurl's `FlurlBeforeCallLogRedactor` and
+  `FlurlAfterCallLogRedactor`.
+- **No redirects**: `AllowAutoRedirect = false`. A redirect usually means a wrong base URL or a
+  reverse proxy sending API calls to a login page; following it ends in an HTML page that fails to
+  parse. The 3xx response fails the instance as `ServiceRedirectedFailure`. Replaces Flurl's
   `FlurlRedirectPreventer`.
 - **SSL bypass**: Conditionally disables certificate validation via
   `ConfigurePrimaryHttpMessageHandler` based on `EnableSslCertificateValidation` setting.
@@ -257,8 +259,8 @@ handler pipeline is pooled by `IHttpClientFactory`.
 
 ## Service API Divergence
 
-Comparison of Sonarr and Radarr APIs for endpoints Recyclarr consumes. Useful when deciding shared
-vs split pipeline for new features.
+Comparison of Sonarr and Radarr APIs for endpoints Recyclarr consumes. Useful when deciding which
+fields are shared and which are service-owned for new features.
 
 | Endpoint            | Divergence           | Notes                                                  |
 | ------------------- | -------------------- | ------------------------------------------------------ |
@@ -273,4 +275,4 @@ vs split pipeline for new features.
 Both services publish OpenAPI specs in their repositories; use them as a reference when adding
 fields or endpoints.
 
-[adr-007]: ../decisions/architecture/007-custom-format-gateway-passthrough.md
+[adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md

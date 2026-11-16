@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Recyclarr.Api.Sonarr\Recyclarr.Api.Sonarr.csproj" />
     <ProjectReference Include="..\..\src\Recyclarr.Api.Radarr\Recyclarr.Api.Radarr.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Client\Recyclarr.Client.csproj" />
   </ItemGroup>
 
 </Project>

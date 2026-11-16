@@ -1,26 +1,16 @@
 using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extras.Ordering;
-using Recyclarr.Cli.ConfigFilterRendering;
+using Microsoft.Extensions.Configuration;
 using Recyclarr.Cli.Console;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
-using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
-using Recyclarr.Cli.Migration;
-using Recyclarr.Cli.Migration.Steps;
-using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Processors;
-using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
-using Recyclarr.Common;
-using Recyclarr.Common.FluentValidation;
-using Recyclarr.Config.Filtering;
-using Recyclarr.Logging;
-using Recyclarr.ResourceProviders;
+using Recyclarr.Cli.Processors.Sync.Results;
+using Recyclarr.Cli.Server;
+using Recyclarr.Platform;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -31,107 +21,48 @@ internal static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
         RegisterLogger(builder);
 
-        builder.RegisterModule<CoreAutofacModule>();
-        builder.RegisterModule<PipelineAutofacModule>();
-        builder.RegisterModule<ResourceProviderAutofacModule>();
-
+        // The CLI is an HTTP client of the server (ADR-020). It needs only the environment and the
+        // configuration directory lookup, never Recyclarr.Core.
+        builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
+        builder
+            .Register(_ =>
+                new ConfigurationBuilder()
+                    .AddEnvironment(EnvironmentConfiguration.FromProcess())
+                    .Build()
+            )
+            .As<IConfiguration>()
+            .SingleInstance();
 
         CliRegistrations(builder);
-        RegisterMigrations(builder);
         RegisterServiceProcessors(builder);
-        RegisterConfigServices(builder);
     }
 
     private static void RegisterServiceProcessors(ContainerBuilder builder)
     {
         RegisterErrorHandling(builder);
 
-        // Scope factories
-        builder.RegisterType<SyncScopeFactory>();
-
-        // Sync (registered in named "sync" scope for lifecycle management)
-        builder.RegisterMatchingScope(
-            "sync",
-            b =>
-            {
-                b.RegisterType<SyncProcessor>();
-                b.RegisterType<SyncProgressRenderer>();
-                b.RegisterType<DiagnosticsRenderer>();
-                b.RegisterType<DiagnosticsLogger>();
-            }
-        );
-
-        // Instance-level (resolved from "instance" child scope)
-        builder.RegisterType<InstanceSyncProcessor>();
-        builder.RegisterType<DeleteCustomFormatsProcessor>();
-
-        // Configuration pipeline
-        builder.RegisterType<ConfigPipelineFactory>();
-
-        builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
-        builder.RegisterType<ConfigListLocalProcessor>();
-        builder.RegisterType<ConfigListTemplateProcessor>();
-
-        builder
-            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
-            .As<IConfigCreator>()
-            .OrderByRegistration();
+        // Sync runs server-side; these types only send the request and render what comes back.
+        builder.RegisterType<SyncCommandHandler>();
+        builder.RegisterType<SyncProgressRenderer>();
+        builder.RegisterType<SyncResultsPresenter>();
+        builder.RegisterType<PreviewRenderer>();
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
     {
-        // Exception strategies (dispatch)
-        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ServiceExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
-
-        // Output strategies (routing)
-        builder.RegisterType<FatalErrorOutputStrategy>();
-        builder.RegisterType<SyncEventOutputStrategy>();
-
-        // Handler (orchestrator)
         builder.RegisterType<ExceptionHandler>();
-    }
-
-    private static void RegisterMigrations(ContainerBuilder builder)
-    {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
-        builder.RegisterType<MigrationExecutor>();
-
-        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
-        builder
-            .RegisterAssemblyTypes(thisAssembly)
-            .AssignableTo<IMigrationStep>()
-            .As<IMigrationStep>()
-            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)
     {
-        // Log Configurators
-        builder.RegisterType<FileLogSinkConfigurator>().As<ILogConfigurator>();
-        builder.RegisterType<ConsoleLogSinkConfigurator>();
-
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<ReloadableLogger>().AsSelf().As<ILogger>().SingleInstance();
-
-        builder.RegisterType<LogJanitor>();
-        builder.RegisterType<ValidationLogger>();
     }
 
     private static void CliRegistrations(ContainerBuilder builder)
@@ -146,25 +77,11 @@ internal static class CompositionRoot
             .RegisterTypes(
                 typeof(ConsoleSetupTask), // Must run before LoggerSetupTask (handles console redirect)
                 typeof(LoggerSetupTask),
-                typeof(ProgramInformationDisplayTask),
-                typeof(JanitorCleanupTask)
+                typeof(ProgramInformationDisplayTask)
             )
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
-        builder.RegisterType<ProviderProgressHandler>();
-    }
-
-    private static void RegisterConfigServices(ContainerBuilder builder)
-    {
-        builder.RegisterType<ConsoleFilterResultRenderer>().As<IFilterResultRenderer>();
-        builder
-            .RegisterTypes(
-                typeof(DuplicateInstancesFilterResultRenderer),
-                typeof(InvalidInstancesFilterResultRenderer),
-                typeof(NonExistentInstancesFilterResultRenderer),
-                typeof(SplitInstancesFilterResultRenderer)
-            )
-            .As<IConsoleFilterResultRenderer>();
+        builder.RegisterServerApi();
     }
 }

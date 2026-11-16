@@ -18,7 +18,32 @@ public record QualityProfileData : IServiceResource
     public int? CutoffFormatScore { get; init; }
     public IReadOnlyList<QualityProfileFormatItem> FormatItems { get; init; } = [];
     public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
+}
+
+/// <summary>
+/// A Radarr quality profile. Radarr profiles have a language; Sonarr profiles do not (ADR-023).
+/// Shared pipeline code transforms profiles with <c>with</c> expressions, which keep this runtime
+/// type, so the language survives from fetch through persist.
+/// </summary>
+public record RadarrQualityProfileData : QualityProfileData
+{
     public ProfileLanguage? Language { get; init; }
+}
+
+/// <summary>
+/// A Sonarr v5 quality profile. Sonarr v5 moved quality size limits from global quality
+/// definitions onto profile quality items; earlier Sonarr versions and Radarr have no per-profile
+/// sizes (ADR-023).
+/// </summary>
+/// <remarks>
+/// Sizes are keyed by quality name rather than stored on <see cref="QualityProfileItem"/>, so
+/// reorganizing the quality layout cannot drop them. Gateways write a size back onto the item for
+/// that quality; qualities without an entry keep the service's values.
+/// </remarks>
+public record SonarrV5QualityProfileData : QualityProfileData
+{
+    public IReadOnlyDictionary<string, QualityItemSize> QualitySizes { get; init; } =
+        new Dictionary<string, QualityItemSize>(StringComparer.OrdinalIgnoreCase);
 }
 
 public record QualityProfileFormatItem
@@ -35,13 +60,6 @@ public record QualityProfileItem
     public bool? Allowed { get; init; }
     public QualityProfileItemQuality? Quality { get; init; }
     public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
-
-    /// <summary>
-    /// Size limits stored on this quality item by services that keep sizes per profile (Sonarr
-    /// v5). Null means the service reported no sizes, or the item came from a source that does not
-    /// carry them; gateways then leave the service's values untouched.
-    /// </summary>
-    public QualityItemSize? Size { get; init; }
 }
 
 /// <summary>

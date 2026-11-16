@@ -9,17 +9,24 @@
       ],
       "rollForward": false
     },
-    "jetbrains.resharper.globaltools": {
-      "version": "2026.2.4",
-      "commands": [
-        "jb"
-      ],
-      "rollForward": false
-    },
     "gitversion.tool": {
       "version": "6.8.2",
       "commands": [
         "dotnet-gitversion"
+      ],
+      "rollForward": false
+    },
+    "dotnet-ef": {
+      "version": "11.0.0",
+      "commands": [
+        "dotnet-ef"
+      ],
+      "rollForward": false
+    },
+    "dotnet-outdated-tool": {
+      "version": "4.9.0",
+      "commands": [
+        "dotnet-outdated"
       ],
       "rollForward": false
     }

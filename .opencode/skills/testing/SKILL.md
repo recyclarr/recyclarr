@@ -11,8 +11,8 @@ description: >-
   `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
   updating E2E fixtures under `tests/Recyclarr.EndToEndTests/Fixtures/`
   (`recyclarr.yml`, `settings.yml`, `custom-formats-*`,
-  `trash-guides-override/`); running `Run-E2ETests.ps1` or
-  `scripts/coverage.py`; investigating flaky tests, coverage gaps, or
+  `trash-guides-override/`); running `run-e2e-tests.sh` or
+  `scripts/coverage.py`; running the pre-completion smoke test; investigating flaky tests, coverage gaps, or
   Testcontainers setup. Triggers on phrases like "write a test", "fix this
   test", "improve coverage", "add an E2E case", "mock this dependency", or
   any edit to `*.Tests.csproj` or files under `tests/**`.
@@ -32,6 +32,10 @@ description: >-
 - **E2E**: Critical user workflows against real services (Testcontainers)
 - **Integration**: Complete workflows with mocked externals (Git, HTTP, filesystem)
 - **Unit**: Edge cases integration cannot reach
+
+Cover each code path once, at the highest level that reaches it. MUST NOT add a unit test for a path
+an integration test already exercises. Add one only after `scripts/coverage.py` shows lines the
+integration tests leave uncovered (see Coverage Analysis).
 
 ## Naming
 
@@ -121,21 +125,21 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `TestableLogger`: Capture log messages
 - `NUnitAnsiConsole`: Console output verification
 - `MockFileSystem`: Filesystem testing (avoid absolute paths)
-- Factory classes: `NewCf`, `NewConfig`, `NewQualitySize`, `NewPlannedCf`, etc.
+- Factory classes: `NewCf`, `NewConfig`, `NewQp`, etc.
 
 ## Test Factory Helpers (`New*` Classes)
 
-One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
-grab-bag classes mixing unrelated types.
+`New*` helpers isolate tests from model-construction churn. When a model changes an initialization
+value most tests ignore, update the helper instead of every caller.
 
 **Rules:**
 
-- Methods return one type. Use overloads or optional parameters for variants, not separate classes.
-- Accept only test-relevant parameters with sensible defaults. This shields tests from model
-  changes.
-- Location: `Core.TestLibrary` for types in Core; `Cli.Tests/Reusable` for types in Cli. Hard
-  constraint from project dependency direction (see REC-90).
-- Overhaul existing helpers when their types are touched. No legacy pattern preservation.
+- Group related constructions under a concise domain-area name. Split concepts with different
+  ownership or change cadence; related return types do not require separate classes.
+- Use overloads or optional parameters for variants.
+- Accept only test-relevant parameters, with sensible defaults for the rest.
+- Test projects may depend on test-library projects, never the reverse. Shared test-library APIs
+  must be public; helpers exposing internal production types stay in the owning test project.
 
 **When to skip:** If a domain type is trivial (few properties, no `required` fields, natural
 defaults), direct construction in tests is acceptable. Include a brief justification when skipping.
@@ -152,21 +156,29 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 "/absolute/path/file.json"
 ```
 
+## Time and Background Work
+
+`tests/BannedSymbols.txt` bans real-time waits (`Task.Delay`, `Thread.Sleep`), including polling
+loops, in every test project except E2E. Never suppress the ban. Instead:
+
+- Assert decisions where the code makes them synchronously, at the lowest layer that owns them.
+- Await a signal from a test double (`TaskCompletionSource` set when the double is called).
+- Drive time with `TimerObservingTimeProvider`: await `NextTimer(period)` before `Advance`, because
+  background loops create timers on another thread; awaiting the next timer after `Advance` proves
+  the loop finished that iteration.
+
+If none fits, the code under test is untestable by design; change the design.
+
+Build failure results (exceptions, error responses) directly. Open real sockets only when network
+behavior is what the test checks; OS network stacks differ on resets and timeouts, so a socket used
+only to manufacture an exception can hang on one platform. `Recyclarr.Core.Tests` bans sockets.
+
 ## Running Tests
 
-```bash
-# Unit and integration tests
-dotnet test -v q
-
-# Specific test project
-dotnet test -v q tests/Recyclarr.Cli.Tests/
-
-# Single test by name
-dotnet test -v q --filter "FullyQualifiedName~TestMethodName"
-
-# E2E tests (requires Docker services)
-./scripts/Run-E2ETests.ps1
-```
+- Unit and integration tests: `dotnet test` at solution level.
+- One project: pass its path, such as `tests/Recyclarr.Cli.Tests/`.
+- One test: `--filter "FullyQualifiedName~TestMethodName"`.
+- E2E tests (requires Docker services): `./scripts/run-e2e-tests.sh`.
 
 ## Coverage Analysis
 
@@ -196,16 +208,34 @@ Output format: `path:pct:covered/total[:uncovered_lines]`
 CRITICAL: `--run` must succeed before querying. Investigate failures - coverage data is invalid on
 failure. Run coverage BEFORE writing tests to understand gaps.
 
----
+## Smoke Test
+
+AGENTS.md (Smoke Test) says when this is required.
+
+1. Run `git -C ../dev-configs pull`. Prefix server and CLI commands with `mise exec --`, which sets
+   `RECYCLARR_CONFIG_DIR` to `../dev-configs/appdata`.
+2. Run `docker compose up -d` to start the whole `compose.yaml` stack.
+3. Unless AGENTS.md Local Processes finds a server to reuse, start
+   `dotnet run --project src/Recyclarr.Server` as a background task and wait for `READY:` in its
+   output. It has no `--help`; any invocation starts the server. `cli.yml` points the CLI at this
+   server. Use the CLI's ephemeral server only when testing ephemeral mode itself.
+4. Run `dotnet run --project src/Recyclarr.Cli -- sync --preview`. A run with no changes proves
+   little; also run a config that exercises the changed behavior.
+5. Revert dev-configs edits unless they stay useful. Report useful edits to the user and commit them
+   in `../dev-configs` only after approval.
+6. Stop the processes and containers you started.
 
 ## End-to-End Tests
 
-E2E tests run the full Recyclarr CLI against containerized Sonarr/Radarr instances. Tests verify
-that sync operations produce expected state in the services.
+E2E tests run the published `recyclarr-server` process against containerized Sonarr/Radarr
+instances and drive sync through the generated `Recyclarr.Client`; the CLI is out of scope. Tests
+assert structured job results and service state, never process output or log text. The server
+loads config once at startup, so a test needing a different config restarts it with another
+fixture.
 
 ### Running E2E Tests
 
-**MANDATORY**: Use `./scripts/Run-E2ETests.ps1` - never run `dotnet test` directly for E2E tests.
+**MANDATORY**: Use `./scripts/run-e2e-tests.sh` - never run `dotnet test` directly for E2E tests.
 The script outputs a log file path; use `rg` to search logs without rerunning tests.
 
 ### Resource Provider Strategy

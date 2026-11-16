@@ -7,6 +7,58 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v9.0 Upgrade Guide][breaking9] for required
+changes you may need to make.
+
+[breaking9]: https://recyclarr.dev/guide/upgrade-guide/v9.0/
+
+### Added
+
+- Server: Recyclarr server with an HTTP API, scheduled syncs, and metrics
+- Sync: Notifications and `sync` output list ongoing problems, such as deprecated settings or a
+  held-back guide update, after every sync until they are fixed
+- Kubernetes: Official Helm chart
+- Config: `RECYCLARR_STATE_DIR` environment variable
+
+### Changed
+
+- **BREAKING**: Recyclarr is now a client and server; CLI commands run through a server
+- **BREAKING**: Docker: The image runs the Recyclarr server instead of a cron job
+- **BREAKING**: Docker: Arguments after the image name no longer run CLI commands
+- **BREAKING**: Recyclarr no longer creates the `configs` and `includes` directories or an empty
+  `settings.yml`
+- **BREAKING**: Older x86-64 processors without SSE4.2 and POPCNT support can no longer run
+  Recyclarr
+- CLI: `config create` and `config list templates` build templates from the TRaSH Guides, so they
+  follow guide updates. The official config templates repository is no longer downloaded
+- CLI: `config create --path` also works with a single `--template`
+- CLI: No longer writes log files
+- Logs: Text log lines include the date and time
+
+### Removed
+
+- **BREAKING**: CLI: The `--config` option of `sync` has been removed
+- **BREAKING**: CLI: The `config list local` command has been removed
+- **BREAKING**: CLI: The deprecated `migrate` command has been removed
+- **BREAKING**: CLI: The deprecated `state repair` command has been removed
+- **BREAKING**: Docker: The `CRON_SCHEDULE`, `RECYCLARR_CREATE_CONFIG`, and `RECYCLARR_LOG_LEVEL`
+  environment variables have been removed
+- Docker: The `edge` image tag has been removed. Use `ghcr.io/recyclarr/recyclarr-dev:master`
+  instead
+
+### Fixed
+
+- Sync: An unknown custom format `trash_id` did not fail the sync and could reset its score to 0
+  (#1013)
+- Sync: An unknown `custom_format_groups.skip` ID did not fail the sync, so the group still synced
+- Sync: Unknown qualities or `reset_unmatched_scores` exceptions in a quality profile only warned,
+  and the profile still synced
+- Sync: An unknown quality profile `trash_id` was a warning instead of an error
+- Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
+- Sync: Unclear error when Sonarr's Allowed Hosts setting rejects the hostname in `base_url`
+- Sync: Inconsistent results when two custom formats share the same name
+- CLI: `list custom-formats` crashed when the guide had no custom formats for a service
+
 ## [8.8.1] - 2026-10-28
 
 ### Fixed

@@ -6,4 +6,3 @@ Dockerfile eol=lf
 
 # Ignore whitespace in these files
 *.sln -whitespace
-*.DotSettings -whitespace

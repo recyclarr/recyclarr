@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: ⚙️ Deploy Schemas
+
+# Every deploy replaces the whole site: release directories come from tags and `next/` from the
+# default branch, so the result does not depend on which event triggered it.
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    name: Deploy Schemas
+    runs-on: ubuntu-latest
+    # `queue: max` keeps a waiting release deploy from being replaced by a later push deploy.
+    concurrency:
+      group: deploy-schemas
+      queue: max
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
+      - name: Build Schemas
+        run: ./ci/build-schemas.py
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy schemas-dist --project-name=recyclarr-schemas --branch=master

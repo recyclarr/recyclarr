@@ -9,6 +9,12 @@ public class RecyclarrSettingsValidator : AbstractValidator<RecyclarrSettings>
     public RecyclarrSettingsValidator()
     {
         RuleFor(x => x.Notifications).SetValidator(new NotificationSettingsValidator());
+        RuleFor(x => x.Server.Schedule.Cron)
+            .NotEmpty()
+            .WithMessage("`server.schedule.cron` must not be empty");
+        RuleFor(x => x.Server.SyncTimeout)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("`server.sync_timeout` must be at least 1 minute");
         RuleForEach(x => x.ResourceProviders)
             .SetValidator(new ResourceProviderValidator())
             .SetInheritanceValidator(v =>

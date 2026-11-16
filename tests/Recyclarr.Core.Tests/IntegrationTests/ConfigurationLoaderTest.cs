@@ -6,13 +6,12 @@ using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderTest : CoreIntegrationTestFixture
 {
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
@@ -112,15 +111,16 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
-                new LoadedConfigYaml(
-                    "name",
-                    SupportedServices.Sonarr,
-                    new SonarrConfigYaml
+                new LoadedConfigYaml
+                {
+                    InstanceName = "name",
+                    ServiceType = SupportedServices.Sonarr,
+                    Yaml = new SonarrConfigYaml
                     {
                         ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                         BaseUrl = "http://localhost:8989",
-                    }
-                )
+                    },
+                }
             );
     }
 }

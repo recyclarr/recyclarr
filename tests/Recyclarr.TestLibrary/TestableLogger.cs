@@ -6,7 +6,6 @@ using Serilog.Events;
 
 namespace Recyclarr.TestLibrary;
 
-[UsedImplicitly]
 public sealed class TestableLogger : ILogger
 {
     private readonly Logger _log = new LoggerConfiguration()

@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
+    <Features>$(Features);runtime-async=on</Features>
     <Nullable>enable</Nullable>
     <WarningLevel>9999</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -11,26 +12,37 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Suppress XML doc warnings caused by GenerateDocumentationFile (needed for IDE0005) -->
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <PublishDocumentationFiles>false</PublishDocumentationFiles>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <RecyclarrRepositoryRoot>$(RepositoryRoot)</RecyclarrRepositoryRoot>
     <TestDirectory>$(RepositoryRoot)tests\</TestDirectory>
     <GitVersionBaseDirectory>$(RepositoryRoot)</GitVersionBaseDirectory>
+    <!-- GitVersion's informational version already ends with the commit sha -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- TreatAsUsed: blanket ref; not every project uses its attributes -->
-    <PackageReference Include="JetBrains.Annotations" TreatAsUsed="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="JetBrains.Annotations" />
+  <!-- Repository rules apply everywhere except the analyzer and its tests, which reference it
+       directly. -->
+  <ItemGroup
+    Condition="'$(MSBuildProjectName)' != 'Recyclarr.Analyzers'
+      and '$(MSBuildProjectName)' != 'Recyclarr.Analyzers.Tests'"
+  >
+    <ProjectReference
+      Include="$(RepositoryRoot)src/Recyclarr.Analyzers/Recyclarr.Analyzers.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
 
   <!-- For only NON-TEST projects -->
-  <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('Tests'))">
+  <ItemGroup
+    Condition="!$(MSBuildProjectName.EndsWith('Tests'))
+      and !$(MSBuildProjectName.EndsWith('TestLibrary'))"
+  >
     <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+    <InternalsVisibleTo Include="$(MSBuildProjectName).TestLibrary" />
     <!-- For NSubstitute -->
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 # AGENTS
 
-.NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr. Mainline branch: `master`.
+.NET HTTP server and CLI client for synchronizing TRaSH Guides to Sonarr/Radarr. Mainline branch:
+`master`.
 
 ## Linear
 
@@ -27,6 +28,8 @@ Scope separation:
   (`docs/architecture/`, `docs/decisions/`). MUST NOT duplicate between them.
 - Linear project descriptions SHOULD link to relevant ADRs and architecture docs.
 - MUST NOT put design rationale, decision records, or living design reference into Linear.
+- Every record in `docs/decisions/` is in force. When a task conflicts with one, MUST stop and ask
+  whether the task or the record changes.
 
 ## Agents
 
@@ -35,30 +38,18 @@ quality profiles, naming, quality sizes, trash_ids). NEVER use `explore` for gui
 
 ## Skills
 
-Per-skill triggers. MUST load before acting on the governed task; a skill loaded in parallel with
-that action arrives too late.
-
-- `testing`: MUST load before planning or performing work that requires tests, and before authoring
-  or editing tests, updating E2E fixtures, debugging failures, or running `coverage.py` /
-  `Run-E2ETests.ps1`.
-- `changelog`: MUST load when adding, editing, or reorganizing entries in `CHANGELOG.md`, or when
-  drafting release notes.
-- `decisions`: MUST load when creating, editing, or superseding ADRs or PDRs under
-  `docs/decisions/`.
-- `mapperly`: MUST load when writing, editing, or debugging `Riok.Mapperly` mapper classes
-  (`[Mapper]`-attributed partials, `*Mapper.cs` under `ServarrApi/`, RMG-prefixed diagnostics).
-- `duplication-vs-abstraction`: MUST load when weighing whether to extract a shared abstraction,
-  base class, or generic helper, particularly across Sonarr/Radarr parallels, Refit-generated
-  clients, or anti-corruption layers over distinct external systems.
-- `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
-  (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
+MUST load a skill whose description matches the task before acting on that task; a skill loaded in
+parallel with the action arrives too late.
 
 ## Project Context
 
-Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
-`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (hand-written
-Refit contracts; model only used fields, no enums, every DTO derives from `ExtensibleResource`; see
-ADR-010). Solution is SLNX (`Recyclarr.slnx`), not SLN.
+Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `Pipelines/`,
+`Sync/`, `TrashGuide/`, `ServarrApi/`, `Config/`, `SyncState/` folders) ->
+`Recyclarr.Api.{Sonarr,Radarr}` (hand-written Refit contracts; model only used fields, no enums,
+every DTO derives from `ExtensibleResource`; see ADR-006). `Recyclarr.Cli` (HTTP client of the
+server) -> `Recyclarr.Client` (Refitter-generated typed client from the server's OpenAPI spec) and
+`Recyclarr.Platform` (process and environment primitives only, also referenced by Core; ADR-020).
+The CLI MUST NOT reference Core. Solution is SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
@@ -90,7 +81,7 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   values and domain objects locally; perform service construction in Autofac modules, composition
   roots, or explicit factories. Concrete implementations may be injected directly. Search existing
   registrations before adding new ones.
-- .NET 10.0 (C# 14) + nullable reference types
+- .NET 11.0 (C# 15) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
 - Use enums for closed labels or states. Use polymorphism when variants own distinct behavior or
   implementations must be substitutable or extensible.
@@ -111,12 +102,22 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - Use records for value-oriented data and favor immutable state. `IReadOnlyCollection` and
   `IReadOnlyDictionary` restrict mutation only through that reference; use immutable collections
   when a stable snapshot is required.
+  - Assign collection inputs directly (`Items = items`); do not copy them (`ToList().AsReadOnly()`)
+    to guard internal callers. Defensive copies belong only where untrusted callers cross a trust
+    boundary.
+- Record shape: a record is either fully positional or declares no primary constructor.
+  - Positional records may add only computed get-only members, and only when never serialized.
+  - Base records declare no primary constructor. A derived record may be positional only when its
+    base has no stored properties; otherwise it uses `required` properties.
+  - Prefer `required` over positional parameters for serialized fields: System.Text.Json enforces
+    `required` but fills missing constructor parameters with defaults.
+- Mark the base of a fixed variant set `closed` so `switch` expressions over it are exhaustive
+  without a `_ => throw` arm. Use a `union` instead when the cases are unrelated existing types
+  rather than subtypes of a base you own.
 - JSON serialization: configure naming policy, converters, and style via `JsonSerializerOptions` (or
   source-generated `JsonSerializerContext`). Check for existing options before creating new
   instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
   convention.
-- Use `[UsedImplicitly]` only for verified JetBrains inspection false positives caused by runtime
-  use through deserialization, reflection, or DI.
 - Suppress warnings at the narrowest practical scope and include a justification. Use
   `[SuppressMessage]` for symbol-scoped analyzer findings and `#pragma warning` for unavoidable
   line- or region-scoped compiler diagnostics.
@@ -144,27 +145,16 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 
 ### Comments
 
-- Avoid null-suppression (`!`). When it is necessary and the runtime guarantee is not obvious, add
-  an inline comment naming the invariant (for example, `// non-null: validated above`).
+- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow
+  analysis cannot cross a third-party callback, prefer a documented `!` over an unreachable
+  defensive throw (for example, `// non-null: guarded above`).
 - NEVER commit commented-out code.
 
-#### Public Contract Documentation
+#### Documentation Syntax
 
-- Document hand-written public types with XML `<summary>` comments for maintainers who know C# but
-  not the subsystem. Explain purpose and unfamiliar domain terms; do not paraphrase the type name.
-- Add `<remarks>` when responsibility boundaries, consumer-visible guarantees, or lifecycle
-  constraints need more explanation. Do not require both tags or impose a fixed structure.
-- Document public members selectively when their signatures and type documentation leave important
-  contract meaning unexplained.
-- Do not add `<param>`, `<returns>`, `<value>`, or `<exception>` boilerplate. Describe consequential
-  behavior in the summary or remarks instead.
-- Do not add XML documentation to internal or private types or members. Prefer self-documenting
-  implementation code; follow the inline comment rules above when explanation is still necessary.
-- Keep shared contract documentation on the declaring interface or base member. Reference it rather
-  than duplicating it.
-- Verify documented guarantees against the implementation and callers. Update documentation when the
-  contract changes; do not describe intended behavior as an existing guarantee.
-- Apply these rules to new and changed contracts. Do not backfill unrelated code.
+- Write type and member documentation as XML doc comments: `<summary>`, plus `<remarks>` when more
+  explanation is needed. Do not add `<param>`, `<returns>`, `<value>`, or `<exception>` boilerplate.
+- Reference shared documentation with `<inheritdoc/>` or `<see cref="..."/>` instead of copying it.
 
 ## Backward Compatibility
 
@@ -180,30 +170,28 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 ## YAML Schema Maintenance
 
 The JSON schemas in `schemas/` are the single source of truth for the structure and validation of
-`recyclarr.yml` and `settings.yml`. When adding, removing, or renaming properties, changing types,
-defaults, or constraints, or modifying enum values, you MUST update the relevant schema in
-`schemas/` alongside the code change. Consult the schemas directly when you need to understand or
-generate valid YAML; there is no separate reference document to keep in sync.
+`recyclarr.yml`, `settings.yml`, and `cli.yml`. When adding, removing, or renaming properties,
+changing types, defaults, or constraints, or modifying enum values, you MUST update the relevant
+schema in `schemas/` alongside the code change. Consult the schemas directly when you need to
+understand or generate valid YAML; there is no separate reference document to keep in sync.
 
 ## Sync Philosophy
 
 All sync operations must be deterministic.
 
-**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
+**Independent operations** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
-- Items sync independently; partial sync within pipeline is acceptable
+- Items sync independently; partial sync within an operation is acceptable
 - Invalid items are skipped with errors; valid items proceed
 
-**Dependent pipelines** (Custom Formats):
+**Dependent operations** (Custom Formats):
 
-- All items must sync or the entire pipeline fails
-- Failure cascades to skip dependent pipelines (CF failure → QP skipped)
+- All items must sync or the entire operation fails
+- Failure cascades to skip dependent operations (CF failure → QP skipped)
 - Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
 
-**Diagnostics:**
-
-- `AddError()`: Issues that cause items or pipelines to be skipped
-- `AddWarning()`: Deprecations and informational messages only
+Pipelines report skips and failures as typed outcomes and statuses, never diagnostic messages
+(ADR-015).
 
 ## YAML Error Handling
 
@@ -221,36 +209,19 @@ YAML names. Handlers that need property context MUST operate inside the pipeline
 
 ## Console and Logging Output
 
-The `--log` flag controls which output channel is visible to users:
-
-- `--log` **omitted**: IAnsiConsole -> console (visible); ILogger -> file only
-- `--log [level]`: IAnsiConsole -> void (hidden); ILogger -> file + console
-
-Output channel usage:
-
-- `IAnsiConsole`: User-facing output (progress, results, prompts). Visible by default.
-- `ILogger`: Diagnostic information. Always written to log files; visible on console only with
-  --log.
-- NEVER use `Console.WriteLine`
-
-### Dual Output Pattern
-
-User-visible information must go to both console and log:
-
-- Sync command: Diagnostics flow through a publisher/subscriber system that handles both channels
-  automatically. Use `AddError()`/`AddWarning()` on the publisher; the framework routes to console
-  and log.
-- Other commands: Must output to both channels manually:
+- Server: logs only through `ILogger` to its log files. Deprecations are logged as warnings at
+  startup (ADR-019).
+- CLI: writes no log files (ADR-022). Without `--log`, `IAnsiConsole` shows output and `ILogger` is
+  silent; with `--log [level]`, `ILogger` writes to the console and `IAnsiConsole` is hidden. CLI
+  commands MUST send user-visible information to both channels:
 
 ```csharp
-// User-visible information
 console.WriteLine(message);
 log.Information(message);
-
-// Deprecations
-console.MarkupLine("[darkorange bold][[DEPRECATED]][/] " + message);
-log.Warning(message);
 ```
+
+- NEVER use `Console.WriteLine`. Exception: the ephemeral server's `READY:{port}` stdout handshake
+  (ADR-010).
 
 ## Repository Structure
 
@@ -265,116 +236,71 @@ log.Warning(message);
     - `architecture/`: Technical implementation decisions (ADRs)
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
-- `schemas/`: JSON Schemas for `recyclarr.yml` and `settings.yml`
+- `http/`: httpyac requests against the server API
+- `schemas/`: JSON Schemas for `recyclarr.yml`, `settings.yml` (server), and `cli.yml` (CLI)
 - `Directory.Packages.props`: NuGet central package management
 
 ## Tooling Requirements
 
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
 - MUST run `pre-commit run --files <file1> <file2> ...` for all changes
-- Use `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
-  when a clean rebuild is needed.
-- Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
-- You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
-  Prioritize the CLI for all project-specific modifications if possible.
+- Gitignore: add a pattern only for output this repository's tools produce; OS and editor files
+  belong in each developer's global excludes. Ignore by file pattern (`*.pyc`). Use a directory
+  pattern only when its contents share file types with tracked files (`obj/` holds `.json` and
+  `.props`).
+
+### Projects and Packages
+
+- Edit `*.csproj`, `*.props`, and `*.slnx` by hand, including package references. Use the dotnet CLI
+  to look up versions (`dotnet package search <id> --exact-match`, plus `--prerelease` when the
+  current version is a prerelease), audit packages (`dotnet list package --outdated`), and generate
+  output: `dotnet new`, `dotnet tool`, `dotnet ef migrations add`.
 - Central package management: `Directory.Packages.props` contains versions only. Private packages
   MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
   synchronized when adding, renaming, removing, or changing package privacy.
-- When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
+- `Recyclarr.slnx` layout: non-test projects at the solution root, test projects in `/test/`, and
+  repository configuration files (`*.props`, `.editorconfig`, tool configs) in `/_props/`.
+- `InternalsVisibleTo` is granted convention-wide by `Directory.Build.props`. MUST NOT add it to an
+  individual csproj; name the consuming project to match the convention, or extend the convention.
 
-**Development and Testing:**
-
-All under `./scripts`.
+### Scripts (`scripts/`)
 
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)
-- `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
-- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
+- `docker-recyclarr.sh`: Run Recyclarr in container; auto-starts dependent services via
   `docker compose up -d`
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
+- `record-demo.sh` (`mise run demo`): Re-record the README demo from
+  `.github/assets/sync-preview.tape`
 
-**Gitignore management:**
+## Verification
 
-- `Update-Gitignore.ps1`: Updates the global `.gitignore`.
-- `Commit-Gitignore.ps1`: Commit git ignore changes.
+Test conventions live in the `testing` skill.
+
+- Run `dotnet test` at solution level; it excludes E2E tests. Use `dotnet build --no-incremental`
+  for a clean rebuild.
+- E2E: MUST run `./scripts/run-e2e-tests.sh`, never `dotnet test`. Search its log with `rg`.
+
+### Local Processes
+
+Before starting the server or another backend process, check for a running one (e.g. the user's
+`dotnet watch`) with `pgrep -af 'dotnet|recyclarr'` and `ss -ltnp`. Reuse it when it serves the
+task. MUST NOT stop it or start a parallel instance. If it blocks the task (stale build, port
+conflict, shared state), stop and ask the user to shut it down.
+
+Run long-lived processes (server, `dotnet watch`) as background shell tasks; read their output there
+and stop them through the same tool when done. NEVER use `pkill -f`; it can match and kill your own
+shell.
+
+### Smoke Test
+
+Before reporting a `feat`, `fix`, `perf`, or `src/` refactor complete, MUST run E2E tests and the
+smoke test from the `testing` skill unprompted.
 
 ## Commits and Changelog
 
-Use this priority order (highest to lowest) to determine commit type:
-
-### Tier 1: User-Facing (require CHANGELOG)
-
-Conventional Commits serves semver (2 buckets: feat/fix). Keep a Changelog serves users (3 buckets:
-Added/Changed/Fixed). These are two separate decisions made in order.
-
-**Step 1: Commit type (determines semver bump).**
-
-Ask: "Could a user report this as broken?" This includes crashes, garbled output, wrong results,
-missing data, or any behavior that fails to meet reasonable expectations. If yes: `fix`. Otherwise,
-ask: "Does this change user-visible behavior (e.g. new capability, enhanced output, modified
-defaults)?" If yes: `feat`. If neither: skip to Tier 2.
-
-- `fix:` -> Corrects behavior a user could report as broken (PATCH bump)
-- `feat:` -> User-visible change that is not a bug fix (MINOR bump)
-- `perf:` -> Significant, measurable performance improvement (PATCH bump)
-- Append `!` for breaking changes regardless of type (MAJOR bump)
-
-**Step 2: Changelog category (describes the change for users).**
-
-Given a Tier 1 commit, pick the changelog section by what happened:
-
-- **Added**: A capability that did not exist before (e.g. new command, new flag, new config option)
-- **Changed**: Existing behavior now works differently (e.g. enhanced output, modified defaults,
-  adjusted limits, breaking changes, performance improvements)
-- **Fixed**: Something was broken and now it works correctly
-
-A single commit type can map to different changelog categories. `feat` produces either Added or
-Changed depending on whether the capability is new or an enhancement. `fix` almost always produces
-Fixed. Breaking changes (`!`) produce Changed or Removed.
-
-Multi-commit features: use `refactor` for infrastructure commits, `feat` only for the commit that
-enables the user-visible capability.
-
-### Tier 2: Path-Based (no CHANGELOG)
-
-If Tier 1 doesn't apply, match file paths:
-
-- `test:` -> `tests/**`
-- `ci:` -> `.github/**`, `ci/**`
-- `build:` -> `*.props`, `*.csproj`, `*.slnx`, `.config/dotnet-tools.json`
-- `docs:` -> `docs/**`, `*.md` (including `CHANGELOG.md` if committed alone)
-
-### Tier 3: Catch-All (no CHANGELOG)
-
-If neither Tier 1 nor Tier 2 applies:
-
-- `refactor:` -> C# changes in `src/**` (internal restructuring, code reorganization)
-- `chore:` -> All other non-C# changes (`scripts/**`, `.renovate/*`, `renovate.json5`,
-  `.editorconfig`, `.vscode/*`, `schemas/*`, linter configs, etc.)
-
-### Scopes
-
-A scope names a durable boundary a user or maintainer would filter the log by, never a type and
-never a directory. MUST use one of these or omit the scope entirely:
-
-- `deps` -> dependency updates (Renovate)
-- `sync` -> `src/Recyclarr.Cli/Pipelines/*`, sync orchestration
-- `config` -> `src/Recyclarr.Core/Config/*`
-- `yaml` -> `schemas/*`
-- `cli` -> `src/Recyclarr.Cli/*` outside `Pipelines/`
-- `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`, `src/Recyclarr.Core/ServarrApi/*`
-- `docker` -> Dockerfile and image assets (NOT Docker-related workflows; those are `ci:`)
-- `agents` -> `AGENTS.md`, `.opencode/*`, skills, agent definitions
-
-MUST NOT restate the type as a scope: `ci(ci)`, `docs(readme)`, `test(e2e)`, `docs(changelog)` and
-similar add nothing. Scopeless `chore:` beats a one-off scope.
-
-A new scope is justified only when all three hold: 3+ commits fit nothing existing, the name
-survives a refactor (`docker` does, `di` and `http` do not), and it partitions rather than nests (no
-`sync` plus `sync-qp`). Retire a scope by the same test once its boundary dissolves.
-
-### CHANGELOG Format
+Load the `commit-conventions` skill before choosing a commit type or scope.
 
 MUST NEVER read the entire `CHANGELOG.md`; the file is massive. MUST read only from the top with a
 limited line range (e.g. 50 lines) to capture the `[Unreleased]` section. The file follows Keep a
@@ -382,6 +308,5 @@ Changelog, so the newest entries are always at the top.
 
 The `changelog` skill has detailed format and conventions.
 
-**IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
-`CHANGELOG.md` in scope. Verify changelog updates are part of the implementation plan before
-starting work.
+When planning user-facing changes (`feat`, `fix`, `perf`), MUST include `CHANGELOG.md` in scope and
+verify the implementation plan includes its update before starting work.

@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 
 namespace Recyclarr.Settings.Models;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record AppriseNotificationSettings
 {
     public AppriseMode? Mode { get; init; }
@@ -12,7 +11,6 @@ public record AppriseNotificationSettings
     public Collection<string> Urls { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record NotificationSettings
 {
     public NotificationVerbosity Verbosity { get; init; } = NotificationVerbosity.Normal;

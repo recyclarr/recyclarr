@@ -1,63 +1,64 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Cli.Processors;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List custom formats in the guide for a particular service.")]
 internal class ListCustomFormatsCommand(
     ILogger log,
     IAnsiConsole console,
-    CategorizedCustomFormatProvider provider,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
     }
 
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-        ListCustomFormats(settings);
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.CustomFormats(settings.Service, ct);
+        ListCustomFormats(settings, response.ContentOrThrow().Items);
         return (int)ExitStatus.Succeeded;
     }
 
-    private void ListCustomFormats(CliSettings settings)
+    private void ListCustomFormats(
+        CliSettings settings,
+        IEnumerable<GuideCustomFormatSummaryResponse> customFormats
+    )
     {
-        var customFormats = provider.Get(settings.Service);
-
         var items = customFormats
-            .Where(x => !string.IsNullOrWhiteSpace(x.Resource.TrashId))
+            .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
             .OrderBy(x => x.Category)
-            .ThenBy(x => x.Resource.Name)
+            .ThenBy(x => x.Name)
             .ToList();
 
         log.Debug("Found {Count} custom formats for {Service}", items.Count, settings.Service);
-        log.Information(
-            "Custom formats: {@CustomFormats}",
-            items.Select(cf => cf.Resource.TrashId)
-        );
+        log.Information("Custom formats: {@CustomFormats}", items.Select(cf => cf.TrashId));
 
         if (settings.Raw)
         {
             OutputCustomFormatsRaw(items);
+        }
+        else if (items.Count == 0)
+        {
+            const string message = "No custom formats found in the guide.";
+            console.WriteLine(message);
+            log.Information(message);
         }
         else
         {
@@ -65,22 +66,24 @@ internal class ListCustomFormatsCommand(
         }
     }
 
-    private void OutputCustomFormatsRaw(IReadOnlyCollection<CategorizedCustomFormat> items)
+    private void OutputCustomFormatsRaw(IReadOnlyCollection<GuideCustomFormatSummaryResponse> items)
     {
         foreach (var cf in items)
         {
             var category = cf.Category ?? "";
-            console.WriteRawLine($"{cf.Resource.TrashId}\t{cf.Resource.Name}\t{category}");
+            console.WriteRawLine($"{cf.TrashId}\t{cf.Name}\t{category}");
         }
     }
 
-    private void OutputCustomFormatsTable(IReadOnlyCollection<CategorizedCustomFormat> items)
+    private void OutputCustomFormatsTable(
+        IReadOnlyCollection<GuideCustomFormatSummaryResponse> items
+    )
     {
         var byCategory = items.GroupBy(cf => cf.Category ?? "[No Category]").OrderBy(g => g.Key);
 
         console.WriteLine();
 
-        var maxNameLen = items.Max(cf => cf.Resource.Name.Length);
+        var maxNameLen = items.Max(cf => cf.Name.Length);
 
         foreach (var group in byCategory)
         {
@@ -94,10 +97,7 @@ internal class ListCustomFormatsCommand(
             foreach (var cf in group)
             {
                 var color = rowIndex++ % 2 == 0 ? "white" : "grey";
-                table.AddRow(
-                    $"[{color}]{cf.Resource.Name.EscapeMarkup()}[/]",
-                    $"[{color}]{cf.Resource.TrashId}[/]"
-                );
+                table.AddRow($"[{color}]{cf.Name.EscapeMarkup()}[/]", $"[{color}]{cf.TrashId}[/]");
             }
 
             var panel = new Panel(table)

@@ -1,0 +1,118 @@
+using System.Text.Json.Nodes;
+using Recyclarr.Server.TestLibrary;
+
+namespace Recyclarr.Server.Tests.Http;
+
+internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
+{
+    [Test]
+    public async Task Enum_value_descriptions_are_keyed_by_wire_value()
+    {
+        var document = await GetDocument();
+        var schema = document!["components"]!["schemas"]!["InstanceProgressStatusResponse"]!;
+        var descriptions = schema["x-enumDescriptions"]!.AsObject();
+
+        descriptions["notRun"]!
+            .GetValue<string>()
+            .Should()
+            .Be("The job stopped before this instance started.");
+        descriptions
+            .Select(x => x.Key)
+            .Should()
+            .Equal(schema["enum"]!.AsArray().Select(x => x!.GetValue<string>()));
+        schema["description"]!
+            .GetValue<string>()
+            .Should()
+            .Be("Sync progress of one instance in a job.");
+    }
+
+    // The wiki API reference renders only what the document contains.
+    [Test]
+    public async Task Every_operation_parameter_response_and_tag_is_described()
+    {
+        var document = await GetDocument();
+        var operations = document!["paths"]!
+            .AsObject()
+            .SelectMany(path =>
+                path.Value!.AsObject().Select(op => (Name: $"{op.Key} {path.Key}", Op: op.Value!))
+            )
+            .ToList();
+
+        var undescribed = operations
+            .Where(x => IsBlank(x.Op["summary"]) || IsBlank(x.Op["description"]))
+            .Select(x => x.Name)
+            .Concat(
+                operations.SelectMany(x =>
+                    (x.Op["parameters"]?.AsArray() ?? [])
+                        .Where(p => IsBlank(p!["description"]))
+                        .Select(p => $"{x.Name} parameter {p!["name"]}")
+                )
+            )
+            .Concat(
+                operations.SelectMany(x =>
+                    x.Op["responses"]!
+                        .AsObject()
+                        .Where(r => !IsSentence(r.Value!["description"]))
+                        .Select(r => $"{x.Name} response {r.Key}")
+                )
+            )
+            .Concat(
+                (document["tags"]?.AsArray() ?? [])
+                    .Where(t => IsBlank(t!["description"]))
+                    .Select(t => $"tag {t!["name"]}")
+            );
+
+        undescribed.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Every_api_operation_requires_the_bearer_scheme()
+    {
+        var document = await GetDocument();
+        var schemes = document!["components"]!["securitySchemes"]!.AsObject();
+        var scheme = schemes.Should().ContainSingle().Which;
+        var unsecured = document["paths"]!
+            .AsObject()
+            .SelectMany(path => path.Value!.AsObject().Select(op => (path.Key, Op: op.Value!)))
+            .Where(x => x.Op["security"]?[0]?[scheme.Key] is null)
+            .Select(x => x.Key);
+
+        scheme.Value!["type"]!.GetValue<string>().Should().Be("http");
+        scheme.Value["scheme"]!.GetValue<string>().Should().Be("bearer");
+        unsecured.Should().BeEmpty();
+    }
+
+    // Data records are referenced only through this map, so clients depend on it for typed data
+    [Test]
+    public async Task Outcome_codes_map_to_published_data_schemas()
+    {
+        var document = await GetDocument();
+        var schemas = document!["components"]!["schemas"]!.AsObject();
+        var map = schemas["OutcomeResponse"]!["x-outcome-data"]!.AsObject();
+
+        map["customFormatAdopted"]!["$ref"]!
+            .GetValue<string>()
+            .Should()
+            .Be("#/components/schemas/ServiceIdOutcomeData");
+        map.Select(x => x.Value!["$ref"]!.GetValue<string>().Split('/')[^1])
+            .Should()
+            .OnlyContain(name => schemas.ContainsKey(name));
+        map.Should().NotContainKey("customFormatCreateRejected");
+    }
+
+    private async Task<JsonNode?> GetDocument()
+    {
+        using var client = CreateClient();
+        return JsonNode.Parse(
+            await client.GetStringAsync(new Uri("/openapi/v1.json", UriKind.Relative))
+        );
+    }
+
+    private static bool IsBlank(JsonNode? node) =>
+        string.IsNullOrWhiteSpace(node?.GetValue<string>());
+
+    // FastEndpoints fills an undocumented response with a reason phrase such as "Success", never a
+    // sentence that states the condition.
+    private static bool IsSentence(JsonNode? node) =>
+        node?.GetValue<string>().EndsWith('.', StringComparison.Ordinal) ?? false;
+}

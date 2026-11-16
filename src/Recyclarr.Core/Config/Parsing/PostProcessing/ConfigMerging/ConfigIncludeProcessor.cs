@@ -4,8 +4,12 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log)
-    : IIncludeProcessor
+public class ConfigIncludeProcessor(
+    IFileSystem fs,
+    IAppPaths paths,
+    ConfigInputRecorder inputs,
+    ILogger log
+) : IIncludeProcessor
 {
     public IFileInfo GetPathToConfig(IYamlInclude includeDirective, SupportedServices serviceType)
     {
@@ -33,10 +37,13 @@ public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log
         if (fs.Path.IsPathRooted(path))
         {
             log.Debug("Path processed as absolute: {Path}", path);
-            return fs.FileInfo.New(path);
+            var absolute = fs.FileInfo.New(path);
+            inputs.Record(absolute.FullName);
+            return absolute;
         }
 
         var fsPath = paths.YamlIncludeDirectory.File(path);
+        inputs.Record(fsPath.FullName);
         if (fsPath.Exists)
         {
             log.Debug("Path rooted to the includes directory: {Path}", path);

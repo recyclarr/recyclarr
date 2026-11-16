@@ -1,0 +1,13 @@
+# @name livez
+GET {{managementUrl}}/livez
+
+?? status == 200
+?? body == Healthy
+
+###
+
+# @name readyz
+GET {{managementUrl}}/readyz
+
+?? status == 200
+?? body == Healthy

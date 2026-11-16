@@ -37,6 +37,9 @@ jobs:
       - name: Setup .NET and tools
         uses: $/.github/actions/setup-dotnet
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
       - name: Validate release
         id: release
         env:

@@ -1,32 +1,81 @@
+using System.Net;
 using Autofac.Core;
+using Recyclarr.Cli.Server;
+using Recyclarr.Cli.Settings;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
+using Refit;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.ErrorHandling;
 
-internal class ExceptionHandler(
-    IEnumerable<IExceptionStrategy> strategies,
-    FatalErrorOutputStrategy defaultOutput
-)
+/// <summary>
+/// Turns expected failures (server start, server HTTP errors, unreachable server, bad command
+/// input, unusable cli.yml or environment) into user-facing messages. Unexpected exceptions are
+/// left to the caller.
+/// </summary>
+internal class ExceptionHandler(IAnsiConsole console, ILogger log)
 {
-    public async Task<bool> TryHandleAsync(Exception exception, IErrorOutputStrategy? output = null)
+    public async Task<bool> TryHandleAsync(Exception exception)
     {
-        // Unwrap DI exceptions to get the actual cause
-        var actualException = exception
-            is DependencyResolutionException { InnerException: { } inner }
+        var actual = exception is DependencyResolutionException { InnerException: { } inner }
             ? inner
             : exception;
 
-        foreach (var strategy in strategies)
+        IReadOnlyList<string>? messages = actual switch
         {
-            var messages = await strategy.HandleAsync(actualException);
-            if (messages is null)
-            {
-                continue;
-            }
+            ServerStartException e => [e.Message, .. e.Errors],
+            // Refit reports transport failures of IApiResponse calls as ApiRequestException.
+            ApiRequestException { InnerException: { } e } => [Unreachable(e.Message)],
+            ApiException e => await DescribeAsync(e),
+            HttpRequestException e => [Unreachable(e.Message)],
+            CommandRuntimeException or CliSettingsException or EnvironmentException =>
+            [
+                actual.Message,
+            ],
+            _ => null,
+        };
 
-            (output ?? defaultOutput).Write(messages, actualException);
-            return true;
+        if (messages is null)
+        {
+            return false;
         }
 
-        return false;
+        foreach (var message in messages)
+        {
+            console.MarkupLine($"[red]Error:[/] {Markup.Escape(message)}");
+            log.Error("{Message}", message);
+        }
+
+        log.Error(actual, "Exiting due to fatal error");
+        return true;
+    }
+
+    private static string Unreachable(string reason) =>
+        $"Unable to reach the Recyclarr server: {reason}";
+
+    private static async Task<IReadOnlyList<string>> DescribeAsync(ApiException e)
+    {
+        if (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return
+            [
+                "The Recyclarr server rejected the request: missing or wrong API key. Set "
+                    + $"server.api_key in {CliSettingsLoader.FileName}, or the "
+                    + $"{ServerApiKeyLocator.Variable} or {ServerApiKeyLocator.FileVariable} "
+                    + "environment variable, to the key the server uses.",
+            ];
+        }
+
+        if (e.StatusCode == HttpStatusCode.BadGateway)
+        {
+            var failure = await e.GetContentAsAsync<ServiceFailureProblemDetails>();
+            return [ServiceFailureText.Describe(failure?.Failure)];
+        }
+
+        var problem = await e.GetContentAsAsync<HttpValidationProblemDetails>();
+        var details = problem?.Errors?.Values.SelectMany(x => x) ?? [];
+        return [problem?.Title ?? e.Message, .. details];
     }
 }

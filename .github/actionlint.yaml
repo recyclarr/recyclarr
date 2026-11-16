@@ -5,3 +5,5 @@ paths:
     ignore:
       - reusable workflow call "\$/.+" at "uses" is not following the format
       - specifying action "\$/.+" in invalid format because ref is missing
+      # Remove when actionlint supports GitHub's `concurrency.queue` key.
+      - unexpected key "queue" for "concurrency" section

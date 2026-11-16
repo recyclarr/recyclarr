@@ -3,7 +3,6 @@ using Autofac.Features.Indexed;
 
 namespace Recyclarr.TestLibrary.Autofac;
 
-[UsedImplicitly]
 public class StubAutofacIndex<TKey, TValue> : IIndex<TKey, TValue>
     where TKey : notnull
 {

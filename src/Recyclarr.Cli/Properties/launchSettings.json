@@ -6,11 +6,6 @@
       "targetProject": "Recyclarr.Cli",
       "commandLineArgs": "sync"
     },
-    "config list local": {
-      "commandName": "Project",
-      "targetProject": "Recyclarr.Cli",
-      "commandLineArgs": "config list local"
-    },
     "delete custom-formats": {
       "commandName": "Project",
       "targetProject": "Recyclarr.Cli",

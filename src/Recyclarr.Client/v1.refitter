@@ -1,0 +1,19 @@
+{
+  "openApiPath": "../Recyclarr.Server/Recyclarr.Server.json",
+  "namespace": "Recyclarr.Client.V1",
+  "multipleInterfaces": "ByTag",
+  "includePathMatches": ["^/api/v1/.*"],
+  "generateContracts": true,
+  "useCancellationTokens": true,
+  // Callers render refusals from the error body (e.g. POST sync/jobs Problem Details), so they
+  // need the response, not an exception.
+  "returnIApiResponse": true,
+  "usePolymorphicSerialization": true,
+  "operationNameGenerator": "MultipleClientsFromPathSegments",
+  "outputFolder": "Generated",
+  "outputFilename": "RecyclarrApi.V1.g.cs",
+  "codeGeneratorSettings": {
+    "generateOptionalPropertiesAsNullable": true,
+    "generateNullableReferenceTypes": true
+  }
+}

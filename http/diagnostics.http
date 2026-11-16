@@ -1,0 +1,5 @@
+# @name listDiagnostics
+GET {{baseUrl}}/api/v1/diagnostics
+
+?? status == 200
+?? body diagnostics isArray

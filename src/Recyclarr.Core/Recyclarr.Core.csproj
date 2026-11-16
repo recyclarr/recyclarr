@@ -11,6 +11,8 @@
       <PackageReference Include="CliWrap" />
       <PackageReference Include="FluentValidation" />
       <PackageReference Include="GitVersion.MsBuild" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" />
       <PackageReference Include="Microsoft.Extensions.Http" />
       <PackageReference Include="Refit.HttpClientFactory" />
       <PackageReference Include="Riok.Mapperly" />
@@ -18,15 +20,20 @@
       <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="SuperLinq" />
       <PackageReference Include="System.Data.HashFunction.FNV" />
-      <PackageReference Include="System.Reactive.Linq" />
+      <PackageReference Include="SystemTextJson.JsonDiffPatch" />
       <PackageReference Include="TestableIO.System.IO.Abstractions" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
       <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="Recyclarr.Server.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Recyclarr.Api.Sonarr\Recyclarr.Api.Sonarr.csproj" />
       <ProjectReference Include="..\Recyclarr.Api.Radarr\Recyclarr.Api.Radarr.csproj" />
+      <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
     </ItemGroup>
 
 </Project>

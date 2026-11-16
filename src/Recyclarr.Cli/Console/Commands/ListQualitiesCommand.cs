@@ -1,42 +1,38 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
-using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
 internal class ListQualitiesCommand(
     ILogger log,
     IAnsiConsole console,
-    QualitySizeResourceQuery guide,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
     }
 
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-
-        var qualitySizes = guide.Get(settings.Service).ToList();
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.Qualities(settings.Service, ct);
+        var qualitySizes = response.ContentOrThrow().Items.ToList();
 
         log.Debug(
             "Found {Count} quality definition types for {Service}",
@@ -56,7 +52,7 @@ internal class ListQualitiesCommand(
         return (int)ExitStatus.Succeeded;
     }
 
-    private void OutputRaw(IReadOnlyCollection<QualitySizeResource> qualitySizes)
+    private void OutputRaw(IReadOnlyCollection<GuideQualitySummaryResponse> qualitySizes)
     {
         foreach (var q in qualitySizes)
         {
@@ -64,7 +60,7 @@ internal class ListQualitiesCommand(
         }
     }
 
-    private void OutputTable(IReadOnlyCollection<QualitySizeResource> qualitySizes)
+    private void OutputTable(IReadOnlyCollection<GuideQualitySummaryResponse> qualitySizes)
     {
         var table = new Table().AddColumn("Quality Type");
         var alternatingColors = new[] { "white", "paleturquoise4" };

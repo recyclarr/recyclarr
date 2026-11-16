@@ -14,13 +14,19 @@
     <PackageReference Update="AwesomeAssertions.Analyzers" PrivateAssets="all" />
     <PackageReference Update="coverlet.collector" PrivateAssets="all" />
     <PackageReference Update="GitVersion.MsBuild" PrivateAssets="all" />
-    <PackageReference Update="JetBrains.Annotations" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.Extensions.ApiDescription.Server" PrivateAssets="all" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
     <PackageReference Update="NSubstitute" PrivateAssets="all" />
     <PackageReference Update="NSubstitute.Analyzers.CSharp" PrivateAssets="all" />
     <PackageReference Update="NUnit" PrivateAssets="all" />
     <PackageReference Update="NUnit.Analyzers" PrivateAssets="all" />
     <PackageReference Update="NUnit3TestAdapter" PrivateAssets="all" />
+    <PackageReference Update="Refitter.MSBuild" PrivateAssets="all" />
     <PackageReference Update="Riok.Mapperly" PrivateAssets="all" />
     <PackageReference Update="Serilog.Sinks.NUnit" PrivateAssets="all" />
     <PackageReference Update="Spectre.Console.Analyzer" PrivateAssets="all" />
@@ -31,4 +37,10 @@
       PrivateAssets="all"
     />
   </ItemGroup>
+
+  <!-- Generated clients target the System.Text.Json version of the project's framework, so
+       framework bumps need no .refitter edits. -->
+  <PropertyGroup>
+    <RefitterJsonLibraryVersion>$(TargetFrameworkVersion.TrimStart('v'))</RefitterJsonLibraryVersion>
+  </PropertyGroup>
 </Project>

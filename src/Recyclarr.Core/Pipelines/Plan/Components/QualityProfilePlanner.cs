@@ -1,0 +1,258 @@
+using Recyclarr.Common.Extensions;
+using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
+
+namespace Recyclarr.Pipelines.Plan.Components;
+
+internal class QualityProfilePlanner(
+    QualityProfileResourceQuery guide,
+    IQualityProfileSizePlanner sizePlanner,
+    IServiceConfiguration config,
+    ILogger log
+) : IPipelinePlanner<PlannedQualityProfiles>
+{
+    public PlannedQualityProfiles Plan(PlanningContext context)
+    {
+        log.Debug(
+            "Planning quality profiles for {Service} {Instance}: {Count} profiles",
+            config.ServiceType,
+            config.InstanceName,
+            config.QualityProfiles.Count
+        );
+
+        foreach (var qp in config.QualityProfiles)
+        {
+            log.Debug(
+                "  Profile {Name}: TrashId={TrashId}, MinUpgradeFormatScore={Score}",
+                qp.Name,
+                qp.TrashId ?? "(none)",
+                qp.MinUpgradeFormatScore
+            );
+        }
+
+        // Load guide resources and build lookup by TrashId
+        var guideResources = guide
+            .Get(config.ServiceType)
+            .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
+
+        // Build profile-CF pairs from the CF plan (which includes both config CFs and QP formatItems)
+        var profileAndCfs = context
+            .Require<PlannedCustomFormats>()
+            .Items.SelectMany(cf =>
+                cf.AssignScoresTo.Select(scoreConfig => (Profile: scoreConfig, Cf: cf))
+            );
+
+        // Start with explicitly defined quality profiles.
+        // Multiple profiles can share a trash_id as long as they have distinct names.
+        var allProfiles = BuildExplicitProfiles(config.QualityProfiles, guideResources, context);
+
+        foreach (var (scoreConfig, cf) in profileAndCfs)
+        {
+            if (!allProfiles.TryGetValue(scoreConfig.Name, out var profile))
+            {
+                // Implicitly add profile if only referenced via assign_scores_to
+                allProfiles[scoreConfig.Name] = profile = new PlannedQualityProfile.UserDefined
+                {
+                    Name = scoreConfig.Name,
+                    Config = new QualityProfileConfig { Name = scoreConfig.Name },
+                    IsManaged = false,
+                };
+            }
+
+            AddCustomFormatScore(profile, scoreConfig, cf);
+        }
+
+        return new PlannedQualityProfiles(sizePlanner.Plan(allProfiles.Values, context));
+    }
+
+    private static Dictionary<string, PlannedQualityProfile> BuildExplicitProfiles(
+        IReadOnlyCollection<QualityProfileConfig> profiles,
+        Dictionary<string, QualityProfileResource> guideResources,
+        PlanningContext context
+    )
+    {
+        var result = new Dictionary<string, PlannedQualityProfile>(
+            StringComparer.InvariantCultureIgnoreCase
+        );
+
+        // Track names that have duplicates so all instances are skipped
+        var duplicateNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+        foreach (var config in profiles)
+        {
+            var planned = CreatePlannedProfile(config, guideResources, context);
+            if (planned is null)
+            {
+                continue;
+            }
+
+            if (result.ContainsKey(planned.Name))
+            {
+                if (duplicateNames.Add(planned.Name))
+                {
+                    // First time seeing this duplicate; report error and remove the earlier entry
+                    context.Add(new DuplicateQualityProfileNameOutcome(planned.Name));
+                    result.Remove(planned.Name);
+                }
+
+                continue;
+            }
+
+            result[planned.Name] = planned;
+        }
+
+        return result;
+    }
+
+    private void AddCustomFormatScore(
+        PlannedQualityProfile profile,
+        AssignScoresToConfig scoreConfig,
+        PlannedCustomFormat cf
+    )
+    {
+        var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
+        if (scoreToUse is null)
+        {
+            return;
+        }
+
+        // Check for exact duplicate (same trash_id)
+        var existingScore = profile.CfScores.FirstOrDefault(x =>
+            x.TrashId.EqualsIgnoreCase(cf.Resource.TrashId)
+        );
+
+        if (existingScore is not null)
+        {
+            if (existingScore.Score != scoreToUse)
+            {
+                // User config overrides guide-provided scores; log for visibility only
+                log.Information(
+                    "Custom format {Name} ({TrashId}) has conflicting scores in profile "
+                        + "{Profile}: {Existing} vs {New} (first value wins)",
+                    cf.Resource.Name,
+                    cf.Resource.TrashId,
+                    profile.Name,
+                    existingScore.Score,
+                    scoreToUse
+                );
+            }
+
+            return;
+        }
+
+        profile.CfScores.Add(new PlannedCfScore(cf, scoreToUse.Value));
+    }
+
+    private static int? DetermineScore(
+        QualityProfileConfig profile,
+        AssignScoresToConfig scoreConfig,
+        PlannedCustomFormat cf
+    )
+    {
+        // Explicit score from config takes priority
+        if (scoreConfig.Score is not null)
+        {
+            return scoreConfig.Score;
+        }
+
+        // Try score set lookup
+        if (profile.ScoreSet is not null)
+        {
+            if (cf.Resource.TrashScores.TryGetValue(profile.ScoreSet, out var scoreFromSet))
+            {
+                return scoreFromSet;
+            }
+        }
+
+        // Fall back to default score
+        return cf.Resource.DefaultScore;
+    }
+
+    private static PlannedQualityProfile? CreatePlannedProfile(
+        QualityProfileConfig config,
+        Dictionary<string, QualityProfileResource> guideResources,
+        PlanningContext diagnostics
+    )
+    {
+        QualityProfileResource? resource = null;
+
+        if (config.TrashId is not null)
+        {
+            if (!guideResources.TryGetValue(config.TrashId, out resource))
+            {
+                diagnostics.Add(new InvalidQualityProfileTrashIdOutcome(config.TrashId));
+                return null;
+            }
+        }
+
+        // Use guide name if available and config name is empty, otherwise use config name
+        var name =
+            string.IsNullOrEmpty(config.Name) && resource is not null ? resource.Name : config.Name;
+
+        // Build effective config: inherit qualities and score_set from resource if not specified
+        var effectiveConfig = BuildEffectiveConfig(config, resource);
+
+        return resource is not null
+            ? new PlannedQualityProfile.GuideBacked
+            {
+                Name = name,
+                Config = effectiveConfig,
+                Resource = resource,
+            }
+            : new PlannedQualityProfile.UserDefined { Name = name, Config = effectiveConfig };
+    }
+
+    private static QualityProfileConfig BuildEffectiveConfig(
+        QualityProfileConfig config,
+        QualityProfileResource? resource
+    )
+    {
+        var result = config;
+
+        // Inherit score_set from resource if not specified in config
+        if (config.ScoreSet is null && !string.IsNullOrEmpty(resource?.TrashScoreSet))
+        {
+            result = result with { ScoreSet = resource.TrashScoreSet };
+        }
+
+        // If config already has qualities, return now
+        if (config.Qualities.Count > 0)
+        {
+            return result;
+        }
+
+        // If no resource or resource has no items, return unchanged
+        if (resource?.Items.Count is null or 0)
+        {
+            return result;
+        }
+
+        // Convert resource items to config qualities format
+        var convertedQualities = resource
+            .Items.Select(item => new QualityProfileQualityConfig
+            {
+                Name = item.Name,
+                Enabled = item.Allowed,
+                Qualities = item.Items,
+            })
+            .ToList();
+
+        return result with
+        {
+            Qualities = convertedQualities,
+        };
+    }
+}
+
+/// <summary>
+/// Handles quality sizes on planned profiles for the instance's API target: assigns them where
+/// sizes live on profiles (Sonarr v5) and reports profile sizes that will be ignored elsewhere.
+/// Returns the profiles to plan; outcomes are reported through the context.
+/// </summary>
+internal interface IQualityProfileSizePlanner
+{
+    IReadOnlyCollection<PlannedQualityProfile> Plan(
+        IReadOnlyCollection<PlannedQualityProfile> profiles,
+        PlanningContext context
+    );
+}

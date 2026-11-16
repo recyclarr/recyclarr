@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Common.FluentValidation;
@@ -8,7 +9,6 @@ namespace Recyclarr.Common.FluentValidation;
 public static class FluentValidationExtensions
 {
     // From: https://github.com/FluentValidation/FluentValidation/issues/1648
-    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IRuleBuilderOptions<T, TProperty?> SetNonNullableValidator<T, TProperty>(
         this IRuleBuilder<T, TProperty?> ruleBuilder,
         IValidator<TProperty> validator,
@@ -23,7 +23,6 @@ public static class FluentValidationExtensions
         return ruleBuilder.SetAsyncValidator(adapter);
     }
 
-    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IRuleBuilderOptions<T, TProperty?> SetNonNullableValidator<
         T,
         TProperty,
@@ -47,13 +46,13 @@ public static class FluentValidationExtensions
     }
 
     /// <summary>
-    /// Forwards validation failures to an <see cref="IDiagnosticPublisher"/> as errors or warnings
-    /// based on severity. Info-level failures are routed to <paramref name="log"/> at debug level
-    /// (suppressed when no logger is provided). Returns true if the result has no errors.
+    /// Converts validation failures to sync outcomes. Info-level failures are routed to
+    /// <paramref name="log"/> at debug level (suppressed when no logger is provided). Returns true
+    /// if the result has no errors.
     /// </summary>
     public static bool ForwardTo(
         this ValidationResult result,
-        IDiagnosticPublisher publisher,
+        Action<SyncOutcome> addOutcome,
         ILogger? log = null
     )
     {
@@ -65,15 +64,27 @@ public static class FluentValidationExtensions
                     log?.Debug("{Message}", failure.ErrorMessage);
                     break;
                 case Severity.Warning:
-                    publisher.AddWarning(failure.ErrorMessage);
+                    addOutcome(ToOutcome(failure, SyncDiagnosticLevel.Warning));
                     break;
                 default:
-                    publisher.AddError(failure.ErrorMessage);
+                    addOutcome(ToOutcome(failure, SyncDiagnosticLevel.Error));
                     break;
             }
         }
 
         return result.IsValid;
+
+        static RuleValidationOutcome ToOutcome(
+            ValidationFailure failure,
+            SyncDiagnosticLevel severity
+        ) =>
+            new(
+                severity,
+                failure.PropertyName,
+                failure.ErrorMessage,
+                failure.AttemptedValue?.ToString(),
+                failure.ErrorCode
+            );
     }
 
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(

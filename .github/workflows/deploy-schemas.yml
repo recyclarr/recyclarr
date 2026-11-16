@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Deploy Schemas
+
+# Publishes unreleased schemas and API specs to `next/`; releases deploy from post-release.
+on:
+  push:
+    branches: [master]
+    paths:
+      - schemas/**
+      - src/Recyclarr.Server/Recyclarr.Server*.json
+      - ci/build-schemas.py
+      - .github/workflows/*deploy-schemas.yml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Schemas
+    uses: $/.github/workflows/reusable-deploy-schemas.yml
+    secrets: inherit

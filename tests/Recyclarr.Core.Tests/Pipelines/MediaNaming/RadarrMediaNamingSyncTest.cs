@@ -1,0 +1,115 @@
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.MediaNaming;
+using Recyclarr.Pipelines.MediaNaming.Radarr;
+using Recyclarr.Pipelines.Plan;
+using Recyclarr.Servarr.MediaNaming;
+using Recyclarr.Sync.Results;
+
+namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
+
+internal sealed class RadarrMediaNamingSyncTest
+{
+    [Test]
+    public async Task Compute_returns_every_configured_value()
+    {
+        var api = Substitute.For<IRadarrNamingService>();
+        api.GetNaming(default)
+            .ReturnsForAnyArgs(
+                new RadarrNamingData
+                {
+                    RenameMovies = null,
+                    StandardMovieFormat = "standard-current",
+                    MovieFolderFormat = "folder-current",
+                }
+            );
+        var sut = CreateSut(api);
+        var plan = new PlannedRadarrMediaNaming
+        {
+            Data = new RadarrNamingData
+            {
+                RenameMovies = false,
+                StandardMovieFormat = "standard-current",
+                MovieFolderFormat = "",
+            },
+        };
+
+        var result = await Execute(sut, plan, preview: true);
+
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
+        result
+            .Settings.Should()
+            .Be(
+                new PlannedRadarrNamingResource
+                {
+                    Action = PlannedAction.Update,
+                    RenameMovies = PlannedValue.Compared<bool?>(null, false),
+                    StandardMovieFormat = PlannedValue.Compared<string?>(
+                        "standard-current",
+                        "standard-current"
+                    ),
+                    MovieFolderFormat = PlannedValue.Compared<string?>("folder-current", ""),
+                }
+            );
+    }
+
+    [Test]
+    public async Task Mixed_valid_and_invalid_unchanged_fields_are_partial_without_write()
+    {
+        var api = Substitute.For<IRadarrNamingService>();
+        api.GetNaming(default).ReturnsForAnyArgs(new RadarrNamingData { RenameMovies = false });
+        var sut = CreateSut(api);
+        var mismatch = new RadarrNamingReferenceMismatchOutcome(
+            RadarrNamingFormatField.StandardMovieFormat,
+            "unknown"
+        );
+        var plan = new PlannedRadarrMediaNaming
+        {
+            Data = new RadarrNamingData { RenameMovies = false },
+            Mismatches = [mismatch],
+        };
+
+        var result = await Execute(sut, plan, preview: false);
+
+        result.Status.Should().Be(SyncResultStatus.Partial);
+        result.Outcomes.Should().Equal(mismatch);
+        result.Settings!.Action.Should().Be(PlannedAction.Unchanged);
+        await api.DidNotReceiveWithAnyArgs().UpdateNaming(default!, default);
+    }
+
+    [Test]
+    public async Task Write_failure_propagates_after_one_attempt()
+    {
+        var api = Substitute.For<IRadarrNamingService>();
+        api.GetNaming(default).ReturnsForAnyArgs(new RadarrNamingData { RenameMovies = true });
+        api.UpdateNaming(default!, default)
+            .ReturnsForAnyArgs(Task.FromException(new InvalidOperationException("rejected")));
+        var sut = CreateSut(api);
+        var plan = new PlannedRadarrMediaNaming
+        {
+            Data = new RadarrNamingData { RenameMovies = false },
+        };
+        var act = () => Execute(sut, plan, preview: false);
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("rejected");
+        await api.ReceivedWithAnyArgs(1).UpdateNaming(default!, default);
+    }
+
+    private static MediaNamingSyncOperation CreateSut(IRadarrNamingService api) =>
+        new(new RadarrNamingSync(Substitute.For<ILogger>(), api));
+
+    private static async Task<RadarrNamingPipelineResult> Execute(
+        MediaNamingSyncOperation sut,
+        PlannedMediaNaming plan,
+        bool preview
+    )
+    {
+        var result = await ((ISyncOperation<PlannedMediaNaming>)sut).Execute(
+            preview,
+            plan,
+            [],
+            _ => { },
+            CancellationToken.None
+        );
+        return result.Should().BeOfType<RadarrNamingPipelineResult>().Which;
+    }
+}

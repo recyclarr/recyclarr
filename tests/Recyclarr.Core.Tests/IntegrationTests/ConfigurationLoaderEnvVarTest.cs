@@ -1,18 +1,15 @@
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
-using Recyclarr.Platform;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderEnvVarTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Test_successful_environment_variable_loading()
     {
-        var env = Resolve<IEnvironment>();
-        env.GetEnvironmentVariable("SONARR_API_KEY").Returns("the_api_key");
-        env.GetEnvironmentVariable("SONARR_URL").Returns("http://the_url");
+        Env.Set("SONARR_API_KEY", "the_api_key");
+        Env.Set("SONARR_URL", "http://the_url");
 
         var sut = Resolve<ConfigurationLoader>();
 
@@ -35,6 +32,25 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     }
 
     [Test]
+    public void Variable_name_with_double_underscore_is_found()
+    {
+        Env.Set("SONARR__API_KEY", "the_api_key");
+
+        var sut = Resolve<ConfigurationLoader>();
+
+        const string testYml = """
+            sonarr:
+              instance:
+                api_key: !env_var SONARR__API_KEY
+                base_url: http://sonarr:8989
+            """;
+
+        var config = sut.Load(testYml);
+
+        config.Should().ContainSingle().Which.Yaml.ApiKey.Should().Be("the_api_key");
+    }
+
+    [Test]
     public void Use_default_value_if_env_var_not_defined()
     {
         var sut = Resolve<ConfigurationLoader>();
@@ -54,8 +70,7 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Default_value_with_spaces_is_allowed()
     {
-        var env = Resolve<IEnvironment>();
-        env.GetEnvironmentVariable("SONARR_URL").Returns("");
+        Env.Set("SONARR_URL", "");
 
         var sut = Resolve<ConfigurationLoader>();
 
@@ -74,8 +89,7 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Quotation_characters_are_stripped_from_default_value()
     {
-        var env = Resolve<IEnvironment>();
-        env.GetEnvironmentVariable("SONARR_URL").Returns("");
+        Env.Set("SONARR_URL", "");
 
         var sut = Resolve<ConfigurationLoader>();
 

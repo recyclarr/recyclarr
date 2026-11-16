@@ -1,53 +1,47 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
-using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List quality profiles in the guide for a particular service.")]
 internal class ListQualityProfilesCommand(
     ILogger log,
     IAnsiConsole console,
-    QualityProfileResourceQuery guide,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListQualityProfilesCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
 
         [CommandOption("--filter")]
         [Description("Filter profiles by name (case-insensitive substring match)")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string? Filter { get; init; }
 
         [CommandOption("--details")]
         [Description("Show custom formats included in each quality profile")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool Details { get; init; }
     }
 
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-
-        var profiles = guide.Get(settings.Service).OrderBy(p => p.Name).ToList();
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.QualityProfiles(settings.Service, ct);
+        var profiles = response.ContentOrThrow().Items.OrderBy(p => p.Name).ToList();
 
         if (settings.Filter is not null)
         {
@@ -70,7 +64,7 @@ internal class ListQualityProfilesCommand(
         return (int)ExitStatus.Succeeded;
     }
 
-    private void OutputRaw(IReadOnlyCollection<QualityProfileResource> profiles)
+    private void OutputRaw(IReadOnlyCollection<GuideQualityProfileSummaryResponse> profiles)
     {
         foreach (var profile in profiles)
         {
@@ -79,7 +73,7 @@ internal class ListQualityProfilesCommand(
     }
 
     private void OutputTable(
-        IReadOnlyCollection<QualityProfileResource> profiles,
+        IReadOnlyCollection<GuideQualityProfileSummaryResponse> profiles,
         CliSettings settings
     )
     {
@@ -107,7 +101,11 @@ internal class ListQualityProfilesCommand(
         );
     }
 
-    private static void AddProfileRow(Table table, QualityProfileResource profile, bool showDetails)
+    private static void AddProfileRow(
+        Table table,
+        GuideQualityProfileSummaryResponse profile,
+        bool showDetails
+    )
     {
         var nameMarkup = string.IsNullOrEmpty(profile.TrashUrl)
             ? Markup.Escape(profile.Name)
@@ -120,23 +118,20 @@ internal class ListQualityProfilesCommand(
             rows.Add(new Markup("\n[underline]Qualities[/]"));
         }
 
-        foreach (var quality in profile.Items.Where(q => q.Allowed))
+        foreach (var quality in profile.AllowedQualities)
         {
             rows.Add(FormatQualityRow(quality));
         }
 
-        if (showDetails && profile.FormatItems.Count > 0)
+        if (showDetails && profile.CustomFormats.Count > 0)
         {
-            var scoreSetLabel = string.IsNullOrEmpty(profile.TrashScoreSet)
-                ? "default"
-                : profile.TrashScoreSet;
+            var scoreSetLabel = profile.ScoreSet ?? "default";
 
             rows.Add(
                 new Markup($"\n[underline]Custom Formats[/] [dim](score set: {scoreSetLabel})[/]")
             );
 
-            // FormatItems: keys are CF display names, values are trash IDs
-            foreach (var (name, _) in profile.FormatItems.OrderBy(kv => kv.Key))
+            foreach (var name in profile.CustomFormats)
             {
                 rows.Add(FormatCustomFormatRow(name));
             }
@@ -145,7 +140,7 @@ internal class ListQualityProfilesCommand(
         table.AddRow(new Rows(rows), new Markup($"[dim]{profile.TrashId}[/]"));
     }
 
-    private static Grid FormatQualityRow(QualityProfileQualityItem quality)
+    private static Grid FormatQualityRow(GuideProfileQualityResponse quality)
     {
         var name = Markup.Escape(quality.Name);
         var qualityText =

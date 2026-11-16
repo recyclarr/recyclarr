@@ -1,53 +1,47 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
-using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[UsedImplicitly]
 [Description("List custom format groups available in the guide.")]
 internal class ListCustomFormatGroupsCommand(
     ILogger log,
     IAnsiConsole console,
-    CfGroupResourceQuery cfGroupQuery,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListCustomFormatGroupsCommand.CliSettings>
 {
-    [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
 
         [CommandOption("--filter")]
         [Description("Filter groups by name (case-insensitive substring match)")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string? Filter { get; init; }
 
         [CommandOption("--details")]
         [Description("Show member custom formats and their required/default status")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool Details { get; init; }
     }
 
-    protected override async Task<int> ExecuteAsync(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-
-        var groups = cfGroupQuery.Get(settings.Service).OrderBy(g => g.Name).ToList();
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.CustomFormatGroups(settings.Service, ct);
+        var groups = response.ContentOrThrow().Items.OrderBy(g => g.Name).ToList();
 
         if (settings.Filter is not null)
         {
@@ -75,7 +69,7 @@ internal class ListCustomFormatGroupsCommand(
         return (int)ExitStatus.Succeeded;
     }
 
-    private void OutputRaw(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputRaw(IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups)
     {
         foreach (var group in groups)
         {
@@ -90,7 +84,10 @@ internal class ListCustomFormatGroupsCommand(
         }
     }
 
-    private void OutputTable(IReadOnlyCollection<CfGroupResource> groups, bool showDetails)
+    private void OutputTable(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups,
+        bool showDetails
+    )
     {
         console.WriteLine();
 
@@ -109,7 +106,9 @@ internal class ListCustomFormatGroupsCommand(
         );
     }
 
-    private void OutputCompactTable(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputCompactTable(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups
+    )
     {
         var table = new Table().RoundedBorder();
         table.AddColumn("Group");
@@ -123,7 +122,9 @@ internal class ListCustomFormatGroupsCommand(
         console.Write(table);
     }
 
-    private void OutputDetailedPanels(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputDetailedPanels(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups
+    )
     {
         foreach (var group in groups)
         {
@@ -139,16 +140,10 @@ internal class ListCustomFormatGroupsCommand(
                 rows.Add(FormatCustomFormatRow(cf));
             }
 
-            var profileNames = group.QualityProfiles.Include.Keys.Order().ToList();
+            var profileNames = group.QualityProfiles.Order().ToList();
             if (profileNames.Count > 0)
             {
-                var groupDefault = string.Equals(
-                    group.Default,
-                    "true",
-                    StringComparison.OrdinalIgnoreCase
-                );
-
-                var tag = groupDefault ? "[green](default)[/]" : "[yellow](optional)[/]";
+                var tag = group.Default ? "[green](default)[/]" : "[yellow](optional)[/]";
 
                 rows.Add(new Markup("\n[underline]Quality Profiles[/]"));
                 rows.AddRange(profileNames.Select(p => new Markup($"  {p.EscapeMarkup()} {tag}")));
@@ -160,7 +155,7 @@ internal class ListCustomFormatGroupsCommand(
         }
     }
 
-    private static Grid FormatCustomFormatRow(CfGroupCustomFormat cf)
+    private static Grid FormatCustomFormatRow(GuideCustomFormatGroupMemberResponse cf)
     {
         var tag =
             cf.Required ? "[red]required[/]"

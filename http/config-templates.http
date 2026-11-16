@@ -1,0 +1,22 @@
+# @name configTemplates
+GET {{baseUrl}}/api/v1/config-templates
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name configTemplate
+# @ref configTemplates
+GET {{baseUrl}}/api/v1/config-templates/{{configTemplates.items[0].id}}
+
+?? status == 200
+?? header content-type startsWith application/yaml
+
+###
+
+# @name configIncludes
+GET {{baseUrl}}/api/v1/config-includes
+
+?? status == 200
+?? body items isArray

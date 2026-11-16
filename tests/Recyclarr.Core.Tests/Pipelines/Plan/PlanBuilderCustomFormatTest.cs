@@ -1,0 +1,87 @@
+using Recyclarr.Config.Models;
+using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.Plan;
+
+namespace Recyclarr.Core.Tests.Pipelines.Plan;
+
+internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
+{
+    private GuideResourceTestData GuideData => new(Fs, Guide.Files);
+
+    private void SetupCustomFormatGuideData(params (string Name, string TrashId)[] formats) =>
+        GuideData.AddCustomFormats(formats);
+
+    [Test]
+    public void Build_with_complete_config_produces_valid_plan()
+    {
+        SetupCustomFormatGuideData(("Test CF One", "cf1"), ("Test CF Two", "cf2"));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2"] }],
+        };
+
+        var sut = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().HaveCount(2);
+        plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("cf1", "cf2");
+        plan.Outcomes.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Build_with_invalid_trash_ids_reports_diagnostics()
+    {
+        SetupCustomFormatGuideData(("Valid CF", "valid-cf"));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats = [new CustomFormatConfig { TrashIds = ["valid-cf", "invalid-cf"] }],
+        };
+
+        var sut = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().HaveCount(1);
+        plan.Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be(new InvalidCustomFormatTrashIdOutcome("invalid-cf"));
+    }
+
+    [Test]
+    public void Custom_formats_sharing_a_name_are_all_skipped()
+    {
+        SetupCustomFormatGuideData(("Same Name", "cf1"), ("same name", "cf2"), ("Unique", "cf3"));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2", "cf3"] }],
+        };
+
+        var sut = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().ContainSingle().Which.Resource.TrashId.Should().Be("cf3");
+        plan.Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(new DuplicateCustomFormatNameOutcome("Same Name", ["cf1", "cf2"]));
+    }
+
+    [Test]
+    public void Build_with_no_config_produces_empty_plan()
+    {
+        var config = NewConfig.Radarr();
+
+        var sut = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().BeEmpty();
+        plan.Outcomes.Should().BeEmpty();
+    }
+}

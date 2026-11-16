@@ -1,5 +1,5 @@
 <Solution>
-  <Folder Name="/Props/">
+  <Folder Name="/_props/">
     <File Path=".config/dotnet-tools.json" />
     <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
@@ -9,17 +9,24 @@
     <File Path="renovate.json5" />
     <File Path="scratch.ignored.md" />
   </Folder>
-  <Folder Name="/Tests/">
+  <Folder Name="/test/">
+    <Project Path="tests/Recyclarr.Analyzers.Tests/Recyclarr.Analyzers.Tests.csproj" />
     <Project Path="tests/Recyclarr.Cli.Tests/Recyclarr.Cli.Tests.csproj" />
     <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
     <Project Path="tests/Recyclarr.Core.Tests/Recyclarr.Core.Tests.csproj" />
+    <Project Path="tests/Recyclarr.Server.TestLibrary/Recyclarr.Server.TestLibrary.csproj" />
+    <Project Path="tests/Recyclarr.Server.Tests/Recyclarr.Server.Tests.csproj" />
     <Project Path="tests/Recyclarr.TestLibrary/Recyclarr.TestLibrary.csproj" />
     <Project Path="tests\Recyclarr.EndToEndTests\Recyclarr.EndToEndTests.csproj" />
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
   </Folder>
+  <Project Path="src/Recyclarr.Analyzers/Recyclarr.Analyzers.csproj" />
   <Project Path="src/Recyclarr.Api.Radarr/Recyclarr.Api.Radarr.csproj" />
   <Project Path="src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj" />
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
+  <Project Path="src/Recyclarr.Client/Recyclarr.Client.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
+  <Project Path="src/Recyclarr.Platform/Recyclarr.Platform.csproj" />
+  <Project Path="src/Recyclarr.Server/Recyclarr.Server.csproj" />
 </Solution>

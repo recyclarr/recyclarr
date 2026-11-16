@@ -1,17 +1,11 @@
 # PDR-005: CF Group Opt-In Semantics
 
-- **Status:** Accepted
-- **Date:** 2026-01-20
-- **Upstream:** Discord discussion with TRaSH (2026-01-20)
+- **Upstream:** Discord discussion with a TRaSH Guides maintainer (2026-01-20)
 
 ## Context
 
-TRaSH Guides CF Groups use `required` and `default` flags on individual custom formats to indicate
-sync behavior. During initial design, an `exclude`-based approach was considered where users would
-get ALL CFs in a group by default and remove unwanted ones. However, this did not match TRaSH's
-intended semantics.
-
-TRaSH clarified the intended behavior via Discord with annotated screenshots:
+TRaSH Guides CF groups use `required` and `default` flags on each custom format to state sync
+behavior. A guide maintainer clarified the intended behavior with annotated screenshots:
 
 1. **Group-level `default: true`**: Group is auto-enabled for matching quality profiles
 2. **Group-level no `default`**: Group is opt-in (user must explicitly add it)
@@ -19,72 +13,61 @@ TRaSH clarified the intended behavior via Discord with annotated screenshots:
 4. **CF-level `required: false` + `default: true`**: Pre-selected by default, user can override
 5. **CF-level `required: false` + no `default`**: NOT selected by default, user must opt-in
 
-Examples from TRaSH's clarification:
+Examples from that clarification:
 
 - **[Audio] Audio Formats**: group `default: true`, all CFs `required: true` → all-or-nothing sync
 - **[Optional] Miscellaneous**: no group default, all CFs `required: false` → user picks
   individually
-- **[Required] Golden Rule UHD**: group `default: true`, but CFs are `required: false` with only
+- **[Optional] Golden Rule UHD**: group `default: true`, but CFs are `required: false` with only
   `x265 (no HDR/DV)` having `default: true` → only that CF pre-selected, `x265 (HD)` requires opt-in
 
 ## Decision
 
-Implement opt-in semantics for CF group custom formats:
+Within an enabled CF group, custom formats sync by their guide flags:
 
-| CF Flags                            | Behavior                                            |
-|-------------------------------------|-----------------------------------------------------|
-| `required: true`                    | Always synced when group enabled                    |
-| `required: false` + `default: true` | Synced by default (can be overridden via `select`)  |
-| `required: false` + no `default`    | NOT synced by default (must be explicitly selected) |
+| CF flags                            | Synced by default | User override                    |
+|-------------------------------------|-------------------|----------------------------------|
+| `required: true`                    | Always            | None; cannot be excluded         |
+| `required: false` + `default: true` | Yes               | `exclude` removes it             |
+| `required: false` + no `default`    | No                | `select` or `select_all` adds it |
 
-YAML syntax uses `select` to choose specific optional CFs:
+Modifiers on a `custom_format_groups.add[]` entry:
 
-| Modifier     | Behavior                                                    |
-|--------------|-------------------------------------------------------------|
-| No modifiers | Sync required + default CFs                                 |
-| `select`     | Sync required + ONLY these optional CFs (replaces defaults) |
-
-`select` was chosen over `include`/`exclude` because:
-
-1. **Clearer swap pattern**: Choosing x265 (HD) instead of x265 (no HDR/DV) is one line, not two
-2. **Better semantics**: "select" implies choosing from options, not adding to a set
-3. **Handles mutually exclusive CFs**: Groups with no defaults force explicit choice
-4. **Matches guide structure**: 35% of groups are pure opt-in with no defaults
-5. **Simpler API**: One modifier covers all cases; users specify what they want, not what to remove
+- `select`: non-default CFs to add on top of the required and default CFs.
+- `select_all`: add every CF in the group. Mutually exclusive with `select`.
+- `exclude`: default CFs to remove. Listing a required CF is a validation error.
 
 ```yaml
 custom_format_groups:
-  # All-required group: no modifiers needed, get all CFs
-  - trash_id: 9d5acd8f1da78dfbae788182f7605200  # [Audio] Audio Formats
+  add:
+    # Swap the default CF for its mutually exclusive alternative
+    - trash_id: ff204bbcecdd487d1cefcefdbf0c278d # [Optional] Golden Rule UHD
+      exclude:
+        - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
+      select:
+        - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
 
-  # Swap default CF for alternative (mutually exclusive CFs)
-  # Default: x265 (no HDR/DV) syncs. User wants x265 (HD) instead.
-  - trash_id: ff204bbcecdd487d1cefcefdbf0c278d  # [Required] Golden Rule UHD
-    select:
-      - dc98083864ea246d05a42df0d05f81cc  # x265 (HD) - replaces default
-
-  # Select specific optional CFs from a group where none are default
-  - trash_id: 9337080378236ce4c0b183e35790d2a7  # [Optional] Miscellaneous
-    select:
-      - 7357cf5161efbf8c4d5d0c30b4815ee2  # Obfuscated
-      - f537cf427b64c38c8e36298f657e4828  # Scene
+    # Pick optional CFs from a group with no defaults
+    - trash_id: 9337080378236ce4c0b183e35790d2a7 # [Optional] Miscellaneous
+      select:
+        - 0d91270a7255a1e388fa85e959f359d8 # FreeLeech
+        - 182fa1c42a2468f8488e6dcf75a81b81 # INTERNAL
 ```
 
-Validation rules:
+## Rejected Options
 
-- `select` is only meaningful for `required: false` CFs (selecting required CFs is redundant but
-  allowed for clarity)
-
-## Affected Areas
-
-- Config: `custom_format_groups[].select` property for optional CF selection
-- Commands: None
+- Every CF in a group by default, with removal only: contradicts the maintainers' intent that
+  non-default CFs are opt-in.
+- `select` replacing the defaults: adding one optional CF silently dropped the defaults.
 
 ## Consequences
 
-- CF group behavior matches TRaSH's documented intent
-- Users have fine-grained control via `select` to choose specific optional CFs
-- Clearer mental model: "required" means required, "default" means pre-selected, neither means
-  opt-in
-- `select` provides intuitive "pick from menu" UX for groups with many optional CFs
-- Simpler API surface: one modifier instead of two
+- Config: `custom_format_groups.add[].select`, `select_all`, and `exclude`
+- Migration: not required
+- "Required" means always, "default" means pre-selected, neither means opt-in.
+
+## History
+
+- 2026-01-20: Opt-in semantics, with `select` replacing the default CFs.
+- 2026-02-20: `select` becomes additive; add `exclude` for default CFs.
+- 2026-02-25: Add `select_all`.

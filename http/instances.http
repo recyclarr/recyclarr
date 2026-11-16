@@ -1,0 +1,40 @@
+{{
+  // Prompt only when --var did not supply the value; a file-level @instance would override --var.
+  // Dev instances are named after their service, so --var service=... also selects the instance.
+  if (typeof instance === "undefined") {
+    exports.instance = typeof service === "undefined"
+      ? "{{$pick-askonce Instance? $value: radarr,sonarr}}"
+      : service;
+  }
+}}
+
+###
+
+# @name listCustomFormats
+GET {{baseUrl}}/api/v1/instances/{{instance}}/custom-formats
+
+?? status == 200
+?? body items isArray
+
+###
+
+# Deletes a real custom format from the instance. Runs only with `--var destructive=true`.
+# @name deleteCustomFormat
+# @disabled !destructive
+# @ref listCustomFormats
+{{
+  const assert = require("assert");
+  assert.ok(listCustomFormats.items.length > 0, "instance has no custom formats to delete");
+  exports.deletedId = listCustomFormats.items[0].id;
+}}
+DELETE {{baseUrl}}/api/v1/instances/{{instance}}/custom-formats/{{deletedId}}
+
+?? status == 204
+
+###
+
+# Deleting the same custom format again finds nothing
+# @disabled !destructive
+DELETE {{baseUrl}}/api/v1/instances/{{instance}}/custom-formats/{{deletedId}}
+
+?? status == 404

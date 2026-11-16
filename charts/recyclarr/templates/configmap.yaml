@@ -1,0 +1,17 @@
+{{- range $source := list "configs" "includes" "settings" }}
+{{- $values := index $.Values $source }}
+{{- $data := ternary (dict "settings.yml" $values.content) $values.files (eq $source "settings") }}
+{{- if and (not $values.existingConfigMap) (ternary $values.content $values.files (eq $source "settings")) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "recyclarr.configMapName" (dict "root" $ "source" $source) }}
+  labels:
+    {{- include "recyclarr.labels" $ | nindent 4 }}
+data:
+  {{- range $file, $content := $data }}
+  {{ $file }}: {{ $content | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}

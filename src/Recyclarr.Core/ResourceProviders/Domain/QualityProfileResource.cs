@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Text.Json.Serialization;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileQualityItem
 {
     public string Name { get; init; } = "";
@@ -12,7 +12,6 @@ public record QualityProfileQualityItem
     public IReadOnlyCollection<string> Items { get; init; } = [];
 }
 
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 [SuppressMessage(
     "Design",
     "CA1056:URI properties should not be strings",
@@ -20,6 +19,9 @@ public record QualityProfileQualityItem
 )]
 public record QualityProfileResource : IGuideResource
 {
+    [JsonIgnore]
+    public IFileInfo? SourceFile { get; init; }
+
     [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = "";
 
@@ -40,7 +42,6 @@ public record QualityProfileResource : IGuideResource
     public int MinFormatScore { get; init; }
     public int CutoffFormatScore { get; init; }
     public int MinUpgradeFormatScore { get; init; }
-    public string Language { get; init; } = "";
     public IReadOnlyCollection<QualityProfileQualityItem> Items { get; init; } = [];
     public IReadOnlyDictionary<string, string> FormatItems { get; init; } =
         new Dictionary<string, string>();
@@ -53,8 +54,13 @@ public record QualityProfileResource : IGuideResource
         new Dictionary<string, string>();
 }
 
-[UsedImplicitly]
-public record RadarrQualityProfileResource : QualityProfileResource;
+/// <summary>
+/// A Radarr guide profile. Only Radarr profiles have a language (ADR-023); Sonarr guide JSON may
+/// still contain one, and it is ignored.
+/// </summary>
+public record RadarrQualityProfileResource : QualityProfileResource
+{
+    public string Language { get; init; } = "";
+}
 
-[UsedImplicitly]
 public record SonarrQualityProfileResource : QualityProfileResource;

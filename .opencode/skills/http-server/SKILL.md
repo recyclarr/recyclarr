@@ -1,0 +1,167 @@
+---
+name: http-server
+description: >-
+  Use when working on Recyclarr.Server or its HTTP API: FastEndpoints endpoints and DTOs, routes
+  and REST resources, API versioning, OpenAPI spec generation and API reference text, Kestrel
+  hosting and the serve command, or httpyac files under `http/`.
+---
+
+# HTTP Server
+
+Recyclarr.Server is a thin HTTP layer over Core. Endpoints receive requests, call through port
+interfaces into Core, and return responses. No business logic in the server project.
+
+## Route Conventions
+
+Rationale and the full resource model live in ADR-011; config representation in ADR-012. The rules:
+
+```txt
+/api/{version}/{namespace?}/{resource}[/{id}/{resource}[/{id}...]]
+```
+
+- Path versioning: `/api/v1/...`. API version is independent from application semver.
+- Namespaces (`sync/`, `guide/{service}/`) group resources and NEVER resolve; `GET /api/v1/sync`
+  404s. One namespace level max.
+- `{service}` is a closed enum (`radarr|sonarr`), not a collection id.
+- Collections are plural and id-addressable (`instances/{name}`). Singletons are singular with no id
+  (`sync/schedule`). Test: can more than one exist?
+- Kebab-case resource names (`custom-formats`).
+- Instance names are globally unique (config validation enforces this); `/instances/{name}` relies
+  on it.
+- No DELETE with a request body; bulk deletes are per-item calls in a client loop.
+- Probes and metrics live only on the management port (ADR-029), excluded from the OpenAPI spec.
+  Everything under `/api` requires the API key.
+- All error responses use RFC 9457 Problem Details.
+- Collections return an object wrapping `*SummaryResponse` items; each item has a stable id for a
+  future `/{id}` route (ADR-011).
+- Response DTOs are domain-shaped, never YAML-shaped. Secrets (e.g. `api_key`) are absent from DTOs,
+  not masked.
+- An outcome appears under the resource it affects, even when repeated; responses never reference
+  resources elsewhere by identity (ADR-016).
+
+## API Evolution
+
+Clients built against an older spec MUST keep working against a newer server within one API
+version (versioning rules: ADR-016).
+
+- Model a value set that can grow as a `string`, never an `enum`; generated clients may switch
+  exhaustively, so a new enum member breaks them. Closed sets (`{service}`) may stay enums.
+- Make changes additive: new optional properties, collections, or discriminator values. Removing,
+  renaming, or changing a field's meaning needs a new API version.
+- Polymorphic types fall back to their base type for unknown discriminators; consumers MUST handle
+  that base type without throwing.
+- Sync outcomes use the envelope (ADR-016): a new outcome is a code in `OutcomeCodes` plus a case
+  in `OutcomeResponseMapper`, never a new DTO or named collection. Choose its severity by ADR-033.
+
+## Long-Running Operations
+
+Model as job resources, never verb endpoints (ADR-011):
+
+- Trigger = create: `POST /api/v1/sync/jobs` returns 202 + `Location: /api/v1/sync/jobs/{id}`
+- `GET .../jobs/{id}` always returns 200; the body `status` tells clients whether to keep polling,
+  and `Retry-After` is set while the job is active (ADR-016)
+- The snapshot is cumulative (per-instance, per-operation); a slow or skipped poll loses nothing
+- Polling only; no SSE
+- Large result payloads belong on a sub-resource (`GET .../jobs/{id}/results`), never on the polled
+  job resource (ADR-016); DTOs are shaped for what consumers render, not mirrors of domain types
+- Result value objects hold only plan state; identity and reason sit beside them (ADR-016)
+- "Is one running" = filter the jobs collection, never a singleton status resource
+
+## FastEndpoints
+
+One class per endpoint, auto-discovered. Request/response DTOs co-located with the endpoint.
+
+```csharp
+public class GetWidget : Endpoint<GetWidgetRequest, WidgetResponse>
+{
+    public override void Configure()
+    {
+        Get("/widgets/{id}");
+    }
+
+    public override async Task HandleAsync(GetWidgetRequest req, CancellationToken ct)
+    {
+        // Call through port interface, not direct domain access
+        var widget = await widgetPort.Get(req.Id, ct);
+        await SendAsync(widget);
+    }
+}
+```
+
+### Feature Slice Structure
+
+```txt
+Features/
+  Widgets/
+    GetAll/
+      Endpoint.cs
+      Models.cs        ← request/response DTOs
+    Get/
+      Endpoint.cs
+      Models.cs
+```
+
+No `Mapper.cs` or `Data.cs`; that logic lives in Core.
+
+### Versioning (Release Group Strategy)
+
+An endpoint's folder sets its API version (`ApiVersions`): a `V{N}/` folder is version N,
+anything else is version 1. Endpoints MUST NOT call `Version()`. Only the changed endpoint gets a
+new class in a `V2/` subfolder, at the same route; the first one creates the `v2` OpenAPI document
+and its reference page. Each version's document includes the latest version (<= N) of every
+endpoint, so unchanged endpoints keep their `v1` routes in it.
+
+```txt
+Features/
+  Orders/
+    Create/
+      Endpoint.cs      ← v1
+      Models.cs
+      V2/
+        Endpoint.cs    ← breaking change only
+        Models.cs
+```
+
+## OpenAPI Spec Workflow
+
+Specs are committed to source control in `src/Recyclarr.Server/`: `Recyclarr.Server.json` for v1
+and `Recyclarr.Server_v{N}.json` for later versions (names fixed by the build tool). Build-time
+generation outputs to the project directory via `OpenApiDocumentsDirectory`. The committed spec is
+the input to Refitter, which generates the typed client (ADR-013). `ci/build-schemas.py` publishes
+each spec as `openapi-v{N}.json` beside the YAML schemas on `schemas.recyclarr.dev`, per release
+and in `next/` for the default branch.
+
+- Non-RID builds regenerate the spec (local dev, CI test step)
+- RID builds skip spec generation (cross-compilation); the committed file is always present
+- API version (`v1`) is independent from the application semver
+- `Recyclarr.Client` has a `ProjectReference` on Server for build ordering (not assembly reference)
+- One `.refitter` config per API version the CLI uses, reading that version's spec into a version
+  namespace (`Recyclarr.Client.V1`), so the version stays out of the call chain. Beyond v1, do not
+  filter paths by version prefix: unchanged endpoints keep their `v1` routes in later specs
+
+### API reference text
+
+The spec owns reference text, written for API consumers. Conceptual prose (overview, job lifecycle,
+CLI and schedule relationship, authentication) lives in hand-written wiki pages, not
+`info.description` or tag descriptions.
+
+- Describe what a consumer cannot infer from the name and type: units, valid values, defaults,
+  absence meaning, status conditions. Leave self-explanatory members bare.
+- Schemas, properties, path/query params: XML `<summary>` on the DTO member.
+- Enum values: `[Description]` on each member; published as `x-enumDescriptions`.
+- Operations: `Summary()` in `Configure()` (summary, description, per-status response text,
+  examples). Not endpoint-class XML docs.
+
+## httpyac Requests
+
+`http/*.http` exercises every endpoint against a running server. When an endpoint, route, status
+code, or DTO field changes, MUST update the affected `.http` file in the same change and run it.
+Conventions live in `http/AGENTS.md`.
+
+## Kestrel Embedding
+
+`WebApplication.CreateSlimBuilder()` for minimal footprint. Autofac via `UseServiceProviderFactory`.
+Two modes share the same startup:
+
+- `recyclarr serve`: standalone, persistent, shuts down on SIGTERM
+- Ephemeral: CLI spawns server process, `READY:{port}` stdout handshake, stdin lifeline

@@ -1,0 +1,1117 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using Recyclarr.Config.Models;
+using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.Plan;
+using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Pipelines.QualityProfile.State;
+using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Servarr.QualityProfile;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
+using Recyclarr.SyncState;
+using Recyclarr.TrashGuide.QualitySize;
+using Refit;
+
+namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
+
+internal sealed class QualityProfileSyncOperationTest
+{
+    [Test]
+    public async Task Compute_returns_guide_backed_created_profile()
+    {
+        var resource = NewPlan.QpResource("qp-trash-id", "WEB-1080p") with
+        {
+            UpgradeAllowed = true,
+        };
+        var config = new QualityProfileConfig
+        {
+            Name = "WEB-1080p",
+            Qualities = [NewQp.QualityConfig("Bluray-1080p")],
+        };
+        var planned = NewPlan.Qp(config, resource);
+        var harness = CreateHarness(
+            [planned],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Succeeded);
+        var created = compute.Resources.Should().ContainSingle().Which;
+        created.Action.Should().Be(PlannedAction.Create);
+        created
+            .Identity.Should()
+            .Be(new GuideBackedQualityProfileIdentity(new MappingKey("qp-trash-id", "WEB-1080p")));
+        created.Name.Should().Be(PlannedValue.Created("WEB-1080p"));
+        created
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Created<bool?>(true)));
+        created.Qualities.Reason.Should().Be(QualityProfileFieldReason.Set);
+        created.Qualities.Value.Current.Should().BeNull();
+        created
+            .Qualities.Value.Desired.Should()
+            .Equal(new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true });
+    }
+
+    [Test]
+    public async Task Compute_returns_every_value_of_an_updated_profile()
+    {
+        var current = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Old Name",
+            UpgradeAllowed = false,
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", false)],
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 0,
+                },
+            ],
+        };
+        var resource = NewPlan.QpResource("qp-trash-id", "New Name");
+        var config = new QualityProfileConfig
+        {
+            Name = "New Name",
+            UpgradeAllowed = true,
+            UpgradeUntilQuality = "Bluray-1080p",
+            Qualities = [NewQp.QualityConfig("Bluray-1080p")],
+        };
+        var planned = NewPlan.Qp(
+            config,
+            resource,
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-trash-id", 10)), 100)
+        );
+        var mapping = NewSyncState.Mapping("qp-trash-id", "Old Name", 7);
+        var harness = CreateHarness([planned], [current], Schema(current.Items), [mapping]);
+
+        var compute = await Compute(harness);
+
+        var updated = compute.Resources.Should().ContainSingle().Which;
+        updated.Action.Should().Be(PlannedAction.Update);
+        updated.Name.Should().Be(PlannedValue.Compared("Old Name", "New Name"));
+        updated
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Compared<bool?>(false, true)));
+        updated.Qualities.Value.Changed.Should().BeTrue();
+        updated
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-trash-id",
+                    PlannedValue.Compared(0, 100),
+                    QualityProfileScoreReason.Set
+                )
+            );
+    }
+
+    [Test]
+    public async Task One_changed_score_lists_every_score_and_marks_only_that_one()
+    {
+        var current = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 100,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 11,
+                    Name = "DV",
+                    Score = 50,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 12,
+                    Name = "Mine",
+                    Score = 25,
+                },
+            ],
+        };
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Existing" },
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-hdr", 10)), 100),
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("DV", "cf-dv", 11)), 60)
+        );
+        var harness = CreateHarness([planned], [current], Schema(current.Items));
+
+        var compute = await Compute(harness);
+
+        var updated = compute.Resources.Should().ContainSingle().Which;
+        updated.Action.Should().Be(PlannedAction.Update);
+        updated
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-hdr",
+                    PlannedValue.Compared(100, 100),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "DV",
+                    "cf-dv",
+                    PlannedValue.Compared(50, 60),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "Mine",
+                    null,
+                    PlannedValue.Compared(25, 25),
+                    QualityProfileScoreReason.Unmanaged
+                )
+            );
+    }
+
+    [Test]
+    public async Task Unchanged_profile_reports_every_score_including_unmanaged_ones()
+    {
+        var current = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 100,
+                },
+                new QualityProfileFormatItem
+                {
+                    FormatId = 11,
+                    Name = "Mine",
+                    Score = 25,
+                },
+            ],
+        };
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Existing" },
+            new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-trash-id", 10)), 100)
+        );
+        var harness = CreateHarness([planned], [current], Schema(current.Items));
+
+        var compute = await Compute(harness);
+
+        var unchanged = compute.Resources.Should().ContainSingle().Which;
+        unchanged.Action.Should().Be(PlannedAction.Unchanged);
+        unchanged
+            .CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    "cf-trash-id",
+                    PlannedValue.Compared(100, 100),
+                    QualityProfileScoreReason.Set
+                ),
+                new QualityProfileScoreResult(
+                    "Mine",
+                    null,
+                    PlannedValue.Compared(25, 25),
+                    QualityProfileScoreReason.Unmanaged
+                )
+            );
+    }
+
+    [Test]
+    public async Task Valid_and_ambiguous_profiles_produce_partial_result()
+    {
+        var valid = NewPlan.Qp("Valid");
+        var ambiguous = NewPlan.Qp("Duplicate");
+        var harness = CreateHarness(
+            [valid, ambiguous],
+            [
+                new QualityProfileData { Id = 1, Name = "Valid" },
+                new QualityProfileData { Id = 2, Name = "Duplicate" },
+                new QualityProfileData { Id = 3, Name = "Duplicate" },
+            ],
+            Schema()
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Partial);
+        var outcome = compute
+            .Outcomes.OfType<QualityProfileAmbiguousMatchOutcome>()
+            .Should()
+            .ContainSingle()
+            .Which;
+        outcome.Identity.Should().Be(new UserDefinedQualityProfileIdentity("Duplicate"));
+        outcome.ServiceMatches.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task Validation_failure_is_typed_without_diagnostic_prose()
+    {
+        var config = new QualityProfileConfig
+        {
+            Name = "Invalid",
+            MinFormatScore = 10,
+            Qualities = [NewQp.QualityConfig("Bluray-1080p")],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp(config)],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute.Resources.Should().BeEmpty();
+        compute
+            .Outcomes.OfType<QualityProfileMinimumScoreUnsatisfiedOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileMinimumScoreUnsatisfiedOutcome(
+                    new UserDefinedQualityProfileIdentity("Invalid"),
+                    10,
+                    0,
+                    0
+                )
+            );
+    }
+
+    [Test]
+    public async Task Plan_outcomes_retain_quality_profile_context()
+    {
+        var harness = CreateHarness([], [], Schema());
+        harness.PlanOutcomes.Add(new InvalidQualityProfileTrashIdOutcome("missing-qp"));
+        harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute.Outcomes.Should().Contain(x => x is QualityProfileReferenceMismatchOutcome);
+        compute.Outcomes.Should().Contain(x => x is QualityProfileDuplicateNameOutcome);
+    }
+
+    [Test]
+    public async Task Per_profile_quality_size_outcomes_are_attributed_to_the_profile()
+    {
+        var planned = GuideProfile("Series", "qp");
+        var harness = CreateHarness([], [], Schema());
+        harness.PlanOutcomes.Add(
+            new QualityProfileSizeOutcome(planned, new QualityDefinitionNotFoundOutcome("x"))
+        );
+        harness.PlanOutcomes.Add(new ProfileQualityDefinitionIgnoredOutcome(planned));
+        harness.PlanOutcomes.Add(new QualityDefinitionUnusedOutcome());
+
+        var compute = await Compute(harness);
+
+        var identity = new GuideBackedQualityProfileIdentity(new MappingKey("qp", "Series"));
+        compute
+            .Outcomes.Should()
+            .Equal(
+                new QualityProfileQualitySizeOutcome(
+                    identity,
+                    new QualitySizeDefinitionReferenceMismatchOutcome("x")
+                ),
+                new QualityProfileQualityDefinitionIgnoredOutcome(identity),
+                new QualityProfileQualityDefinitionUnusedOutcome()
+            );
+        compute.Status.Should().Be(SyncResultStatus.Failed, "the size error is incomplete work");
+    }
+
+    [Test]
+    public async Task Resource_local_plan_errors_flow_through_normal_orchestration()
+    {
+        var harness = CreateHarness([], [], Schema());
+        harness.PlanOutcomes.Add(new DuplicateQualityProfileNameOutcome("Duplicate"));
+        var executor = NewPipeline.Executor(PipelineType.QualityProfile, harness.Sut);
+        var settings = Substitute.For<ISyncSettings>();
+        settings.Preview.Returns(true);
+
+        var results = await executor.Execute(
+            settings,
+            NewPipeline.Plan(harness.Plan, harness.PlanOutcomes),
+            new PipelineExecutionBuffer(),
+            CancellationToken.None
+        );
+
+        var result = results
+            .Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfilePipelineResult>()
+            .Which;
+        result.Outcomes.Should().Contain(x => x is QualityProfileDuplicateNameOutcome);
+    }
+
+    [Test]
+    public async Task Missing_and_adopted_profiles_retain_identity()
+    {
+        var missing = NewPlan.Qp("Missing", isManaged: false);
+        var adopted = GuideProfile("Adopted", "adopted-id");
+        var harness = CreateHarness(
+            [missing, adopted],
+            [new QualityProfileData { Id = 7, Name = "Adopted" }],
+            GuideProfileSchema()
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Partial);
+        compute
+            .Outcomes.OfType<QualityProfileNotFoundOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileNotFoundOutcome(new UserDefinedQualityProfileIdentity("Missing"))
+            );
+        compute
+            .Outcomes.OfType<QualityProfileAdoptedOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileAdoptedOutcome(
+                    new GuideBackedQualityProfileIdentity(new MappingKey("adopted-id", "Adopted")),
+                    7
+                )
+            );
+    }
+
+    [Test]
+    public async Task Rename_conflict_retains_the_conflicting_service_profile()
+    {
+        var planned = GuideProfile("New Name", "trash-id");
+        var harness = CreateHarness(
+            [planned],
+            [
+                new QualityProfileData { Id = 7, Name = "Old Name" },
+                new QualityProfileData { Id = 8, Name = "New Name" },
+            ],
+            Schema(),
+            [NewSyncState.Mapping("trash-id", "Old Name", 7)]
+        );
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute
+            .Outcomes.OfType<QualityProfileRenameBlockedOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileRenameBlockedOutcome(
+                    new GuideBackedQualityProfileIdentity(new MappingKey("trash-id", "New Name")),
+                    new QualityProfileServiceMatch("New Name", 8)
+                )
+            );
+    }
+
+    [Test]
+    public async Task Invalid_cutoff_reference_is_a_typed_constraint()
+    {
+        var config = new QualityProfileConfig
+        {
+            Name = "Invalid",
+            UpgradeUntilQuality = "Unknown",
+            Qualities = [NewQp.QualityConfig("Unknown")],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp(config)],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Outcomes.OfType<QualityProfileInvalidCutoffOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileInvalidCutoffOutcome(
+                    new UserDefinedQualityProfileIdentity("Invalid"),
+                    "Unknown"
+                )
+            );
+    }
+
+    [Test]
+    public async Task Unavailable_cutoff_is_a_typed_constraint()
+    {
+        var config = new QualityProfileConfig
+        {
+            Name = "Existing",
+            UpgradeUntilQuality = "Bluray-1080p",
+        };
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", false)],
+        };
+        var harness = CreateHarness([NewPlan.Qp(config)], [serviceProfile], Schema());
+
+        var compute = await Compute(harness);
+
+        compute
+            .Outcomes.OfType<QualityProfileUnavailableCutoffOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileUnavailableCutoffOutcome(
+                    new UserDefinedQualityProfileIdentity("Existing"),
+                    "Bluray-1080p"
+                )
+            );
+    }
+
+    [Test]
+    public async Task Missing_create_qualities_is_a_typed_constraint()
+    {
+        var harness = CreateHarness([NewPlan.Qp("New")], [], Schema());
+
+        var compute = await Compute(harness);
+
+        compute
+            .Outcomes.OfType<QualityProfileQualitiesRequiredOutcome>()
+            .Should()
+            .Equal(
+                new QualityProfileQualitiesRequiredOutcome(
+                    new UserDefinedQualityProfileIdentity("New")
+                )
+            );
+    }
+
+    [Test]
+    public async Task Unknown_quality_and_reset_references_skip_the_profile()
+    {
+        var config = new QualityProfileConfig
+        {
+            Name = "Existing",
+            Qualities = [NewQp.QualityConfig("Unknown Quality")],
+            ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+            {
+                Except = ["Unknown CF"],
+                ExceptPatterns = ["missing.*"],
+            },
+        };
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            FormatItems = [new QualityProfileFormatItem { FormatId = 10, Name = "Known CF" }],
+        };
+        var harness = CreateHarness([NewPlan.Qp(config)], [serviceProfile], Schema());
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Failed);
+        compute.Resources.Should().BeEmpty();
+        compute
+            .Outcomes.OfType<QualityProfileQualityReferenceMismatchOutcome>()
+            .Should()
+            .ContainSingle();
+        compute
+            .Outcomes.OfType<QualityProfileResetScoreReferenceMismatchOutcome>()
+            .Should()
+            .ContainSingle();
+    }
+
+    [Test]
+    public async Task Reset_score_is_reported_with_its_reason()
+    {
+        var config = new QualityProfileConfig
+        {
+            Name = "Existing",
+            ResetUnmatchedScores = new ResetUnmatchedScoresConfig { Enabled = true },
+        };
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            FormatItems =
+            [
+                new QualityProfileFormatItem
+                {
+                    FormatId = 10,
+                    Name = "HDR",
+                    Score = 100,
+                },
+            ],
+        };
+        var harness = CreateHarness([NewPlan.Qp(config)], [serviceProfile], Schema());
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.CustomFormatScores.Should()
+            .Equal(
+                new QualityProfileScoreResult(
+                    "HDR",
+                    null,
+                    PlannedValue.Compared(100, 0),
+                    QualityProfileScoreReason.Reset
+                )
+            );
+    }
+
+    [Test]
+    public async Task Missing_service_quality_changes_the_layout()
+    {
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp("Existing")],
+            [serviceProfile],
+            Schema(
+                NewQp.QualityItem(1, "Bluray-1080p", true),
+                NewQp.QualityItem(2, "WEB 1080p", false)
+            )
+        );
+
+        var compute = await Compute(harness);
+
+        var layout = compute.Resources.Should().ContainSingle().Which.Qualities;
+        layout.Reason.Should().Be(QualityProfileFieldReason.Set);
+        layout.Value.Changed.Should().BeTrue();
+        layout.Value.Current!.Value.Should().ContainSingle();
+        layout.Value.Desired.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task Fields_nothing_sets_keep_the_service_value_as_unmanaged()
+    {
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            UpgradeAllowed = true,
+            Cutoff = 1,
+            CutoffFormatScore = 5,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp(new QualityProfileConfig { Name = "Existing", UpgradeUntilScore = 10 })],
+            [serviceProfile],
+            Schema(serviceProfile.Items)
+        );
+
+        var compute = await Compute(harness);
+
+        var profile = compute.Resources.Should().ContainSingle().Which;
+        profile
+            .UpgradeUntilScore.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Compared<int?>(5, 10)));
+        profile
+            .UpgradeAllowed.Should()
+            .Be(QualityProfileField.Of(managed: false, PlannedValue.Compared<bool?>(true, true)));
+        profile.UpgradeUntilQuality.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+        profile.MinimumFormatScore.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+        profile.Qualities.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
+    }
+
+    [Test]
+    public async Task Cutoff_picked_because_the_service_requires_one_is_set()
+    {
+        var serviceProfile = new QualityProfileData
+        {
+            Id = 7,
+            Name = "Existing",
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+        };
+        var harness = CreateHarness(
+            [NewPlan.Qp("Existing")],
+            [serviceProfile],
+            Schema(serviceProfile.Items)
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.UpgradeUntilQuality.Should()
+            .Be(
+                QualityProfileField.Of(
+                    managed: true,
+                    PlannedValue.Compared<string?>(null, "Bluray-1080p")
+                )
+            );
+    }
+
+    [TestCase(HttpStatusCode.BadRequest)]
+    [TestCase(HttpStatusCode.NotFound)]
+    [TestCase(HttpStatusCode.Conflict)]
+    [TestCase(HttpStatusCode.UnprocessableEntity)]
+    public async Task Apply_continues_after_create_rejection_and_saves_acknowledged_state(
+        HttpStatusCode statusCode
+    )
+    {
+        var rejected = GuideProfile("Rejected", "rejected-id");
+        var accepted = GuideProfile("Accepted", "accepted-id");
+        var harness = CreateHarness(
+            [rejected, accepted],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+        var exception = await CreateApiException(statusCode);
+        harness
+            .Service.CreateQualityProfile(default!, default)
+            .ReturnsForAnyArgs(call =>
+            {
+                var profile = call.Arg<QualityProfileData>();
+                return profile.Name == "Rejected"
+                    ? Task.FromException<QualityProfileData>(exception)
+                    : Task.FromResult(profile with { Id = 9 });
+            });
+
+        var compute = await Compute(harness);
+        var calculated = compute.Resources;
+        compute = await Persist(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Partial);
+        compute.Resources.Should().BeEquivalentTo(calculated);
+        compute
+            .Outcomes.OfType<QualityProfileCreateRejectedOutcome>()
+            .Should()
+            .ContainSingle()
+            .Which.Identity.Should()
+            .Be(new GuideBackedQualityProfileIdentity(new MappingKey("rejected-id", "Rejected")));
+        harness.State.Mappings.Should().Equal(NewSyncState.Mapping("accepted-id", "Accepted", 9));
+    }
+
+    [Test]
+    public async Task Update_rejection_retains_old_mapping_while_success_records_rename()
+    {
+        var rejected = GuideProfile("Rejected New", "rejected-id");
+        var accepted = GuideProfile("Accepted New", "accepted-id");
+        var oldRejected = new QualityProfileData { Id = 7, Name = "Rejected Old" };
+        var oldAccepted = new QualityProfileData { Id = 8, Name = "Accepted Old" };
+        var rejectedMapping = NewSyncState.Mapping("rejected-id", "Rejected Old", 7);
+        var acceptedMapping = NewSyncState.Mapping("accepted-id", "Accepted Old", 8);
+        var harness = CreateHarness(
+            [rejected, accepted],
+            [oldRejected, oldAccepted],
+            GuideProfileSchema(),
+            [rejectedMapping, acceptedMapping]
+        );
+        var exception = await CreateApiException(HttpStatusCode.BadRequest);
+        harness
+            .Service.UpdateQualityProfile(default!, default)
+            .ReturnsForAnyArgs(call =>
+                call.Arg<QualityProfileData>().Name == "Rejected New"
+                    ? Task.FromException(exception)
+                    : Task.CompletedTask
+            );
+
+        await Compute(harness);
+        var compute = await Persist(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Partial);
+        compute.Outcomes.OfType<QualityProfileUpdateRejectedOutcome>().Should().ContainSingle();
+        harness
+            .State.Mappings.Should()
+            .Equal(rejectedMapping, NewSyncState.Mapping("accepted-id", "Accepted New", 8));
+    }
+
+    [Test]
+    public async Task Instance_wide_api_failure_propagates_without_saving_state()
+    {
+        var profile = GuideProfile("Unauthorized", "trash-id");
+        var harness = CreateHarness(
+            [profile],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+        var exception = await CreateApiException(HttpStatusCode.Unauthorized);
+        harness
+            .Service.CreateQualityProfile(default!, default)
+            .ReturnsForAnyArgs(Task.FromException<QualityProfileData>(exception));
+
+        await Compute(harness);
+        var act = () => Persist(harness);
+
+        await act.Should().ThrowAsync<ApiException>();
+        harness.StatePersister.DidNotReceive().Save(harness.State);
+    }
+
+    [Test]
+    public async Task Sync_state_persistence_failure_propagates()
+    {
+        var profile = GuideProfile("Accepted", "trash-id");
+        var harness = CreateHarness(
+            [profile],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+        harness
+            .Service.CreateQualityProfile(default!, default)
+            .ReturnsForAnyArgs(call => call.Arg<QualityProfileData>() with { Id = 9 });
+        harness
+            .StatePersister.When(x => x.Save(harness.State))
+            .Do(_ => throw new IOException("state write failed"));
+
+        await Compute(harness);
+        var act = () => Persist(harness);
+
+        await act.Should().ThrowAsync<IOException>().WithMessage("state write failed");
+    }
+
+    [Test]
+    public async Task Preview_returns_results_without_service_or_state_writes()
+    {
+        var profile = GuideProfile("Preview", "trash-id");
+        var harness = CreateHarness(
+            [profile],
+            [],
+            Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
+        );
+        var executor = NewPipeline.Executor(PipelineType.QualityProfile, harness.Sut);
+        var settings = Substitute.For<ISyncSettings>();
+        settings.Preview.Returns(true);
+
+        var results = await executor.Execute(
+            settings,
+            NewPipeline.Plan(harness.Plan, harness.PlanOutcomes),
+            new PipelineExecutionBuffer(),
+            CancellationToken.None
+        );
+
+        results
+            .Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfilePipelineResult>()
+            .Which.Resources.Should()
+            .ContainSingle();
+        await harness.Service.DidNotReceiveWithAnyArgs().CreateQualityProfile(default!, default);
+        harness.StatePersister.DidNotReceive().Save(harness.State);
+    }
+
+    private static PlannedQualityProfile GuideProfile(string name, string trashId)
+    {
+        return NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = name,
+                Qualities = [NewQp.QualityConfig("Bluray-1080p")],
+            },
+            NewPlan.QpResource(trashId, name)
+        );
+    }
+
+    // The service schema that contains the quality GuideProfile configures
+    private static QualityProfileData GuideProfileSchema() =>
+        Schema(NewQp.QualityItem(1, "Bluray-1080p", true));
+
+    private static QualityProfileData Schema(params QualityProfileItem[] items)
+    {
+        return Schema((IReadOnlyList<QualityProfileItem>)items);
+    }
+
+    private static QualityProfileData Schema(IReadOnlyList<QualityProfileItem> items)
+    {
+        return new QualityProfileData { Name = "Schema", Items = items };
+    }
+
+    [Test]
+    public async Task Radarr_language_drift_alone_is_detected_and_restored()
+    {
+        var english = new ProfileLanguage { Id = 1, Name = "English" };
+        var french = new ProfileLanguage { Id = 2, Name = "French" };
+        var current = new RadarrQualityProfileData
+        {
+            Id = 7,
+            Name = "Movies",
+            UpgradeAllowed = false,
+            MinFormatScore = 0,
+            MinUpgradeFormatScore = 0,
+            CutoffFormatScore = 0,
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            Language = english,
+        };
+        var resource = new RadarrQualityProfileResource
+        {
+            TrashId = "qp-trash-id",
+            Name = "Movies",
+            Language = "French",
+        };
+        var planned = NewPlan.Qp(new QualityProfileConfig { Name = "Movies" }, resource);
+        var languages = Substitute.For<IRadarrLanguageService>();
+        languages.GetLanguages(default).ReturnsForAnyArgs([english, french]);
+        var harness = CreateHarness(
+            [planned],
+            [current],
+            Schema(current.Items),
+            [NewSyncState.Mapping("qp-trash-id", "Movies", 7)],
+            new RadarrQualityProfileFields(languages)
+        );
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        var radarr = compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<RadarrPlannedQualityProfileResource>()
+            .Which;
+        radarr.Action.Should().Be(PlannedAction.Update);
+        radarr
+            .Language.Should()
+            .Be(
+                QualityProfileField.Of(
+                    managed: true,
+                    PlannedValue.Compared<string?>("English", "French")
+                )
+            );
+        await harness
+            .Service.Received()
+            .UpdateQualityProfile(
+                Arg.Is<QualityProfileData>(x =>
+                    x is RadarrQualityProfileData
+                    && ((RadarrQualityProfileData)x).Language == french
+                ),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
+    private static readonly QualityItemSize ServiceSize = new(1, 10, 5);
+
+    private static SonarrV5QualityProfileData SonarrV5Profile() =>
+        new()
+        {
+            Id = 7,
+            Name = "Series",
+            UpgradeAllowed = false,
+            MinFormatScore = 0,
+            MinUpgradeFormatScore = 0,
+            CutoffFormatScore = 0,
+            Cutoff = 9,
+            Items =
+            [
+                NewQp.QualityItem(9, "HDTV-1080p", true),
+                NewQp.GroupItem(1001, "WEB 1080p", true, NewQp.QualityItem(3, "WEBDL-1080p", true)),
+            ],
+            QualitySizes = new Dictionary<string, QualityItemSize>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["HDTV-1080p"] = ServiceSize,
+                ["WEBDL-1080p"] = ServiceSize,
+            },
+        };
+
+    private static PlannedQualityProfile SonarrV5Planned(params PlannedQualityItem[] sizes) =>
+        NewPlan.Qp(
+            new QualityProfileConfig { Name = "Series" },
+            NewPlan.QpResource("qp", "Series")
+        ) with
+        {
+            QualitySizes = new PlannedQualitySizes { Type = "series", Qualities = sizes },
+        };
+
+    private static SonarrV5QualityProfileFields SonarrV5Fields()
+    {
+        var limits = Substitute.For<IQualityItemLimitFactory>();
+        limits.Create(default, default).ReturnsForAnyArgs(new QualityItemLimits(1000m, 995m));
+        return new SonarrV5QualityProfileFields(limits);
+    }
+
+    [Test]
+    public async Task Sonarr_v5_planned_sizes_are_reported_and_written_to_matching_qualities()
+    {
+        var harness = CreateHarness(
+            [SonarrV5Planned(new PlannedQualityItem("HDTV-1080p", 5, 50, 30))],
+            [SonarrV5Profile()],
+            SonarrV5Profile(),
+            [NewSyncState.Mapping("qp", "Series", 7)],
+            SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        var sonarr = compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
+            .Which;
+        sonarr.Action.Should().Be(PlannedAction.Update);
+        sonarr
+            .QualitySizes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(new { Quality = "HDTV-1080p", Action = PlannedAction.Update });
+        await harness
+            .Service.Received()
+            .UpdateQualityProfile(
+                Arg.Is<SonarrV5QualityProfileData>(x =>
+                    x.QualitySizes["HDTV-1080p"] == new QualityItemSize(5, 50, 30)
+                    && x.QualitySizes["WEBDL-1080p"] == ServiceSize
+                ),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
+    // Planned sizes carry a decimal scale (10.00) that service values (10) do not
+    [Test]
+    public async Task Sonarr_v5_equal_sizes_with_different_decimal_scale_are_unchanged()
+    {
+        var harness = CreateHarness(
+            [SonarrV5Planned(new PlannedQualityItem("HDTV-1080p", 1.0m, 10.00m, 5.0m))],
+            [SonarrV5Profile()],
+            SonarrV5Profile(),
+            [NewSyncState.Mapping("qp", "Series", 7)],
+            SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+
+        var sonarr = compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
+            .Which;
+        sonarr.Action.Should().Be(PlannedAction.Unchanged);
+        sonarr
+            .QualitySizes.Should()
+            .ContainSingle()
+            .Which.Action.Should()
+            .Be(PlannedAction.Unchanged);
+    }
+
+    [Test]
+    public async Task Sonarr_v5_created_profile_describes_only_planned_sizes()
+    {
+        // A new profile needs at least one quality
+        var planned = SonarrV5Planned(new PlannedQualityItem("WEBDL-1080p", 5, null, 30));
+        planned = planned with
+        {
+            Config = planned.Config with { Qualities = [NewQp.QualityConfig("WEBDL-1080p")] },
+        };
+        var harness = CreateHarness(
+            [planned],
+            [],
+            SonarrV5Profile() with
+            {
+                Id = null,
+            },
+            serviceFields: SonarrV5Fields()
+        );
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SonarrPlannedQualityProfileResource>()
+            .Which.QualitySizes.Should()
+            .Equal(
+                PlannedQualitySizeResource.Created(
+                    "WEBDL-1080p",
+                    new QualitySizeValue.Numeric(5),
+                    new QualitySizeValue.Numeric(30),
+                    new QualitySizeValue.Unlimited()
+                )
+            );
+    }
+
+    private static Harness CreateHarness(
+        IReadOnlyList<PlannedQualityProfile> planned,
+        IReadOnlyList<QualityProfileData> serviceProfiles,
+        QualityProfileData schema,
+        IReadOnlyList<TrashIdMapping>? mappings = null,
+        IQualityProfileServiceFields? serviceFields = null
+    )
+    {
+        var service = Substitute.For<IQualityProfileService>();
+        service.GetQualityProfiles(default).ReturnsForAnyArgs(serviceProfiles);
+        service.GetSchema(default).ReturnsForAnyArgs(schema);
+
+        var state = new TrashIdMappingStore(mappings?.ToList() ?? []);
+        var statePersister = Substitute.For<IQualityProfileStatePersister>();
+        statePersister.Load().Returns(state);
+
+        var plan = new PlannedQualityProfiles(planned);
+
+        // Unless a test supplies Radarr's, Sonarr's (empty) service-owned field behavior applies.
+        var log = Substitute.For<ILogger>();
+        serviceFields ??= new SonarrV3QualityProfileFields();
+        var sut = new QualityProfileSyncOperation(
+            log,
+            service,
+            serviceFields,
+            statePersister,
+            new QualityProfileStatCalculator(log, serviceFields),
+            new QualityProfileLogger(log)
+        );
+        return new Harness(sut, service, statePersister, state, plan, []);
+    }
+
+    private static async Task<QualityProfilePipelineResult> Compute(Harness harness)
+    {
+        var result = await ((ISyncOperation<PlannedQualityProfiles>)harness.Sut).Execute(
+            preview: true,
+            harness.Plan,
+            harness.PlanOutcomes,
+            _ => { },
+            CancellationToken.None
+        );
+        return result.Should().BeOfType<QualityProfilePipelineResult>().Which;
+    }
+
+    private static async Task<QualityProfilePipelineResult> Persist(Harness harness)
+    {
+        var result = await ((ISyncOperation<PlannedQualityProfiles>)harness.Sut).Execute(
+            preview: false,
+            harness.Plan,
+            harness.PlanOutcomes,
+            _ => { },
+            CancellationToken.None
+        );
+        return result.Should().BeOfType<QualityProfilePipelineResult>().Which;
+    }
+
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "ApiException.Create takes ownership of request and response"
+    )]
+    private static Task<ApiException> CreateApiException(HttpStatusCode statusCode)
+    {
+        var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            "http://localhost/api/v3/qualityprofile"
+        );
+        var response = new HttpResponseMessage(statusCode);
+        return ApiException.Create(request, HttpMethod.Post, response, new RefitSettings());
+    }
+
+    private sealed record Harness(
+        QualityProfileSyncOperation Sut,
+        IQualityProfileService Service,
+        IQualityProfileStatePersister StatePersister,
+        TrashIdMappingStore State,
+        PlannedQualityProfiles Plan,
+        List<SyncOutcome> PlanOutcomes
+    );
+}

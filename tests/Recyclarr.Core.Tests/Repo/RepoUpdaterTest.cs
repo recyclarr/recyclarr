@@ -108,6 +108,28 @@ internal sealed class RepoUpdaterTest
     }
 
     [Test, AutoMockData]
+    public async Task Failed_fetch_falls_back_to_cached_data(
+        [Frozen] IGitRepository repo,
+        [Frozen] MockFileSystem fs
+    )
+    {
+        var repoPath = fs.WithGitDir(10 * 1024 * 1024);
+        var log = Substitute.For<ILogger>();
+        var source = NewSource(repoPath, cacheLimitMb: 0);
+
+        repo.Fetch(default!, default!, default)
+            .ReturnsForAnyArgs(Task.FromException(new AggregateException("offline")));
+        repo.ResolveCommit("HEAD", default).ReturnsForAnyArgs("abc123");
+
+        var sut = new RepoUpdater(log, _ => repo);
+        var outcome = await sut.UpdateRepo(source, CancellationToken.None);
+
+        outcome.Should().Be(RepoUpdateOutcome.FetchFailedUsingCache);
+        fs.Directory.Exists(repoPath.FullName).Should().BeTrue();
+        LoggedWarningContaining(log, "will proceed with existing files").Should().BeTrue();
+    }
+
+    [Test, AutoMockData]
     public async Task Warning_logged_when_rebuilt_cache_still_exceeds_limit(
         [Frozen] IGitRepository repo,
         [Frozen] MockFileSystem fs

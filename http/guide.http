@@ -1,0 +1,54 @@
+{{
+  // Prompt only when --var did not supply the value; a file-level @service would override --var.
+  if (typeof service === "undefined") {
+    exports.service = "{{$pick-askonce Service? $value: radarr,sonarr}}";
+  }
+}}
+
+###
+
+# @name guideCustomFormats
+GET {{baseUrl}}/api/v1/guide/{{service}}/custom-formats
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name guideCustomFormatGroups
+GET {{baseUrl}}/api/v1/guide/{{service}}/custom-format-groups
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name guideQualityProfiles
+GET {{baseUrl}}/api/v1/guide/{{service}}/quality-profiles
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name guideQualities
+GET {{baseUrl}}/api/v1/guide/{{service}}/qualities
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name guideScoreSets
+GET {{baseUrl}}/api/v1/guide/{{service}}/score-sets
+
+?? status == 200
+?? body items isArray
+
+###
+
+# @name guideNaming
+GET {{baseUrl}}/api/v1/guide/{{service}}/naming
+
+?? status == 200
+?? body service == {{service}}

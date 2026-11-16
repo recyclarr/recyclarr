@@ -1,0 +1,497 @@
+using System.Net;
+using Recyclarr.Common.Extensions;
+using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.CustomFormat.Models;
+using Recyclarr.Pipelines.CustomFormat.State;
+using Recyclarr.Pipelines.Plan;
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Servarr.CustomFormat;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
+using Recyclarr.SyncState;
+using Refit;
+
+namespace Recyclarr.Pipelines.CustomFormat;
+
+internal class CustomFormatSyncOperation(
+    ILogger log,
+    ICustomFormatService api,
+    ICustomFormatStatePersister statePersister,
+    CustomFormatTransactionLogger cfLogger,
+    IServiceConfiguration config
+) : SyncOperation<PlannedCustomFormats, CustomFormatComputeResult>
+{
+    protected override PipelineResult CreateEmptyResult(
+        SyncResultStatus status,
+        PipelineType? blockedBy
+    ) => new CustomFormatPipelineResult(0, 0, [], [], []).WithStatus(status, blockedBy);
+
+    protected override async Task<CustomFormatComputeResult> Compute(
+        PlannedCustomFormats plan,
+        IReadOnlyList<SyncOutcome> planOutcomes,
+        CancellationToken ct
+    )
+    {
+        // Fetch phase
+        var state = statePersister.Load();
+        var apiFetchOutput = await api.GetCustomFormats(ct);
+
+        // Transaction phase
+        var plannedCfs = plan.Items;
+        var transactions = new CustomFormatTransactionData();
+        var outcomes = MapPlanOutcomes(planOutcomes).ToList();
+        var resources = new List<PlannedCustomFormatResource>();
+        var deletes = new List<CustomFormatIdentity>();
+        var incompleteResources = planOutcomes
+            .OfType<DuplicateCustomFormatNameOutcome>()
+            .Sum(x => x.TrashIds.Count);
+
+        var sourceInfo = plannedCfs.ToDictionary(
+            cf => cf.Resource.TrashId,
+            CreateSourceInfo,
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        // Build lookups for O(1) access
+        var serviceCfsById = apiFetchOutput.ToDictionary(cf => cf.Id);
+        var serviceCfsByName = apiFetchOutput.ToLookup(
+            cf => cf.Name,
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        foreach (var planned in plannedCfs)
+        {
+            var guideCf = planned.Resource;
+            var provenance = sourceInfo[guideCf.TrashId];
+            log.Debug(
+                "Process transaction for guide CF {TrashId} ({Name})",
+                guideCf.TrashId,
+                guideCf.Name
+            );
+
+            var storedId = state.FindId(guideCf.MappingKey);
+
+            if (storedId.HasValue)
+            {
+                ProcessCachedCf(
+                    guideCf,
+                    storedId.Value,
+                    serviceCfsById,
+                    serviceCfsByName,
+                    transactions,
+                    provenance,
+                    outcomes,
+                    resources
+                );
+            }
+            else
+            {
+                ProcessNameCollision(
+                    guideCf,
+                    serviceCfsByName,
+                    transactions,
+                    provenance,
+                    outcomes,
+                    resources
+                );
+            }
+        }
+
+        // Configured CFs skipped for a shared name are still in the user's config; never delete them
+        var skippedTrashIds = planOutcomes
+            .OfType<DuplicateCustomFormatNameOutcome>()
+            .SelectMany(x => x.TrashIds)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
+        var deletionCandidates = state
+            .Mappings
+            // Custom format must be in the state but NOT in the user's config
+            .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
+            .Where(map => !skippedTrashIds.Contains(map.TrashId))
+            // Also, that state-only CF must exist in the service (otherwise there is nothing to delete)
+            .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
+            .ToList();
+
+        // Build set of service IDs that are being actively managed (updated or unchanged)
+        var managedServiceIds = transactions
+            .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
+            .Select(cf => cf.Id)
+            .ToHashSet();
+
+        // Separate valid deletions from invalid state entries (duplicate service IDs)
+        foreach (var candidate in deletionCandidates)
+        {
+            if (managedServiceIds.Contains(candidate.ServiceId))
+            {
+                incompleteResources++;
+
+                var managed = transactions
+                    .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
+                    .First(cf => cf.Id == candidate.ServiceId);
+                outcomes.Add(
+                    new CustomFormatStateConflictOutcome(
+                        ToIdentity(candidate),
+                        ToIdentity(managed),
+                        candidate.ServiceId
+                    )
+                );
+            }
+            else if (config.DeleteOldCustomFormats)
+            {
+                transactions.DeletedCustomFormats.Add(candidate);
+                deletes.Add(ToIdentity(candidate));
+            }
+        }
+
+        incompleteResources += transactions.AmbiguousCustomFormats.Count;
+        var completedResources =
+            transactions.NewCustomFormats.Count
+            + transactions.UpdatedCustomFormats.Count
+            + transactions.UnchangedCustomFormats.Count
+            + transactions.DeletedCustomFormats.Count;
+        var result = new CustomFormatPipelineResult(
+            completedResources,
+            incompleteResources,
+            outcomes,
+            resources,
+            deletes
+        );
+
+        var validServiceIds = apiFetchOutput.Select(cf => cf.Id).ToList();
+        var computeResult = new CustomFormatComputeResult(
+            transactions,
+            validServiceIds,
+            state,
+            result
+        );
+        cfLogger.LogTransactions(transactions);
+        return computeResult;
+    }
+
+    protected override async Task Persist(
+        CustomFormatComputeResult computeResult,
+        CancellationToken ct
+    )
+    {
+        var transactions = computeResult.Transactions;
+        var completedResources = transactions.UnchangedCustomFormats.Count;
+        var incompleteResources = computeResult.Result.IncompleteResources;
+        var persistenceOutcomes = new List<CustomFormatOutcome>();
+
+        foreach (var cf in transactions.NewCustomFormats)
+        {
+            try
+            {
+                var response = await api.CreateCustomFormat(cf, ct);
+                if (response is null)
+                {
+                    incompleteResources++;
+                    persistenceOutcomes.Add(new CustomFormatCreateRejectedOutcome(ToIdentity(cf)));
+                    continue;
+                }
+
+                cf.Id = response.Id;
+                computeResult.RecordSynced(cf);
+                completedResources++;
+            }
+            catch (ApiException e) when (IsResourceRejection(e))
+            {
+                incompleteResources++;
+                persistenceOutcomes.Add(new CustomFormatCreateRejectedOutcome(ToIdentity(cf)));
+            }
+        }
+
+        foreach (var cf in transactions.UpdatedCustomFormats)
+        {
+            try
+            {
+                await api.UpdateCustomFormat(cf, ct);
+                computeResult.RecordSynced(cf);
+                completedResources++;
+            }
+            catch (ApiException e) when (IsResourceRejection(e))
+            {
+                incompleteResources++;
+                persistenceOutcomes.Add(new CustomFormatUpdateRejectedOutcome(ToIdentity(cf)));
+            }
+        }
+
+        foreach (var mapping in transactions.DeletedCustomFormats)
+        {
+            try
+            {
+                await api.DeleteCustomFormat(mapping.ServiceId, ct);
+                computeResult.RecordDeleted(mapping.ServiceId);
+                completedResources++;
+            }
+            catch (ApiException e) when (IsResourceRejection(e))
+            {
+                incompleteResources++;
+                persistenceOutcomes.Add(new CustomFormatDeleteRejectedOutcome(ToIdentity(mapping)));
+            }
+        }
+
+        computeResult.State.Update(computeResult);
+        statePersister.Save(computeResult.State);
+        computeResult.CompleteApply(completedResources, incompleteResources, persistenceOutcomes);
+    }
+
+    private static bool IsResourceRejection(ApiException exception)
+    {
+        return exception.StatusCode
+            is HttpStatusCode.BadRequest
+                or HttpStatusCode.NotFound
+                or HttpStatusCode.Conflict
+                or HttpStatusCode.UnprocessableEntity;
+    }
+
+    private void ProcessCachedCf(
+        CustomFormatResource guideCf,
+        int storedId,
+        Dictionary<int, CustomFormatResource> serviceCfsById,
+        ILookup<string, CustomFormatResource> serviceCfsByName,
+        CustomFormatTransactionData transactions,
+        CustomFormatSourceInfo provenance,
+        ICollection<CustomFormatOutcome> outcomes,
+        ICollection<PlannedCustomFormatResource> resources
+    )
+    {
+        if (serviceCfsById.TryGetValue(storedId, out var serviceCf))
+        {
+            // ID-first: Found by stored ID - update regardless of name
+            guideCf.Id = storedId;
+
+            if (!serviceCf.Name.EqualsIgnoreCase(guideCf.Name))
+            {
+                log.Debug(
+                    "CF {TrashId} will be renamed from '{ServiceName}' to '{GuideName}'",
+                    guideCf.TrashId,
+                    serviceCf.Name,
+                    guideCf.Name
+                );
+            }
+
+            AddUpdatedOrUnchanged(guideCf, serviceCf, transactions, provenance, resources);
+        }
+        else
+        {
+            // Stale state: stored ID no longer exists in service
+            log.Debug(
+                "Stored service ID {StoredId} for CF {TrashId} no longer exists in service",
+                storedId,
+                guideCf.TrashId
+            );
+
+            // Check for name collision before creating
+            ProcessNameCollision(
+                guideCf,
+                serviceCfsByName,
+                transactions,
+                provenance,
+                outcomes,
+                resources
+            );
+        }
+    }
+
+    private static void ProcessNameCollision(
+        CustomFormatResource guideCf,
+        ILookup<string, CustomFormatResource> serviceCfsByName,
+        CustomFormatTransactionData transactions,
+        CustomFormatSourceInfo provenance,
+        ICollection<CustomFormatOutcome> outcomes,
+        ICollection<PlannedCustomFormatResource> resources
+    )
+    {
+        var nameMatches = serviceCfsByName[guideCf.Name].ToList();
+
+        switch (nameMatches.Count)
+        {
+            case 0:
+                // No collision - safe to create
+                transactions.NewCustomFormats.Add(guideCf);
+                resources.Add(
+                    new PlannedCustomFormatResource
+                    {
+                        Action = PlannedAction.Create,
+                        Identity = ToIdentity(guideCf),
+                        SelectionProvenance = provenance,
+                        Name = PlannedValue.Created(guideCf.Name),
+                        IncludeWhenRenaming = PlannedValue.Created(
+                            guideCf.IncludeCustomFormatWhenRenaming
+                        ),
+                        Specifications = guideCf
+                            .Specifications.Select(x => new CustomFormatSpecificationResult(
+                                x.Name,
+                                CustomFormatSpecificationChange.Added
+                            ))
+                            .ToList(),
+                    }
+                );
+                break;
+
+            case 1:
+                // Config is authoritative: adopt the existing service CF
+                guideCf.Id = nameMatches[0].Id;
+                transactions.ReplacedCustomFormats.Add(guideCf.Name);
+                outcomes.Add(new CustomFormatAdoptedOutcome(ToIdentity(guideCf), guideCf.Id));
+                AddUpdatedOrUnchanged(guideCf, nameMatches[0], transactions, provenance, resources);
+                break;
+
+            default:
+                // Multiple matches - ambiguous
+                transactions.AmbiguousCustomFormats.Add(
+                    new AmbiguousMatch(
+                        guideCf.Name,
+                        nameMatches.Select(cf => (cf.Name, cf.Id)).ToList()
+                    )
+                );
+                outcomes.Add(
+                    new CustomFormatAmbiguousMatchOutcome(
+                        ToIdentity(guideCf),
+                        nameMatches
+                            .Select(cf => new CustomFormatServiceMatch(cf.Name, cf.Id))
+                            .ToList()
+                    )
+                );
+                break;
+        }
+    }
+
+    private static void AddUpdatedOrUnchanged(
+        CustomFormatResource guideCf,
+        CustomFormatResource serviceCf,
+        CustomFormatTransactionData transactions,
+        CustomFormatSourceInfo provenance,
+        ICollection<PlannedCustomFormatResource> resources
+    )
+    {
+        var changed = !IsEquivalent(guideCf, serviceCf);
+        if (changed)
+        {
+            transactions.UpdatedCustomFormats.Add(guideCf);
+        }
+        else
+        {
+            transactions.UnchangedCustomFormats.Add(guideCf);
+        }
+
+        resources.Add(
+            new PlannedCustomFormatResource
+            {
+                Action = changed ? PlannedAction.Update : PlannedAction.Unchanged,
+                Identity = ToIdentity(guideCf),
+                SelectionProvenance = provenance,
+                Name = PlannedValue.Compared(serviceCf.Name, guideCf.Name),
+                IncludeWhenRenaming = PlannedValue.Compared(
+                    serviceCf.IncludeCustomFormatWhenRenaming,
+                    guideCf.IncludeCustomFormatWhenRenaming
+                ),
+                Specifications = CompareSpecifications(serviceCf, guideCf),
+            }
+        );
+    }
+
+    private static List<CustomFormatSpecificationResult> CompareSpecifications(
+        CustomFormatResource current,
+        CustomFormatResource desired
+    )
+    {
+        var specifications = desired
+            .Specifications.Select(desiredSpec =>
+            {
+                var currentSpec = current.Specifications.FirstOrDefault(x =>
+                    x.Name == desiredSpec.Name
+                );
+                var change = currentSpec switch
+                {
+                    null => CustomFormatSpecificationChange.Added,
+                    _ when currentSpec != desiredSpec => CustomFormatSpecificationChange.Changed,
+                    _ => CustomFormatSpecificationChange.Unchanged,
+                };
+                return new CustomFormatSpecificationResult(desiredSpec.Name, change);
+            })
+            .ToList();
+
+        specifications.AddRange(
+            current
+                .Specifications.Where(x => desired.Specifications.All(y => y.Name != x.Name))
+                .Select(x => new CustomFormatSpecificationResult(
+                    x.Name,
+                    CustomFormatSpecificationChange.Removed
+                ))
+        );
+        return specifications;
+    }
+
+    private static IEnumerable<CustomFormatOutcome> MapPlanOutcomes(
+        IReadOnlyList<SyncOutcome> planOutcomes
+    )
+    {
+        foreach (var outcome in planOutcomes)
+        {
+            switch (outcome)
+            {
+                case IncompatibleCfGroupOutcome x:
+                    yield return new IncompatibleCustomFormatGroupOutcome(x.Name, x.TrashId);
+                    break;
+                case EmptyCfGroupOutcome x:
+                    yield return new EmptyCustomFormatGroupOutcome(x.Name, x.TrashId);
+                    break;
+                case DuplicateCustomFormatNameOutcome x:
+                    yield return new CustomFormatDuplicateNameOutcome(x.Name, x.TrashIds);
+                    break;
+            }
+        }
+    }
+
+    private static CustomFormatSourceInfo CreateSourceInfo(PlannedCustomFormat cf)
+    {
+        return new CustomFormatSourceInfo(
+            cf.Source,
+            cf.GroupName,
+            cf.InclusionReason,
+            cf.AssignScoresTo.Select(x => x.Name).ToList()
+        );
+    }
+
+    private static CustomFormatIdentity ToIdentity(CustomFormatResource cf)
+    {
+        return new CustomFormatIdentity(cf.TrashId, cf.Name);
+    }
+
+    private static CustomFormatIdentity ToIdentity(TrashIdMapping mapping)
+    {
+        return new CustomFormatIdentity(mapping.TrashId, mapping.Name);
+    }
+
+    // Compares custom format data for equivalence, ignoring record type differences.
+    // Guide CFs are SonarrCustomFormatResource/RadarrCustomFormatResource (derived types),
+    // while API responses deserialize to base CustomFormatResource.
+    private static bool IsEquivalent(CustomFormatResource a, CustomFormatResource b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        // FullOuterHashJoin matches specs by name. For matched pairs, delegates to
+        // CustomFormatSpecificationData equality. Returns false for unmatched specs.
+        var specsEqual = a
+            .Specifications.FullOuterHashJoin(
+                b.Specifications,
+                x => x.Name,
+                x => x.Name,
+                _ => false,
+                _ => false,
+                (x, y) => x == y
+            )
+            .All(x => x);
+
+        return a.Id == b.Id
+            && a.Name == b.Name
+            && a.IncludeCustomFormatWhenRenaming == b.IncludeCustomFormatWhenRenaming
+            && specsEqual;
+    }
+}

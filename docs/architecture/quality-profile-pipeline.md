@@ -1,7 +1,7 @@
 # Quality Profile Sync
 
-Quality Profile synchronization follows the standard pipeline pattern. This document covers
-QP-specific behaviors in transaction and persistence phases. For plan phase details, see
+Quality Profile synchronization is handled by `QualityProfileSyncOperation`. This document covers
+QP-specific behaviors in compute and persist. For plan phase details, see
 [sync-plan-phase.md](sync-plan-phase.md). For the ID-first matching algorithm, see
 [trash-id-state-system.md](trash-id-state-system.md).
 
@@ -34,10 +34,26 @@ Quality ordering supports:
 
 Qualities are inherited from guide resources when not specified in config.
 
-## Language Passthrough (Radarr)
+## Service-Owned Fields
 
-For Radarr profiles, language settings from guide resources pass through to the service. Sonarr does
-not have language in quality profiles; such data is preserved via extra JSON passthrough.
+The pipeline has one sync operation for both services. Fields only one service has live on that
+service's types ([ADR-023][adr-023]), and their behavior lives in `IQualityProfileServiceFields`,
+which DI resolves per detected API target ([ADR-028][adr-028]):
+
+- Radarr (`RadarrQualityProfileFields`): profile language. The guide's `language` applies when the
+  instance offers a language with that name; otherwise the profile keeps its current language. A
+  language difference alone makes the profile changed, so drift is restored.
+- Sonarr v4 (`SonarrV3QualityProfileFields`, v3 API): no service-owned fields. Sonarr guide JSON
+  that contains a `language` is ignored.
+- Sonarr v5 (`SonarrV5QualityProfileFields`): per-profile quality sizes, stored on
+  `SonarrV5QualityProfileData` keyed by quality name. The planner chooses each profile's size source
+  ([PDR-008][pdr-008]); this component converts the planned sizes to service values and writes them
+  to qualities the profile contains. Other qualities keep their sizes. A size difference alone makes
+  the profile changed.
+
+[adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
+[adr-028]: ../decisions/architecture/028-api-version-selection-by-server-major.md
+[pdr-008]: ../decisions/product/008-sonarr-v5-per-profile-quality-sizes.md
 
 ## No Delete Feature
 

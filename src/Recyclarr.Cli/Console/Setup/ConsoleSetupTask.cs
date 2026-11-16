@@ -7,7 +7,8 @@ internal class ConsoleSetupTask(IAnsiConsole console) : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)
     {
-        // Log mode: redirect console output to null (Serilog takes over)
+        // Log mode: redirect console output to null (Serilog takes over). Live-display cursor
+        // operations bypass that writer and can fail on a redirected stream, so also disable them.
         if (cmd.IsLogMode)
         {
             console.Profile.Out = new AnsiConsoleOutput(TextWriter.Null);

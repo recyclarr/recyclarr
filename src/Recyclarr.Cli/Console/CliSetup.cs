@@ -1,5 +1,6 @@
 using Autofac;
 using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Platform;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -9,12 +10,32 @@ internal static class CliSetup
 {
     private static void AddCommands(IConfigurator cli)
     {
+        cli.AddCommand<ServeCommand>("serve");
+
         cli.AddCommand<SyncCommand>("sync")
             .WithExample("sync", "radarr", "--instance", "movies")
             .WithExample("sync", "-i", "instance1", "-i", "instance2")
             .WithExample("sync", "sonarr", "--preview");
 
-        cli.AddCommand<MigrateCommand>("migrate");
+        cli.AddBranch(
+            "config",
+            config =>
+            {
+                config.SetDescription("Create starter configuration files");
+                config
+                    .AddCommand<ConfigCreateCommand>("create")
+                    .WithExample("config", "create", "-t", "hd-bluray-web")
+                    .WithExample("config", "create", "-p", "./recyclarr.yml");
+                config.AddBranch(
+                    "list",
+                    list =>
+                    {
+                        list.SetDescription("List configuration templates");
+                        list.AddCommand<ConfigListTemplatesCommand>("templates");
+                    }
+                );
+            }
+        );
 
         cli.AddBranch(
             "list",
@@ -31,24 +52,6 @@ internal static class CliSetup
         );
 
         cli.AddBranch(
-            "config",
-            config =>
-            {
-                config.SetDescription("Operations for configuration files");
-                config.AddCommand<ConfigCreateCommand>("create");
-                config.AddBranch(
-                    "list",
-                    list =>
-                    {
-                        list.SetDescription("List configuration files in various ways");
-                        list.AddCommand<ConfigListLocalCommand>("local");
-                        list.AddCommand<ConfigListTemplatesCommand>("templates");
-                    }
-                );
-            }
-        );
-
-        cli.AddBranch(
             "delete",
             delete =>
             {
@@ -58,24 +61,20 @@ internal static class CliSetup
                 delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
             }
         );
-
-        cli.AddBranch(
-            "state",
-            state =>
-            {
-                state.SetDescription("State management operations");
-                state
-                    .AddCommand<StateRepairCommand>("repair")
-                    .WithExample("state", "repair")
-                    .WithExample("state", "repair", "custom-formats")
-                    .WithExample("state", "repair", "-i", "instance1", "-i", "instance2")
-                    .WithExample("state", "repair", "custom-formats", "--preview");
-            }
-        );
     }
 
-    public static async Task<int> Run(ILifetimeScope scope, IEnumerable<string> args)
+    public static async Task<int> Run(ILifetimeScope scope, IReadOnlyList<string> args)
     {
+        var removed = RemovedCommands.Find(args);
+        if (removed is not null)
+        {
+            scope
+                .Resolve<IAnsiConsole>()
+                .MarkupLine($"[red][[REMOVED]][/] {Markup.Escape(removed)}");
+            scope.Resolve<ILogger>().Error("[REMOVED] {Message}", removed);
+            return (int)ExitStatus.Failed;
+        }
+
         var app = scope.Resolve<CommandApp>();
         app.Configure(config =>
         {
@@ -88,9 +87,7 @@ internal static class CliSetup
             config.UseStrictParsing();
 
             config.SetApplicationName("recyclarr");
-            config.SetApplicationVersion(
-                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})"
-            );
+            config.SetApplicationVersion(AppVersion.Display);
 
             AddCommands(config);
         });

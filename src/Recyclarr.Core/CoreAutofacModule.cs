@@ -1,11 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-using System.IO.Abstractions;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.Ordering;
 using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
@@ -21,8 +16,8 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
 using Recyclarr.Http;
-using Recyclarr.Notifications;
-using Recyclarr.Notifications.Apprise;
+using Recyclarr.Migration;
+using Recyclarr.Migration.Steps;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.Servarr.CustomFormat;
@@ -37,9 +32,6 @@ using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
-using Recyclarr.Settings;
-using Recyclarr.Settings.Deprecations;
-using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
 using Recyclarr.TrashGuide;
@@ -62,17 +54,31 @@ public class CoreAutofacModule : Module
         RegisterCommon(builder);
         RegisterCompatibility(builder);
         RegisterConfig(builder);
-        RegisterHttp(builder);
-        RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
         RegisterServarrApiClients(builder);
         RegisterServarrGateways(builder);
-        RegisterSettings(builder);
         RegisterTrashGuide(builder);
         RegisterYaml(builder);
         RegisterVersionControl(builder);
-        RegisterSyncEvents(builder);
+        RegisterSync(builder);
+        RegisterMigrations(builder);
+        RegisterPorts(builder);
+    }
+
+    private static void RegisterMigrations(ContainerBuilder builder)
+    {
+        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
+        builder
+            .RegisterTypes(
+                // Order-sensitive! A step may depend on the layout an earlier step produces.
+                typeof(FlattenNestedStateMigrationStep),
+                typeof(DeleteRepoDirMigrationStep),
+                typeof(MoveCacheToStateMigrationStep),
+                typeof(NormalizeStateMappingsPropertyStep)
+            )
+            .As<IMigrationStep>()
+            .OrderByRegistration();
     }
 
     private static void RegisterCache(ContainerBuilder builder)
@@ -105,13 +111,16 @@ public class CoreAutofacModule : Module
 
     private static void RegisterConfig(ContainerBuilder builder)
     {
-        builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
+        // Per scope so each configuration load reads the current secrets file.
+        builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().InstancePerLifetimeScope();
+        builder.RegisterType<ConfigInputRecorder>().InstancePerLifetimeScope();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
         builder.RegisterType<ConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
         builder.RegisterType<InstanceScopeFactory>();
+        builder.RegisterType<InstanceSyncProcessor>();
 
         // Filter Processors
         builder.RegisterType<ConfigFilterProcessor>();
@@ -153,9 +162,6 @@ public class CoreAutofacModule : Module
             .As<IConfigDiagnosticCollector>()
             .InstancePerLifetimeScope();
 
-        // Settings Deprecations
-        builder.RegisterType<SettingsDeprecations>();
-
         // These validators are required by IncludePostProcessor
         builder.RegisterType<RadarrConfigYamlValidator>().As<IValidator>();
         builder.RegisterType<SonarrConfigYamlValidator>().As<IValidator>();
@@ -163,84 +169,14 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ServiceConfigYamlValidator>().As<IValidator<ServiceConfigYaml>>();
     }
 
-    private static void RegisterHttp(ContainerBuilder builder)
-    {
-        RegisterHttpClientFactory(builder);
-    }
-
-    [SuppressMessage(
-        "Security",
-        "CA5399:HttpClient is created without enabling CheckCertificateRevocationList"
-    )]
-    [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
-    private static void RegisterHttpClientFactory(ContainerBuilder builder)
-    {
-        var services = new ServiceCollection();
-
-        services.AddTransient<HttpLoggingHandler>();
-
-        // Suppress automatic scope creation per client; handler dependencies are all singletons
-        // and these scopes would be invisible to our intentional "sync" > "instance" hierarchy.
-        services.Configure<HttpClientFactoryOptions>("servarr", o => o.SuppressHandlerScope = true);
-        services
-            .AddHttpClient("servarr")
-            .AddHttpMessageHandler<HttpLoggingHandler>()
-            .ConfigurePrimaryHttpMessageHandler(sp =>
-            {
-                var settings = sp.GetRequiredService<ISettings<RecyclarrSettings>>();
-                var handler = new HttpClientHandler();
-
-                if (!settings.Value.EnableSslCertificateValidation)
-                {
-                    handler.ServerCertificateCustomValidationCallback =
-                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-                }
-
-                return handler;
-            });
-
-        services.Configure<HttpClientFactoryOptions>("apprise", o => o.SuppressHandlerScope = true);
-        services.AddHttpClient("apprise").AddHttpMessageHandler<HttpLoggingHandler>();
-
-        builder.Populate(services);
-    }
-
-    private static void RegisterNotifications(ContainerBuilder builder)
-    {
-        builder.RegisterType<NotificationService>();
-        builder.RegisterType<AppriseNotificationApiService>().As<IAppriseNotificationApiService>();
-
-        builder.Register<INotificationService>(c =>
-        {
-            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
-            return settings.Apprise is not null
-                ? c.Resolve<NotificationService>()
-                : new NoopNotificationService();
-        });
-
-        builder.RegisterAppriseRefitClient<IAppriseApi>();
-
-        builder.Register(c =>
-        {
-            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
-            return VerbosityOptions.From(settings.Verbosity);
-        });
-    }
-
     private static void RegisterPlatform(ContainerBuilder builder)
     {
-        builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
+        builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterType<DefaultRuntimeInformation>().As<IRuntimeInformation>();
 
+        builder.RegisterType<DefaultAppDataSetup>();
         builder
-            .Register(c =>
-            {
-                var setup = new DefaultAppDataSetup(
-                    c.Resolve<IEnvironment>(),
-                    c.Resolve<IFileSystem>()
-                );
-                return setup.CreateAppPaths();
-            })
+            .Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
             .As<IAppPaths>()
             .SingleInstance();
     }
@@ -263,7 +199,6 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IQualityProfileSchemaApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileSchemaApi>();
-        builder.RegisterServarrRefitClient<SonarrApi.ILanguageApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ILanguageApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IMediaManagementConfigApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IMediaManagementConfigApi>();
@@ -275,7 +210,6 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<SonarrV5Api.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IQualityProfileSchemaApi>();
-        builder.RegisterServarrRefitClient<SonarrV5Api.ILanguageApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.IMediaManagementSettingsApi>();
         builder.RegisterServarrRefitClient<SonarrV5Api.INamingSettingsApi>();
     }
@@ -305,6 +239,10 @@ public class CoreAutofacModule : Module
             .For<SonarrV5QualityProfileGateway>(ServiceApiTarget.SonarrV5)
             .For<RadarrQualityProfileGateway>(ServiceApiTarget.RadarrV3);
         builder
+            .RegisterType<RadarrLanguageGateway>()
+            .As<IRadarrLanguageService>()
+            .InstancePerLifetimeScope();
+        builder
             .RegisterServiceGateway<ICustomFormatService>()
             .For<SonarrV3CustomFormatGateway>(ServiceApiTarget.SonarrV3)
             .For<SonarrV5CustomFormatGateway>(ServiceApiTarget.SonarrV5)
@@ -328,17 +266,6 @@ public class CoreAutofacModule : Module
             .For<RadarrMediaManagementGateway>(ServiceApiTarget.RadarrV3);
     }
 
-    private static void RegisterSettings(ContainerBuilder builder)
-    {
-        builder.RegisterType<SettingsLoader>();
-        builder.RegisterType<SettingsProvider>().SingleInstance();
-
-        builder.RegisterSettings(x => x);
-        builder.RegisterSettings(x => x.LogJanitor);
-        builder.RegisterSettings(x => x.Notifications);
-        builder.RegisterSettings(x => x.ResourceProviders);
-    }
-
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
@@ -348,19 +275,8 @@ public class CoreAutofacModule : Module
     {
         builder
             .RegisterAssemblyTypes(ThisAssembly)
-            .Where(t =>
-                typeof(IYamlBehavior).IsAssignableFrom(t)
-                && !t.IsAbstract
-                && t != typeof(SettingsDeprecatedPropertyBehavior)
-            )
+            .Where(t => typeof(IYamlBehavior).IsAssignableFrom(t) && !t.IsAbstract)
             .As<IYamlBehavior>();
-
-        // Registered both as itself (for SettingsLoader to read deprecations) and as IYamlBehavior
-        builder
-            .RegisterType<SettingsDeprecatedPropertyBehavior>()
-            .AsSelf()
-            .As<IYamlBehavior>()
-            .SingleInstance();
 
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
@@ -372,16 +288,19 @@ public class CoreAutofacModule : Module
         builder.RegisterType<GitRepository>().As<IGitRepository>();
     }
 
-    private static void RegisterSyncEvents(ContainerBuilder builder)
+    private static void RegisterSync(ContainerBuilder builder)
     {
         builder
-            .RegisterType<SyncRunScope>()
-            .AsImplementedInterfaces()
-            .InstancePerMatchingLifetimeScope("sync");
+            .RegisterType<SyncOrchestrator>()
+            .As<ISyncOrchestrator>()
+            .InstancePerMatchingLifetimeScope("run");
 
-        builder
-            .RegisterType<InstancePublisher>()
-            .As<IInstancePublisher>()
-            .InstancePerMatchingLifetimeScope("instance");
+        builder.RegisterType<SyncRunScopeFactory>().SingleInstance();
+    }
+
+    private static void RegisterPorts(ContainerBuilder builder)
+    {
+        // Custom format deletion port
+        builder.RegisterType<CustomFormatDeleter>().As<ICustomFormatDeleter>();
     }
 }

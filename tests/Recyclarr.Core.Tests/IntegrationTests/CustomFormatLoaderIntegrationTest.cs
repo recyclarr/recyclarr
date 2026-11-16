@@ -6,7 +6,7 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
+internal sealed class CustomFormatLoaderIntegrationTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Load_custom_format_json_works()

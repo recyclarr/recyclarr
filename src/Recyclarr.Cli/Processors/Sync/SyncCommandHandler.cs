@@ -1,0 +1,137 @@
+using System.Net;
+using Recyclarr.Cli.Processors.Sync.Progress;
+using Recyclarr.Cli.Processors.Sync.Results;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
+using Recyclarr.Platform;
+using Refit;
+using Spectre.Console;
+
+namespace Recyclarr.Cli.Processors.Sync;
+
+internal class SyncCommandHandler(
+    ILogger log,
+    IAnsiConsole console,
+    SyncProgressRenderer progressRenderer,
+    SyncResultsPresenter resultsPresenter
+)
+{
+    public async Task<ExitStatus> RunAsync(
+        ISyncApi api,
+        IDiagnosticsApi diagnosticsApi,
+        CreateSyncJobRequest request,
+        CancellationToken ct
+    )
+    {
+        var jobId = await CreateJobAsync(api, request, ct);
+        if (jobId is null)
+        {
+            return ExitStatus.Failed;
+        }
+
+        var job = await progressRenderer.RenderProgressAsync(
+            onSnapshot => SyncJobPoller.PollAsync(api, jobId.Value, onSnapshot, ct),
+            ct
+        );
+
+        using var response = await api.Results(jobId.Value, ct);
+        var results = response.ContentOrThrow();
+        var serverDiagnostics = await GetServerDiagnosticsAsync(diagnosticsApi, ct);
+        resultsPresenter.Present(results, serverDiagnostics, job.Progress, job.Preview);
+
+        // Only an outright failure earns a non-zero exit code. A partial sync applied everything
+        // it could, which is the outcome the CLI has always reported as success.
+        return results.Status == SyncCompletionStatus.Failed
+            ? ExitStatus.Failed
+            : ExitStatus.Succeeded;
+    }
+
+    /// <summary>
+    /// The server's current problems, shown with the sync results. They add context to a sync
+    /// that already finished, so a failed request shows nothing rather than failing the command.
+    /// </summary>
+    private async Task<IReadOnlyList<DiagnosticResponse>> GetServerDiagnosticsAsync(
+        IDiagnosticsApi api,
+        CancellationToken ct
+    )
+    {
+        try
+        {
+            using var response = await api.Diagnostics(ct);
+            if (response is { IsSuccessful: true, Content: { } content })
+            {
+                return content.Diagnostics;
+            }
+
+            log.Debug("Server diagnostics unavailable: {Error}", response.Error?.Message);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            log.Debug(e, "Server diagnostics unavailable");
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Returns the id of the accepted job, or null when the server refused the request.
+    /// </summary>
+    private async Task<Guid?> CreateJobAsync(
+        ISyncApi api,
+        CreateSyncJobRequest request,
+        CancellationToken ct
+    )
+    {
+        using var response = await api.JobsPost(request, ct);
+        if (response.IsSuccessful)
+        {
+            // non-null: a 202 always carries the created job
+            return response.Content!.Id;
+        }
+
+        // No HTTP response at all (a transport failure) or a rejected API key: not a refusal of
+        // this request, so the exception handler reports it like any other command.
+        if (
+            response.Error
+            is ApiRequestException
+                or ApiException { StatusCode: HttpStatusCode.Unauthorized }
+        )
+        {
+            throw response.Error;
+        }
+
+        await RenderRefusalAsync(response);
+        return null;
+    }
+
+    private async Task RenderRefusalAsync(IApiResponse<CreateSyncJobResponse> response)
+    {
+        var problem = response.HasResponseError(out var error)
+            ? await error.GetContentAsAsync<CreateSyncJobProblemDetails>()
+            : null;
+
+        var message = problem?.Title ?? response.Error?.Message ?? "Unknown error";
+        console.MarkupLineInterpolated($"[red]Error:[/] {message}");
+        log.Error("Sync request rejected: {Message}", message);
+
+        foreach (var detail in problem?.Errors?.Values.SelectMany(x => x) ?? [])
+        {
+            console.MarkupLineInterpolated($"  {detail}");
+            log.Error("{Detail}", detail);
+        }
+
+        if (problem?.UnknownInstances is { Count: > 0 } unknown)
+        {
+            var available = problem.AvailableInstances ?? [];
+            console.MarkupLineInterpolated($"  Unknown instances: {string.Join(", ", unknown)}");
+            console.MarkupLineInterpolated(
+                $"  Available instances: {string.Join(", ", available)}"
+            );
+            log.Error(
+                "Unknown instances {Unknown}; available instances {Available}",
+                unknown,
+                available
+            );
+        }
+    }
+}
