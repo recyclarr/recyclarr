@@ -49,16 +49,37 @@ envFrom: []
 # - secretRef:
 #     name: recyclarr-servarr-keys
 
-# Durable state: sync state and the server database (RECYCLARR_STATE_DIR). Losing it loses
-# the mapping between Sonarr/Radarr IDs and TRaSH IDs.
+# Storage for the state and data directories. Each volume is a PersistentVolumeClaim when
+# enabled (existingClaim, or a claim the chart creates), otherwise an emptyDir that lives only as
+# long as the pod. state and data cannot use the same existingClaim: both would mount the
+# claim's root, and the server would refuse to start because it locks each directory.
 persistence:
-  # When false, state lives in an emptyDir and is lost when the pod is recreated.
-  enabled: true
-  existingClaim: ~
-  # Null uses the cluster default StorageClass.
-  storageClass: ~
-  accessMode: ReadWriteOnce
-  size: 1Gi
+  # Durable state: sync state and the server database (RECYCLARR_STATE_DIR). Losing it loses
+  # the mapping between Sonarr/Radarr IDs and TRaSH IDs. Uninstalling the chart keeps the claim
+  # it created.
+  state:
+    enabled: true
+    existingClaim: ~
+    # Null uses the cluster default StorageClass.
+    storageClass: ~
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    # Used only when enabled is false.
+    emptyDir:
+      sizeLimit: ~
+      # Memory uses a tmpfs, which counts against the container memory limit.
+      medium: ~
+  # Downloaded data: resource provider git clones, caches, and logs (RECYCLARR_DATA_DIR).
+  # Losing it costs only a re-download on the next start, so an emptyDir is the default.
+  data:
+    enabled: false
+    existingClaim: ~
+    storageClass: ~
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    emptyDir:
+      sizeLimit: ~
+      medium: ~
 
 service:
   type: ClusterIP

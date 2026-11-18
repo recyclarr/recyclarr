@@ -18,6 +18,9 @@ settings:
   content: |
     log_janitor:
       max_files: 5
+persistence:
+  data:
+    enabled: true
 env:
   - name: SONARR_API_KEY
     value: ci-sonarr-key

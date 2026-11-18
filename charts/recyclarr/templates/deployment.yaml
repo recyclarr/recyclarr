@@ -7,9 +7,9 @@ metadata:
 {{- $configs := include "recyclarr.configMapName" (dict "root" . "source" "configs") }}
 {{- $includes := include "recyclarr.configMapName" (dict "root" . "source" "includes") }}
 {{- $settings := include "recyclarr.configMapName" (dict "root" . "source" "settings") }}
-{{- $stateClaim := include "recyclarr.stateClaimName" . }}
 spec:
-  # One server owns the state volume; Recreate stops the old pod before the new one mounts it.
+  # One server owns the state and data volumes; Recreate stops the old pod before the new one
+  # mounts them.
   replicas: 1
   strategy:
     type: Recreate
@@ -126,16 +126,11 @@ spec:
               - key: {{ .Values.apiKey.existingSecretKey }}
                 path: api-key
         - name: data
-          emptyDir: {}
+          {{- include "recyclarr.volumeSource" (dict "root" . "volume" "data") | trim | nindent 10 }}
+        - name: state
+          {{- include "recyclarr.volumeSource" (dict "root" . "volume" "state") | trim | nindent 10 }}
         - name: tmp
           emptyDir: {}
-        - name: state
-          {{- if $stateClaim }}
-          persistentVolumeClaim:
-            claimName: {{ $stateClaim }}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
         {{- if $configs }}
         - name: configs
           configMap:

@@ -14,6 +14,27 @@
           "additionalProperties": { "type": "string" }
         }
       }
+    },
+    "volume": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "existingClaim": { "$ref": "#/definitions/nullableString" },
+        "storageClass": { "$ref": "#/definitions/nullableString" },
+        "accessMode": {
+          "enum": ["ReadWriteOnce", "ReadWriteOncePod", "ReadWriteMany"]
+        },
+        "size": { "type": "string", "minLength": 1 },
+        "emptyDir": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sizeLimit": { "$ref": "#/definitions/nullableString" },
+            "medium": { "enum": [null, "Memory"] }
+          }
+        }
+      }
     }
   },
   "properties": {
@@ -64,13 +85,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "existingClaim": { "$ref": "#/definitions/nullableString" },
-        "storageClass": { "$ref": "#/definitions/nullableString" },
-        "accessMode": {
-          "enum": ["ReadWriteOnce", "ReadWriteOncePod", "ReadWriteMany"]
-        },
-        "size": { "type": "string", "minLength": 1 }
+        "state": { "$ref": "#/definitions/volume" },
+        "data": { "$ref": "#/definitions/volume" }
       }
     },
     "service": {

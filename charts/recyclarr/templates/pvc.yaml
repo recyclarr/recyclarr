@@ -1,14 +1,18 @@
-{{- with .Values.persistence }}
+{{- range $volume := list "state" "data" }}
+{{- with index $.Values.persistence $volume }}
 {{- if and .enabled (not .existingClaim) }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "recyclarr.stateClaimName" $ }}
+  name: {{ include "recyclarr.claimName" (dict "root" $ "volume" $volume) }}
   labels:
     {{- include "recyclarr.labels" $ | nindent 4 }}
+  {{- if eq $volume "state" }}
   annotations:
     # Uninstalling the chart keeps the claim so sync state survives a reinstall.
     helm.sh/resource-policy: keep
+  {{- end }}
 spec:
   accessModes:
     - {{ .accessMode }}
@@ -18,5 +22,6 @@ spec:
   resources:
     requests:
       storage: {{ .size }}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -79,10 +79,42 @@ source is unset. Call with (dict "root" $ "source" "configs").
 {{- end }}
 
 {{/*
-Name of the PersistentVolumeClaim for state, or empty when persistence is disabled.
+Name of the PersistentVolumeClaim for one volume (state or data), or empty when its persistence
+is disabled. Call with (dict "root" $ "volume" "state").
 */}}
-{{- define "recyclarr.stateClaimName" -}}
-{{- if .Values.persistence.enabled }}
-{{- .Values.persistence.existingClaim | default (printf "%s-state" (include "recyclarr.fullname" .)) }}
+{{- define "recyclarr.claimName" -}}
+{{- $values := index .root.Values.persistence .volume }}
+{{- if $values.enabled }}
+{{- $values.existingClaim | default (printf "%s-%s" (include "recyclarr.fullname" .root) .volume) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Volume source for one volume (state or data): its claim, or an emptyDir when persistence is
+disabled. Fails when state and data name the same claim; both would mount its root, and the
+server's lock on each directory would collide. Call with (dict "root" $ "volume" "state").
+*/}}
+{{- define "recyclarr.volumeSource" -}}
+{{- $claim := include "recyclarr.claimName" . }}
+{{- $other := include "recyclarr.claimName" (dict "root" .root "volume" (ternary "data" "state" (eq .volume "state"))) }}
+{{- if and $claim (eq $claim $other) }}
+{{- fail "persistence.state and persistence.data cannot use the same claim" }}
+{{- end }}
+{{- if $claim }}
+persistentVolumeClaim:
+  claimName: {{ $claim }}
+{{- else }}
+{{- $emptyDir := (index .root.Values.persistence .volume).emptyDir }}
+{{- if or $emptyDir.sizeLimit $emptyDir.medium }}
+emptyDir:
+  {{- with $emptyDir.sizeLimit }}
+  sizeLimit: {{ . }}
+  {{- end }}
+  {{- with $emptyDir.medium }}
+  medium: {{ . }}
+  {{- end }}
+{{- else }}
+emptyDir: {}
+{{- end }}
 {{- end }}
 {{- end }}

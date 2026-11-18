@@ -41,7 +41,8 @@ jobs:
           helm template t "$CHART_DIR" "$key" > /dev/null
           helm template t "$CHART_DIR" --set=apiKey.existingSecret=s \
             --set=configs.existingConfigMap=c --set=includes.existingConfigMap=i \
-            --set=settings.existingConfigMap=st --set=persistence.existingClaim=pvc \
+            --set=settings.existingConfigMap=st --set=persistence.state.existingClaim=pvc \
+            --set=persistence.data.enabled=true --set=persistence.data.existingClaim=data \
             --set=serviceMonitor.enabled=true > /dev/null
           # errexit ignores commands negated with !, so each rejection is checked explicitly
           reject() {
@@ -55,7 +56,9 @@ jobs:
           reject "$key" --set=apiKey.existingSecret=s
           reject "$key" --set=configs.existingConfigMap=c --set=configs.files.a\\.yml=b
           reject "$key" --set=configs.files.a\\.txt=b
-          reject "$key" --set=persistance.enabled=false
+          reject "$key" --set=persistance.state.enabled=false
+          reject "$key" --set=persistence.data.enabled=true \
+            --set=persistence.state.existingClaim=pvc --set=persistence.data.existingClaim=pvc
           reject "$key" --set=service.port=7983
 
       - name: Package Chart
