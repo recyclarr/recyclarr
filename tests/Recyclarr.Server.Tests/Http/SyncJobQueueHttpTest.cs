@@ -70,12 +70,46 @@ internal sealed class SyncJobQueueHttpTest : ServerHttpFixture
     public async Task Job_that_cannot_be_queued_fails()
     {
         using var client = CreateClient();
-        await Services.GetRequiredService<IScheduler>().Shutdown();
+        var scheduler = Services.GetRequiredService<IScheduler>();
+        await SchedulerStarted(scheduler);
+        await scheduler.Shutdown();
 
         var id = await CreateJob(client, "first");
 
         var job = (await RestService.For<ISyncApi>(client).JobsGet(id)).Content;
         job?.Status.Should().Be(nameof(SyncJobStatus.Failed));
+    }
+
+    // The Quartz hosted service starts the scheduler in the background once the host has started.
+    // A start still in progress sets the scheduler running after a shutdown completes, so a
+    // shutdown issued before the start finishes can leave a scheduler that accepts jobs but never
+    // runs them. The listener is added before the status check so a start that finishes in between
+    // is not missed.
+    private static Task SchedulerStarted(IScheduler scheduler)
+    {
+        var listener = new StartedListener();
+        scheduler.ListenerManager.AddSchedulerListener(listener);
+        if (scheduler.Status == SchedulerStatus.Running)
+        {
+            return Task.CompletedTask;
+        }
+
+        return listener.Started.WaitAsync(TimeSpan.FromSeconds(10));
+    }
+
+    private sealed class StartedListener : ISchedulerListener
+    {
+        private readonly TaskCompletionSource _started = new(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+
+        public Task Started => _started.Task;
+
+        public ValueTask SchedulerStarted(IScheduler scheduler, CancellationToken ct = default)
+        {
+            _started.TrySetResult();
+            return default;
+        }
     }
 
     private static async Task<Guid> CreateJob(HttpClient client, string instance)
