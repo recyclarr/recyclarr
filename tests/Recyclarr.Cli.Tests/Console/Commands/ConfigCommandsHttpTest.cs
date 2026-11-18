@@ -202,10 +202,10 @@ internal sealed class ConfigCommandsHttpTest : CliServerHttpFixture
         path.Exists.Should().BeFalse();
     }
 
-    [TestCase("radarr\thd-bluray-web\tHD Bluray + WEB\n", "radarr-inc")]
-    [TestCase("radarr\tradarr-inc\n", "hd-bluray-web", "-i")]
+    [TestCase("radarr\thd-bluray-web\tHD Bluray + WEB", "radarr-inc")]
+    [TestCase("radarr\tradarr-inc", "hd-bluray-web", "-i")]
     public async Task List_templates_raw_prints_service_and_id(
-        string expected,
+        string expectedLine,
         string unexpected,
         params string[] extraArgs
     )
@@ -215,6 +215,11 @@ internal sealed class ConfigCommandsHttpTest : CliServerHttpFixture
         var exitCode = await RunCliAsync(["config", "list", "templates", "--raw", .. extraArgs]);
 
         exitCode.Should().Be(0);
-        ConsoleOutput.Should().Contain(expected).And.NotContain(unexpected);
+        ConsoleOutput
+            .ReplaceLineEndings()
+            .Split(Environment.NewLine)
+            .Should()
+            .Contain(expectedLine);
+        ConsoleOutput.Should().NotContain(unexpected);
     }
 }
