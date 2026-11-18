@@ -83,6 +83,8 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   registrations before adding new ones.
 - .NET 11.0 (C# 15) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
+- Code and tests MUST behave identically on Linux, macOS, and Windows. Never assume the host
+  platform's conventions; use .NET platform abstractions or compare in a platform-neutral form.
 - Use enums for closed labels or states. Use polymorphism when variants own distinct behavior or
   implementations must be substitutable or extensible.
 - Avoid interface pollution. Add interfaces for architectural boundaries, multiple implementations
