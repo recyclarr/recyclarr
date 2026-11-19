@@ -38,6 +38,7 @@ repos:
     rev: v3.10.1
     hooks:
       - id: prettier
+        language_version: system
         args: [--write]
         types_or: [json, json5, xml, html, yaml, javascript, markdown]
         # Helm templates are Go templates, not YAML
