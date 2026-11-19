@@ -29,6 +29,8 @@ changes you may need to make.
   `settings.yml`
 - **BREAKING**: Older x86-64 processors without SSE4.2 and POPCNT support can no longer run
   Recyclarr
+- **BREAKING**: CLI: `list naming radarr --raw` prints the key and version in separate columns, like
+  Sonarr
 - CLI: `config create` and `config list templates` build templates from the TRaSH Guides, so they
   follow guide updates. The official config templates repository is no longer downloaded
 - CLI: `config create --path` also works with a single `--template`

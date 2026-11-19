@@ -66,11 +66,8 @@ internal class ListMediaNamingCommand(
             {
                 foreach (var format in formats)
                 {
-                    // Raw columns differ by service to keep existing scripts working.
                     console.WriteRawLine(
-                        settings.Service == SupportedServices.Radarr
-                            ? $"{type}\t{RadarrRawKey(format)}\t{format.Format}"
-                            : $"{type}\t{format.Key}\t{VersionLabel(format)}\t{format.Format}"
+                        $"{type}\t{format.Key}\t{VersionLabel(format)}\t{format.Format}"
                     );
                 }
             }
@@ -87,9 +84,6 @@ internal class ListMediaNamingCommand(
 
         return (int)ExitStatus.Succeeded;
     }
-
-    private static string RadarrRawKey(GuideNamingFormatResponse format) =>
-        format.Version is null ? format.Key : $"{format.Key} (v{format.Version})";
 
     private static string VersionLabel(GuideNamingFormatResponse format) =>
         format.Version is null ? "All" : $"v{format.Version}";

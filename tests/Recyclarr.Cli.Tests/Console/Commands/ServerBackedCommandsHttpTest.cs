@@ -91,14 +91,14 @@ internal sealed class ServerBackedCommandsHttpTest : CliServerHttpFixture
     }
 
     [Test]
-    public async Task List_naming_keeps_the_radarr_raw_format()
+    public async Task List_naming_raw_output_has_separate_key_and_version_columns()
     {
         AddGuide();
 
         var exitCode = await RunCliAsync("list", "naming", "radarr", "--raw");
 
         exitCode.Should().Be(0);
-        ConsoleOutput.Should().Contain("movie_folder\tplex (v4)\t{Movie Title}");
+        ConsoleOutput.Should().Contain("movie_folder\tplex\tv4\t{Movie Title}");
     }
 
     [Test]
