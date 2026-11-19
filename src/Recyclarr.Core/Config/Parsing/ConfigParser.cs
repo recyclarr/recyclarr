@@ -33,10 +33,6 @@ public class ConfigParser(IYamlSerializerFactory yamlFactory)
             using var stream = streamFactory();
             return _deserializer.Deserialize<T?>(stream);
         }
-        catch (FeatureRemovalException e)
-        {
-            throw new ConfigParsingException(e.Message, 0, e);
-        }
         catch (YamlException e)
         {
             // Layer 1 handlers throw ConfigParsingException inside the pipeline, which
