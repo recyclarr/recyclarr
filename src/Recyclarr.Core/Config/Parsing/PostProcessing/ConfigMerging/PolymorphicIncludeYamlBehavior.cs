@@ -1,4 +1,4 @@
-using Recyclarr.Common.Extensions;
+using System.Text.Json;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 
@@ -9,8 +9,10 @@ public class PolymorphicIncludeYamlBehavior : IYamlBehavior
 {
     private static readonly Dictionary<string, Type> Mapping = new()
     {
-        [nameof(ConfigYamlInclude.Config).ToSnakeCase()] = typeof(ConfigYamlInclude),
-        [nameof(TemplateYamlInclude.Template).ToSnakeCase()] = typeof(TemplateYamlInclude),
+        [JsonNamingPolicy.SnakeCaseLower.ConvertName(nameof(ConfigYamlInclude.Config))] =
+            typeof(ConfigYamlInclude),
+        [JsonNamingPolicy.SnakeCaseLower.ConvertName(nameof(TemplateYamlInclude.Template))] =
+            typeof(TemplateYamlInclude),
     };
 
     public void Setup(DeserializerBuilder builder)

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.Json;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
@@ -27,25 +28,17 @@ internal sealed class KebabCaseEnumTypeConverter<TEnum> : TypeConverter
             return base.ConvertFrom(context, culture, value);
         }
 
-        // Convert kebab-case to PascalCase: "custom-formats" -> "CustomFormats"
-        var normalized = string.Concat(
-            stringValue
-                .Split('-')
-                .Select(part =>
-                    part.Length > 0
-                        ? char.ToUpperInvariant(part[0]) + part[1..].ToLowerInvariant()
-                        : string.Empty
-                )
-        );
-
-        if (Enum.TryParse<TEnum>(normalized, ignoreCase: true, out var result))
+        foreach (var enumValue in Enum.GetValues<TEnum>())
         {
-            return result;
+            if (ToKebabCase(enumValue).Equals(stringValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return enumValue;
+            }
         }
 
         throw new InvalidOperationException(
             $"'{stringValue}' is not a valid value for {typeof(TEnum).Name}. "
-                + $"Valid values: {string.Join(", ", GetKebabCaseValues())}"
+                + $"Valid values: {string.Join(", ", KebabCaseNames())}"
         );
     }
 
@@ -58,14 +51,19 @@ internal sealed class KebabCaseEnumTypeConverter<TEnum> : TypeConverter
     {
         if (destinationType == typeof(string) && value is TEnum enumValue)
         {
-            return StringCaseConverter.ToKebabCase(enumValue.ToString());
+            return ToKebabCase(enumValue);
         }
 
         return base.ConvertTo(context, culture, value, destinationType);
     }
 
-    private static IEnumerable<string> GetKebabCaseValues()
+    public static IEnumerable<string> KebabCaseNames()
     {
-        return Enum.GetNames<TEnum>().Select(StringCaseConverter.ToKebabCase);
+        return Enum.GetValues<TEnum>().Select(ToKebabCase);
+    }
+
+    private static string ToKebabCase(TEnum value)
+    {
+        return JsonNamingPolicy.KebabCaseLower.ConvertName(value.ToString());
     }
 }

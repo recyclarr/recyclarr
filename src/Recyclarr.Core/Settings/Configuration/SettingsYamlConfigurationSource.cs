@@ -201,6 +201,14 @@ internal sealed class SettingsYamlConfigurationSource : FileConfigurationSource
                 && scalar.Value is null or "" or "~" or "null" or "Null" or "NULL";
         }
 
+        /// <summary>
+        /// Converts a snake_case settings.yml key into the PascalCase name the binder expects.
+        /// </summary>
+        /// <remarks>
+        /// Hand-written on purpose: <c>JsonNamingPolicy.PascalCase</c> does not split on
+        /// underscores (<c>base_url</c> becomes <c>Base_Url</c>), and the binder needs
+        /// <c>BaseUrl</c>.
+        /// </remarks>
         private static string PascalCase(string key)
         {
             return string.Concat(

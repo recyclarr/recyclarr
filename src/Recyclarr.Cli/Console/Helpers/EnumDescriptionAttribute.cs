@@ -6,13 +6,13 @@ namespace Recyclarr.Cli.Console.Helpers;
 
 [AttributeUsage(AttributeTargets.Property)]
 internal sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
-    where TEnum : Enum
+    where TEnum : struct, Enum
 {
     public override string Description { get; }
 
     public EnumDescriptionAttribute(string description)
     {
-        var enumNames = Enum.GetNames(typeof(TEnum)).Select(StringCaseConverter.ToKebabCase);
+        var enumNames = KebabCaseEnumTypeConverter<TEnum>.KebabCaseNames();
 
         var str = new StringBuilder(description.Trim());
         str.Append(

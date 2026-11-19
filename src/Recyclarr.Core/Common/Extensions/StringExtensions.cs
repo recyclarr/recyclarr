@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 
 namespace Recyclarr.Common.Extensions;
 
@@ -43,35 +42,5 @@ public static class StringExtensions
     public static string TrimNewlines(this string value)
     {
         return value.Trim('\r', '\n');
-    }
-
-    public static string ToCamelCase(this string value)
-    {
-        return char.ToLowerInvariant(value[0]) + value[1..];
-    }
-
-    public static string ToSnakeCase(this string text)
-    {
-        if (text.Length < 2)
-        {
-            return text;
-        }
-
-        var sb = new StringBuilder();
-        sb.Append(char.ToLowerInvariant(text[0]));
-        foreach (var c in text[1..])
-        {
-            if (char.IsUpper(c))
-            {
-                sb.Append('_');
-                sb.Append(char.ToLowerInvariant(c));
-            }
-            else
-            {
-                sb.Append(c);
-            }
-        }
-
-        return sb.ToString();
     }
 }
