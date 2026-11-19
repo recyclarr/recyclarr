@@ -34,6 +34,22 @@ internal sealed class JsonLogFormatterTest
     }
 
     [Test]
+    public void Object_in_message_is_rendered_as_text_while_its_property_stays_json()
+    {
+        var line = WriteSingleLine(log =>
+            log.Information("Synced {@Outcome}", new ProfileOutcome { Name = "HD", Score = 100 })
+        );
+
+        using var json = JsonDocument.Parse(line);
+        var root = json.RootElement;
+        root.GetProperty("message")
+            .GetString()
+            .Should()
+            .Be("Synced ProfileOutcome { Name: \"HD\", Score: 100 }");
+        root.GetProperty("Outcome").GetProperty("Score").GetInt32().Should().Be(100);
+    }
+
+    [Test]
     public void Event_inside_an_activity_carries_its_trace_and_span_ids()
     {
         using var activity = new Activity("test");
@@ -67,6 +83,13 @@ internal sealed class JsonLogFormatterTest
             .Be(typeof(InvalidOperationException).FullName);
         root.GetProperty("exception.message").GetString().Should().NotBeNullOrEmpty();
         root.GetProperty("exception.stacktrace").GetString().Should().Contain(nameof(Thrown));
+    }
+
+    // Serilog reads these properties through reflection when destructuring
+    private sealed record ProfileOutcome
+    {
+        public required string Name { get; init; }
+        public required int Score { get; init; }
     }
 
     private static string WriteSingleLine(Action<ILogger> write)

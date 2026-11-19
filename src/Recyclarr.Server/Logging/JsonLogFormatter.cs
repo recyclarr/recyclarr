@@ -24,7 +24,7 @@ internal sealed class JsonLogFormatter : ITextFormatter
     private static readonly JsonValueFormatter ValueFormatter = new(typeTagName: null);
 
     private static readonly MessageTemplateTextFormatter MessageFormatter = new(
-        "{Message:lj}",
+        "{Message:l}",
         CultureInfo.InvariantCulture
     );
 
@@ -86,8 +86,10 @@ internal sealed class JsonLogFormatter : ITextFormatter
 
     private static string RenderMessage(LogEvent logEvent)
     {
-        // `l` renders strings without quotes, matching the text console; `j` renders structured
-        // values as JSON.
+        // `l` renders strings without quotes, matching the text console. Without `j`, objects
+        // render as readable text (`Type { Name: value }`) rather than as JSON nested in a JSON
+        // string; collectors read them from the structured properties instead. The text console
+        // cannot match this: Serilog.Expressions always renders objects in messages as JSON.
         using var rendered = new StringWriter(CultureInfo.InvariantCulture);
         MessageFormatter.Format(logEvent, rendered);
         var message = rendered.ToString();
