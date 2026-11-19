@@ -97,7 +97,7 @@ internal class SonarrV5QualityProfileFields(IQualityItemLimitFactory limitFactor
             })
             .ToList();
 
-        return new SonarrPlannedQualityProfileResource(shared, sizes);
+        return new SonarrPlannedQualityProfileResource(shared, sizes, planned.QualitySizesSource);
     }
 
     private static PlannedQualitySizeResource Compare(

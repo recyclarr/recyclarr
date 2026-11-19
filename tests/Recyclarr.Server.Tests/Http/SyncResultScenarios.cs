@@ -294,8 +294,15 @@ internal static class SyncResultScenarios
                             new QualitySizeValue.Numeric(30),
                             new QualitySizeValue.Unlimited()
                         ),
-                    ]
+                    ],
+                    QualitySizeSource.Instance
                 ),
+                new SonarrPlannedQualityProfileResource(
+                    created,
+                    [],
+                    QualitySizeSource.GuideProfile
+                ),
+                new SonarrPlannedQualityProfileResource(created, [], qualitySizesSource: null),
                 new SonarrPlannedQualityProfileResource(
                     updated,
                     [
@@ -305,7 +312,8 @@ internal static class SyncResultScenarios
                             (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited()),
                             (new QualitySizeValue.Unlimited(), new QualitySizeValue.Unlimited())
                         ),
-                    ]
+                    ],
+                    QualitySizeSource.Profile
                 ),
             ];
         if (!isRadarr)

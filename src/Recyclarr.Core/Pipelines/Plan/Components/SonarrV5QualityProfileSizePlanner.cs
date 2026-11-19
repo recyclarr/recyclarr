@@ -1,5 +1,6 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
 
@@ -52,9 +53,13 @@ internal class SonarrV5QualityProfileSizePlanner(
             return profile;
         }
 
-        if (source is ProfileSource.Config { Definition: var definition })
+        if (source is ProfileSource.Config { Definition: var definition, Origin: var origin })
         {
-            return profile with { QualitySizes = resolver.Resolve(definition, Report) };
+            return profile with
+            {
+                QualitySizes = resolver.Resolve(definition, Report),
+                QualitySizesSource = origin,
+            };
         }
 
         if (instanceSizes.Value is not { Sizes: { } sizes, Outcomes: var outcomes })
@@ -70,6 +75,7 @@ internal class SonarrV5QualityProfileSizePlanner(
         return profile with
         {
             QualitySizes = sizes,
+            QualitySizesSource = QualitySizeSource.Instance,
         };
     }
 
@@ -80,7 +86,7 @@ internal class SonarrV5QualityProfileSizePlanner(
     {
         if (profile.Config.QualityDefinition is { } yaml)
         {
-            return new ProfileSource.Config(yaml);
+            return new ProfileSource.Config(yaml, QualitySizeSource.Profile);
         }
 
         var guideReference = profile.GuideResource?.TrashQualityDefinition;
@@ -106,7 +112,10 @@ internal class SonarrV5QualityProfileSizePlanner(
             return new ProfileSource.None();
         }
 
-        return new ProfileSource.Config(new QualityDefinitionConfig { Type = guideSizes.Type });
+        return new ProfileSource.Config(
+            new QualityDefinitionConfig { Type = guideSizes.Type },
+            QualitySizeSource.GuideProfile
+        );
     }
 
     private ResolvedSizes ResolveInstanceSizes()
@@ -128,7 +137,8 @@ internal class SonarrV5QualityProfileSizePlanner(
 
     private abstract record ProfileSource
     {
-        public sealed record Config(QualityDefinitionConfig Definition) : ProfileSource;
+        public sealed record Config(QualityDefinitionConfig Definition, QualitySizeSource Origin)
+            : ProfileSource;
 
         public sealed record Instance : ProfileSource;
 

@@ -836,7 +836,8 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                                         new QualitySizeValue.Numeric(1),
                                         new QualitySizeValue.Numeric(1)
                                     ),
-                                ]
+                                ],
+                                QualitySizeSource.Instance
                             ),
                         ],
                         failed: 1

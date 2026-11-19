@@ -22,5 +22,5 @@ internal class SonarrV3QualityProfileFields : IQualityProfileServiceFields
         QualityProfileData? current,
         QualityProfileData desired,
         PlannedQualityProfile planned
-    ) => new SonarrPlannedQualityProfileResource(shared, []);
+    ) => new SonarrPlannedQualityProfileResource(shared, [], qualitySizesSource: null);
 }

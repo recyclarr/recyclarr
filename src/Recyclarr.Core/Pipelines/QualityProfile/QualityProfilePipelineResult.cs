@@ -212,15 +212,37 @@ public sealed record SonarrPlannedQualityProfileResource : PlannedQualityProfile
     [SetsRequiredMembers]
     public SonarrPlannedQualityProfileResource(
         PlannedQualityProfileResource shared,
-        IReadOnlyList<PlannedQualitySizeResource> qualitySizes
+        IReadOnlyList<PlannedQualitySizeResource> qualitySizes,
+        QualitySizeSource? qualitySizesSource
     )
         : base(shared)
     {
         QualitySizes = qualitySizes;
+        QualitySizesSource = qualitySizesSource;
     }
 
     /// <summary>The sizes of every planned quality the profile contains.</summary>
     public IReadOnlyList<PlannedQualitySizeResource> QualitySizes { get; }
+
+    /// <summary>
+    /// Where <see cref="QualitySizes"/> came from; null when no size source applies to the profile.
+    /// </summary>
+    public QualitySizeSource? QualitySizesSource { get; }
+}
+
+/// <summary>
+/// The size source chosen for a Sonarr v5 profile, first available wins in this order (PDR-008).
+/// </summary>
+public enum QualitySizeSource
+{
+    /// <summary>The profile's own <c>quality_definition</c> in the configuration.</summary>
+    Profile,
+
+    /// <summary>The quality definition the guide's version of the profile references.</summary>
+    GuideProfile,
+
+    /// <summary>The instance-level <c>quality_definition</c>.</summary>
+    Instance,
 }
 
 public abstract record QualityProfileQualityLayoutItem

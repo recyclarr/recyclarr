@@ -3,6 +3,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.Pipelines.Plan;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -136,10 +137,30 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
         plan.QualityProfiles.Should()
             .BeEquivalentTo(
                 [
-                    new { Name = "Yaml Wins", QualitySizes = new { Type = "anime" } },
-                    new { Name = "Guide Ref", QualitySizes = new { Type = "guide" } },
-                    new { Name = "Guide NoRef", QualitySizes = new { Type = "series" } },
-                    new { Name = "User Defined", QualitySizes = new { Type = "series" } },
+                    new
+                    {
+                        Name = "Yaml Wins",
+                        QualitySizes = new { Type = "anime" },
+                        QualitySizesSource = QualitySizeSource.Profile,
+                    },
+                    new
+                    {
+                        Name = "Guide Ref",
+                        QualitySizes = new { Type = "guide" },
+                        QualitySizesSource = QualitySizeSource.GuideProfile,
+                    },
+                    new
+                    {
+                        Name = "Guide NoRef",
+                        QualitySizes = new { Type = "series" },
+                        QualitySizesSource = QualitySizeSource.Instance,
+                    },
+                    new
+                    {
+                        Name = "User Defined",
+                        QualitySizes = new { Type = "series" },
+                        QualitySizesSource = QualitySizeSource.Instance,
+                    },
                 ],
                 o => o.ExcludingMissingMembers()
             );

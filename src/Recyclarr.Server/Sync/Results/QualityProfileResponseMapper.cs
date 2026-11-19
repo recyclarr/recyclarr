@@ -37,6 +37,18 @@ internal static class QualityProfileResponseMapper
                         QualitySizes = sonarr
                             .QualitySizes.Select(ResultValueMapper.MapQualitySizeItem)
                             .ToList(),
+                        QualitySizesSource = sonarr.QualitySizesSource switch
+                        {
+                            null => null,
+                            QualitySizeSource.Profile => "profile",
+                            QualitySizeSource.GuideProfile => "guide_profile",
+                            QualitySizeSource.Instance => "instance",
+                            _ => throw new ArgumentOutOfRangeException(
+                                nameof(result),
+                                sonarr.QualitySizesSource,
+                                null
+                            ),
+                        },
                     };
                 })
                 .ToList(),

@@ -3587,6 +3587,13 @@
             "description": "Sizes of every quality in the profile that the configuration sizes. Only Sonarr v5 stores\nsizes per quality profile; empty on earlier versions.",
             "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
           },
+          "qualitySizesSource": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Where the profile's quality sizes come from: profile (the profile's own\nquality_definition), guide_profile (the definition the guide profile\nreferences), or instance (the instance quality_definition). More values may be\nadded. Absent when no size source applies, including on Sonarr versions before v5."
+          },
           "action": {
             "$ref": "#/components/schemas/ResourceAction"
           },

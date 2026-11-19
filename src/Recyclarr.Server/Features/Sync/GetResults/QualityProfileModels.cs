@@ -127,6 +127,14 @@ internal sealed record SonarrQualityProfileItemResponse : QualityProfileItemResp
     /// sizes per quality profile; empty on earlier versions.
     /// </summary>
     public required IReadOnlyList<QualitySizeItemResponse> QualitySizes { get; init; }
+
+    /// <summary>
+    /// Where the profile's quality sizes come from: <c>profile</c> (the profile's own
+    /// <c>quality_definition</c>), <c>guide_profile</c> (the definition the guide profile
+    /// references), or <c>instance</c> (the instance <c>quality_definition</c>). More values may be
+    /// added. Absent when no size source applies, including on Sonarr versions before v5.
+    /// </summary>
+    public string? QualitySizesSource { get; init; }
 }
 
 /// <summary>

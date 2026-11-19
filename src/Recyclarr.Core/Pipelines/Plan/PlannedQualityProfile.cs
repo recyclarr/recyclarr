@@ -1,4 +1,5 @@
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Pipelines.Plan;
@@ -34,6 +35,9 @@ internal abstract record PlannedQualityProfile
     // Sizes assigned to this profile's qualities on services that store sizes per profile. Null
     // when no size source applies; the service's existing sizes are then left untouched.
     public PlannedQualitySizes? QualitySizes { get; init; }
+
+    // Which source supplied QualitySizes; null exactly when QualitySizes is null.
+    public QualitySizeSource? QualitySizesSource { get; init; }
 
     public QualityProfileResource? GuideResource =>
         this is GuideBacked guideBacked ? guideBacked.Resource : null;

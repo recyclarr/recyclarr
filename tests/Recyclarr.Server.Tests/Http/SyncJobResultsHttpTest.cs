@@ -173,6 +173,9 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             );
         raw.Should().Contain("\"action\":\"unchanged\"").And.Contain("\"changed\":false");
         raw.Should().NotContain("sonarrNaming").And.NotContain("radarrNaming");
+
+        // A profile without a size source omits the field instead of sending null.
+        raw.Should().NotContain("\"qualitySizesSource\":null");
     }
 
     [Test]
@@ -447,6 +450,10 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         pipeline.Should().NotBeNull();
         var created = pipeline.Items.First();
         created.Action.Should().Be(ResourceAction.Create);
+        pipeline
+            .Items.Select(x => x.QualitySizesSource)
+            .Should()
+            .Equal("instance", "guide_profile", null, "profile");
         created
             .QualitySizes.Should()
             .ContainSingle()
