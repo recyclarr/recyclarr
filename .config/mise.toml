@@ -6,6 +6,7 @@ DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
 RECYCLARR_API_KEY = "dev-server-api-key-0123456789abcdef"
 
 [tools]
+cloudflare-cf = "latest"
 dotnet = "11"
 ffmpeg = "latest"
 "github:santhosh-tekuri/jsonschema" = "latest"
@@ -16,7 +17,6 @@ python = "latest"
 ttyd = { version = "latest", os = ["linux", "windows"] }
 uv = "latest"
 vhs = "latest"
-wrangler = "latest"
 
 [tasks.demo]
 description = "Record the README sync demo (.github/assets/sync-preview.webp)"
