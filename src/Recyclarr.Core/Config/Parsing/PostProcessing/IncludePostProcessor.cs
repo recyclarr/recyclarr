@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
-using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Logging;
 using Recyclarr.TrashGuide;
 using Serilog.Context;
@@ -12,8 +11,7 @@ public sealed class IncludePostProcessor(
     ILogger log,
     ConfigParser parser,
     ConfigValidationExecutor validator,
-    IYamlIncludeResolver includeResolver,
-    ConfigDeprecations deprecations
+    IYamlIncludeResolver includeResolver
 ) : IConfigPostProcessor
 {
     public RootConfigYaml Process(RootConfigYaml config)
@@ -66,7 +64,7 @@ public sealed class IncludePostProcessor(
                             LogProperty.Scope,
                             $"Include {yamlFile.Name}"
                         );
-                        return deprecations.CheckAndTransform(LoadYamlInclude<T>(yamlFile));
+                        return LoadYamlInclude<T>(yamlFile);
                     })
                     .Aggregate(new T(), merger.Merge!);
 

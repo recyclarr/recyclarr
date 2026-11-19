@@ -13,7 +13,6 @@ using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
-using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
 using Recyclarr.Http;
 using Recyclarr.Migration;
@@ -146,15 +145,11 @@ public class CoreAutofacModule : Module
         builder
             .RegisterTypes(
                 // Order-sensitive!
-                typeof(ConfigDeprecationPostProcessor),
                 typeof(ImplicitUrlAndKeyPostProcessor),
                 typeof(IncludePostProcessor)
             )
             .As<IConfigPostProcessor>()
             .OrderByRegistration();
-
-        // Config Deprecations
-        builder.RegisterType<ConfigDeprecations>();
 
         // Config Diagnostic Collector (shared between YAML type inspector and config registry)
         builder
