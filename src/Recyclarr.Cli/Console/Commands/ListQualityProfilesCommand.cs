@@ -97,7 +97,7 @@ internal class ListQualityProfilesCommand(
         console.Write(table);
         console.WriteLine();
         console.WriteLine(
-            "Copy the Trash ID to use with `trash_ids:` under `quality_profiles:` in your config."
+            "Copy the Trash ID to use with `trash_id:` under `quality_profiles:` in your config."
         );
     }
 
