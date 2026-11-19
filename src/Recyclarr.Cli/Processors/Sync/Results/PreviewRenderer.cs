@@ -1,329 +1,204 @@
-using Recyclarr.Client.V1;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors.Sync.Results;
 
 /// <summary>
-/// Renders what a preview sync would change, one section per pipeline of each instance. Values
-/// show as "current -> desired" wherever the results carry both.
+/// Renders what a preview sync would change as one tree per instance: a heading line with the
+/// instance's change counts, then each pipeline, each changed resource, and each changed value.
+/// Every pipeline is drawn from the same <see cref="PreviewChange"/> shape, so colors and symbols
+/// mean the same thing everywhere: green "+" creates, yellow "~" updates, red "-" deletes, muted
+/// text is context, and bold text is the new value. A totals line follows the last instance.
 /// </summary>
 internal class PreviewRenderer(IAnsiConsole console)
 {
-    public void Render(InstanceResults instance)
+    private const string Accent = "dodgerblue1";
+    private const string Create = "green";
+    private const string Update = "yellow";
+    private const string Delete = "red";
+    private const string Muted = "grey";
+    private static readonly Style Border = new(Color.Grey35);
+
+    public void Render(IReadOnlyList<InstanceResults> instances)
     {
+        var all = new List<PreviewChange>();
+
+        foreach (var instance in instances)
+        {
+            var pipelines = PreviewChanges.Of(instance);
+            var changes = pipelines.SelectMany(x => x.Changes).ToList();
+            all.AddRange(changes);
+
+            // The heading is the tree root so the guide lines hang directly off it.
+            var tree = new Tree(Heading(instance.Name, changes))
+                .Guide(TreeGuide.Line)
+                .Style(Border);
+            foreach (var pipeline in pipelines)
+            {
+                tree.AddNode(PipelineNode(pipeline));
+            }
+
+            console.WriteLine();
+            console.Write(tree);
+        }
+
         console.WriteLine();
-        console.Write(new Rule($"[bold]{instance.Name.EscapeMarkup()}[/]").LeftJustified());
-
-        if (instance.CustomFormats is { } cf)
-        {
-            Section(instance, "Custom Format", cf.BlockedBy, CustomFormats(cf));
-        }
-
-        if (instance.QualityProfiles is { } qp)
-        {
-            Section(instance, "Quality Profile", qp.BlockedBy, QualityProfiles(qp));
-        }
-
-        if (instance.QualitySizes is { } qs)
-        {
-            Section(instance, "Quality Definition", qs.BlockedBy, QualitySizes(qs));
-        }
-
-        if (instance.Naming is { } naming)
-        {
-            Section(instance, naming.Title, naming.BlockedBy, Fields(naming.Changes));
-        }
-
-        if (instance.MediaManagement is { } mm)
-        {
-            var changes = new[]
-            {
-                FieldChange.From("Download Propers and Repacks", mm.Settings?.PropersAndRepacks),
-            }
-                .OfType<FieldChange>()
-                .ToList();
-
-            Section(instance, "Media Management", mm.BlockedBy, Fields(changes));
-        }
+        console.Write(new Rule().RuleStyle(Border));
+        console.MarkupLine(Totals(all, instances.Count));
     }
 
-    private void Section(
-        InstanceResults instance,
-        string title,
-        BlockingPipeline? blockedBy,
-        IRenderable? changes
-    )
+    // Name at the left edge, then a rule filling the rest of the line.
+    private static Grid Heading(string name, IReadOnlyList<PreviewChange> changes) =>
+        new Grid { Expand = true }
+            .AddColumn(new GridColumn().NoWrap().PadRight(1))
+            .AddColumn(new GridColumn().PadLeft(0))
+            .AddRow(
+                new Markup(
+                    $"[bold {Accent}]{name.EscapeMarkup()}[/] [{Muted}]preview[/]  {Counts(changes)}"
+                ),
+                new Rule().RuleStyle(Border)
+            );
+
+    private static TreeNode PipelineNode(PreviewPipeline pipeline)
     {
-        console.WriteLine();
-        console.MarkupLine(
-            $"── [bold]{title}[/] [red](Preview)[/] [dim][[{instance.Name.EscapeMarkup()}]][/] ──"
-        );
-
-        if (blockedBy is { } blocker)
+        if (pipeline.Skip is { } skip)
         {
-            console.MarkupLine($"[dim]Not run: blocked by {PipelineNames.Of(blocker)}[/]");
-            return;
+            return new TreeNode(
+                new Markup(
+                    $"{pipeline.Title}  [{Delete}]{skip.Label}[/] [{Muted}]({skip.Reason})[/]"
+                )
+            );
         }
 
-        if (changes is null)
-        {
-            console.MarkupLine("[dim]No changes[/]");
-            return;
-        }
-
-        console.Write(changes);
-    }
-
-    private static Tree? CustomFormats(CustomFormatPipelineResponse pipeline)
-    {
-        const string flatSource = "(from custom_formats)";
-
-        var groups = pipeline
-            .Items.Where(x => x.Action == ResourceAction.Create)
-            .Select(x => new CfRow("[green]Create[/]", x.Identity, x.SelectionProvenance))
-            .Concat(
-                pipeline
-                    .Items.Where(x => x.Action == ResourceAction.Update)
-                    .Select(x => new CfRow("[yellow]Update[/]", x.Identity, x.SelectionProvenance))
-            )
-            .Concat(pipeline.Deletes.Select(x => new CfRow("[red]Delete[/]", x, null)))
-            .GroupBy(x => x.Provenance is null ? flatSource : Source(x.Provenance))
-            .OrderBy(x => x.Key == flatSource ? 0 : 1)
-            .ThenBy(x => x.Key, StringComparer.Ordinal)
-            .ToList();
-
-        if (groups.Count == 0)
-        {
-            return null;
-        }
-
-        var tree = new Tree("[bold]Changes[/]");
-        foreach (var group in groups)
-        {
-            var isGroup = group.Any(x => x.Provenance?.GroupName is not null);
-            var table = new Table()
-                .AddColumn("[bold]Action[/]")
-                .AddColumn("[bold]Name[/]")
-                .AddColumn("[bold]Trash ID[/]");
-
-            if (isGroup)
-            {
-                table.AddColumn("[bold]Inclusion[/]");
-            }
-
-            foreach (var (action, identity, provenance) in group)
-            {
-                string[] cells =
-                [
-                    action,
-                    identity.Name.EscapeMarkup(),
-                    $"[dim]{identity.TrashId.EscapeMarkup()}[/]",
-                ];
-
-                table.AddRow(isGroup ? [.. cells, $"[dim]{Inclusion(provenance)}[/]"] : cells);
-            }
-
-            tree.AddNode(new Rows(new Markup($"[dim]{group.Key.EscapeMarkup()}[/]"), table));
-        }
-
-        return tree;
-
-        static string Source(CustomFormatSelectionResponse selection)
-        {
-            var profiles = string.Join(", ", selection.ProfileNames);
-            return selection.Source switch
-            {
-                CustomFormatSource.ProfileFormatItems => $"(from profile: {profiles})",
-                CustomFormatSource.CfGroupImplicit =>
-                    $"(from group: {selection.GroupName} [implicit via: {profiles}])",
-                CustomFormatSource.CfGroupExplicit =>
-                    $"(from group: {selection.GroupName} [explicit])",
-                _ => flatSource,
-            };
-        }
-
-        static string Inclusion(CustomFormatSelectionResponse? selection) =>
-            selection?.InclusionReason switch
-            {
-                CustomFormatInclusionReason.Required => "required",
-                CustomFormatInclusionReason.Default => "default",
-                CustomFormatInclusionReason.Selected => "selected",
-                _ => "",
-            };
-    }
-
-    private static Rows? QualityProfiles(QualityProfileResults pipeline)
-    {
         if (pipeline.Changes.Count == 0)
         {
-            return null;
+            return new TreeNode(new Markup($"[{Muted}]{pipeline.Title}  no changes[/]"));
         }
 
-        var rows = new List<IRenderable>();
+        var node = new TreeNode(new Markup($"[bold]{pipeline.Title}[/]"));
+        var nameWidth = pipeline.Changes.Max(x => x.Name.Length);
 
         foreach (var change in pipeline.Changes)
         {
-            var tree = ProfileTree(change.Identity, change.Reason);
-            AddFields(tree, change.Fields);
-            AddQualities(tree, change.CurrentQualities, change.DesiredQualities);
-            AddSizes(tree, change.Sizes);
-            AddScores(tree, change.Scores);
-            rows.Add(tree);
+            var item = node.AddNode(ItemLine(change, nameWidth));
+            var showCurrent = change.Kind != ChangeKind.Create;
+            AddFields(item, change.Fields, showCurrent);
+
+            foreach (var section in change.Sections)
+            {
+                var note = section.Note is null ? "" : $"  [{Muted}]{section.Note}[/]";
+                var sectionNode = item.AddNode($"[{Accent}]{section.Title}[/]{note}");
+                AddFields(sectionNode, section.Fields, showCurrent);
+                AddLayout(sectionNode, section.Layout);
+            }
         }
 
-        return new Rows(rows);
-
-        static Tree ProfileTree(QualityProfileIdentityResponse identity, string reason) =>
-            new($"[yellow]{identity.Name.EscapeMarkup()}[/] (Change Reason: [green]{reason}[/])");
-
-        static void AddFields(Tree tree, IReadOnlyList<FieldChange> fields)
-        {
-            if (fields.Count == 0)
-            {
-                return;
-            }
-
-            tree.AddNode(new Rows(new Markup("[b]Profile Updates[/]"), FieldTable(fields)));
-        }
-
-        static void AddQualities(
-            Tree tree,
-            IReadOnlyCollection<QualityProfileLayoutResponse> current,
-            IReadOnlyCollection<QualityProfileLayoutResponse> desired
-        )
-        {
-            if (desired.Count == 0)
-            {
-                return;
-            }
-
-            var columns = new Columns(
-                Layout("Current", current),
-                Layout("New", desired)
-            ).Collapse();
-
-            tree.AddNode(new Rows(new Markup("[b]Quality Updates[/]"), columns));
-        }
-
-        static Panel Layout(string header, IReadOnlyCollection<QualityProfileLayoutResponse> items)
-        {
-            var tree = new Tree("");
-            foreach (var item in items)
-            {
-                var mark = item.Allowed ? "[green]✓[/]" : "[red]✗[/]";
-                var node = tree.AddNode($"{mark} {item.Name.EscapeMarkup()}");
-                foreach (var member in item.Qualities ?? [])
-                {
-                    node.AddNode(member.EscapeMarkup());
-                }
-            }
-
-            return new Panel(items.Count == 0 ? new Markup("[dim]none[/]") : tree)
-                .Header($"[bold][underline]{header}[/][/]")
-                .NoBorder();
-        }
-
-        static void AddSizes(Tree tree, IReadOnlyList<SizeChange> sizes)
-        {
-            if (sizes.Count == 0)
-            {
-                return;
-            }
-
-            var table = new Table()
-                .AddColumn("[bold]Quality[/]")
-                .AddColumn("[bold]Min[/]")
-                .AddColumn("[bold]Max[/]")
-                .AddColumn("[bold]Preferred[/]");
-
-            foreach (var size in sizes)
-            {
-                table.AddRow(
-                    size.Quality.EscapeMarkup(),
-                    size.Minimum,
-                    size.Maximum,
-                    size.Preferred
-                );
-            }
-
-            tree.AddNode(new Rows(new Markup("[b]Quality Size Updates[/]"), table));
-        }
-
-        static void AddScores(Tree tree, IReadOnlyList<ScoreChange> scores)
-        {
-            if (scores.Count == 0)
-            {
-                return;
-            }
-
-            var table = new Table()
-                .AddColumn("[bold]Custom Format[/]")
-                .AddColumn("[bold]Current[/]")
-                .AddColumn("[bold]New[/]")
-                .AddColumn("[bold]Reason[/]");
-
-            foreach (var score in scores)
-            {
-                table.AddRow(score.Name.EscapeMarkup(), score.Current, score.Desired, score.Reason);
-            }
-
-            tree.AddNode(new Rows(new Markup("[b]Score Updates[/]"), table));
-        }
+        return node;
     }
 
-    private static Table? QualitySizes(QualitySizePipelineResponse pipeline)
+    private static string ItemLine(PreviewChange change, int nameWidth)
     {
-        var updates = pipeline.Items.Where(InstanceResults.IsChanged).ToList();
-        if (updates.Count == 0)
-        {
-            return null;
-        }
-
-        var table = new Table()
-            .AddColumn("[bold]Quality[/]")
-            .AddColumn("[bold]Min[/]")
-            .AddColumn("[bold]Max[/]")
-            .AddColumn("[bold]Preferred[/]");
-
-        foreach (var update in updates)
-        {
-            table.AddRow(
-                $"[dodgerblue1]{update.Quality.EscapeMarkup()}[/]",
-                SizeChange.Text(update.Minimum),
-                SizeChange.Text(update.Maximum),
-                SizeChange.Text(update.Preferred)
-            );
-        }
-
-        return table;
+        var name = change.Name.PadRight(nameWidth).EscapeMarkup();
+        var detail = change.Detail is null ? "" : $"  [{Muted}]{change.Detail.EscapeMarkup()}[/]";
+        return $"{Symbol(change.Kind)} {name}{detail}";
     }
 
-    private static Table? Fields(IReadOnlyList<FieldChange> changes) =>
-        changes.Count == 0 ? null : FieldTable(changes);
-
-    private static Table FieldTable(IEnumerable<FieldChange> changes)
+    // Values align in columns: labels padded right, current values padded left so the arrows
+    // line up. A created resource has no current values, so only the new value shows.
+    private static void AddFields(
+        TreeNode parent,
+        IReadOnlyList<FieldChange> fields,
+        bool showCurrent
+    )
     {
-        var table = new Table()
-            .AddColumn("[bold]Field[/]")
-            .AddColumn("[bold]Current[/]")
-            .AddColumn("[bold]New[/]");
-
-        foreach (var change in changes)
+        if (fields.Count == 0)
         {
-            table.AddRow(
-                change.Field.EscapeMarkup(),
-                change.Current.EscapeMarkup(),
-                change.Desired.EscapeMarkup()
-            );
+            return;
         }
 
-        return table;
+        var labelWidth = fields.Max(x => x.Field.Length);
+        var currentWidth = fields.Max(x => x.Current.Length);
+        var desiredWidth = fields.Max(x => x.Desired.Length);
+
+        foreach (var field in fields)
+        {
+            var label = $"[{Muted}]{field.Field.PadRight(labelWidth).EscapeMarkup()}[/]";
+            var desired = $"[bold]{field.Desired.PadRight(desiredWidth).EscapeMarkup()}[/]";
+            var value = showCurrent
+                ? $"[{Muted}]{field.Current.PadLeft(currentWidth).EscapeMarkup()} →[/] {desired}"
+                : desired;
+            var note = field.Note is null ? "" : $"  [{Muted}]{field.Note.EscapeMarkup()}[/]";
+
+            parent.AddNode($"{label}  {value}{note}");
+        }
     }
 
-    private sealed record CfRow(
-        string Action,
-        TrashIdNameResponse Identity,
-        CustomFormatSelectionResponse? Provenance
-    );
+    private static void AddLayout(TreeNode section, IReadOnlyList<QualityLine> layout)
+    {
+        if (layout.Count == 0)
+        {
+            return;
+        }
+
+        var nameWidth = layout.Max(x => x.Name.Length);
+
+        foreach (var line in layout)
+        {
+            var mark = line.Allowed ? $"[{Create}]✓[/]" : $"[{Delete}]✗[/]";
+            var arrow = line.MovedUp switch
+            {
+                true => $" [{Update}]↑[/]",
+                false => $" [{Update}]↓[/]",
+                null => "  ",
+            };
+            var padding = new string(' ', nameWidth - line.Name.Length);
+            var changed = line.Note is not null || line.MovedUp is not null;
+            var name = changed
+                ? line.Name.EscapeMarkup()
+                : $"[{Muted}]{line.Name.EscapeMarkup()}[/]";
+            var note = line.Note is null ? "" : $"  [{Update}]{line.Note.EscapeMarkup()}[/]";
+
+            var node = section.AddNode($"{mark} {name}{arrow}{padding}{note}");
+            foreach (var member in line.Members)
+            {
+                node.AddNode($"[{Muted}]{member.EscapeMarkup()}[/]");
+            }
+        }
+    }
+
+    private static string Symbol(ChangeKind kind) =>
+        kind switch
+        {
+            ChangeKind.Create => $"[{Create}]+[/]",
+            ChangeKind.Update => $"[{Update}]~[/]",
+            ChangeKind.Delete => $"[{Delete}]-[/]",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+        };
+
+    private static string Counts(IReadOnlyList<PreviewChange> changes)
+    {
+        if (changes.Count == 0)
+        {
+            return $"[{Muted}]no changes[/]";
+        }
+
+        return string.Join(
+            " ",
+            Enum.GetValues<ChangeKind>()
+                .Select(kind => (kind, count: changes.Count(x => x.Kind == kind)))
+                .Where(x => x.count > 0)
+                .Select(x => $"{Symbol(x.kind)}[{Muted}]{x.count}[/]")
+        );
+    }
+
+    private static string Totals(IReadOnlyList<PreviewChange> changes, int instanceCount)
+    {
+        var create = changes.Count(x => x.Kind == ChangeKind.Create);
+        var update = changes.Count(x => x.Kind == ChangeKind.Update);
+        var delete = changes.Count(x => x.Kind == ChangeKind.Delete);
+        var instances = instanceCount == 1 ? "1 instance" : $"{instanceCount} instances";
+
+        return $"[{Create}]{create} to create[/], [{Update}]{update} to update[/], "
+            + $"[{Delete}]{delete} to delete[/] across {instances}. "
+            + $"[{Muted}]Nothing was changed; run without --preview to apply.[/]";
+    }
 }

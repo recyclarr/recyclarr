@@ -72,10 +72,10 @@ internal sealed record InstanceResults(
 
 /// <summary>
 /// Media naming results for either service. <see cref="Changes"/> holds one row per naming field
-/// the sync changes, labeled for display.
+/// the sync changes, labeled for display; <see cref="Subject"/> names what those fields format.
 /// </summary>
 internal sealed record NamingResults(
-    string Title,
+    string Subject,
     PipelineStatus Status,
     BlockingPipeline? BlockedBy,
     IReadOnlyList<OutcomeResponse> Outcomes,
@@ -84,7 +84,7 @@ internal sealed record NamingResults(
 {
     public static NamingResults From(SonarrNamingPipelineResponse pipeline) =>
         new(
-            "Sonarr Media Naming",
+            "Episode naming",
             pipeline.Status,
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
@@ -106,7 +106,7 @@ internal sealed record NamingResults(
 
     public static NamingResults From(RadarrNamingPipelineResponse pipeline) =>
         new(
-            "Radarr Media Naming",
+            "Movie naming",
             pipeline.Status,
             pipeline.BlockedBy,
             [.. pipeline.Outcomes],
@@ -164,8 +164,9 @@ internal sealed record QualityProfileResults(
                             [
                                 .. x
                                     .QualitySizes.Where(y => y.Action != ResourceAction.Unchanged)
-                                    .Select(SizeChange.From),
+                                    .SelectMany(y => QualitySizeText.Fields(y, $"{y.Quality} ")),
                             ],
+                            SizesSource = x.QualitySizesSource,
                         }
                     ),
             ]
@@ -239,16 +240,16 @@ internal sealed record QualityProfileResults(
 
         return new ProfileChange(
             identity,
-            created ? "New" : "Changed",
+            action,
             [.. fields],
-            qualities.Changed ? [.. qualities.Current ?? []] : [],
+            created ? null : [.. qualities.Current ?? []],
             qualities.Changed ? [.. qualities.Desired ?? []] : [],
             [
-                .. shownScores.Select(x => new ScoreChange(
+                .. shownScores.Select(x => new FieldChange(
                     x.Name,
                     FieldChange.Text(x.Value.Current),
                     FieldChange.Text(x.Value.Desired),
-                    created ? "Set" : x.Reason.ToString()
+                    x.Reason == QualityProfileScoreReason.Reset ? "reset" : null
                 )),
             ],
             []
@@ -258,54 +259,31 @@ internal sealed record QualityProfileResults(
 
 /// <summary>
 /// One profile the sync creates or updates, ready for display. Empty
-/// <see cref="DesiredQualities"/> means the quality layout does not change.
+/// <see cref="DesiredQualities"/> means the quality layout does not change;
+/// <see cref="CurrentQualities"/> is null for a created profile, which has no prior layout.
+/// <see cref="SizesSource"/> is the server's code for where Sonarr v5 profile sizes came from.
 /// </summary>
 internal sealed record ProfileChange(
     QualityProfileIdentityResponse Identity,
-    string Reason,
+    ResourceAction Action,
     IReadOnlyList<FieldChange> Fields,
-    IReadOnlyList<QualityProfileLayoutResponse> CurrentQualities,
+    IReadOnlyList<QualityProfileLayoutResponse>? CurrentQualities,
     IReadOnlyList<QualityProfileLayoutResponse> DesiredQualities,
-    IReadOnlyList<ScoreChange> Scores,
-    IReadOnlyList<SizeChange> Sizes
+    IReadOnlyList<FieldChange> Scores,
+    IReadOnlyList<FieldChange> Sizes,
+    string? SizesSource = null
 );
 
-internal sealed record ScoreChange(string Name, string Current, string Desired, string Reason);
-
 /// <summary>
-/// Per-quality size changes on a profile (Sonarr v5), each value formatted for display.
+/// A labeled current-to-desired change of one field, with both values already formatted for
+/// display. <see cref="Note"/> briefly says why the value changes when that is not obvious.
 /// </summary>
-internal sealed record SizeChange(string Quality, string Minimum, string Maximum, string Preferred)
-{
-    private const string Unchanged = "[dim]unchanged[/]";
-
-    // A created profile shows each size it sets; an updated one shows changes only.
-    public static SizeChange From(QualitySizeItemResponse size) =>
-        size.Action == ResourceAction.Create
-            ? new SizeChange(
-                size.Quality,
-                QualitySizeText.Of(size.Minimum.Desired),
-                QualitySizeText.Of(size.Maximum.Desired),
-                QualitySizeText.Of(size.Preferred.Desired)
-            )
-            : new SizeChange(
-                size.Quality,
-                Text(size.Minimum),
-                Text(size.Maximum),
-                Text(size.Preferred)
-            );
-
-    public static string Text(PlannedValueResponseOfQualitySizeValueResponse value) =>
-        value.Changed
-            ? $"{QualitySizeText.Of(value.Current)} -> {QualitySizeText.Of(value.Desired)}"
-            : Unchanged;
-}
-
-/// <summary>
-/// A labeled current-to-desired change of one settings field, with both values already formatted
-/// for display.
-/// </summary>
-internal sealed record FieldChange(string Field, string Current, string Desired)
+internal sealed record FieldChange(
+    string Field,
+    string Current,
+    string Desired,
+    string? Note = null
+)
 {
     public const string Unset = "UNSET";
 

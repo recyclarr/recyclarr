@@ -4,7 +4,7 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Sync.Results;
 
 /// <summary>
-/// Presents a finished sync job: the final status table, preview change sections (preview runs
+/// Presents a finished sync job: the final status table, the preview change trees (preview runs
 /// only), and the diagnostics panel on the console, plus the same diagnostics and a per-instance
 /// change summary in the log. Console and log are separate channels; <c>--log</c> silences the
 /// console, so the log alone must carry every actionable message.
@@ -29,7 +29,7 @@ internal class SyncResultsPresenter(IAnsiConsole console, ILogger log, PreviewRe
 
         if (isPreview)
         {
-            instances.ForEach(preview.Render);
+            preview.Render(instances);
         }
 
         var diagnostics = SyncDiagnostics.Build(results.Fault, instances, serverDiagnostics);

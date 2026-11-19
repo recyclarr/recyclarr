@@ -33,6 +33,8 @@ changes you may need to make.
   Sonarr
 - CLI: `config create` and `config list templates` build templates from the TRaSH Guides, so they
   follow guide updates. The official config templates repository is no longer downloaded
+- CLI: `sync --preview` shows changes for every instance in one consistent tree layout, including
+  quality reorders and the old position of each moved quality
 - CLI: `config create --path` also works with a single `--template`
 - CLI: No longer writes log files
 - Logs: Text log lines include the date and time

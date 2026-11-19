@@ -360,10 +360,11 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         ConsoleOutput
             .Should()
-            .Contain("Custom Format (Preview) [real-instance]")
-            .And.Contain("Bad Dual Groups")
-            .And.Contain("50 -> 50.4")
-            .And.MatchRegex(@"Movie\s+│?\s*\{Movie\}\s+│?\s*\{Title\}");
+            .MatchRegex(@"real-instance preview\s+\+1\s+~2")
+            .And.MatchRegex(@"\+ Bad Dual Groups\s+from custom_formats")
+            .And.MatchRegex(@"~ Bluray-1080p\s+│\s+└── Min\s+50 → 50\.4")
+            .And.MatchRegex(@"Movie\s+\{Movie\} → \{Title\}")
+            .And.Contain("1 to create, 2 to update, 0 to delete across 1 instance.");
     }
 
     [Test]
@@ -380,7 +381,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         await RunSync();
 
-        ConsoleOutput.Should().NotContain("(Preview)").And.NotContain("Bad Dual Groups");
+        ConsoleOutput.Should().NotContain("Bad Dual Groups").And.NotContain("Nothing was changed");
     }
 
     [Test]
@@ -487,16 +488,51 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         ConsoleOutput
             .Should()
-            .Contain("(from group: Golden Rule [implicit via: HD Bluray])")
-            .And.MatchRegex(@"Create\s+│\s+x265 \(HD\)\s+│\s+cf-x265\s+│\s+required")
-            .And.Contain("HD Bluray (Change Reason: New)")
-            .And.Contain("Profile Updates")
-            .And.Contain("Quality Updates")
-            .And.MatchRegex(@"x264\s+│\s+UNSET\s+│\s+50\s+│\s+Set")
+            .Contain("+ x265 (HD)  from group Golden Rule, required (via profile HD Bluray)")
+            .And.Contain("+ HD Bluray")
+            .And.MatchRegex(@"Upgrade Until Quality\s+Bluray-1080p")
+            .And.Contain("✓ Bluray-1080p")
+            .And.MatchRegex(@"x264\s+50")
+            .And.NotContain("UNSET →")
             .And.NotContain("Schema Default")
-            .And.Contain("400 -> Unlimited")
-            .And.MatchRegex(@"Radarr Media Naming \(Preview\) \[real-instance\] ──\s+No changes")
-            .And.Contain("Not run: blocked by Custom Formats");
+            .And.MatchRegex(@"Max\s+400 → Unlimited")
+            .And.Contain("Media Naming  no changes")
+            .And.Contain("Media Management  not run (blocked by Custom Formats)");
+    }
+
+    [Test]
+    public async Task Preview_describes_moved_qualities_by_the_neighbor_they_crossed()
+    {
+        AddInstanceConfig(InstanceName);
+        var profile = NewProfileUpdate("HD", PlannedAction.Unchanged) with
+        {
+            Action = PlannedAction.Update,
+            Qualities = Set(
+                PlannedValue.Compared<IReadOnlyList<QualityProfileQualityLayoutItem>>(
+                    [Quality("Bluray-1080p"), Quality("WEB-1080p"), Quality("HDTV-1080p")],
+                    [Quality("HDTV-1080p"), Quality("Bluray-1080p"), Quality("WEB-1080p")],
+                    true
+                )
+            ),
+        };
+
+        _result = new SyncRunResult([
+            new SyncInstanceResult(
+                InstanceName,
+                SupportedServices.Radarr,
+                [NewPipelineResult.QualityProfiles([], [profile])]
+            ),
+        ]);
+
+        await RunSync(new CreateSyncJobRequest { Preview = true });
+
+        ConsoleOutput
+            .Should()
+            .MatchRegex(@"✓ HDTV-1080p ↑\s+was below WEB-1080p")
+            .And.NotMatchRegex(@"Bluray-1080p [↑↓]")
+            .And.NotMatchRegex(@"WEB-1080p [↑↓]");
+
+        static QualityProfileQuality Quality(string name) => new() { Name = name, Allowed = true };
     }
 
     [Test]
@@ -666,20 +702,17 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         ConsoleOutput
             .Should()
-            .Contain("UHD (Change Reason: Changed)")
-            .And.MatchRegex(@"Minimum Format Score\s+│\s+0\s+│\s+10")
-            .And.MatchRegex(@"Language\s+│\s+English\s+│\s+French")
-            .And.Contain("✓ Remux-2160p")
-            .And.Contain("✗ Remux-2160p")
-            .And.MatchRegex(@"x265 \(HD\)\s+│\s+0\s+│\s+-10000\s+│\s+Set")
-            .And.MatchRegex(
-                @"Download Propers and Repacks\s+│\s+PreferAndUpgrade\s+│\s+DoNotPrefer"
-            );
+            .Contain("~ UHD")
+            .And.MatchRegex(@"Minimum Format Score\s+0 → 10")
+            .And.MatchRegex(@"Language\s+English → French")
+            .And.MatchRegex(@"✗ Remux-2160p\s+now denied")
+            .And.MatchRegex(@"x265 \(HD\)\s+0 → -10000")
+            .And.MatchRegex(@"Download Propers and Repacks\s+PreferAndUpgrade → DoNotPrefer");
         ConsoleOutput
             .Should()
-            .NotContain("SD (Change Reason")
+            .NotContain("~ SD")
             .And.NotContain("Kept Score")
-            .And.NotMatchRegex(@"Upgrade Until Score\s+│");
+            .And.NotContain("Upgrade Until Score");
     }
 
     private static PlannedMediaManagementResource PropersAndRepacks(PlannedAction action) =>
@@ -850,8 +883,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
         ConsoleOutput
             .Should()
-            .Contain("Quality Size Updates")
-            .And.MatchRegex(@"HDTV-1080p\s+│\s+1 -> 5\s+│")
+            .MatchRegex(
+                @"Quality Sizes  from instance quality_definition\s+└── HDTV-1080p Min\s+1 → 5"
+            )
             .And.NotContain("WEB-1080p")
             .And.Contain(
                 "[real-instance] Quality profile 'Series': The guide profile references a quality "
