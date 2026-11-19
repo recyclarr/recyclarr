@@ -391,7 +391,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Items.Select(x => x.Action)
             .Should()
             .Equal(ResourceAction.Create, ResourceAction.Update, ResourceAction.Unchanged);
-        var created = pipeline.Items.First();
+        var created = pipeline.Items[0];
         created.Name.Should().BeEquivalentTo(new { Desired = "First CF", Current = (string?)null });
         created.IncludeWhenRenaming.Should().BeEquivalentTo(new { Current = (bool?)null });
         var updated = pipeline.Items.ElementAt(1);
@@ -414,7 +414,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
                 CustomFormatSpecificationChange.Removed,
                 CustomFormatSpecificationChange.Unchanged
             );
-        pipeline.Items.Last().Name.Changed.Should().BeFalse();
+        pipeline.Items[^1].Name.Changed.Should().BeFalse();
         pipeline.Deletes.Should().ContainSingle();
         pipeline
             .Outcomes.Select(x => x.Code)
@@ -448,7 +448,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        var created = pipeline.Items.First();
+        var created = pipeline.Items[0];
         created.Action.Should().Be(ResourceAction.Create);
         pipeline
             .Items.Select(x => x.QualitySizesSource)
@@ -478,7 +478,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         sizeOutcome.Subject?.TrashId.Should().Be("qp-one");
         DataAs<QualitySizeGuideReferenceOutcomeData>(sizeOutcome).TrashId.Should().Be("qs-missing");
 
-        var update = pipeline.Items.Last();
+        var update = pipeline.Items[^1];
         update.Action.Should().Be(ResourceAction.Update);
         update
             .QualitySizes.Should()
@@ -495,7 +495,9 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         AssertUpdatedProfileScores(update.CustomFormatScores);
     }
 
-    private static void AssertUpdatedProfileScores(ICollection<QualityProfileScoreResponse> scores)
+    private static void AssertUpdatedProfileScores(
+        IReadOnlyList<QualityProfileScoreResponse> scores
+    )
     {
         scores
             .Select(x => (x.Name, x.Reason, x.Value.Desired, x.Value.Changed))
@@ -510,12 +512,12 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertRadarrQualityProfiles(RadarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
-        var created = pipeline.Items.First();
+        var created = pipeline.Items[0];
         created.Language.Value.Desired.Should().Be("English");
         created.UpgradeAllowed.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
         AssertQualityProfileOutcomes(pipeline.Outcomes, "qualityProfileQualityDefinitionIgnored");
 
-        var update = pipeline.Items.Last();
+        var update = pipeline.Items[^1];
         update
             .Language.Should()
             .BeEquivalentTo(
@@ -539,7 +541,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     }
 
     private static void AssertQualityProfileOutcomes(
-        ICollection<OutcomeResponse> outcomes,
+        IReadOnlyList<OutcomeResponse> outcomes,
         params string[] serviceCodes
     )
     {
@@ -595,7 +597,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private static void AssertSonarrNaming(SonarrNamingPipelineResponse? pipeline)
     {
         pipeline?.Outcomes.Should().HaveCount(5);
-        DataAs<MediaNamingReferenceOutcomeData>(pipeline!.Outcomes.First())
+        DataAs<MediaNamingReferenceOutcomeData>(pipeline!.Outcomes[0])
             .Field.Should()
             .Be("seriesFolderFormat");
         var settings = pipeline.Settings;

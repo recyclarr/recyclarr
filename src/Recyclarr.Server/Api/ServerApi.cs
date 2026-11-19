@@ -122,7 +122,7 @@ internal static class ServerApi
         o.AutoTagPathSegmentIndex = 0;
         o.ConfigureOpenApi = options =>
         {
-            options.CreateSchemaReferenceId = PolymorphicSchemaIds.Wrap(
+            options.CreateSchemaReferenceId = SchemaReferenceIds.Wrap(
                 options.CreateSchemaReferenceId
             );
             options.AddDocumentTransformer(DescribeDocument);

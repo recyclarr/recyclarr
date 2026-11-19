@@ -228,8 +228,8 @@ internal sealed record QualityProfileResults(
         ResourceAction action,
         QualityProfileIdentityResponse identity,
         IEnumerable<FieldChange> fields,
-        QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse qualityField,
-        ICollection<QualityProfileScoreResponse> scores
+        QualityProfileFieldResponseOfQualityProfileLayoutResponseArray qualityField,
+        IReadOnlyList<QualityProfileScoreResponse> scores
     )
     {
         var created = action == ResourceAction.Create;

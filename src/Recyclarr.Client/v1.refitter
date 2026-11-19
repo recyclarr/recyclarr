@@ -14,6 +14,8 @@
   "outputFilename": "RecyclarrApi.V1.g.cs",
   "codeGeneratorSettings": {
     "generateOptionalPropertiesAsNullable": true,
-    "generateNullableReferenceTypes": true
+    "generateNullableReferenceTypes": true,
+    "arrayType": "System.Collections.Generic.IReadOnlyList",
+    "arrayInstanceType": "System.Collections.Generic.List"
   }
 }

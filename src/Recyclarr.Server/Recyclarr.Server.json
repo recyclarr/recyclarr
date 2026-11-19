@@ -911,7 +911,10 @@
         "type": "object",
         "properties": {
           "errors": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "The configuration errors that made the change invalid."
@@ -1035,7 +1038,13 @@
             "description": "Names of every configured instance."
           },
           "errors": {
-            "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "description": "Problem Details for a rejected sync request. A request that names unknown instances also\nlists the unknown and the available instance names."
@@ -1099,7 +1108,10 @@
         "type": "object",
         "properties": {
           "trashIds": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "The trash IDs of the custom formats that share one name."
@@ -1159,8 +1171,11 @@
             "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfBoolean"
           },
           "specifications": {
-            "description": "Every condition of the guide definition, plus conditions the sync removes.",
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatSpecificationResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomFormatSpecificationResponse"
+            },
+            "description": "Every condition of the guide definition, plus conditions the sync removes."
           }
         }
       },
@@ -1177,15 +1192,24 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            }
           },
           "items": {
-            "description": "Every configured custom format, changed or not. A format skipped by an outcome is absent.",
-            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatItemResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomFormatItemResponse"
+            },
+            "description": "Every configured custom format, changed or not. A format skipped by an outcome is absent."
           },
           "deletes": {
-            "description": "Managed custom formats removed from the configuration. Deletes happen only when\n`delete_old_custom_formats` is enabled.",
-            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrashIdNameResponse"
+            },
+            "description": "Managed custom formats removed from the configuration. Deletes happen only when\n`delete_old_custom_formats` is enabled."
           },
           "blockedBy": {
             "oneOf": [
@@ -1222,7 +1246,10 @@
             "$ref": "#/components/schemas/CustomFormatInclusionReason"
           },
           "profileNames": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "How the configuration selected a custom format."
@@ -1427,16 +1454,22 @@
             ]
           },
           "instances": {
-            "description": "The requested instance names; empty when the request selected all.",
-            "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The requested instance names; empty when the request selected all."
           },
           "preview": {
             "type": "boolean",
             "description": "True when the job computes changes without applying them."
           },
           "progress": {
-            "description": "One entry for each instance the job selected, updated as the job runs.",
-            "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstanceSnapshotResponse"
+            },
+            "description": "One entry for each instance the job selected, updated as the job runs."
           }
         }
       },
@@ -1486,12 +1519,18 @@
             "description": "True when the group is enabled by default for the quality profiles it applies to."
           },
           "customFormats": {
-            "description": "The group's custom formats, sorted by name.",
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatGroupMemberResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideCustomFormatGroupMemberResponse"
+            },
+            "description": "The group's custom formats, sorted by name."
           },
           "qualityProfiles": {
-            "description": "Names of the guide quality profiles the group applies to.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of the guide quality profiles the group applies to."
           }
         },
         "description": "A guide custom format group: a set of custom formats that sync together."
@@ -1572,10 +1611,16 @@
         "type": "object",
         "properties": {
           "movieFolder": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           },
           "standardMovie": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           }
         }
       },
@@ -1590,19 +1635,34 @@
         "type": "object",
         "properties": {
           "seasonFolder": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           },
           "seriesFolder": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           },
           "standardEpisode": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           },
           "dailyEpisode": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           },
           "animeEpisode": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideNamingFormatResponse"
+            }
           }
         }
       },
@@ -1617,8 +1677,11 @@
             "type": "string"
           },
           "items": {
-            "description": "The member qualities of a quality group; empty for a single quality.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The member qualities of a quality group; empty for a single quality."
           }
         },
         "description": "A quality or quality group in a guide quality profile."
@@ -1653,12 +1716,18 @@
             "description": "The score set the profile uses; absent when it uses the default set."
           },
           "allowedQualities": {
-            "description": "The qualities and quality groups the profile allows, in guide order.",
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideProfileQualityResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideProfileQualityResponse"
+            },
+            "description": "The qualities and quality groups the profile allows, in guide order."
           },
           "customFormats": {
-            "description": "Names of the custom formats the profile scores, sorted by name.",
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of the custom formats the profile scores, sorted by name."
           }
         }
       },
@@ -1721,14 +1790,14 @@
             ]
           },
           "errors": {
-            "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
-        }
-      },
-      "IDictionaryOfStringAndStringArray": {
-        "type": "object",
-        "additionalProperties": {
-          "$ref": "#/components/schemas/StringArray"
         }
       },
       "InstanceCustomFormatSummaryResponse": {
@@ -1808,162 +1877,6 @@
           }
         }
       },
-      "IReadOnlyCollectionOfString": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "IReadOnlyListOfConfigIncludeSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/ConfigIncludeSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfConfigTemplateSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/ConfigTemplateSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfCustomFormatItemResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CustomFormatItemResponse"
-        }
-      },
-      "IReadOnlyListOfCustomFormatSpecificationResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CustomFormatSpecificationResponse"
-        }
-      },
-      "IReadOnlyListOfDiagnosticResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/DiagnosticResponse"
-        }
-      },
-      "IReadOnlyListOfGuideCustomFormatGroupMemberResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideCustomFormatGroupMemberResponse"
-        }
-      },
-      "IReadOnlyListOfGuideCustomFormatGroupSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideCustomFormatGroupSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfGuideCustomFormatSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideCustomFormatSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfGuideNamingFormatResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideNamingFormatResponse"
-        }
-      },
-      "IReadOnlyListOfGuideProfileQualityResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideProfileQualityResponse"
-        }
-      },
-      "IReadOnlyListOfGuideQualityProfileSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideQualityProfileSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfGuideQualitySummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideQualitySummaryResponse"
-        }
-      },
-      "IReadOnlyListOfGuideScoreSetSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/GuideScoreSetSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfInstanceCustomFormatSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/InstanceCustomFormatSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfInstanceSnapshotResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/InstanceSnapshotResponse"
-        }
-      },
-      "IReadOnlyListOfNamedServiceResourceResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/NamedServiceResourceResponse"
-        }
-      },
-      "IReadOnlyListOfOutcomeResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/OutcomeResponse"
-        }
-      },
-      "IReadOnlyListOfQualityProfileScoreResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualityProfileScoreResponse"
-        }
-      },
-      "IReadOnlyListOfQualitySizeItemResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/QualitySizeItemResponse"
-        }
-      },
-      "IReadOnlyListOfRadarrQualityProfileItemResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/RadarrQualityProfileItemResponse"
-        }
-      },
-      "IReadOnlyListOfSonarrQualityProfileItemResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SonarrQualityProfileItemResponse"
-        }
-      },
-      "IReadOnlyListOfString": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "IReadOnlyListOfSyncInstanceResultsResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SyncInstanceResultsResponse"
-        }
-      },
-      "IReadOnlyListOfSyncJobSummaryResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SyncJobSummaryResponse"
-        }
-      },
-      "IReadOnlyListOfTrashIdNameResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/TrashIdNameResponse"
-        }
-      },
       "ListConfigIncludesResponse": {
         "required": [
           "items"
@@ -1971,7 +1884,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfConfigIncludeSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigIncludeSummaryResponse"
+            }
           }
         }
       },
@@ -1982,7 +1898,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfConfigTemplateSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigTemplateSummaryResponse"
+            }
           }
         }
       },
@@ -1993,7 +1912,10 @@
         "type": "object",
         "properties": {
           "diagnostics": {
-            "$ref": "#/components/schemas/IReadOnlyListOfDiagnosticResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticResponse"
+            }
           }
         }
       },
@@ -2004,7 +1926,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatGroupSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideCustomFormatGroupSummaryResponse"
+            }
           }
         }
       },
@@ -2015,7 +1940,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideCustomFormatSummaryResponse"
+            }
           }
         }
       },
@@ -2026,7 +1954,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideQualitySummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideQualitySummaryResponse"
+            }
           }
         }
       },
@@ -2037,7 +1968,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideQualityProfileSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideQualityProfileSummaryResponse"
+            }
           }
         }
       },
@@ -2048,7 +1982,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfGuideScoreSetSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuideScoreSetSummaryResponse"
+            }
           }
         }
       },
@@ -2059,7 +1996,10 @@
         "type": "object",
         "properties": {
           "items": {
-            "$ref": "#/components/schemas/IReadOnlyListOfInstanceCustomFormatSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstanceCustomFormatSummaryResponse"
+            }
           }
         }
       },
@@ -2070,7 +2010,10 @@
         "type": "object",
         "properties": {
           "jobs": {
-            "$ref": "#/components/schemas/IReadOnlyListOfSyncJobSummaryResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobSummaryResponse"
+            }
           }
         }
       },
@@ -2406,38 +2349,6 @@
           "blocked": "Did not run because a pipeline it depends on did not succeed. See `blockedBy`."
         }
       },
-      "PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
-        "required": [
-          "desired",
-          "current",
-          "changed"
-        ],
-        "type": "object",
-        "properties": {
-          "desired": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-            }
-          },
-          "current": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
-            }
-          },
-          "changed": {
-            "type": "boolean"
-          }
-        },
-        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
-      },
       "PlannedValueResponseOfNullableOfBoolean": {
         "required": [
           "desired",
@@ -2519,6 +2430,38 @@
                 "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
               }
             ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "description": "One value Recyclarr manages: `desired` is the value after the sync and `current` the value in\nthe service, null when the sync creates the resource. `changed` is true when the sync writes a\ndifferent value; compare with it rather than with `current` and `desired`, because some values\nare compared semantically. A preview job computes values but writes nothing."
+      },
+      "PlannedValueResponseOfQualityProfileLayoutResponseArray": {
+        "required": [
+          "desired",
+          "current",
+          "changed"
+        ],
+        "type": "object",
+        "properties": {
+          "desired": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
+          },
+          "current": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
           },
           "changed": {
             "type": "boolean"
@@ -2611,7 +2554,10 @@
         "type": "object",
         "properties": {
           "profileNames": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "The configured profiles that one quality profile trash ID matches."
@@ -2635,7 +2581,10 @@
             "type": "string"
           },
           "errors": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "The resource provider whose update was held back, and the configuration errors the update\ncaused."
@@ -2690,7 +2639,10 @@
         "type": "object",
         "properties": {
           "qualities": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2705,22 +2657,6 @@
           "set": "Recyclarr manages the value: the configuration or guide sets it, or Recyclarr picks it because the service requires one (for example, the first allowed quality as the upgrade-until quality).",
           "unmanaged": "Nothing sets the value, so it keeps its value in the service (the service default for a created profile)."
         }
-      },
-      "QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
-        "required": [
-          "reason",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "reason": {
-            "$ref": "#/components/schemas/QualityProfileFieldReason"
-          },
-          "value": {
-            "$ref": "#/components/schemas/PlannedValueResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
-          }
-        },
-        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
       },
       "QualityProfileFieldResponseOfNullableOfBoolean": {
         "required": [
@@ -2750,6 +2686,22 @@
           },
           "value": {
             "$ref": "#/components/schemas/PlannedValueResponseOfNullableOfInt32"
+          }
+        },
+        "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
+      },
+      "QualityProfileFieldResponseOfQualityProfileLayoutResponseArray": {
+        "required": [
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileFieldReason"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PlannedValueResponseOfQualityProfileLayoutResponseArray"
           }
         },
         "description": "A profile field and why it has its desired value. The reason sits beside the value, never in\nit."
@@ -2851,7 +2803,10 @@
             "type": "string"
           },
           "profileNames": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "A quality profile trash ID that a group assigns scores to, and the configured profiles it\nmatches."
@@ -2915,7 +2870,10 @@
         "type": "object",
         "properties": {
           "labels": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "The quality size sets that one guide quality profile links."
@@ -2987,11 +2945,17 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            }
           },
           "items": {
-            "description": "Every quality the configuration sizes, changed or not. Qualities the service does not have\nare absent and reported as outcomes.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualitySizeItemResponse"
+            },
+            "description": "Every quality the configuration sizes, changed or not. Qualities the service does not have\nare absent and reported as outcomes."
           },
           "blockedBy": {
             "oneOf": [
@@ -3051,7 +3015,10 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            }
           },
           "settings": {
             "oneOf": [
@@ -3219,11 +3186,14 @@
             "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "qualities": {
-            "$ref": "#/components/schemas/QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfQualityProfileLayoutResponseArray"
           },
           "customFormatScores": {
-            "description": "Every custom format score in the profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileScoreResponse"
+            },
+            "description": "Every custom format score in the profile."
           }
         }
       },
@@ -3236,15 +3206,21 @@
         "type": "object",
         "properties": {
           "items": {
-            "description": "Every valid configured profile. A profile skipped by an outcome is absent.",
-            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileItemResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RadarrQualityProfileItemResponse"
+            },
+            "description": "Every valid configured profile. A profile skipped by an outcome is absent."
           },
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject.",
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            },
+            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject."
           },
           "blockedBy": {
             "oneOf": [
@@ -3279,10 +3255,16 @@
         "type": "object",
         "properties": {
           "names": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "patterns": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "`reset_unmatched_scores.except` names that are not in the profile, and except patterns that\nmatch no custom format in the profile."
@@ -3339,7 +3321,13 @@
             "$ref": "#/components/schemas/InstanceFailureCategory"
           },
           "errors": {
-            "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -3363,7 +3351,10 @@
         "type": "object",
         "properties": {
           "serviceMatches": {
-            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedServiceResourceResponse"
+            }
           }
         },
         "description": "The service resources whose names match."
@@ -3413,7 +3404,10 @@
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            }
           },
           "settings": {
             "oneOf": [
@@ -3584,8 +3578,11 @@
         "type": "object",
         "properties": {
           "qualitySizes": {
-            "description": "Sizes of every quality in the profile that the configuration sizes. Only Sonarr v5 stores\nsizes per quality profile; empty on earlier versions.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualitySizeItemResponse"
+            },
+            "description": "Sizes of every quality in the profile that the configuration sizes. Only Sonarr v5 stores\nsizes per quality profile; empty on earlier versions."
           },
           "qualitySizesSource": {
             "type": [
@@ -3619,11 +3616,14 @@
             "$ref": "#/components/schemas/QualityProfileFieldResponseOfNullableOfInt32"
           },
           "qualities": {
-            "$ref": "#/components/schemas/QualityProfileFieldResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+            "$ref": "#/components/schemas/QualityProfileFieldResponseOfQualityProfileLayoutResponseArray"
           },
           "customFormatScores": {
-            "description": "Every custom format score in the profile.",
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileScoreResponse"
+            },
+            "description": "Every custom format score in the profile."
           }
         }
       },
@@ -3636,15 +3636,21 @@
         "type": "object",
         "properties": {
           "items": {
-            "description": "Every valid configured profile. A profile skipped by an outcome is absent.",
-            "$ref": "#/components/schemas/IReadOnlyListOfSonarrQualityProfileItemResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SonarrQualityProfileItemResponse"
+            },
+            "description": "Every valid configured profile. A profile skipped by an outcome is absent."
           },
           "status": {
             "$ref": "#/components/schemas/PipelineStatus"
           },
           "outcomes": {
-            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject.",
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            },
+            "description": "On services that store sizes per quality profile (Sonarr v5), quality size outcomes appear\nhere with the affected profile as their subject."
           },
           "blockedBy": {
             "oneOf": [
@@ -3657,12 +3663,6 @@
               }
             ]
           }
-        }
-      },
-      "StringArray": {
-        "type": "array",
-        "items": {
-          "type": "string"
         }
       },
       "SupportedServices": {
@@ -3760,8 +3760,11 @@
             ]
           },
           "planningOutcomes": {
-            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance.",
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            },
+            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance."
           }
         }
       },
@@ -3805,8 +3808,11 @@
             ]
           },
           "planningOutcomes": {
-            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance.",
-            "$ref": "#/components/schemas/IReadOnlyListOfOutcomeResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeResponse"
+            },
+            "description": "Configuration problems found before any pipeline ran. A blocking outcome stops every\npipeline of the instance."
           }
         }
       },
@@ -3827,8 +3833,11 @@
             "$ref": "#/components/schemas/SyncCompletionStatus"
           },
           "instances": {
-            "description": "One entry for each instance that finished; instances that never ran are absent.",
-            "$ref": "#/components/schemas/IReadOnlyListOfSyncInstanceResultsResponse"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncInstanceResultsResponse"
+            },
+            "description": "One entry for each instance that finished; instances that never ran are absent."
           },
           "fault": {
             "oneOf": [

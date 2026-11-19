@@ -100,6 +100,25 @@ internal sealed class OpenApiDocumentHttpTest : ServerHttpFixture
         map.Should().NotContainKey("customFormatCreateRejected");
     }
 
+    // Component names become generated client type names; a C# collection type must not reach them
+    [Test]
+    public async Task Collections_are_inline_and_never_named_after_their_csharp_type()
+    {
+        var document = await GetDocument();
+        var schemas = document!["components"]!["schemas"]!.AsObject();
+
+        schemas.Where(x => x.Value!["type"]?.GetValue<string>() == "array").Should().BeEmpty();
+        schemas
+            .Where(x =>
+                x.Value!["additionalProperties"] is not null && x.Value["properties"] is null
+            )
+            .Should()
+            .BeEmpty();
+        schemas
+            .Should()
+            .ContainKey("QualityProfileFieldResponseOfQualityProfileLayoutResponseArray");
+    }
+
     private async Task<JsonNode?> GetDocument()
     {
         using var client = CreateClient();
