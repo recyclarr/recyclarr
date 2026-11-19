@@ -74,5 +74,6 @@ repos:
     rev: v0.24.1
     hooks:
       - id: markdownlint-cli2
+        language_version: system
         args: [--fix]
         exclude: ^\.claude/
