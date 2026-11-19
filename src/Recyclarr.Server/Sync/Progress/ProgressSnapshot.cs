@@ -31,28 +31,24 @@ internal sealed record ProgressSnapshot
         );
 
     public ProgressSnapshot Start(string instanceName) =>
-        Update(
-            instanceName,
-            instance =>
-                instance.Status == InstanceProgressStatus.Pending
-                    ? instance with
-                    {
-                        Status = InstanceProgressStatus.Running,
-                    }
-                    : null
+        Update(instanceName, instance =>
+            instance.Status == InstanceProgressStatus.Pending
+                ? instance with
+                {
+                    Status = InstanceProgressStatus.Running,
+                }
+                : null
         );
 
     public ProgressSnapshot Complete(SyncInstanceResultsResponse result) =>
-        Update(
-            result.Name,
-            instance =>
-                instance.Status == InstanceProgressStatus.Running
-                    ? instance with
-                    {
-                        Status = ToProgressStatus(result.Status),
-                        Result = result,
-                    }
-                    : null
+        Update(result.Name, instance =>
+            instance.Status == InstanceProgressStatus.Running
+                ? instance with
+                {
+                    Status = ToProgressStatus(result.Status),
+                    Result = result,
+                }
+                : null
         );
 
     public ProgressSnapshot Stop()
@@ -103,16 +99,14 @@ internal sealed record ProgressSnapshot
     }
 
     private ProgressSnapshot Reconcile(SyncInstanceResultsResponse result) =>
-        Update(
-            result.Name,
-            instance =>
-                instance.Result is null
-                    ? instance with
-                    {
-                        Status = ToProgressStatus(result.Status),
-                        Result = result,
-                    }
-                    : null
+        Update(result.Name, instance =>
+            instance.Result is null
+                ? instance with
+                {
+                    Status = ToProgressStatus(result.Status),
+                    Result = result,
+                }
+                : null
         );
 
     private static InstanceProgressStatus ToProgressStatus(SyncCompletionStatus status) =>

@@ -77,14 +77,11 @@ public abstract class IntegrationTestFixture : IDisposable
     )
         where T : notnull
     {
-        var childScope = Container.BeginLifetimeScope(
-            "instance",
-            c =>
-            {
-                c.RegisterInstance(config).As<IServiceConfiguration>().As(config.GetType());
-                configure?.Invoke(c);
-            }
-        );
+        var childScope = Container.BeginLifetimeScope("instance", c =>
+        {
+            c.RegisterInstance(config).As<IServiceConfiguration>().As(config.GetType());
+            configure?.Invoke(c);
+        });
         return new LifetimeScopeWrapper<T>(childScope);
     }
 

@@ -276,9 +276,7 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
 
         // The refresh holds the write lock from fetch to publish, so this read waits until it ends.
         // Stopping the worker first could cancel the refresh before it publishes.
-        (await GuideCustomFormats())
-            .Should()
-            .Equal("cf-one", "cf-two");
+        (await GuideCustomFormats()).Should().Equal("cf-one", "cf-two");
         await worker.StopAsync(CancellationToken.None);
     }
 

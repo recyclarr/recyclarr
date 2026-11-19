@@ -134,9 +134,8 @@ internal sealed class SyncJobTimeoutHttpTest : ServerHttpFixture
         }
 
         private TaskCompletionSource Signal(string instance) =>
-            _started.GetOrAdd(
-                instance,
-                _ => new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
-            );
+            _started.GetOrAdd(instance, _ => new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            ));
     }
 }

@@ -87,17 +87,11 @@ internal sealed class SyncJobRestartHttpTest
             var finished = SyncJobResultsResponseMapper.MapInstance(
                 new SyncInstanceResult("finished", SupportedServices.Radarr, [])
             );
-            store.Update(
-                id,
-                job =>
-                {
-                    job.Status = SyncJobStatus.Running;
-                    job.Progress = job
-                        .Progress.Start("finished")
-                        .Complete(finished)
-                        .Start("running");
-                }
-            );
+            store.Update(id, job =>
+            {
+                job.Status = SyncJobStatus.Running;
+                job.Progress = job.Progress.Start("finished").Complete(finished).Start("running");
+            });
         }
 
         await using var second = new FileDatabaseServer(_databasePath);

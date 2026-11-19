@@ -36,14 +36,11 @@ public abstract class ServiceConfigMerger<T>
             ),
 
             DeleteOldCustomFormats = b.DeleteOldCustomFormats ?? a.DeleteOldCustomFormats,
-            MediaManagement = Combine(
-                a.MediaManagement,
-                b.MediaManagement,
-                (a1, b1) =>
-                    a1 with
-                    {
-                        PropersAndRepacks = b1.PropersAndRepacks ?? a1.PropersAndRepacks,
-                    }
+            MediaManagement = Combine(a.MediaManagement, b.MediaManagement, (a1, b1) =>
+                a1 with
+                {
+                    PropersAndRepacks = b1.PropersAndRepacks ?? a1.PropersAndRepacks,
+                }
             ),
         };
     }
@@ -175,11 +172,8 @@ public abstract class ServiceConfigMerger<T>
             IReadOnlyCollection<string>? b
         )
         {
-            return Combine(
-                a,
-                b,
-                (a1, b1) =>
-                    a1.Concat(b1).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList()
+            return Combine(a, b, (a1, b1) =>
+                a1.Concat(b1).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList()
             );
         }
 
@@ -188,25 +182,22 @@ public abstract class ServiceConfigMerger<T>
             IReadOnlyCollection<CustomFormatGroupConfigYaml>? b
         )
         {
-            return Combine(
-                a,
-                b,
-                (a1, b1) =>
-                    a1.FullOuterHashJoin(
-                            b1,
-                            x => x.TrashId,
-                            x => x.TrashId,
-                            l => l,
-                            r => r,
-                            (l, r) =>
-                                l with
-                                {
-                                    AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
-                                    Select = r.Select ?? l.Select,
-                                },
-                            StringComparer.InvariantCultureIgnoreCase
-                        )
-                        .ToList()
+            return Combine(a, b, (a1, b1) =>
+                a1.FullOuterHashJoin(
+                        b1,
+                        x => x.TrashId,
+                        x => x.TrashId,
+                        l => l,
+                        r => r,
+                        (l, r) =>
+                            l with
+                            {
+                                AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
+                                Select = r.Select ?? l.Select,
+                            },
+                        StringComparer.InvariantCultureIgnoreCase
+                    )
+                    .ToList()
             );
         }
     }
@@ -216,26 +207,22 @@ public abstract class ServiceConfigMerger<T>
         IReadOnlyCollection<QualityProfileConfigYaml>? b
     )
     {
-        return Combine(
-            a,
-            b,
-            (a1, b1) =>
-            {
-                // Composite key: profiles merge only when both trash_id and name match.
-                // This allows multiple profiles sharing a trash_id (with different names)
-                // to pass through includes without collapsing.
-                return a1.FullOuterHashJoin(
-                        b1,
-                        x => $"{x.TrashId}\0{x.Name}",
-                        x => $"{x.TrashId}\0{x.Name}",
-                        l => l,
-                        r => r,
-                        MergeQualityProfile,
-                        StringComparer.InvariantCultureIgnoreCase
-                    )
-                    .ToList();
-            }
-        );
+        return Combine(a, b, (a1, b1) =>
+        {
+            // Composite key: profiles merge only when both trash_id and name match.
+            // This allows multiple profiles sharing a trash_id (with different names)
+            // to pass through includes without collapsing.
+            return a1.FullOuterHashJoin(
+                    b1,
+                    x => $"{x.TrashId}\0{x.Name}",
+                    x => $"{x.TrashId}\0{x.Name}",
+                    l => l,
+                    r => r,
+                    MergeQualityProfile,
+                    StringComparer.InvariantCultureIgnoreCase
+                )
+                .ToList();
+        });
     }
 
     private static QualityProfileConfigYaml MergeQualityProfile(
@@ -245,16 +232,13 @@ public abstract class ServiceConfigMerger<T>
     {
         return a with
         {
-            Upgrade = Combine(
-                a.Upgrade,
-                b.Upgrade,
-                (a1, b1) =>
-                    a1 with
-                    {
-                        Allowed = b1.Allowed ?? a1.Allowed,
-                        UntilQuality = b1.UntilQuality ?? a1.UntilQuality,
-                        UntilScore = b1.UntilScore ?? a1.UntilScore,
-                    }
+            Upgrade = Combine(a.Upgrade, b.Upgrade, (a1, b1) =>
+                a1 with
+                {
+                    Allowed = b1.Allowed ?? a1.Allowed,
+                    UntilQuality = b1.UntilQuality ?? a1.UntilQuality,
+                    UntilScore = b1.UntilScore ?? a1.UntilScore,
+                }
             ),
             MinFormatScore = b.MinFormatScore ?? a.MinFormatScore,
             MinUpgradeFormatScore = b.MinUpgradeFormatScore ?? a.MinUpgradeFormatScore,
@@ -267,29 +251,17 @@ public abstract class ServiceConfigMerger<T>
                     a1 with
                     {
                         Enabled = b1.Enabled ?? a1.Enabled,
-                        Except = Combine(
-                            a1.Except,
-                            b1.Except,
-                            (a2, b2) =>
-                                Combine(
-                                    a2,
-                                    b2,
-                                    (a3, b3) =>
-                                        a3.Concat(b3)
-                                            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-                                            .ToList()
-                                )
+                        Except = Combine(a1.Except, b1.Except, (a2, b2) =>
+                            Combine(a2, b2, (a3, b3) =>
+                                a3.Concat(b3)
+                                    .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                                    .ToList()
+                            )
                         ),
-                        ExceptPatterns = Combine(
-                            a1.ExceptPatterns,
-                            b1.ExceptPatterns,
-                            (a2, b2) =>
-                                Combine(
-                                    a2,
-                                    b2,
-                                    (a3, b3) =>
-                                        a3.Concat(b3).Distinct(StringComparer.Ordinal).ToList()
-                                )
+                        ExceptPatterns = Combine(a1.ExceptPatterns, b1.ExceptPatterns, (a2, b2) =>
+                            Combine(a2, b2, (a3, b3) =>
+                                a3.Concat(b3).Distinct(StringComparer.Ordinal).ToList()
+                            )
                         ),
                     }
             ),
@@ -320,23 +292,19 @@ public abstract class ServiceConfigMerger<T>
         IReadOnlyCollection<QualitySizeItemConfigYaml>? b
     )
     {
-        return Combine(
-            a,
-            b,
-            (a1, b1) =>
-            {
-                return a1.FullOuterHashJoin(
-                        b1,
-                        x => x.Name,
-                        x => x.Name,
-                        l => l,
-                        r => r,
-                        MergeQualitySizeItem,
-                        StringComparer.InvariantCultureIgnoreCase
-                    )
-                    .ToList();
-            }
-        );
+        return Combine(a, b, (a1, b1) =>
+        {
+            return a1.FullOuterHashJoin(
+                    b1,
+                    x => x.Name,
+                    x => x.Name,
+                    l => l,
+                    r => r,
+                    MergeQualitySizeItem,
+                    StringComparer.InvariantCultureIgnoreCase
+                )
+                .ToList();
+        });
     }
 
     private static QualitySizeItemConfigYaml MergeQualitySizeItem(

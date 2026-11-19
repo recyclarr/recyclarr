@@ -26,9 +26,8 @@ public sealed class SyntaxErrorHelper : INodeTypeResolver
     {
         if (
             nodeEvent is SequenceStart
-            && !Array.Exists(
-                CollectionKeywords,
-                x => currentType.Name.Contains(x, StringComparison.Ordinal)
+            && !Array.Exists(CollectionKeywords, x =>
+                currentType.Name.Contains(x, StringComparison.Ordinal)
             )
         )
         {

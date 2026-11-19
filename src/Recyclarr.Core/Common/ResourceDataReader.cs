@@ -48,9 +48,8 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
 
     private string FindResourcePath(string resourcePath)
     {
-        var foundResource = Array.Find(
-            assembly.GetManifestResourceNames(),
-            x => x.EndsWith(resourcePath, StringComparison.Ordinal)
+        var foundResource = Array.Find(assembly.GetManifestResourceNames(), x =>
+            x.EndsWith(resourcePath, StringComparison.Ordinal)
         );
 
         return foundResource
@@ -59,8 +58,7 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
 
     private string GetResourceData(string resourcePath)
     {
-        using var stream =
-            assembly.GetManifestResourceStream(resourcePath)
+        using var stream = assembly.GetManifestResourceStream(resourcePath)
             ?? throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();

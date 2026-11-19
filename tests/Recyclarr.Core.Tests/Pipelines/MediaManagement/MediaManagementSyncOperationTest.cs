@@ -161,8 +161,7 @@ internal sealed class MediaManagementSyncOperationTest
             .ReturnsForAnyArgs(_ => new MediaManagementData { Id = 42, PropersAndRepacks = mode });
         api.WhenForAnyArgs(x => x.UpdateMediaManagement(default!, default))
             .Do(x =>
-                mode =
-                    x.Arg<MediaManagementData>().PropersAndRepacks
+                mode = x.Arg<MediaManagementData>().PropersAndRepacks
                     ?? throw new InvalidOperationException("Expected configured mode")
             );
         var sut = new MediaManagementSyncOperation(Substitute.For<ILogger>(), api);

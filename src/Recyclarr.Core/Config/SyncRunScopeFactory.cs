@@ -17,9 +17,8 @@ public class SyncRunScopeFactory(ILifetimeScope scope)
     public LifetimeScopeWrapper<TEntry> Start<TEntry>(GuideIndex guide)
         where TEntry : notnull
     {
-        var childScope = scope.BeginLifetimeScope(
-            "run",
-            c => c.RegisterInstance(ResourceScope.For(guide))
+        var childScope = scope.BeginLifetimeScope("run", c =>
+            c.RegisterInstance(ResourceScope.For(guide))
         );
         return new LifetimeScopeWrapper<TEntry>(childScope);
     }

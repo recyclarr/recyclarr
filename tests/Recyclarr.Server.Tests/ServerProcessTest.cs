@@ -380,9 +380,8 @@ internal sealed class ServerProcessTest
         using var created = await http.PostAsync(LocalUri(apiPort, "/api/v1/sync/jobs"), body);
         created.StatusCode.Should().Be(HttpStatusCode.Accepted);
 
-        var jobLine = await ReadLineAsync(
-            server,
-            line => line.Contains("\"Sync job ", StringComparison.Ordinal)
+        var jobLine = await ReadLineAsync(server, line =>
+            line.Contains("\"Sync job ", StringComparison.Ordinal)
         );
         jobLine.Should().Contain("\"trace_id\":");
         server.StandardInput.Close();

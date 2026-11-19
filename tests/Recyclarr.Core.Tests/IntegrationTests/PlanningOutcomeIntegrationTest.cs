@@ -101,9 +101,8 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
             .Equal(expected.Select(x => x.GetType()));
         invalidInstance
             .PlanningOutcomes.Should()
-            .BeEquivalentTo(
-                expected,
-                options => options.PreferringRuntimeMemberTypes().WithStrictOrdering()
+            .BeEquivalentTo(expected, options =>
+                options.PreferringRuntimeMemberTypes().WithStrictOrdering()
             );
 
         var nonBlockingInstance = result.Instances[1];

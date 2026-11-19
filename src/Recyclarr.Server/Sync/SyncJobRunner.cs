@@ -28,14 +28,11 @@ internal sealed class SyncJobRunner(
         CancellationToken ct
     )
     {
-        store.Update(
-            jobId,
-            job =>
-            {
-                job.Status = SyncJobStatus.Running;
-                job.StartedAt = time.GetUtcNow();
-            }
-        );
+        store.Update(jobId, job =>
+        {
+            job.Status = SyncJobStatus.Running;
+            job.StartedAt = time.GetUtcNow();
+        });
 
         var progress = progressFactory(jobId);
         SyncRunResult result;

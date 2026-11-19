@@ -80,17 +80,14 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
             [],
             fault: new SyncFault("failed-fault")
         );
-        store.Update(
-            job.Id,
-            current =>
-            {
-                current.Status = SyncJobStatus.Running;
-                current.Progress = current.Progress.Start("completed").Complete(Map(completed));
-                current.Progress = current.Progress.Start("running");
-                current.Progress = current.Progress.Start("partial").Complete(Map(partial));
-                current.Progress = current.Progress.Start("failed").Complete(Map(failed));
-            }
-        );
+        store.Update(job.Id, current =>
+        {
+            current.Status = SyncJobStatus.Running;
+            current.Progress = current.Progress.Start("completed").Complete(Map(completed));
+            current.Progress = current.Progress.Start("running");
+            current.Progress = current.Progress.Start("partial").Complete(Map(partial));
+            current.Progress = current.Progress.Start("failed").Complete(Map(failed));
+        });
 
         using var client = CreateClient();
         var response = await RestService.For<ISyncApi>(client).JobsGet(job.Id.Value);
@@ -178,16 +175,13 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var job = store.CreateManualJob(["completed", "interrupted", "not-run"]);
         var completed = new SyncInstanceResult("completed", SupportedServices.Sonarr, []);
         store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
-        store.Update(
-            job.Id,
-            current =>
-            {
-                current.Progress = current.Progress.Start("completed").Complete(Map(completed));
-                current.Progress = current.Progress.Start("interrupted").Stop();
-                current.FaultReference = "run-fault";
-                current.Status = SyncJobStatus.Partial;
-            }
-        );
+        store.Update(job.Id, current =>
+        {
+            current.Progress = current.Progress.Start("completed").Complete(Map(completed));
+            current.Progress = current.Progress.Start("interrupted").Stop();
+            current.FaultReference = "run-fault";
+            current.Status = SyncJobStatus.Partial;
+        });
 
         using var client = CreateClient();
         var response = await RestService.For<ISyncApi>(client).JobsGet(job.Id.Value);

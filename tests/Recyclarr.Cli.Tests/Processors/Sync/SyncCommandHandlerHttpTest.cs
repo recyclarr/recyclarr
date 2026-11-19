@@ -988,8 +988,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         {
             Action = action,
             Identity = new CustomFormatIdentity(trashId, name),
-            SelectionProvenance =
-                source
+            SelectionProvenance = source
                 ?? new CustomFormatSourceInfo(
                     CfSource.FlatConfig,
                     null,

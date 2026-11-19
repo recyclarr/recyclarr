@@ -67,22 +67,18 @@ internal class CustomFormatDeleter(ILogger log, ICustomFormatService customForma
         ConcurrentBag<string> failedNames = [];
 
         var options = new ParallelOptions { MaxDegreeOfParallelism = 8 };
-        await Parallel.ForEachAsync(
-            candidates,
-            options,
-            async (candidate, token) =>
+        await Parallel.ForEachAsync(candidates, options, async (candidate, token) =>
+        {
+            try
             {
-                try
-                {
-                    await customFormatApi.DeleteCustomFormat(candidate.Id, token);
-                    successNames.Add(candidate.Name);
-                }
-                catch (Exception)
-                {
-                    failedNames.Add(candidate.Name);
-                }
+                await customFormatApi.DeleteCustomFormat(candidate.Id, token);
+                successNames.Add(candidate.Name);
             }
-        );
+            catch (Exception)
+            {
+                failedNames.Add(candidate.Name);
+            }
+        });
 
         if (!successNames.IsEmpty)
         {

@@ -111,8 +111,7 @@ public class GitProviderLocation : IResourceSource
         }
 
         using var repo = _repoFactory(_cachePath);
-        var head =
-            await repo.ResolveCommit("HEAD", ct)
+        var head = await repo.ResolveCommit("HEAD", ct)
             ?? throw new InvalidOperationException($"Git provider {_config.Name} has no HEAD");
         await repo.UpdateRef(GoodRef, head, ct);
     }

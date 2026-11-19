@@ -165,8 +165,8 @@ public class TrashGuidesStrategy(ILogger log) : IProviderTypeStrategy
     {
         using var stream = jsonFile.OpenRead();
         return JsonSerializer.Deserialize<RepoMetadata>(
-                stream,
-                GlobalJsonSerializerSettings.Metadata
-            ) ?? throw new InvalidDataException($"Unable to deserialize {jsonFile}");
+            stream,
+            GlobalJsonSerializerSettings.Metadata
+        ) ?? throw new InvalidDataException($"Unable to deserialize {jsonFile}");
     }
 }

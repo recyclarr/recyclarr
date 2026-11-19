@@ -49,9 +49,8 @@ internal sealed class YamlConfigValidatorTest
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(
-            config,
-            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        var result = validator.TestValidate(config, o =>
+            o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
         );
 
         result.ShouldHaveValidationErrorFor(x => x.ApiKey);
@@ -76,9 +75,8 @@ internal sealed class YamlConfigValidatorTest
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(
-            config,
-            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        var result = validator.TestValidate(config, o =>
+            o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
         );
 
         result
@@ -105,9 +103,8 @@ internal sealed class YamlConfigValidatorTest
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(
-            config,
-            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        var result = validator.TestValidate(config, o =>
+            o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
         );
 
         result
@@ -173,9 +170,8 @@ internal sealed class YamlConfigValidatorTest
         var config = new ServiceConfigYaml { BaseUrl = "http:/invalid" };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(
-            config,
-            s => s.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        var result = validator.TestValidate(config, s =>
+            s.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
         );
 
         result

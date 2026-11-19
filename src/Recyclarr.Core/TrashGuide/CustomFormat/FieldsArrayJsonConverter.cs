@@ -8,9 +8,8 @@ public class FieldsArrayJsonConverter : JsonConverter<object>
     public override bool CanConvert(Type typeToConvert)
     {
         return typeToConvert == typeof(CustomFormatFieldData)
-            || Array.Exists(
-                typeToConvert.GetInterfaces(),
-                x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+            || Array.Exists(typeToConvert.GetInterfaces(), x =>
+                x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
             );
     }
 

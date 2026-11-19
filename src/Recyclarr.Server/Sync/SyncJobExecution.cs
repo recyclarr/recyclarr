@@ -55,8 +55,7 @@ internal sealed class SyncJobExecution(
     private async Task RunJobAsync(Guid jobId, CancellationToken shutdown)
     {
         // Jobs are queued only while pending, and only finished jobs are evicted from the store.
-        var job =
-            store.Get(new JobId { Value = jobId })
+        var job = store.Get(new JobId { Value = jobId })
             ?? throw new InvalidOperationException($"Queued sync job {jobId} has no record");
 
         using var activity = SyncJobTelemetry.StartRun(job);

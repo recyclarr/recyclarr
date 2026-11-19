@@ -10,22 +10,19 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 {
     public ServiceConfigYamlValidator()
     {
-        RuleSet(
-            YamlValidatorRuleSets.RootConfig,
-            () =>
-            {
-                RuleFor(x => x.BaseUrl)
-                    .Cascade(CascadeMode.Stop)
-                    .NotEmpty()
-                    .Must(x => x!.StartsWith("http", StringComparison.Ordinal))
-                    .WithMessage("{PropertyName} must start with 'http' or 'https'")
-                    .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-                    .WithMessage("{PropertyName} must be a valid URL")
-                    .WithName("base_url");
+        RuleSet(YamlValidatorRuleSets.RootConfig, () =>
+        {
+            RuleFor(x => x.BaseUrl)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty()
+                .Must(x => x!.StartsWith("http", StringComparison.Ordinal))
+                .WithMessage("{PropertyName} must start with 'http' or 'https'")
+                .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
+                .WithMessage("{PropertyName} must be a valid URL")
+                .WithName("base_url");
 
-                RuleFor(x => x.ApiKey).NotEmpty().WithName("api_key");
-            }
-        );
+            RuleFor(x => x.ApiKey).NotEmpty().WithName("api_key");
+        });
 
         RuleForEach(x => x.CustomFormats).SetValidator(new CustomFormatConfigYamlValidator());
 

@@ -51,8 +51,7 @@ internal sealed class ServerLogger(
             AddLogFiles(config);
         }
 
-        var format =
-            logging.Format
+        var format = logging.Format
             ?? (Console.IsOutputRedirected ? ServerLogFormat.Json : ServerLogFormat.Text);
 
         if (mode == ServerMode.Ephemeral)

@@ -47,8 +47,8 @@ public class QualityProfileGroupResourceQuery(ResourceScope resources, ILogger l
     {
         using var stream = file.OpenRead();
         return JsonSerializer.Deserialize<List<TResource>>(
-                stream,
-                GlobalJsonSerializerSettings.Metadata
-            ) ?? [];
+            stream,
+            GlobalJsonSerializerSettings.Metadata
+        ) ?? [];
     }
 }

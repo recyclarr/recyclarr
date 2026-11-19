@@ -88,14 +88,11 @@ internal sealed class PipelineGraphTest
     {
         var graph = new PipelineGraph([
             Pipeline(PipelineType.CustomFormat, _ => new PlanA()),
-            Pipeline(
-                PipelineType.QualityProfile,
-                context =>
-                {
-                    context.Require<PlanA>();
-                    return new PlanB();
-                }
-            ),
+            Pipeline(PipelineType.QualityProfile, context =>
+            {
+                context.Require<PlanA>();
+                return new PlanB();
+            }),
         ]);
 
         var act = () => new PlanBuilder(graph, Substitute.For<ILogger>()).Build();

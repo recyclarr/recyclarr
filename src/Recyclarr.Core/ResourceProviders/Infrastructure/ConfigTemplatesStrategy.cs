@@ -44,8 +44,8 @@ public class ConfigTemplatesStrategy : IProviderTypeStrategy
     {
         using var stream = jsonFile.OpenRead();
         return JsonSerializer.Deserialize<TemplatesData>(
-                stream,
-                GlobalJsonSerializerSettings.Recyclarr
-            ) ?? throw new InvalidDataException($"Unable to deserialize {jsonFile}");
+            stream,
+            GlobalJsonSerializerSettings.Recyclarr
+        ) ?? throw new InvalidDataException($"Unable to deserialize {jsonFile}");
     }
 }

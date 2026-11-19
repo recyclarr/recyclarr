@@ -9,48 +9,39 @@ internal sealed class SyncJobFinalizer(ISyncJobStore store, TimeProvider time)
 {
     public void Complete(JobId jobId, SyncRunResult result)
     {
-        store.Update(
-            jobId,
-            job =>
-            {
-                var instances = result.Instances.Select(SyncJobResultsResponseMapper.MapInstance);
-                job.Progress = job.Progress.Reconcile(instances).Stop();
-                job.Status = result.Status.ToJobStatus();
-                job.FaultReference = result.Fault?.Reference;
-                job.FinishedAt = time.GetUtcNow();
-            }
-        );
+        store.Update(jobId, job =>
+        {
+            var instances = result.Instances.Select(SyncJobResultsResponseMapper.MapInstance);
+            job.Progress = job.Progress.Reconcile(instances).Stop();
+            job.Status = result.Status.ToJobStatus();
+            job.FaultReference = result.Fault?.Reference;
+            job.FinishedAt = time.GetUtcNow();
+        });
     }
 
     // The run stopped on a fault: instances already finished keep their results. A fault before
     // the runner marked the job running (run scope setup) still counts as a started run.
     public void Fail(JobId jobId, SyncFault fault)
     {
-        store.Update(
-            jobId,
-            job =>
+        store.Update(jobId, job =>
+        {
+            if (job.Status != SyncJobStatus.Pending)
             {
-                if (job.Status != SyncJobStatus.Pending)
-                {
-                    return;
-                }
-
-                job.Status = SyncJobStatus.Running;
-                job.StartedAt = time.GetUtcNow();
+                return;
             }
-        );
 
-        store.Update(
-            jobId,
-            job =>
-            {
-                job.Progress = job.Progress.Stop();
-                job.Status = job.Progress.HasCompletedWork
-                    ? SyncJobStatus.Partial
-                    : SyncJobStatus.Failed;
-                job.FaultReference = fault.Reference;
-                job.FinishedAt = time.GetUtcNow();
-            }
-        );
+            job.Status = SyncJobStatus.Running;
+            job.StartedAt = time.GetUtcNow();
+        });
+
+        store.Update(jobId, job =>
+        {
+            job.Progress = job.Progress.Stop();
+            job.Status = job.Progress.HasCompletedWork
+                ? SyncJobStatus.Partial
+                : SyncJobStatus.Failed;
+            job.FaultReference = fault.Reference;
+            job.FinishedAt = time.GetUtcNow();
+        });
     }
 }

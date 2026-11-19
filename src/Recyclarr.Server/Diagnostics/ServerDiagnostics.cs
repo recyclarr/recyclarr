@@ -26,9 +26,8 @@ internal sealed class ServerDiagnostics
     public void Replace(string source, IEnumerable<DiagnosticResponse> diagnostics)
     {
         var entries = diagnostics.ToImmutableArray();
-        ImmutableInterlocked.Update(
-            ref _sources,
-            x => entries.IsEmpty ? x.Remove(source) : x.SetItem(source, entries)
+        ImmutableInterlocked.Update(ref _sources, x =>
+            entries.IsEmpty ? x.Remove(source) : x.SetItem(source, entries)
         );
     }
 

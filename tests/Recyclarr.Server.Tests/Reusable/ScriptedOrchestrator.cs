@@ -41,8 +41,7 @@ internal sealed class ScriptedOrchestrator : ISyncOrchestrator
     }
 
     private TaskCompletionSource Signal(int run) =>
-        _started.GetOrAdd(
-            run,
-            _ => new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
-        );
+        _started.GetOrAdd(run, _ => new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        ));
 }

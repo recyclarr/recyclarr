@@ -36,8 +36,7 @@ internal sealed class SyncJobLauncher(
     {
         try
         {
-            var job =
-                store.Get(jobId)
+            var job = store.Get(jobId)
                 ?? throw new InvalidOperationException($"Sync job {jobId} does not exist");
 
             await scheduler.ScheduleJob<SyncJobExecution, SyncJobInput>(

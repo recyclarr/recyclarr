@@ -141,27 +141,23 @@ internal class DeleteCustomFormatsCommand(
     {
         ConcurrentBag<string> failed = [];
         var options = new ParallelOptions { MaxDegreeOfParallelism = 8, CancellationToken = ct };
-        await Parallel.ForEachAsync(
-            candidates,
-            options,
-            async (cf, token) =>
+        await Parallel.ForEachAsync(candidates, options, async (cf, token) =>
+        {
+            try
             {
-                try
+                using var result = await api.CustomFormatsDelete(instanceName, cf.Id, token);
+                if (result.Error is not null)
                 {
-                    using var result = await api.CustomFormatsDelete(instanceName, cf.Id, token);
-                    if (result.Error is not null)
-                    {
-                        log.Debug(result.Error, "Failed to delete custom format {Name}", cf.Name);
-                        failed.Add(cf.Name);
-                    }
-                }
-                catch (Exception e) when (e is not OperationCanceledException)
-                {
-                    log.Debug(e, "Failed to delete custom format {Name}", cf.Name);
+                    log.Debug(result.Error, "Failed to delete custom format {Name}", cf.Name);
                     failed.Add(cf.Name);
                 }
             }
-        );
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                log.Debug(e, "Failed to delete custom format {Name}", cf.Name);
+                failed.Add(cf.Name);
+            }
+        });
 
         return [.. failed];
     }

@@ -98,8 +98,8 @@ internal class SonarrV5QualityProfileGateway(
         baseDto.Name = domain.Name;
         baseDto.UpgradeAllowed = domain.UpgradeAllowed ?? baseDto.UpgradeAllowed;
         baseDto.MinFormatScore = domain.MinFormatScore ?? baseDto.MinFormatScore;
-        baseDto.MinUpgradeFormatScore =
-            domain.MinUpgradeFormatScore ?? baseDto.MinUpgradeFormatScore;
+        baseDto.MinUpgradeFormatScore = domain.MinUpgradeFormatScore
+            ?? baseDto.MinUpgradeFormatScore;
         baseDto.Cutoff = domain.Cutoff ?? baseDto.Cutoff;
         baseDto.CutoffFormatScore = domain.CutoffFormatScore ?? baseDto.CutoffFormatScore;
         baseDto.FormatItems = domain

@@ -40,8 +40,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             Series = new Dictionary<string, string> { ["default"] = "series" },
             Episodes = new SonarrEpisodeNamingResource
             {
-                Standard =
-                    standardEpisodeFormats
+                Standard = standardEpisodeFormats
                     ?? new Dictionary<string, string>
                     {
                         ["default"] = "standard",

@@ -21,9 +21,8 @@ internal static class OutboundHttpClientRegistration
             // Suppress automatic scope creation per client; handler dependencies are all
             // singletons and these scopes would be invisible to the intentional run/instance
             // Autofac hierarchy.
-            services.Configure<HttpClientFactoryOptions>(
-                "servarr",
-                options => options.SuppressHandlerScope = true
+            services.Configure<HttpClientFactoryOptions>("servarr", options =>
+                options.SuppressHandlerScope = true
             );
             services
                 .AddHttpClient("servarr")
@@ -45,9 +44,8 @@ internal static class OutboundHttpClientRegistration
                     return handler;
                 });
 
-            services.Configure<HttpClientFactoryOptions>(
-                "apprise",
-                options => options.SuppressHandlerScope = true
+            services.Configure<HttpClientFactoryOptions>("apprise", options =>
+                options.SuppressHandlerScope = true
             );
             services
                 .AddHttpClient("apprise")

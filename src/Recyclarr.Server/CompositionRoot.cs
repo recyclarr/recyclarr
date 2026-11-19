@@ -111,16 +111,13 @@ internal static class CompositionRoot
                     : new NoopNotificationService();
             })
             .InstancePerMatchingLifetimeScope("run");
-        builder.RegisterMatchingScope(
-            "run",
-            b =>
-            {
-                b.RegisterType<SyncJobRunner>();
-                b.RegisterType<SyncJobProgress>();
-                b.RegisterType<SyncResultLogger>();
-                b.RegisterType<ServerSyncFaultReporter>().As<ISyncFaultReporter>();
-            }
-        );
+        builder.RegisterMatchingScope("run", b =>
+        {
+            b.RegisterType<SyncJobRunner>();
+            b.RegisterType<SyncJobProgress>();
+            b.RegisterType<SyncResultLogger>();
+            b.RegisterType<ServerSyncFaultReporter>().As<ISyncFaultReporter>();
+        });
     }
 
     private static void RegisterNotifications(ContainerBuilder builder)
@@ -131,8 +128,7 @@ internal static class CompositionRoot
             {
                 var factory = c.Resolve<IHttpClientFactory>();
                 var settings = c.Resolve<IOptions<NotificationSettings>>().Value;
-                var apprise =
-                    settings.Apprise
+                var apprise = settings.Apprise
                     ?? throw new InvalidOperationException(
                         "No Apprise notification settings have been defined"
                     );

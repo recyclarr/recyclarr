@@ -32,14 +32,11 @@ internal sealed class ServerLoggerTest
     {
         var paths = CreatePaths();
 
-        WriteLogs(
-            paths,
-            log =>
-            {
-                log.Verbose("verbose event");
-                log.Debug("debug event");
-            }
-        );
+        WriteLogs(paths, log =>
+        {
+            log.Verbose("verbose event");
+            log.Debug("debug event");
+        });
 
         var files = paths.ServerLogDirectory.GetFiles();
         files
@@ -63,14 +60,11 @@ internal sealed class ServerLoggerTest
     {
         var paths = CreatePaths();
 
-        WriteLogs(
-            paths,
-            log =>
-            {
-                log.Debug(CreateThrownException(), "failing event");
-                log.Debug("next event");
-            }
-        );
+        WriteLogs(paths, log =>
+        {
+            log.Debug(CreateThrownException(), "failing event");
+            log.Debug("next event");
+        });
 
         paths
             .ServerLogDirectory.GetFiles("*.debug.log")

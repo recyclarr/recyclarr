@@ -58,8 +58,7 @@ internal sealed class ServerApiKey
 
     private byte[] Resolve()
     {
-        var key =
-            _locator.Locate()
+        var key = _locator.Locate()
             ?? throw new EnvironmentException(
                 $"Set {ServerApiKeyLocator.Variable} or {ServerApiKeyLocator.FileVariable} to the "
                     + "API key that clients send to this server"

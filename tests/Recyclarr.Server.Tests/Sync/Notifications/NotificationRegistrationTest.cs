@@ -29,9 +29,8 @@ internal sealed class NotificationRegistrationTest : ServerIntegrationFixture
                 },
             }
         );
-        using var scope = Container.BeginLifetimeScope(
-            "run",
-            builder => builder.RegisterInstance(settings).As<IOptions<NotificationSettings>>()
+        using var scope = Container.BeginLifetimeScope("run", builder =>
+            builder.RegisterInstance(settings).As<IOptions<NotificationSettings>>()
         );
 
         scope.Resolve<INotificationService>().Should().BeOfType<NotificationService>();

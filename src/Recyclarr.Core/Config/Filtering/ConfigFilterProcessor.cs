@@ -17,9 +17,8 @@ public class ConfigFilterProcessor(IEnumerable<IConfigFilter> filters)
     {
         var context = new FilterContext { AllAvailableInstances = allAvailableInstances };
 
-        var filteredConfigs = filters.Aggregate(
-            configs,
-            (current, filter) => filter.Filter(criteria, current, context)
+        var filteredConfigs = filters.Aggregate(configs, (current, filter) =>
+            filter.Filter(criteria, current, context)
         );
 
         return new ConfigFilterProcessorResult(filteredConfigs, context.Results);

@@ -24,8 +24,8 @@ public static class ConfigYamlExtensions
         return new CustomFormatConfig
         {
             TrashIds = yaml.TrashIds?.ToList() ?? [],
-            AssignScoresTo =
-                yaml.AssignScoresTo?.Select(x => x.ToAssignScoresToConfig(yaml.Score)).ToList()
+            AssignScoresTo = yaml.AssignScoresTo?.Select(x => x.ToAssignScoresToConfig(yaml.Score))
+                .ToList()
                 ?? [],
         };
     }
@@ -44,8 +44,9 @@ public static class ConfigYamlExtensions
         return new CustomFormatGroupConfig
         {
             TrashId = yaml.TrashId ?? "",
-            AssignScoresTo =
-                yaml.AssignScoresTo?.Select(x => x.ToCfGroupAssignScoresToConfig()).ToList() ?? [],
+            AssignScoresTo = yaml.AssignScoresTo?.Select(x => x.ToCfGroupAssignScoresToConfig())
+                .ToList()
+                ?? [],
             SelectAll = yaml.SelectAll ?? false,
             Select = yaml.Select?.ToList() ?? [],
             Exclude = yaml.Exclude?.ToList() ?? [],
@@ -84,8 +85,8 @@ public static class ConfigYamlExtensions
         {
             Type = yaml.Type ?? "",
             PreferredRatio = yaml.PreferredRatio,
-            Qualities =
-                yaml.Qualities?.Select(x => x.ToQualityDefinitionItemConfig()).ToList() ?? [],
+            Qualities = yaml.Qualities?.Select(x => x.ToQualityDefinitionItemConfig()).ToList()
+                ?? [],
         };
     }
 
@@ -127,8 +128,8 @@ public static class ConfigYamlExtensions
             ScoreSet = yaml.ScoreSet,
             QualitySort = yaml.QualitySort ?? QualitySortAlgorithm.Top,
             ResetUnmatchedScores = yaml.ResetUnmatchedScores.ToResetUnmatchedScoresConfig(),
-            Qualities =
-                yaml.Qualities?.Select(x => x.ToQualityProfileQualityConfig()).ToList() ?? [],
+            Qualities = yaml.Qualities?.Select(x => x.ToQualityProfileQualityConfig()).ToList()
+                ?? [],
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
         };
     }
@@ -211,12 +212,12 @@ public static class ConfigYamlExtensions
             BaseUrl = ParseUri(yaml.BaseUrl),
             ApiKey = yaml.ApiKey ?? "",
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
-            CustomFormats =
-                yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
+            CustomFormats = yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList()
+                ?? [],
             CustomFormatGroups = yaml.CustomFormatGroups.ToCustomFormatGroupsConfig(),
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
-            QualityProfiles =
-                yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
+            QualityProfiles = yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList()
+                ?? [],
             MediaNaming = yaml.MediaNaming.ToRadarrMediaNamingConfig(),
             MediaManagement = yaml.MediaManagement.ToMediaManagementConfig(),
         };
@@ -235,12 +236,12 @@ public static class ConfigYamlExtensions
             BaseUrl = ParseUri(yaml.BaseUrl),
             ApiKey = yaml.ApiKey ?? "",
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
-            CustomFormats =
-                yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
+            CustomFormats = yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList()
+                ?? [],
             CustomFormatGroups = yaml.CustomFormatGroups.ToCustomFormatGroupsConfig(),
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
-            QualityProfiles =
-                yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
+            QualityProfiles = yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList()
+                ?? [],
             MediaNaming = yaml.MediaNaming.ToSonarrMediaNamingConfig(),
             MediaManagement = yaml.MediaManagement.ToMediaManagementConfig(),
         };

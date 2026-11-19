@@ -22,8 +22,9 @@ internal sealed class PlanningContext(IPipeline pipeline, PipelineGraph graph, P
     public TPlan Require<TPlan>()
         where TPlan : class
     {
-        var dependency =
-            pipeline.Dependencies.Select(graph.Get).FirstOrDefault(x => x.PlanType == typeof(TPlan))
+        var dependency = pipeline
+            .Dependencies.Select(graph.Get)
+            .FirstOrDefault(x => x.PlanType == typeof(TPlan))
             ?? throw new InvalidOperationException(
                 $"{pipeline.Type} planning requires {typeof(TPlan).Name}, "
                     + "which no declared dependency produces"

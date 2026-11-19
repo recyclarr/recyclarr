@@ -96,8 +96,7 @@ public sealed class IncludePostProcessor(
         T configToMerge;
         try
         {
-            configToMerge =
-                parser.Load<T>(yamlFile)
+            configToMerge = parser.Load<T>(yamlFile)
                 ?? throw new YamlIncludeException($"Include file is empty: {yamlFile.FullName}");
         }
         catch (ConfigParsingException e)

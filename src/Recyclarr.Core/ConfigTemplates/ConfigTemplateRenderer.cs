@@ -197,8 +197,7 @@ public class ConfigTemplateRenderer(CfGroupResourceQuery cfGroups, ConflictsReso
         return conflicts
             .SelectMany(members =>
             {
-                var winner =
-                    members.FirstOrDefault(cf => cf.Required)
+                var winner = members.FirstOrDefault(cf => cf.Required)
                     ?? members.FirstOrDefault(cf => cf.Default)
                     ?? members[0];
                 return members.Where(cf => cf != winner && !cf.Required);

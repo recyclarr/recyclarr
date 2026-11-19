@@ -27,9 +27,8 @@ internal sealed class CustomFormatLoaderIntegrationTest : CoreIntegrationTestFix
 
         results
             .Should()
-            .BeEquivalentTo(
-                [NewCf.Data("first", "1"), NewCf.Data("second", "2")],
-                o => o.Excluding(x => x.Type == typeof(JsonElement))
+            .BeEquivalentTo([NewCf.Data("first", "1"), NewCf.Data("second", "2")], o =>
+                o.Excluding(x => x.Type == typeof(JsonElement))
             );
     }
 }

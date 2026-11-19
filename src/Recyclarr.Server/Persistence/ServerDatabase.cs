@@ -51,9 +51,8 @@ internal sealed class ServerDatabase : IDisposable
     // set has a single owner.
     public void Configure(DbContextOptionsBuilder options, string migrationsHistoryTable)
     {
-        options.UseSqlite(
-            ConnectionString,
-            sqlite => sqlite.MigrationsHistoryTable(migrationsHistoryTable)
+        options.UseSqlite(ConnectionString, sqlite =>
+            sqlite.MigrationsHistoryTable(migrationsHistoryTable)
         );
     }
 

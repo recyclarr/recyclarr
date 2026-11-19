@@ -96,10 +96,9 @@ public static class SettingsBinder
                 .GetChildren()
                 .Select(BindProvider)
                 .ToList(),
-            EnableSslCertificateValidation =
-                section
-                    .GetSection(nameof(RecyclarrSettings.EnableSslCertificateValidation))
-                    .Get<bool?>()
+            EnableSslCertificateValidation = section
+                .GetSection(nameof(RecyclarrSettings.EnableSslCertificateValidation))
+                .Get<bool?>()
                 ?? defaults.EnableSslCertificateValidation,
             LogJanitor = Get(section, nameof(RecyclarrSettings.LogJanitor), defaults.LogJanitor),
             GitPath = section[nameof(RecyclarrSettings.GitPath)],
@@ -119,8 +118,7 @@ public static class SettingsBinder
 
     private static ResourceProvider BindProvider(IConfigurationSection item)
     {
-        var type =
-            ProviderType(item)
+        var type = ProviderType(item)
             ?? throw new InvalidOperationException($"No provider type for '{item.Path}'");
         return (ResourceProvider)(
             item.Get(type, Strict)

@@ -150,14 +150,11 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
         var store = Resolve<ISyncJobStore>();
         var pending = store.CreateManualJob(["waiting"]);
         var running = store.CreateManualJob(["running"]);
-        store.Update(
-            running.Id,
-            job =>
-            {
-                job.Status = SyncJobStatus.Running;
-                job.Progress = job.Progress.Start("running");
-            }
-        );
+        store.Update(running.Id, job =>
+        {
+            job.Status = SyncJobStatus.Running;
+            job.Progress = job.Progress.Start("running");
+        });
         var finished = store.CreateManualJob([]);
         Finish(store, finished.Id, SyncJobStatus.Succeeded);
 

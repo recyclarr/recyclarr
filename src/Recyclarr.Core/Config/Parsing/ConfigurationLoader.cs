@@ -46,9 +46,8 @@ public class ConfigurationLoader(
             return [];
         }
 
-        config = postProcessors.Aggregate(
-            config,
-            (current, processor) => processor.Process(current)
+        config = postProcessors.Aggregate(config, (current, processor) =>
+            processor.Process(current)
         );
 
         if (config.IsConfigEmpty())
@@ -69,13 +68,13 @@ public class ConfigurationLoader(
             where T : ServiceConfigYaml
         {
             return configs
-                    ?.Where(x => x.Value is not null)
-                    .Select(kvp => new LoadedConfigYaml
-                    {
-                        InstanceName = kvp.Key,
-                        ServiceType = serviceType,
-                        Yaml = kvp.Value!,
-                    })
+                ?.Where(x => x.Value is not null)
+                .Select(kvp => new LoadedConfigYaml
+                {
+                    InstanceName = kvp.Key,
+                    ServiceType = serviceType,
+                    Yaml = kvp.Value!,
+                })
                 ?? [];
         }
     }

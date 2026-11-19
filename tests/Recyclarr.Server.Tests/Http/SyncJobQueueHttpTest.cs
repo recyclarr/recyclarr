@@ -167,10 +167,9 @@ internal sealed class SyncJobQueueHttpTest : ServerHttpFixture
         }
 
         private TaskCompletionSource Signal(string instance) =>
-            _started.GetOrAdd(
-                instance,
-                _ => new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
-            );
+            _started.GetOrAdd(instance, _ => new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            ));
 
         private static void InterlockedMax(ref int target, int value)
         {

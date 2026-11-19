@@ -22,12 +22,10 @@ public class InvalidInstancesFilter(ILogger log, IValidator<ServiceConfigYaml> v
             .Select(config =>
                 (
                     config.InstanceName,
-                    Result: validator.Validate(
-                        config.Yaml,
-                        options =>
-                            options
-                                .IncludeRulesNotInRuleSet()
-                                .IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+                    Result: validator.Validate(config.Yaml, options =>
+                        options
+                            .IncludeRulesNotInRuleSet()
+                            .IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
                     )
                 )
             )

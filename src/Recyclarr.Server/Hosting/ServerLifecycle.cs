@@ -124,10 +124,9 @@ internal static class ServerLifecycle
     // the bound address carries the real port.
     private static void AnnounceReady(WebApplication app, bool isDocumentGeneration)
     {
-        var addresses =
-            app.Services.GetRequiredService<IServer>()
-                .Features.Get<IServerAddressesFeature>()
-                ?.Addresses
+        var addresses = app.Services.GetRequiredService<IServer>()
+            .Features.Get<IServerAddressesFeature>()
+            ?.Addresses
             ?? [];
 
         int? managementPort = null;

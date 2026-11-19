@@ -191,9 +191,8 @@ internal class QualityProfileSyncOperation(
         var validator = new UpdatedQualityProfileValidator();
 
         return profiles
-            .IsValid(
-                validator,
-                (errors, profile) => invalidProfiles.Add(new InvalidProfileData(profile, errors))
+            .IsValid(validator, (errors, profile) =>
+                invalidProfiles.Add(new InvalidProfileData(profile, errors))
             )
             .ToList();
     }
@@ -205,9 +204,8 @@ internal class QualityProfileSyncOperation(
     {
         var validator = new UpdatedQualityProfileValidator();
         var validProfiles = profiles
-            .IsValid(
-                validator,
-                (errors, profile) => invalidProfiles.Add(new InvalidProfileData(profile, errors))
+            .IsValid(validator, (errors, profile) =>
+                invalidProfiles.Add(new InvalidProfileData(profile, errors))
             )
             .ToList();
 
@@ -575,9 +573,8 @@ internal class QualityProfileSyncOperation(
                     qualitiesChanged
                 )
             ),
-            CustomFormatScores = MapScores(
-                profile,
-                x => PlannedValue.Compared(x.FormatItem.Score, x.NewScore)
+            CustomFormatScores = MapScores(profile, x =>
+                PlannedValue.Compared(x.FormatItem.Score, x.NewScore)
             ),
         };
         return serviceFields.Describe(shared, current, desired, profile.ProfileConfig);
@@ -609,8 +606,8 @@ internal class QualityProfileSyncOperation(
     )
     {
         return profile.ProfileConfig.CfScores.FirstOrDefault(x =>
-                x.ServiceId > 0 && x.ServiceId == score.FormatItem.FormatId
-            )
+            x.ServiceId > 0 && x.ServiceId == score.FormatItem.FormatId
+        )
             ?? profile.ProfileConfig.CfScores.FirstOrDefault(x =>
                 x.Name.Equals(score.FormatItem.Name, StringComparison.OrdinalIgnoreCase)
             );

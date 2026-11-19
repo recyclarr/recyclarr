@@ -133,8 +133,7 @@ public abstract class ServerHttpFixture : IDisposable, IAsyncDisposable
             RegisterStubsAndMocks(b);
         });
 
-        var app =
-            ServerHost.Build(builder)
+        var app = ServerHost.Build(builder)
             ?? throw new InvalidOperationException("The in-process server could not be built");
         if (!app.StartServerAsync().GetAwaiter().GetResult())
         {

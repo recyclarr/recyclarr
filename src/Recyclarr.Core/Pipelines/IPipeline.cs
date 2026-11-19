@@ -68,8 +68,8 @@ internal sealed class Pipeline<TPlan>(
     )
     {
         var planned = plan.Get<TPlan>();
-        var value =
-            planned.Value ?? throw new InvalidOperationException($"{type} has no plan to execute");
+        var value = planned.Value
+            ?? throw new InvalidOperationException($"{type} has no plan to execute");
         return operation.Execute(preview, value, planned.Outcomes, capture, ct);
     }
 

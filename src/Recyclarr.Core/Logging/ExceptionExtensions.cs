@@ -22,9 +22,8 @@ public static class ExceptionExtensions
     {
         if (ex is AggregateException aex)
         {
-            return aex.InnerExceptions.Aggregate(
-                    "[ ",
-                    (total, next) => $"{total}[{next.FullMessage()}] "
+            return aex.InnerExceptions.Aggregate("[ ", (total, next) =>
+                    $"{total}[{next.FullMessage()}] "
                 ) + "]";
         }
 

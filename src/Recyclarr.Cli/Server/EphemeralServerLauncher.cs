@@ -75,8 +75,7 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
         _errorCapture = CaptureLinesAsync(_process.StandardError);
 
         // stdout closing without READY means the server exited, so stderr is complete too
-        var address =
-            await ReadUntilReadyAsync(_process.StandardOutput, ct)
+        var address = await ReadUntilReadyAsync(_process.StandardOutput, ct)
             ?? throw new ServerStartException(await _errorCapture);
 
         _outputDrain = CaptureLinesAsync(_process.StandardOutput);
