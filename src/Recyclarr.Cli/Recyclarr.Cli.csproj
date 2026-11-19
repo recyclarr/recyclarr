@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extras.Ordering" />
+    <PackageReference Include="CliWrap" />
     <PackageReference Include="GitVersion.MsBuild" />
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Serilog" />

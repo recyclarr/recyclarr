@@ -1,5 +1,6 @@
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using CliWrap;
 using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Server;
@@ -20,10 +21,11 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
     private const string ReadyPrefix = "READY:";
     private const string LoopbackUrl = "http://127.0.0.1:0";
 
-    private Process? _process;
-    private StreamWriter? _stdinWriter;
-    private Task? _outputDrain;
-    private Task<List<string>>? _errorCapture;
+    private readonly TaskCompletionSource _lifeline = new(
+        TaskCreationOptions.RunContinuationsAsynchronously
+    );
+
+    private Task<CommandResult>? _execution;
 
     /// <summary>
     /// Starts the server process and returns its base address once it reports readiness.
@@ -34,6 +36,7 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
     /// <exception cref="ServerStartException">
     /// Thrown when the process exits before sending READY.
     /// </exception>
+    [SuppressMessage("Style", "REC001", Justification = "Explicit None marks ct as ignored")]
     public async Task<Uri> StartAsync(string apiKey, CancellationToken ct)
     {
         var serverBinary = ServerBinaryLocator.GetServerBinary(fs);
@@ -44,94 +47,67 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
             );
         }
 
-        _process = new Process
+        var ready = new TaskCompletionSource<Uri>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+        List<string> errors = [];
+
+        _execution = CliWrap
+            .Cli.Wrap(serverBinary.FullName)
+            // Port 0 lets the OS pick a free port, so concurrent CLI invocations and a separately
+            // running `recyclarr serve` never contend for one (ADR-010). The address must be a
+            // literal loopback IP: Kestrel rejects dynamic ports on the "localhost" alias because
+            // it cannot bind both IPv4 and IPv6 to the same OS-assigned port.
+            .WithArguments([
+                $"--urls={LoopbackUrl}",
+                $"--parent-pid={Environment.ProcessId}",
+                "--ephemeral=true",
+            ])
+            // Replaces any inherited key, so the server accepts only this command's key. An
+            // inherited key file would conflict with it and stop the server (ADR-027).
+            .WithEnvironmentVariables(env =>
+                env.Set(ServerApiKeyLocator.Variable, apiKey)
+                    .Set(ServerApiKeyLocator.FileVariable, null)
+            )
+            // stdin stays open until disposal completes the lifeline; CliWrap then closes it.
+            .WithStandardInputPipe(PipeSource.Create((_, _) => _lifeline.Task))
+            .WithStandardOutputPipe(
+                PipeTarget.ToDelegate(line =>
+                {
+                    if (line.StartsWith(ReadyPrefix, StringComparison.Ordinal))
+                    {
+                        ready.TrySetResult(
+                            new Uri($"http://127.0.0.1:{line[ReadyPrefix.Length..]}")
+                        );
+                    }
+                })
+            )
+            .WithStandardErrorPipe(PipeTarget.ToDelegate(errors.Add))
+            .WithValidation(CommandResultValidation.None)
+            // The server's lifetime ends at disposal, not when the caller stops waiting for READY
+            .ExecuteAsync(CancellationToken.None)
+            .Task;
+
+        await Task.WhenAny(ready.Task, _execution).WaitAsync(ct);
+        if (ready.Task.IsCompleted)
         {
-            StartInfo = new ProcessStartInfo(serverBinary.FullName)
-            {
-                UseShellExecute = false,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                // Port 0 lets the OS pick a free port, so concurrent CLI invocations and a
-                // separately running `recyclarr serve` never contend for one (ADR-010). The
-                // address must be a literal loopback IP: Kestrel rejects dynamic ports on the
-                // "localhost" alias because it cannot bind both IPv4 and IPv6 to the same
-                // OS-assigned port.
-                Arguments =
-                    $"--urls={LoopbackUrl} "
-                    + $"--parent-pid={Environment.ProcessId} "
-                    + "--ephemeral=true",
-            },
-        };
+            return await ready.Task;
+        }
 
-        // Replaces any inherited key, so the server accepts only this command's key. An inherited
-        // key file would conflict with it and stop the server (ADR-027).
-        var environment = _process.StartInfo.Environment;
-        environment[ServerApiKeyLocator.Variable] = apiKey;
-        environment.Remove(ServerApiKeyLocator.FileVariable);
-
-        _process.Start();
-        _stdinWriter = _process.StandardInput;
-        _errorCapture = CaptureLinesAsync(_process.StandardError);
-
-        // stdout closing without READY means the server exited, so stderr is complete too
-        var address = await ReadUntilReadyAsync(_process.StandardOutput, ct)
-            ?? throw new ServerStartException(await _errorCapture);
-
-        _outputDrain = CaptureLinesAsync(_process.StandardOutput);
-        return address;
+        // The server exited before it was ready (usually invalid configuration, ADR-019). The
+        // execution completes only after stderr is drained, so the error list is complete.
+        await _execution;
+        throw new ServerStartException(errors);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_stdinWriter is not null)
+        // Closing stdin signals EOF, which the server treats as "my parent is gone".
+        _lifeline.TrySetResult();
+
+        if (_execution is not null)
         {
-            // Closing stdin signals EOF, which the server treats as "my parent is gone".
-            await _stdinWriter.DisposeAsync();
+            await _execution;
         }
-
-        if (_process is not null)
-        {
-            await _process.WaitForExitAsync();
-            _process.Dispose();
-        }
-
-        if (_outputDrain is not null)
-        {
-            await _outputDrain;
-        }
-
-        if (_errorCapture is not null)
-        {
-            await _errorCapture;
-        }
-    }
-
-    /// <summary>
-    /// Returns the server's address, or null when stdout closes first because the server exited
-    /// before it was ready (usually invalid configuration, ADR-019).
-    /// </summary>
-    private static async Task<Uri?> ReadUntilReadyAsync(TextReader output, CancellationToken ct)
-    {
-        while (await output.ReadLineAsync(ct) is { } line)
-        {
-            if (line.StartsWith(ReadyPrefix, StringComparison.Ordinal))
-            {
-                return new Uri($"http://127.0.0.1:{line[ReadyPrefix.Length..]}");
-            }
-        }
-
-        return null;
-    }
-
-    private static async Task<List<string>> CaptureLinesAsync(TextReader output)
-    {
-        List<string> lines = [];
-        while (await output.ReadLineAsync() is { } line)
-        {
-            lines.Add(line);
-        }
-
-        return lines;
     }
 }
