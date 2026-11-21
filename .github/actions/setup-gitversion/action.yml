@@ -18,11 +18,11 @@ runs:
   using: composite
   steps:
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
+      uses: gittools/actions/gitversion/setup@389fe43e6b0189b98c40c43553070ac029304635 # v5.0.0
       with:
         # renovate: datasource=github-tags depName=GitTools/GitVersion
         versionSpec: 6.8.2
 
     - name: Determine Version
-      uses: gittools/actions/gitversion/execute@220647997b450f3e9364b6cf6a357197f17d924b # v4.7.2
+      uses: gittools/actions/gitversion/execute@389fe43e6b0189b98c40c43553070ac029304635 # v5.0.0
       id: gitversion
