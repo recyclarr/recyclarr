@@ -4,6 +4,7 @@ using FastEndpoints;
 using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi;
 using Recyclarr.Server.Api.Auth;
 using Recyclarr.Server.Api.OpenApi;
@@ -40,12 +41,21 @@ internal static class ServerApi
             }
 
             // FastEndpoints requires authentication on every endpoint that does not opt out.
-            services
-                .AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
-                .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
-                    ApiKeyAuthenticationHandler.SchemeName,
-                    configureOptions: null
-                );
+            // AddAuthentication() would also register ASP.NET data protection, which only cookie
+            // and remote sign-in schemes use. Its startup service creates a key ring and, with no
+            // persistent key storage configured, warns on every start. The API key scheme
+            // needs only the authentication core, URL encoding, and a clock. A dependency that
+            // later needs data protection fails to resolve its provider instead of silently
+            // getting keys that a restart discards.
+            services.AddAuthenticationCore(o =>
+                o.DefaultScheme = ApiKeyAuthenticationHandler.SchemeName
+            );
+            services.AddWebEncoders();
+            services.TryAddSingleton(TimeProvider.System);
+            new AuthenticationBuilder(services).AddScheme<
+                AuthenticationSchemeOptions,
+                ApiKeyAuthenticationHandler
+            >(ApiKeyAuthenticationHandler.SchemeName, configureOptions: null);
             services.AddAuthorization();
         }
     }
