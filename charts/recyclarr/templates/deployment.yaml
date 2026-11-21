@@ -3,7 +3,11 @@ kind: Deployment
 metadata:
   name: {{ include "recyclarr.fullname" . }}
   labels:
-    {{- include "recyclarr.labels" . | nindent 4 }}
+    {{- merge (include "recyclarr.labels" . | fromYaml) .Values.deploymentLabels | toYaml | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- $configs := include "recyclarr.configMapName" (dict "root" . "source" "configs") }}
 {{- $includes := include "recyclarr.configMapName" (dict "root" . "source" "includes") }}
 {{- $settings := include "recyclarr.configMapName" (dict "root" . "source" "settings") }}
@@ -35,8 +39,15 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "recyclarr.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
@@ -45,20 +56,24 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "recyclarr.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           # The image sets RECYCLARR_CONFIG_DIR=/config and fixes ports 7982 (API) and 7983
           # (management). Config files mount read-only under /config. /config itself cannot be a
           # read-only volume: the runtime must create the nested mount points in it.
+          # An env entry takes precedence over envFrom, so the empty RECYCLARR_API_KEY (which the
+          # server treats as unset) stops an envFrom source from setting both key variables.
           env:
+            - name: RECYCLARR_API_KEY
+              value: ""
             - name: RECYCLARR_API_KEY_FILE
               value: /secrets/api-key
             - name: RECYCLARR_DATA_DIR
               value: /data
             - name: RECYCLARR_STATE_DIR
               value: /state
-            {{- with .Values.env }}
-            {{- toYaml . | nindent 12 }}
+            {{- with include "recyclarr.env" . }}
+            {{- . | nindent 12 }}
             {{- end }}
           {{- with .Values.envFrom }}
           envFrom:
@@ -118,6 +133,12 @@ spec:
               subPath: settings.yml
               readOnly: true
             {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: api-key
           secret:
@@ -145,6 +166,9 @@ spec:
         - name: settings
           configMap:
             name: {{ $settings }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

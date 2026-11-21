@@ -9,7 +9,10 @@ nameOverride: ~
 fullnameOverride: ~
 
 # API key clients send to the server. The chart mounts it as a file and points
-# RECYCLARR_API_KEY_FILE at it. Set exactly one of existingSecret or value.
+# RECYCLARR_API_KEY_FILE at it. Set exactly one of existingSecret or value. The server refuses to
+# start when RECYCLARR_API_KEY is also set, so the chart sets RECYCLARR_API_KEY to an empty value
+# (which the server treats as unset). That overrides a RECYCLARR_API_KEY entry in a Secret or
+# ConfigMap loaded through envFrom. Setting either variable in env fails rendering.
 apiKey:
   existingSecret: ~
   existingSecretKey: api-key
@@ -21,8 +24,9 @@ configs:
   # Name of an existing ConfigMap whose keys are config files, for example one from a
   # Kustomize configMapGenerator. Takes the place of files. The server reads config only at
   # startup and the chart cannot track changes to a ConfigMap it does not own, so restart the
-  # Deployment after editing it (or use a tool such as Reloader). The same applies to
-  # includes.existingConfigMap and settings.existingConfigMap.
+  # Deployment after editing it (or let a tool such as Reloader do it; see
+  # deploymentAnnotations). The same applies to includes.existingConfigMap and
+  # settings.existingConfigMap.
   existingConfigMap: ~
   files: {}
   # recyclarr.yml: |
@@ -49,6 +53,19 @@ envFrom: []
 # - secretRef:
 #     name: recyclarr-servarr-keys
 
+# Extra volumes for the pod and their mounts in the server container. Use them for files the
+# chart does not manage, such as a secrets.yml (for !secret) or a CA bundle. A file mounted with
+# subPath does not update when its source changes; restart the pod after editing the source.
+extraVolumes: []
+# - name: secrets
+#   secret:
+#     secretName: recyclarr-secrets
+extraVolumeMounts: []
+# - name: secrets
+#   mountPath: /config/secrets.yml
+#   subPath: secrets.yml
+#   readOnly: true
+
 # Storage for the state and data directories. Each volume is a PersistentVolumeClaim when
 # enabled (existingClaim, or a claim the chart creates), otherwise an emptyDir that lives only as
 # long as the pod. state and data cannot use the same existingClaim: both would mount the
@@ -64,6 +81,10 @@ persistence:
     storageClass: ~
     accessMode: ReadWriteOnce
     size: 1Gi
+    # Labels and annotations for the claim the chart creates, for example for backup tools.
+    # The chart's helm.sh/resource-policy annotation on the state claim cannot be overridden.
+    labels: {}
+    annotations: {}
     # Used only when enabled is false.
     emptyDir:
       sizeLimit: ~
@@ -77,6 +98,8 @@ persistence:
     storageClass: ~
     accessMode: ReadWriteOnce
     size: 2Gi
+    labels: {}
+    annotations: {}
     emptyDir:
       sizeLimit: ~
       medium: ~
@@ -84,6 +107,8 @@ persistence:
 service:
   type: ClusterIP
   port: 7982
+  # Annotations for the Service, for example for a LoadBalancer implementation.
+  annotations: {}
 
 # Prometheus Operator ServiceMonitor for /metrics on the management port.
 serviceMonitor:
@@ -99,8 +124,25 @@ serviceAccount:
   annotations: {}
   name: ~
 
+# Annotations and labels for the Deployment itself, for example
+# reloader.stakater.com/auto: "true" so Reloader restarts the pod when a ConfigMap or Secret it
+# uses changes. Chart labels take precedence over deploymentLabels.
+deploymentAnnotations: {}
+deploymentLabels: {}
+
+# Annotations and labels for the pod. Chart labels take precedence over podLabels.
 podAnnotations: {}
 podLabels: {}
+
+# PriorityClass for the pod; null uses the cluster default.
+priorityClassName: ~
+
+# Init containers that run before the server, and extra containers (sidecars) that run beside it.
+# Both use the Kubernetes container spec. They can mount the chart's volumes by name (data, state,
+# tmp, configs, includes, settings) and extraVolumes. The chart applies no securityContext to
+# them, so set one yourself if the namespace enforces a Pod Security profile.
+initContainers: []
+extraContainers: []
 
 podSecurityContext:
   runAsNonRoot: true
@@ -118,6 +160,16 @@ securityContext:
     drop:
       - ALL
 
+# CPU and memory for the server container. One measured server syncing a Sonarr and a Radarr
+# instance peaked near 280Mi, of which about 150Mi was reclaimable file cache from the guide
+# clones, and used under 3 CPU-seconds per start or sync. Larger configs use more. A CPU limit
+# slows the first guide download against the startup probe budget, so this starting point sets
+# none:
+#   requests:
+#     cpu: 50m
+#     memory: 256Mi
+#   limits:
+#     memory: 512Mi
 resources: {}
 nodeSelector: {}
 tolerations: []

@@ -4,6 +4,10 @@
   "additionalProperties": false,
   "definitions": {
     "nullableString": { "type": ["string", "null"] },
+    "stringMap": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
     "fileSource": {
       "type": "object",
       "additionalProperties": false,
@@ -26,6 +30,8 @@
           "enum": ["ReadWriteOnce", "ReadWriteOncePod", "ReadWriteMany"]
         },
         "size": { "type": "string", "minLength": 1 },
+        "labels": { "$ref": "#/definitions/stringMap" },
+        "annotations": { "$ref": "#/definitions/stringMap" },
         "emptyDir": {
           "type": "object",
           "additionalProperties": false,
@@ -100,7 +106,8 @@
           "maximum": 65535,
           "not": { "const": 7983 },
           "description": "7983 is reserved for the management port."
-        }
+        },
+        "annotations": { "$ref": "#/definitions/stringMap" }
       }
     },
     "serviceMonitor": {
@@ -122,8 +129,15 @@
         "name": { "$ref": "#/definitions/nullableString" }
       }
     },
+    "extraVolumes": { "type": "array" },
+    "extraVolumeMounts": { "type": "array" },
+    "deploymentAnnotations": { "$ref": "#/definitions/stringMap" },
+    "deploymentLabels": { "$ref": "#/definitions/stringMap" },
     "podAnnotations": { "type": "object" },
     "podLabels": { "type": "object" },
+    "priorityClassName": { "$ref": "#/definitions/nullableString" },
+    "initContainers": { "type": "array" },
+    "extraContainers": { "type": "array" },
     "podSecurityContext": { "type": "object" },
     "securityContext": { "type": "object" },
     "resources": { "type": "object" },

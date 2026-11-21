@@ -7,5 +7,15 @@ type: application
 version: 0.0.0
 appVersion: "0.0.0"
 home: https://recyclarr.dev
+icon: https://recyclarr.dev/img/recyclarr.png
 sources:
   - https://github.com/recyclarr/recyclarr
+# chart-testing does not validate maintainers (.github/ct.yaml sets validate-maintainers: false).
+maintainers:
+  - name: rcdailey
+    url: https://github.com/rcdailey
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://recyclarr.dev/guide/installation/kubernetes/

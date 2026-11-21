@@ -7,11 +7,12 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "recyclarr.claimName" (dict "root" $ "volume" $volume) }}
   labels:
-    {{- include "recyclarr.labels" $ | nindent 4 }}
-  {{- if eq $volume "state" }}
+    {{- merge (include "recyclarr.labels" $ | fromYaml) .labels | toYaml | nindent 4 }}
+  {{- /* Uninstalling the chart keeps the state claim so sync state survives a reinstall. */}}
+  {{- $keep := ternary (dict "helm.sh/resource-policy" "keep") dict (eq $volume "state") }}
+  {{- with merge $keep .annotations }}
   annotations:
-    # Uninstalling the chart keeps the claim so sync state survives a reinstall.
-    helm.sh/resource-policy: keep
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   accessModes:

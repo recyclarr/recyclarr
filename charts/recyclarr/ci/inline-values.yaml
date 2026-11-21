@@ -19,8 +19,51 @@ settings:
     log_janitor:
       max_files: 5
 persistence:
+  state:
+    labels:
+      backup: daily
+    annotations:
+      example.com/owner: ci
   data:
     enabled: true
+    labels:
+      backup: none
 env:
   - name: SONARR_API_KEY
     value: ci-sonarr-key
+deploymentAnnotations:
+  reloader.stakater.com/auto: "true"
+deploymentLabels:
+  team: ci
+service:
+  annotations:
+    example.com/owner: ci
+# The init container writes a file to an extra volume, and the server container mounts it.
+extraVolumes:
+  - name: extra
+    emptyDir: {}
+extraVolumeMounts:
+  - name: extra
+    mountPath: /extra
+    readOnly: true
+initContainers:
+  - name: init
+    image: busybox:1.38.0-musl
+    command: [sh, -c, echo ok > /extra/ready]
+    securityContext: &restricted
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+    volumeMounts:
+      - name: extra
+        mountPath: /extra
+extraContainers:
+  - name: sidecar
+    image: busybox:1.38.0-musl
+    command: [sh, -c, "cat /extra/ready && exec sleep infinity"]
+    securityContext: *restricted
+    volumeMounts:
+      - name: extra
+        mountPath: /extra
+        readOnly: true

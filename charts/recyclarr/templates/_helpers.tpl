@@ -37,6 +37,10 @@ app.kubernetes.io/name: {{ include "recyclarr.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "recyclarr.image" -}}
+{{ printf "%s:%s" .Values.image.repository (.Values.image.tag | default .Chart.AppVersion) | quote }}
+{{- end }}
+
 {{- define "recyclarr.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "recyclarr.fullname" .) .Values.serviceAccount.name }}
@@ -59,6 +63,21 @@ refuses to start without a key.
 {{- fail "Set apiKey.existingSecret or apiKey.value; the server requires an API key" }}
 {{- end }}
 {{- $key.existingSecret | default (printf "%s-api-key" (include "recyclarr.fullname" .)) }}
+{{- end }}
+
+{{/*
+The user's env entries as YAML, or empty when there are none. Fails when an entry sets an API key
+variable: the chart owns both, and the server refuses to start when both are set.
+*/}}
+{{- define "recyclarr.env" -}}
+{{- range .Values.env }}
+{{- if has .name (list "RECYCLARR_API_KEY" "RECYCLARR_API_KEY_FILE") }}
+{{- fail (printf "env cannot set %s; the chart sets the API key from apiKey" .name) }}
+{{- end }}
+{{- end }}
+{{- with .Values.env }}
+{{- toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*

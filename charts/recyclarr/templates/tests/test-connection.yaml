@@ -5,11 +5,28 @@ metadata:
   labels:
     {{- include "recyclarr.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
+    helm.sh/hook: test
+    # A failed test pod stays for its logs until the next test run replaces it.
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
+  # The server image has busybox wget and is already on the node; the server's security contexts
+  # keep the test pod within the same Pod Security profile.
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  automountServiceAccountToken: false
+  {{- with .Values.podSecurityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
     - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['-q', '-O', '-', 'http://{{ include "recyclarr.fullname" . }}:7983/readyz']
+      image: {{ include "recyclarr.image" . }}
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      command: [wget, -q, -O, -, 'http://{{ include "recyclarr.fullname" . }}:7983/readyz']
   restartPolicy: Never
