@@ -1,26 +1,32 @@
 {
-  // !!! IMPORTANT NOTICE !!!
-  // Modular renovate configuration is in the `.renovate/` directory!
-  //
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "config:recommended",
-    ":disableRateLimiting",
-    ":ignoreUnstable",
-    "helpers:pinGitHubActionDigestsToSemver",
-    "recyclarr/recyclarr//.renovate/autoMerge.json5",
-    "recyclarr/recyclarr//.renovate/customDatasources.json5",
-    "recyclarr/recyclarr//.renovate/customManagers.json5",
-    "recyclarr/recyclarr//.renovate/groups.json5",
-    "recyclarr/recyclarr//.renovate/packageRules.json5",
-    "recyclarr/recyclarr//.renovate/semanticCommits.json5",
+    'config:recommended',
+    ':disableRateLimiting',
+    ':ignoreUnstable',
+    'helpers:pinGitHubActionDigestsToSemver',
+    'recyclarr/recyclarr//.renovate/autoMerge.json5',
+    'recyclarr/recyclarr//.renovate/customDatasources.json5',
+    'recyclarr/recyclarr//.renovate/customManagers.json5',
+    'recyclarr/recyclarr//.renovate/groups.json5',
+    'recyclarr/recyclarr//.renovate/packageRules.json5',
+    'recyclarr/recyclarr//.renovate/semanticCommits.json5',
   ],
-  dependencyDashboardTitle: "Renovate Dashboard 🤖",
-  ignorePresets: ["mergeConfidence:all-badges"],
+  dependencyDashboard: {
+    title: 'Renovate Dashboard 🤖',
+  },
+  ignorePresets: [
+    'mergeConfidence:all-badges',
+  ],
   configMigration: true,
-  gitIgnoredAuthors: ["227055450+renohate[bot]@users.noreply.github.com"],
-  labels: ["renovate", "no-release-comment"],
-  "pre-commit": {
+  gitIgnoredAuthors: [
+    '227055450+renohate[bot]@users.noreply.github.com',
+  ],
+  labels: [
+    'renovate',
+    'no-release-comment',
+  ],
+  'pre-commit': {
     enabled: true,
   },
 }
