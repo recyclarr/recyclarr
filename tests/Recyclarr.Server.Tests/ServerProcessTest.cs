@@ -23,6 +23,8 @@ internal sealed class ServerProcessTest
     private string? _retiredAppData;
     private int _managementPort;
     private bool _managementPortFromEnvironment = true;
+    private bool _apiUrlFromEnvironment;
+    private string? _home;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
 
     [SetUp]
@@ -277,6 +279,28 @@ internal sealed class ServerProcessTest
         await WaitForExitAsync(server);
     }
 
+    /// <summary>
+    /// A warning on every start teaches operators to ignore warnings. The API URL and management
+    /// port come from the environment, the way the Docker image sets them. A fresh home directory
+    /// matches a container, which starts with no state from earlier runs.
+    /// </summary>
+    [Test]
+    public async Task A_persistent_server_starts_without_warnings()
+    {
+        _apiUrlFromEnvironment = true;
+        _home = _root.SubDirectory("home").FullName;
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var startupLines = new List<string>();
+        await WaitForReadyAsync(server, startupLines.Add);
+
+        server.StandardInput.Close();
+        await WaitForExitAsync(server);
+        startupLines
+            .Should()
+            .NotContain(line => line.Contains("\"level\":\"warn\"", StringComparison.Ordinal));
+    }
+
     [Test]
     public async Task An_ephemeral_server_opens_no_management_port()
     {
@@ -440,7 +464,20 @@ internal sealed class ServerProcessTest
             );
         }
 
-        startInfo.ArgumentList.Add($"--urls={_apiUrl}");
+        if (_home is not null)
+        {
+            startInfo.Environment["HOME"] = _home;
+        }
+
+        if (_apiUrlFromEnvironment)
+        {
+            startInfo.Environment["ASPNETCORE_URLS"] = _apiUrl;
+        }
+        else
+        {
+            startInfo.ArgumentList.Add($"--urls={_apiUrl}");
+        }
+
         foreach (var argument in arguments)
         {
             startInfo.ArgumentList.Add(argument);
@@ -454,7 +491,10 @@ internal sealed class ServerProcessTest
     /// A persistent server also logs to stdout, so lines before READY are skipped. Returns the API
     /// port the server reports.
     /// </summary>
-    private static async Task<int> WaitForReadyAsync(Process server)
+    private static async Task<int> WaitForReadyAsync(
+        Process server,
+        Action<string>? skippedLine = null
+    )
     {
         const string prefix = "READY:";
         using var timeout = new CancellationTokenSource(ExitTimeout);
@@ -464,6 +504,8 @@ internal sealed class ServerProcessTest
             {
                 return int.Parse(line[prefix.Length..], CultureInfo.InvariantCulture);
             }
+
+            skippedLine?.Invoke(line);
         }
 
         Assert.Fail("The server exited before it was ready");

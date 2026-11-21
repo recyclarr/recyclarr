@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using Recyclarr.Server.Observability;
 using Recyclarr.Settings.Models;
@@ -6,40 +5,37 @@ using Recyclarr.Settings.Models;
 namespace Recyclarr.Server.Hosting;
 
 /// <summary>
-/// Binds Kestrel to the API endpoint and, on a persistent server, the management port (ADR-029).
+/// The URLs the server listens on: the API endpoint and, on a persistent server, the management
+/// port (ADR-029).
 /// </summary>
 /// <remarks>
 /// The API endpoint comes from an explicit URL (--urls or ASPNETCORE_URLS) when one is given, which
 /// is how the ephemeral launcher requests a free loopback port; otherwise from server.bind_address
-/// and server.port. Configured Kestrel endpoints replace the URL list entirely, so explicit URLs are
-/// re-added as endpoints. The management port binds the same host as the first API endpoint, so
-/// the Docker image (all interfaces) and a loopback-only server each keep one exposure rule. The URL
-/// form keeps Kestrel's own parsing, so "localhost" and "0.0.0.0" mean what they do in --urls.
+/// and server.port. The management port binds the same host as the first API endpoint, so the
+/// Docker image (all interfaces) and a loopback-only server each keep one exposure rule. The URLs
+/// fill the server address list before start; the host reads --urls only when that list is
+/// empty, so Kestrel sees one address source. Configured Kestrel endpoints would instead replace
+/// the URL list and log a warning that it is ignored.
 /// </remarks>
-internal sealed class SettingsEndpointSetup(
+internal sealed class ListenUrls(
     IOptions<ServerSettings> settings,
     IConfiguration configuration,
     ManagementPort managementPort
-) : IConfigureOptions<KestrelServerOptions>
+)
 {
-    public void Configure(KestrelServerOptions options)
+    /// <summary>
+    /// Call <see cref="EnsureValidPorts"/> first; this does not validate the management port.
+    /// </summary>
+    public IReadOnlyList<string> Resolve()
     {
-        var apiUrls = ApiUrls();
-        var endpoints = new Dictionary<string, string?>();
-        for (var i = 0; i < apiUrls.Count; i++)
+        var urls = ApiUrls();
+        if (managementPort.Number is { } port && !UsesApiPort(urls, port))
         {
-            endpoints[$"Endpoints:Api{i}:Url"] = apiUrls[i];
+            var host = BindingAddress.Parse(urls[0]).Host;
+            urls.Add($"http://{host}:{port}");
         }
 
-        // An invalid port is reported by EnsureValidPorts, not thrown here: the web host
-        // configures Kestrel while it is built, outside the startup failure path.
-        if (managementPort.Number is { } port && !UsesApiPort(apiUrls, port))
-        {
-            var host = BindingAddress.Parse(apiUrls[0]).Host;
-            endpoints["Endpoints:Management:Url"] = $"http://{host}:{port}";
-        }
-
-        options.Configure(new ConfigurationBuilder().AddInMemoryCollection(endpoints).Build());
+        return urls;
     }
 
     /// <summary>

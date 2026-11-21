@@ -77,7 +77,14 @@ internal static class ServerLifecycle
 
                 // Fail closed: without a key the server would serve its API to anyone (ADR-027).
                 app.Services.GetRequiredService<ServerApiKey>();
-                app.Services.GetRequiredService<SettingsEndpointSetup>().EnsureValidPorts();
+                var listenUrls = app.Services.GetRequiredService<ListenUrls>();
+                listenUrls.EnsureValidPorts();
+
+                // Document generation substitutes a server that has no address list.
+                foreach (var url in listenUrls.Resolve())
+                {
+                    app.Urls.Add(url);
+                }
             }
 
             await app.StartAsync();
