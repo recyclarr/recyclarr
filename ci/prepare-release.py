@@ -62,7 +62,7 @@ def run_or_die(
 def resolve_version() -> str:
     """Return the release version from gitversion."""
     result = run_or_die(
-        ["dotnet", "gitversion", "/showvariable", "MajorMinorPatch"],
+        ["dotnet", "gitversion", "--show-variable", "MajorMinorPatch"],
         "dotnet gitversion failed",
     )
 

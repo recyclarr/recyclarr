@@ -330,7 +330,7 @@ jobs:
             archive/**/recyclarr-*.tar.xz
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: true
-          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+          prerelease: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
 
       - name: Publish Release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
@@ -338,7 +338,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           tag_name: ${{ github.ref_name }}
           draft: false
-          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+          prerelease: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
 
   #############################################
   # Groups all jobs into one status that pull requests require before merging. The name predates

@@ -68,7 +68,7 @@ jobs:
             type=semver,
             value=${{ steps.gitversion.outputs.semVer }}
           prod: >-
-            enable=${{ github.ref_type == 'tag' && steps.gitversion.outputs.preReleaseTag == '' }}
+            enable=${{ github.ref_type == 'tag' && steps.gitversion.outputs.preReleaseLabel == '' }}
         with:
           images: |
             ${{ github.repository }}
