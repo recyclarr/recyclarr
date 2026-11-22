@@ -19,7 +19,7 @@ jobs:
       packages: write
     steps:
       - name: Delete Old Untagged Versions
-        uses: dataaxiom/ghcr-cleanup-action@d52806a0dc70b430571a37da1fde39733ffd640f # v1.2.2
+        uses: dataaxiom/ghcr-cleanup-action@ac45a8c04b1eb4b27974ca79a0a74f344c93664b # v1.3.0
         with:
           packages: recyclarr-dev,charts-dev/recyclarr
           delete-untagged: true
