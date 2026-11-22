@@ -39,11 +39,20 @@ internal sealed class ListenUrls(
     }
 
     /// <summary>
-    /// Fails startup when the management port is out of range or equals an API port (ADR-029).
-    /// Port 0 is rejected too: probes and scrapers need a known port.
+    /// Fails startup when server.port is out of range (unless an explicit URL replaces it), or when
+    /// the management port is out of range or equals an API port (ADR-029). Port 0 is rejected
+    /// too: clients and probes need a known port.
     /// </summary>
     public void EnsureValidPorts()
     {
+        if (string.IsNullOrEmpty(ExplicitUrls()) && settings.Value.Port is < 1 or > 65535)
+        {
+            throw new FatalException(
+                $"The API port ({settings.Value.Port}) must be between 1 and 65535; "
+                    + "change server.port in settings.yml"
+            );
+        }
+
         if (managementPort.Number is not { } port)
         {
             return;
@@ -71,9 +80,11 @@ internal sealed class ListenUrls(
         return apiUrls.Any(url => BindingAddress.Parse(url).Port == port);
     }
 
+    private string? ExplicitUrls() => configuration[WebHostDefaults.ServerUrlsKey];
+
     private List<string> ApiUrls()
     {
-        var explicitUrls = configuration[WebHostDefaults.ServerUrlsKey];
+        var explicitUrls = ExplicitUrls();
         if (!string.IsNullOrEmpty(explicitUrls))
         {
             return explicitUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();

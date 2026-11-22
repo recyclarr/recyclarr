@@ -18,7 +18,9 @@ internal sealed class ServerProcessTest
 
     private IDirectoryInfo _root = null!;
     private string? _apiKey = "test-server-api-key-0123456789abcdef";
-    private string _apiUrl = "http://127.0.0.1:0";
+
+    // Null leaves the API endpoint to server.port in settings.yml.
+    private string? _apiUrl = "http://127.0.0.1:0";
     private string? _dataDirectory;
     private string? _retiredAppData;
     private int _managementPort;
@@ -332,6 +334,22 @@ internal sealed class ServerProcessTest
     }
 
     [Test]
+    public async Task An_out_of_range_api_port_stops_startup()
+    {
+        _apiUrl = null;
+        ConfigDirectory.File("settings.yml").AppendAllText("\nserver:\n  port: 70000\n");
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().NotBe(0);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain("change server.port in settings.yml");
+    }
+
+    [Test]
     public async Task Invalid_settings_stop_startup_and_explain_why_on_stderr()
     {
         ConfigDirectory.File("settings.yml").AppendAllText("\nserver:\n  prot: 9000\n");
@@ -473,7 +491,7 @@ internal sealed class ServerProcessTest
         {
             startInfo.Environment["ASPNETCORE_URLS"] = _apiUrl;
         }
-        else
+        else if (_apiUrl is not null)
         {
             startInfo.ArgumentList.Add($"--urls={_apiUrl}");
         }
