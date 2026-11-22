@@ -62,6 +62,7 @@ changes you may need to make.
 - Sync: Unclear error when Sonarr's Allowed Hosts setting rejects the hostname in `base_url`
 - Sync: Inconsistent results when two custom formats share the same name
 - CLI: `list custom-formats` crashed when the guide had no custom formats for a service
+- CLI: `delete custom-formats` reported success when some custom formats failed to delete
 - CLI: `list quality-profiles` named the wrong config property (`trash_ids` instead of `trash_id`)
 - Settings: Editor help for `settings.yml` showed `enable_ssl_certificate_validation` as off by
   default

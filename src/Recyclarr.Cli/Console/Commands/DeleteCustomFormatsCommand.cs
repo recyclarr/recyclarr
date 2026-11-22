@@ -95,7 +95,7 @@ internal class DeleteCustomFormatsCommand(
 
         var failed = await DeleteAsync(connection.Instances, settings.InstanceName, candidates, ct);
         RenderSummary(candidates.Count - failed.Count, failed);
-        return (int)ExitStatus.Succeeded;
+        return failed.Count == 0 ? (int)ExitStatus.Succeeded : (int)ExitStatus.Failed;
     }
 
     /// <summary>

@@ -121,6 +121,27 @@ internal sealed class ServerBackedCommandsHttpTest : CliServerHttpFixture
     }
 
     [Test]
+    public async Task Delete_fails_when_any_custom_format_fails_to_delete()
+    {
+        AddInstanceConfig("movies");
+        _customFormats
+            .GetCustomFormats(default)
+            .ReturnsForAnyArgs([
+                new CustomFormatResource { Id = 1, Name = "HDR" },
+                new CustomFormatResource { Id = 2, Name = "Keep" },
+            ]);
+        _customFormats
+            .DeleteCustomFormat(2, Arg.Any<CancellationToken>())
+            .ThrowsAsync(await CreateApiException(HttpStatusCode.InternalServerError));
+
+        var exitCode = await RunCliAsync("delete", "custom-formats", "movies", "--all", "--force");
+
+        exitCode.Should().Be(1);
+        await _customFormats.Received().DeleteCustomFormat(1, Arg.Any<CancellationToken>());
+        LogOutput.Should().Contain("Failed to delete custom formats");
+    }
+
+    [Test]
     public async Task Delete_for_an_unknown_instance_fails_with_the_server_reason()
     {
         AddInstanceConfig("movies");
