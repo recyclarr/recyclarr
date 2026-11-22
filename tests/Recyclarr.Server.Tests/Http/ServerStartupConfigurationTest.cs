@@ -226,7 +226,7 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
 
     [TestCase("CRON_SCHEDULE", "server.schedule.cron", "#cron-schedule")]
     [TestCase("RECYCLARR_CREATE_CONFIG", "configuration files", "#docker-env-removed")]
-    [TestCase("RECYCLARR_LOG_LEVEL", "--log", "#docker-env-removed")]
+    [TestCase("RECYCLARR_LOG_LEVEL", "debug logs", "#docker-env-removed")]
     public async Task Removed_v8_variable_is_warned_about_and_startup_continues(
         string variable,
         string replacement,

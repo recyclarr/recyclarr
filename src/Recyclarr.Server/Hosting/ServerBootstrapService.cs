@@ -50,7 +50,8 @@ internal sealed class ServerBootstrapService(
         ),
         (
             "RECYCLARR_LOG_LEVEL",
-            "pass --log to CLI commands to show log output on the console",
+            "the server writes debug logs to logs/server in the data directory by default, and CLI "
+                + "commands show log output on the console with --log",
             "docker-env-removed"
         ),
     ];
