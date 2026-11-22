@@ -1,4 +1,3 @@
-using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 
@@ -104,7 +103,9 @@ internal class QualityProfilePlanner(
         return result;
     }
 
-    private void AddCustomFormatScore(
+    // The custom format planner keeps one assignment per profile name, so each custom format
+    // reaches a profile at most once here.
+    private static void AddCustomFormatScore(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
         PlannedCustomFormat cf
@@ -113,30 +114,6 @@ internal class QualityProfilePlanner(
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
         if (scoreToUse is null)
         {
-            return;
-        }
-
-        // Check for exact duplicate (same trash_id)
-        var existingScore = profile.CfScores.FirstOrDefault(x =>
-            x.TrashId.EqualsIgnoreCase(cf.Resource.TrashId)
-        );
-
-        if (existingScore is not null)
-        {
-            if (existingScore.Score != scoreToUse)
-            {
-                // User config overrides guide-provided scores; log for visibility only
-                log.Information(
-                    "Custom format {Name} ({TrashId}) has conflicting scores in profile "
-                        + "{Profile}: {Existing} vs {New} (first value wins)",
-                    cf.Resource.Name,
-                    cf.Resource.TrashId,
-                    profile.Name,
-                    existingScore.Score,
-                    scoreToUse
-                );
-            }
-
             return;
         }
 

@@ -54,7 +54,7 @@ internal class CustomFormatPlanner(
             planned.Add(
                 new PlannedCustomFormat(resource)
                 {
-                    AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
+                    AssignScoresTo = MergeProfileAssignments(resource, group),
                     GroupName = first.GroupName,
                     Source = first.Source,
                     InclusionReason = first.InclusionReason,
@@ -63,6 +63,44 @@ internal class CustomFormatPlanner(
         }
 
         return new PlannedCustomFormats(ExcludeDuplicateNames(planned, context));
+    }
+
+    // A custom format can reach one profile from several sources (flat config, guide format items,
+    // CF groups). Keep one assignment per profile, matching profile names the way the quality
+    // profile planner does. An explicit config score overrides guide scores whatever the source
+    // order; among explicit scores, the first in source order wins.
+    private List<AssignScoresToConfig> MergeProfileAssignments(
+        CustomFormatResource resource,
+        IEnumerable<ConfiguredCfEntry> entries
+    )
+    {
+        var merged = new List<AssignScoresToConfig>();
+        var byProfile = entries
+            .SelectMany(x => x.AssignScoresTo)
+            .GroupBy(x => x.Name, StringComparer.InvariantCultureIgnoreCase);
+
+        foreach (var profile in byProfile)
+        {
+            var explicitScores = profile.Where(x => x.Score is not null).ToList();
+            var chosen = explicitScores.FirstOrDefault() ?? profile.First();
+
+            var conflicting = explicitScores.Select(x => x.Score).Distinct().ToList();
+            if (conflicting.Count > 1)
+            {
+                log.Information(
+                    "Custom format {Name} ({TrashId}) has conflicting scores in profile "
+                        + "{Profile}: {Scores} (first value wins)",
+                    resource.Name,
+                    resource.TrashId,
+                    profile.Key,
+                    conflicting
+                );
+            }
+
+            merged.Add(chosen);
+        }
+
+        return merged;
     }
 
     // Services reject a second custom format with an existing name, or match both to one service

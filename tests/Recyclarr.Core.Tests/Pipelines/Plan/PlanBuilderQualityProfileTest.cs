@@ -367,9 +367,88 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             .Should()
             .BeEquivalentTo("cf1", "cf2", "cf3");
 
-        // cf2 should have merged assignments (from both config and formatItems)
-        var cf2 = plan.CustomFormats.Single(x => x.Resource.TrashId == "cf2");
-        cf2.AssignScoresTo.Should().HaveCount(2);
+        // cf2 is selected for the profile by both config and formatItems; the profile appears
+        // once and the config score wins
+        plan.CustomFormats.Should()
+            .ContainSingle(x => x.Resource.TrashId == "cf2")
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Name.Should()
+            .Be("Guide Profile");
+        plan.QualityProfiles.Single()
+            .CfScores.Should()
+            .ContainSingle(x => x.TrashId == "cf2")
+            .Which.Score.Should()
+            .Be(999);
+    }
+
+    [Test]
+    public void Config_score_from_cf_group_overrides_guide_score_from_format_items()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileWithFormatItems(
+            "qp-guide",
+            "Guide Profile",
+            "default",
+            new Dictionary<string, string> { ["CF One"] = "cf1" }
+        );
+        GuideData.AddCfGroup(
+            "group",
+            "Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Guide Profile"] = "qp-guide" }
+        );
+
+        // cf1 reaches the profile three ways: flat config without a score, the guide's format
+        // items, and an explicit group with a score. The explicit score wins regardless of the
+        // order the sources are read in.
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfig
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo = [new AssignScoresToConfig { Name = "Guide Profile" }],
+                },
+            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "group",
+                        AssignScoresTo =
+                        [
+                            new AssignScoresToConfig { Name = "Guide Profile", Score = 555 },
+                        ],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "qp-guide" }],
+        };
+
+        var plan = CreatePlanBuilder(config).Build();
+
+        plan.CustomFormats.Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Name.Should()
+            .Be("Guide Profile");
+        plan.QualityProfiles.Single()
+            .CfScores.Should()
+            .ContainSingle()
+            .Which.Score.Should()
+            .Be(555);
     }
 
     [Test]

@@ -61,6 +61,9 @@ changes you may need to make.
 - Sync: Unclear errors when a reverse proxy redirected Sonarr or Radarr requests to a login page
 - Sync: Unclear error when Sonarr's Allowed Hosts setting rejects the hostname in `base_url`
 - Sync: Inconsistent results when two custom formats share the same name
+- Sync: A score set in `custom_format_groups` could be replaced by the guide score when the custom
+  format was also in the quality profile's guide formats or in `custom_formats` without a score
+- CLI: `sync --preview` could list the same quality profile more than once for a custom format
 - CLI: `list custom-formats` crashed when the guide had no custom formats for a service
 - CLI: `delete custom-formats` reported success when some custom formats failed to delete
 - CLI: `list quality-profiles` named the wrong config property (`trash_ids` instead of `trash_id`)
