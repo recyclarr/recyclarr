@@ -12,6 +12,7 @@ using Recyclarr.Server.TestLibrary;
 using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Refit;
+using Serilog.Events;
 using ISyncApi = Recyclarr.Client.V1.ISyncApi;
 
 namespace Recyclarr.Server.Tests.Http;
@@ -26,10 +27,12 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
 
     private readonly TimerObservingTimeProvider _time = new(Start);
     private readonly ScriptedOrchestrator _orchestrator = new();
+    private readonly RecordingLogger _log = new();
     private ServerMode _mode = ServerMode.Persistent;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
+        builder.RegisterInstance(_log).As<ILogger>();
         builder.RegisterInstance(_time).As<TimeProvider>();
         builder.RegisterInstance(_orchestrator).As<ISyncOrchestrator>();
         var mode = _mode;
@@ -107,6 +110,30 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
         var schedule = await GetSchedule(client);
         schedule.PreviousOccurrence.Should().Be(Midnight);
         schedule.NextOccurrence.Should().Be(Midnight.AddDays(1));
+    }
+
+    // Operators match logged job ids against the ids the API returns.
+    [Test]
+    public async Task Queued_job_is_logged_with_the_id_clients_see()
+    {
+        AddInstance();
+        using var client = CreateClient();
+
+        await SchedulerWait();
+        _time.SetUtcNow(Midnight);
+        await SchedulerWait();
+        var queued = await TheOnlyScheduledJob(client);
+
+        _log.Events.Should()
+            .ContainSingle(evt =>
+                evt.MessageTemplate.Text.Contains("queued as job", StringComparison.Ordinal)
+            )
+            .Which.Properties["JobId"]
+            .Should()
+            .BeOfType<ScalarValue>()
+            .Which.Value?.ToString()
+            .Should()
+            .Be(queued.Id.ToString());
     }
 
     [Test]
@@ -229,4 +256,28 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
 
     private static async Task<SyncJobSummaryResponse> TheOnlyScheduledJob(HttpClient client) =>
         (await ListScheduledJobs(client)).Should().ContainSingle().Subject;
+
+    private sealed class RecordingLogger : ILogger
+    {
+        private readonly List<LogEvent> _events = [];
+
+        public IReadOnlyList<LogEvent> Events
+        {
+            get
+            {
+                lock (_events)
+                {
+                    return [.. _events];
+                }
+            }
+        }
+
+        public void Write(LogEvent logEvent)
+        {
+            lock (_events)
+            {
+                _events.Add(logEvent);
+            }
+        }
+    }
 }

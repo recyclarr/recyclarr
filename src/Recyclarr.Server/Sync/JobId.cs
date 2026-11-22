@@ -9,4 +9,7 @@ internal readonly record struct JobId
     public Guid Value { get; init; }
 
     public static JobId New() => new() { Value = Guid.NewGuid() };
+
+    // Log templates render non-scalar values through ToString; show the id clients see.
+    public override string ToString() => Value.ToString();
 }
