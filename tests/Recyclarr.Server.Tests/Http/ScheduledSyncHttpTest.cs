@@ -11,8 +11,8 @@ using Recyclarr.Server.Sync;
 using Recyclarr.Server.TestLibrary;
 using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
+using Refit;
 using ISyncApi = Recyclarr.Client.V1.ISyncApi;
-using RestService = Refit.RestService;
 
 namespace Recyclarr.Server.Tests.Http;
 

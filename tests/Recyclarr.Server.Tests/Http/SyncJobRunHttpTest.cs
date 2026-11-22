@@ -10,10 +10,10 @@ using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
+using Refit;
 using GeneratedProgressStatus = Recyclarr.Client.V1.InstanceProgressStatusResponse;
 using GetSyncJobResponse = Recyclarr.Client.V1.GetSyncJobResponse;
 using ISyncApi = Recyclarr.Client.V1.ISyncApi;
-using RestService = Refit.RestService;
 using SyncJobResultsResponse = Recyclarr.Client.V1.SyncJobResultsResponse;
 
 namespace Recyclarr.Server.Tests.Http;

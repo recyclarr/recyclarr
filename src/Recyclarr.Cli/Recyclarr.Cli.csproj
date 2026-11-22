@@ -13,6 +13,7 @@
     <PackageReference Include="CliWrap" />
     <PackageReference Include="GitVersion.MsBuild" />
     <PackageReference Include="Refit.HttpClientFactory" />
+    <PackageReference Include="Refit.Reflection" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Expressions" />
     <PackageReference Include="Serilog.Sinks.Console" />

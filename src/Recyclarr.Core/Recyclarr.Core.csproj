@@ -15,6 +15,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" />
       <PackageReference Include="Microsoft.Extensions.Http" />
       <PackageReference Include="Refit.HttpClientFactory" />
+      <PackageReference Include="Refit.Reflection" />
       <PackageReference Include="Riok.Mapperly" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.Expressions" />
