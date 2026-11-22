@@ -53,9 +53,9 @@
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="SystemTextJson.JsonDiffPatch" Version="2.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="23.0.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="23.0.1" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.4" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="23.0.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="23.0.1" />
     <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
   <!-- Unit Test Packages -->
@@ -81,7 +81,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.57.2" />
     <PackageVersion Include="Testcontainers" Version="4.16.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="23.0.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="23.0.1" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
