@@ -10,7 +10,7 @@
       "required": ["base_url", "mode"],
       "properties": {
         "mode": {
-          "description": "The operating mode for Apprise itself. In 'stateful' mode, 'key' is required, 'tags' is optional, and 'urls' is ignored. In 'stateless' mode, 'urls' is optional, while 'key' and 'tags' are ignored.",
+          "description": "The operating mode for Apprise itself. In 'stateful' mode, 'key' is required, 'tags' is optional, and 'urls' is ignored. In 'stateless' mode, 'urls' is required, while 'key' and 'tags' are ignored.",
           "type": "string",
           "enum": ["stateless", "stateful"]
         },
@@ -27,7 +27,7 @@
           "type": "string"
         },
         "urls": {
-          "description": "List of notification service URLs. Used in 'stateless' mode, ignored in 'stateful' mode.",
+          "description": "List of notification service URLs. Required in 'stateless' mode, ignored in 'stateful' mode.",
           "type": ["null", "array"],
           "items": {
             "type": "string"

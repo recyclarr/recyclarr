@@ -66,6 +66,7 @@ changes you may need to make.
 - CLI: `list quality-profiles` named the wrong config property (`trash_ids` instead of `trash_id`)
 - Settings: Editor help for `settings.yml` showed `enable_ssl_certificate_validation` as off by
   default
+- Settings: Editor help for `settings.yml` showed Apprise `urls` as optional in stateless mode
 
 ## [8.8.1] - 2026-10-28
 
