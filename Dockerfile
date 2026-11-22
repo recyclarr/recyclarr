@@ -57,7 +57,8 @@ VOLUME /config
 EXPOSE 7982 7983
 
 # 127.0.0.1, not localhost: busybox wget tries ::1 first, and the server listens on IPv4 only.
-HEALTHCHECK CMD wget -q --spider http://127.0.0.1:7983/livez || exit 1
+# The server listens only after the first guide download, which can take minutes on a first start.
+HEALTHCHECK --start-period=5m CMD wget -q --spider http://127.0.0.1:7983/livez || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 CMD ["recyclarr-server"]
