@@ -5,16 +5,32 @@ namespace Recyclarr.Migration.Steps;
 
 /// <summary>
 /// Moves v8 state out of a nested <c>state</c> folder. v8 kept state in <c>&lt;config&gt;/state</c>,
-/// so a v8 volume reused as the v9 state directory holds it one level too deep. The rest of that
-/// volume (configs, logs, resources) is only reported, never deleted: the step cannot prove those
-/// files are disposable.
+/// so a v8 volume reused as the v9 state directory holds it one level too deep. The rest of v8's
+/// files on that volume (configs, logs, resources) are only reported, never deleted: the step
+/// cannot prove those files are disposable.
 /// </summary>
 internal class FlattenNestedStateMigrationStep(IAppPaths paths) : IMigrationStep
 {
     private static readonly string[] ServiceDirectories = ["sonarr", "radarr"];
 
-    // Files Recyclarr creates in the state root before migrations run.
-    private static readonly string[] OwnedRootEntries = ["recyclarr-server.lock"];
+    // What v8 created or read in its config root, which held the nested state folder. Only these
+    // are reported: other entries belong to the volume or to other tools (lost+found, .DS_Store).
+    // v8 is frozen, so this list is complete.
+    private static readonly string[] V8RootEntries =
+    [
+        "cache",
+        "configs",
+        "includes",
+        "logs",
+        "recyclarr.yaml",
+        "recyclarr.yml",
+        "repo",
+        "resources",
+        "secrets.yaml",
+        "secrets.yml",
+        "settings.yaml",
+        "settings.yml",
+    ];
 
     private IDirectoryInfo StateDir => paths.StateDirectory;
     private IDirectoryInfo NestedDir => StateDir.SubDirectory("state");
@@ -56,7 +72,7 @@ internal class FlattenNestedStateMigrationStep(IAppPaths paths) : IMigrationStep
         var leftovers = StateDir
             .EnumerateFileSystemInfos()
             .Select(e => e.Name)
-            .Where(name => !moved.Contains(name) && !OwnedRootEntries.Contains(name))
+            .Where(name => !moved.Contains(name) && V8RootEntries.Contains(name))
             .Order(StringComparer.Ordinal)
             .ToList();
 

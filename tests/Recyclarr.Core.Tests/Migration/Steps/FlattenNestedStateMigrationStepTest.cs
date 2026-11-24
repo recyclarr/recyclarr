@@ -55,6 +55,8 @@ internal sealed class FlattenNestedStateMigrationStepTest
         _fs.AddFile(State.File("configs", "b.yml"), new MockFileData(""));
         _fs.AddFile(State.File("settings.yml"), new MockFileData(""));
         _fs.AddFile(State.File("recyclarr-server.lock"), new MockFileData(""));
+        _fs.AddDirectory(State.SubDirectory("lost+found"));
+        _fs.AddFile(State.File(".DS_Store"), new MockFileData(""));
 
         CreateSut().Run(_log);
 
@@ -68,6 +70,8 @@ internal sealed class FlattenNestedStateMigrationStepTest
             .And.Contain("settings.yml")
             .And.NotContain("a.yml")
             .And.NotContain("recyclarr-server.lock")
+            .And.NotContain("lost+found")
+            .And.NotContain(".DS_Store")
             .And.NotContain("sonarr");
     }
 
