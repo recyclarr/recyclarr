@@ -18,6 +18,9 @@ runs:
       shell: bash
       run: echo DOTNET_ROLL_FORWARD=Major >> "$GITHUB_ENV"
 
+    # A cold tool resolver cache makes the first restore misattribute commands between packages
+    # once the manifest holds a RID-specific tool (GitVersion 7); the retry runs with a warm cache.
+    # Remove the retry once https://github.com/dotnet/sdk/issues/53783 is fixed.
     - name: Restore dotnet tools
       shell: bash
-      run: dotnet tool restore
+      run: dotnet tool restore || dotnet tool restore
