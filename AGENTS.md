@@ -31,6 +31,11 @@ Scope separation:
 - Every record in `docs/decisions/` is in force. When a task conflicts with one, MUST stop and ask
   whether the task or the record changes.
 
+## GitHub
+
+- Renovate PRs come from the `renova-chan[bot]` app (`gh` shows `app/renova-chan`; filter with
+  `--author app/renova-chan`). Older PRs came from `renovate[bot]`.
+
 ## Agents
 
 MUST use the `trash-guides` subagent for any question about TRaSH Guides content (custom formats,
