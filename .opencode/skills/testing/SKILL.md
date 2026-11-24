@@ -216,9 +216,9 @@ AGENTS.md (Smoke Test) says when this is required.
    `RECYCLARR_CONFIG_DIR` to `../dev-configs/appdata`.
 2. Run `docker compose up -d` to start the whole `compose.yaml` stack.
 3. Unless AGENTS.md Local Processes finds a server to reuse, start
-   `dotnet run --project src/Recyclarr.Server` as a background task and wait for `READY:` in its
-   output. It has no `--help`; any invocation starts the server. `cli.yml` points the CLI at this
-   server. Use the CLI's ephemeral server only when testing ephemeral mode itself.
+   `dotnet run --project src/Recyclarr.Server` as a background task and wait for `API listening on`
+   in its output. It has no `--help`; any invocation starts the server. `cli.yml` points the CLI at
+   this server. Use the CLI's ephemeral server only when testing ephemeral mode itself.
 4. Run `dotnet run --project src/Recyclarr.Cli -- sync --preview`. A run with no changes proves
    little; also run a config that exercises the changed behavior.
 5. Revert dev-configs edits unless they stay useful. Report useful edits to the user and commit them

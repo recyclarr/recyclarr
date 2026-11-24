@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.12"
 # ///
-"""Verify published binaries start: the CLI reports a version and the server signals READY."""
+"""Verify published binaries start: the CLI reports a version and the server logs its address."""
 
 import argparse
 import os
@@ -68,7 +68,8 @@ def smoke_server(server: Path) -> None:
             if line is None:
                 fail("Recyclarr server exited before startup", output)
             output.append(line)
-            if line.startswith("READY:"):
+            # Redirected stdout makes the server log JSON; it logs its API address once ready.
+            if '"message_template":"API listening on {Address}"' in line:
                 print(f"Recyclarr server started successfully: {line}")
                 return
         fail(

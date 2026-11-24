@@ -421,7 +421,7 @@ scope.
 
 ### Refresh Flow
 
-Startup runs the first refresh before the server reports READY; in persistent mode a background
+Startup runs the first refresh before the server reports ready; in persistent mode a background
 worker requests one every minute. Each refresh, under the write lock:
 
 1. **Update**: Each git source that is stale (no state, changed identity, or older than the TTL, and

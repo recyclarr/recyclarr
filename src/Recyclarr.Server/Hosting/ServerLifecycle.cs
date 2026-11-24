@@ -57,7 +57,7 @@ internal static class ServerLifecycle
                 return false;
             }
 
-            AnnounceReady(app, launch.IsDocumentGeneration);
+            AnnounceReady(app, launch);
             return true;
         }
     }
@@ -128,25 +128,32 @@ internal static class ServerLifecycle
     }
 
     // Uses bound addresses, not configured ones: the ephemeral launcher requests port 0, so only
-    // the bound address carries the real port.
-    private static void AnnounceReady(WebApplication app, bool isDocumentGeneration)
+    // the bound address carries the real port. Only an ephemeral server writes the READY line;
+    // nothing reads it from a persistent server, whose stdout carries its console log, so the
+    // logged listen addresses mark readiness there.
+    private static void AnnounceReady(WebApplication app, ServerLaunchOptions launch)
     {
+        if (launch.IsDocumentGeneration)
+        {
+            return;
+        }
+
         var addresses = app.Services.GetRequiredService<IServer>()
             .Features.Get<IServerAddressesFeature>()
             ?.Addresses
             ?? [];
 
-        int? managementPort = null;
-        if (!isDocumentGeneration)
+        var management = app.Services.GetRequiredService<ManagementPort>();
+        LogListenAddresses(app.Services.GetRequiredService<ILogger>(), addresses, management);
+
+        if (launch.Mode != ServerMode.Ephemeral)
         {
-            var management = app.Services.GetRequiredService<ManagementPort>();
-            managementPort = management.Number;
-            LogListenAddresses(app.Services.GetRequiredService<ILogger>(), addresses, management);
+            return;
         }
 
         var apiPort = addresses
             .Select(a => new Uri(a).Port)
-            .FirstOrDefault(p => p != managementPort, -1);
+            .FirstOrDefault(p => p != management.Number, -1);
         app.Services.GetRequiredService<IReadySignal>().Ready(apiPort);
     }
 

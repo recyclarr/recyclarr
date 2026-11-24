@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 
 namespace Recyclarr.Server.Tests;
 
@@ -86,7 +87,7 @@ internal sealed class ServerProcessTest
     public async Task A_persistent_server_with_a_parent_stops_when_its_lifeline_closes()
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(server);
+        await WaitForListeningAsync(server);
 
         server.StandardInput.Close();
         await WaitForExitAsync(server);
@@ -104,7 +105,7 @@ internal sealed class ServerProcessTest
     public async Task A_server_with_an_open_lifeline_stops_promptly_on_interrupt()
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(server);
+        await WaitForListeningAsync(server);
 
         using (
             var kill = Process.Start(
@@ -183,7 +184,7 @@ internal sealed class ServerProcessTest
     public async Task A_second_server_on_the_same_data_directory_stops_startup()
     {
         using var first = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(first);
+        await WaitForListeningAsync(first);
 
         using var second = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
         var output = second.StandardOutput.ReadToEndAsync();
@@ -201,7 +202,7 @@ internal sealed class ServerProcessTest
     public async Task A_second_server_sharing_only_the_state_directory_stops_startup()
     {
         using var first = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(first);
+        await WaitForListeningAsync(first);
 
         _dataDirectory = _root.SubDirectory("other-data").FullName;
         using var second = Start($"--parent-pid={Environment.ProcessId}");
@@ -221,13 +222,13 @@ internal sealed class ServerProcessTest
     {
         using (var crashed = Start($"--parent-pid={Environment.ProcessId}"))
         {
-            await WaitForReadyAsync(crashed);
+            await WaitForListeningAsync(crashed);
             crashed.Kill(entireProcessTree: true);
             await WaitForExitAsync(crashed);
         }
 
         using var next = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(next);
+        await WaitForListeningAsync(next);
         next.StandardInput.Close();
         await WaitForExitAsync(next);
 
@@ -245,7 +246,7 @@ internal sealed class ServerProcessTest
     public async Task Each_route_is_served_only_on_its_own_port(string path, bool management)
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}");
-        var apiPort = await WaitForReadyAsync(server);
+        var apiPort = await WaitForListeningAsync(server);
         using var http = new HttpClient();
 
         var onManagement = await http.GetAsync(LocalUri(_managementPort, path));
@@ -269,7 +270,7 @@ internal sealed class ServerProcessTest
             );
 
         using var server = Start($"--parent-pid={Environment.ProcessId}");
-        await WaitForReadyAsync(server);
+        await WaitForListeningAsync(server);
         using var http = new HttpClient();
 
         var probe = await http.GetAsync(LocalUri(_managementPort, "/livez"));
@@ -282,22 +283,27 @@ internal sealed class ServerProcessTest
     }
 
     /// <summary>
-    /// A warning on every start teaches operators to ignore warnings. The API URL and management
-    /// port come from the environment, the way the Docker image sets them. A fresh home directory
-    /// matches a container, which starts with no state from earlier runs.
+    /// A warning on every start teaches operators to ignore warnings, and a line that is not JSON
+    /// has no level for a log pipeline to read. The API URL and management port come from the
+    /// environment, the way the Docker image sets them. A fresh home directory matches a container,
+    /// which starts with no state from earlier runs.
     /// </summary>
     [Test]
-    public async Task A_persistent_server_starts_without_warnings()
+    public async Task A_persistent_server_starts_with_only_json_log_lines_and_no_warnings()
     {
         _apiUrlFromEnvironment = true;
         _home = _root.SubDirectory("home").FullName;
 
         using var server = Start($"--parent-pid={Environment.ProcessId}");
         var startupLines = new List<string>();
-        await WaitForReadyAsync(server, startupLines.Add);
+        await WaitForListeningAsync(server, startupLines.Add);
 
         server.StandardInput.Close();
+        var remainingOutput = await server.StandardOutput.ReadToEndAsync();
         await WaitForExitAsync(server);
+        startupLines.AddRange(remainingOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries));
+
+        startupLines.Should().AllSatisfy(line => line.Should().StartWith("{\"timestamp\":"));
         startupLines
             .Should()
             .NotContain(line => line.Contains("\"level\":\"warn\"", StringComparison.Ordinal));
@@ -414,7 +420,7 @@ internal sealed class ServerProcessTest
             );
 
         using var server = Start($"--parent-pid={Environment.ProcessId}");
-        var apiPort = await WaitForReadyAsync(server);
+        var apiPort = await WaitForListeningAsync(server);
         using var http = new HttpClient();
         http.DefaultRequestHeaders.Authorization = new("Bearer", _apiKey);
 
@@ -506,28 +512,42 @@ internal sealed class ServerProcessTest
     }
 
     /// <summary>
-    /// A persistent server also logs to stdout, so lines before READY are skipped. Returns the API
-    /// port the server reports.
+    /// Waits for an ephemeral server's READY line, its only stdout output.
     /// </summary>
-    private static async Task<int> WaitForReadyAsync(
+    private static async Task WaitForReadyAsync(Process server)
+    {
+        var line = await ReadLineAsync(server, _ => true);
+        line.Should().StartWith("READY:");
+    }
+
+    /// <summary>
+    /// Waits for a persistent server to log its API address. Earlier log lines go to
+    /// <paramref name="skippedLine"/>. Returns the API port.
+    /// </summary>
+    private static async Task<int> WaitForListeningAsync(
         Process server,
         Action<string>? skippedLine = null
     )
     {
-        const string prefix = "READY:";
-        using var timeout = new CancellationTokenSource(ExitTimeout);
-        while (await server.StandardOutput.ReadLineAsync(timeout.Token) is { } line)
+        var line = await ReadLineAsync(server, line =>
         {
-            if (line.StartsWith(prefix, StringComparison.Ordinal))
+            if (
+                line.Contains(
+                    "\"message_template\":\"API listening on {Address}\"",
+                    StringComparison.Ordinal
+                )
+            )
             {
-                return int.Parse(line[prefix.Length..], CultureInfo.InvariantCulture);
+                return true;
             }
 
             skippedLine?.Invoke(line);
-        }
+            return false;
+        });
 
-        Assert.Fail("The server exited before it was ready");
-        return -1;
+        skippedLine?.Invoke(line);
+        using var json = JsonDocument.Parse(line);
+        return new Uri(json.RootElement.GetProperty("Address").GetString() ?? "").Port;
     }
 
     private static async Task WaitForExitAsync(Process server, TimeSpan? limit = null)

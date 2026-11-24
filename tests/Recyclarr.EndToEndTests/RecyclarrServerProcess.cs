@@ -1,4 +1,4 @@
-using System.Globalization;
+using System.Text.Json;
 using CliWrap;
 using NUnit.Framework;
 
@@ -11,7 +11,7 @@ namespace Recyclarr.EndToEndTests;
 /// </summary>
 internal sealed class RecyclarrServerProcess : IAsyncDisposable
 {
-    private const string ReadyPrefix = "READY:";
+    private const string ListeningTemplate = "\"message_template\":\"API listening on {Address}\"";
 
     private readonly CancellationTokenSource _forcefulStop;
     private readonly CancellationTokenSource _gracefulStop;
@@ -45,7 +45,7 @@ internal sealed class RecyclarrServerProcess : IAsyncDisposable
         );
 
         var execution = Cli.Wrap(binaryPath)
-            // Port 0 lets the OS pick a free port; the READY line reports the one bound.
+            // Port 0 lets the OS pick a free port; the API address log line reports the one bound.
             .WithArguments(["--urls=http://127.0.0.1:0"])
             .WithEnvironmentVariables(environment)
             .WithStandardOutputPipe(PipeTarget.ToDelegate(line => OnOutput(line, readyPort)))
@@ -62,7 +62,7 @@ internal sealed class RecyclarrServerProcess : IAsyncDisposable
             forcefulStop.Dispose();
             gracefulStop.Dispose();
             throw new InvalidOperationException(
-                $"recyclarr-server exited with code {result.ExitCode} before reporting READY; "
+                $"recyclarr-server exited with code {result.ExitCode} before it was ready; "
                     + "see the server output above."
             );
         }
@@ -76,15 +76,18 @@ internal sealed class RecyclarrServerProcess : IAsyncDisposable
         );
     }
 
+    // Redirected stdout makes the server log JSON lines; the API address line marks readiness.
     private static void OnOutput(string line, TaskCompletionSource<int> readyPort)
     {
         TestContext.Progress.WriteLine($"[server] {line}");
-        if (line.StartsWith(ReadyPrefix, StringComparison.Ordinal))
+        if (!line.Contains(ListeningTemplate, StringComparison.Ordinal))
         {
-            readyPort.TrySetResult(
-                int.Parse(line[ReadyPrefix.Length..], CultureInfo.InvariantCulture)
-            );
+            return;
         }
+
+        using var json = JsonDocument.Parse(line);
+        var address = json.RootElement.GetProperty("Address").GetString() ?? "";
+        readyPort.TrySetResult(new Uri(address).Port);
     }
 
     private static void OnErrorOutput(string line)

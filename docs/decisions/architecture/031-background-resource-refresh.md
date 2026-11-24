@@ -19,7 +19,7 @@ configuration resolved against it.
 
 ### Refresh
 
-- Startup refreshes before the server reports READY. In persistent mode, `ResourceRefreshWorker`
+- Startup refreshes before the server reports ready. In persistent mode, `ResourceRefreshWorker`
   asks for a refresh every minute. Readers MUST NOT refresh; no request or sync waits for a fetch.
 - A git provider is fetched when it has no state file, its source identity (clone URL plus requested
   references) changed, or its last successful fetch is 1 hour old. After a failed fetch it is not

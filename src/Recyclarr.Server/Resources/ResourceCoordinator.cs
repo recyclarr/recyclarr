@@ -14,7 +14,7 @@ namespace Recyclarr.Server.Resources;
 
 internal enum RefreshMode
 {
-    // Before the server reports READY; failures that leave no usable snapshot stop startup.
+    // Before the server reports ready; failures that leave no usable snapshot stop startup.
     Startup,
 
     // While the server runs; failures keep the current snapshot.
