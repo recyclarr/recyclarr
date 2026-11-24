@@ -26,6 +26,12 @@ internal static class ServerLoggingRegistration
                             "Microsoft.AspNetCore.Hosting.Diagnostics",
                             LogEventLevel.Warning
                         )
+                        // Result executors log each status code they set; for Problem Details
+                        // responses that is an info line with no context per rejected request.
+                        .MinimumLevel.Override(
+                            "Microsoft.AspNetCore.Http.Result",
+                            LogEventLevel.Warning
+                        )
                         .Filter.ByExcluding(IsHostListenAddress)
                         .WriteTo.Logger(sp.GetRequiredService<ServerLogger>())
             );
