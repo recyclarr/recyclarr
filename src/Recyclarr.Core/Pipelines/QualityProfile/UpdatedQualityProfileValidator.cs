@@ -12,6 +12,9 @@ internal enum QualityProfileValidationConstraint
     QualitiesRequired,
     QualityReferenceMismatch,
     ResetScoreReferenceMismatch,
+
+    // Raised by the Radarr service-fields component, not this validator (ADR-023).
+    LanguageReferenceMismatch,
 }
 
 internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQualityProfile>

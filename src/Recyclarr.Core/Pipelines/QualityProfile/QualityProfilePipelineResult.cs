@@ -160,6 +160,22 @@ public sealed record QualityProfileQualityDefinitionIgnoredOutcome(QualityProfil
     : QualityProfileOutcome;
 
 /// <summary>
+/// The profile's configured <c>language</c> names no language the instance offers, so the profile
+/// is not synced.
+/// </summary>
+public sealed record QualityProfileLanguageReferenceMismatchOutcome(
+    QualityProfileIdentity Identity,
+    string Language
+) : QualityProfileOutcome;
+
+/// <summary>
+/// The profile's <c>language</c> was ignored because the service's quality profiles have no
+/// language.
+/// </summary>
+public sealed record QualityProfileLanguageIgnoredOutcome(QualityProfileIdentity Identity)
+    : QualityProfileOutcome;
+
+/// <summary>
 /// The instance <c>quality_definition</c> applies to nothing: the service stores sizes per quality
 /// profile and no profile is listed under <c>quality_profiles</c>.
 /// </summary>

@@ -104,4 +104,7 @@ public record QualityProfileConfig
 
     // Per-profile size source; honored only by services that store sizes per profile.
     public QualityDefinitionConfig? QualityDefinition { get; init; }
+
+    // Profile language name; honored only by services whose profiles have a language (Radarr).
+    public string? Language { get; init; }
 }

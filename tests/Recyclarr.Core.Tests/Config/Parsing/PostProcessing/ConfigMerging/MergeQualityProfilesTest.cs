@@ -114,6 +114,29 @@ internal sealed class MergeQualityProfilesTest
             );
     }
 
+    [TestCase("Original", null, "Original")]
+    [TestCase(null, "Any", "Any")]
+    [TestCase("Original", "Any", "Any")]
+    public void Profile_language_from_the_right_wins_over_the_left(
+        string? left,
+        string? right,
+        string expected
+    )
+    {
+        var leftConfig = new RadarrConfigYaml
+        {
+            QualityProfiles = [new QualityProfileConfigYaml { Name = "p", Language = left }],
+        };
+        var rightConfig = new RadarrConfigYaml
+        {
+            QualityProfiles = [new QualityProfileConfigYaml { Name = "p", Language = right }],
+        };
+
+        var result = new RadarrConfigMerger().Merge(leftConfig, rightConfig);
+
+        result.QualityProfiles.Should().ContainSingle().Which.Language.Should().Be(expected);
+    }
+
     [Test]
     public void Non_empty_right_to_empty_left()
     {

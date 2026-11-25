@@ -470,8 +470,13 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         AssertQualityProfileOutcomes(
             pipeline.Outcomes,
             "qualitySizeGuideReferenceMismatch",
-            "qualityProfileQualityDefinitionUnused"
+            "qualityProfileQualityDefinitionUnused",
+            "qualityProfileLanguageIgnored"
         );
+        pipeline
+            .Outcomes.Single(x => x.Code == "qualityProfileLanguageIgnored")
+            .Severity.Should()
+            .Be(OutcomeSeverity.Warning);
         var sizeOutcome = pipeline.Outcomes.Single(x =>
             x.Code == "qualitySizeGuideReferenceMismatch"
         );
@@ -515,7 +520,16 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         var created = pipeline.Items[0];
         created.Language.Value.Desired.Should().Be("English");
         created.UpgradeAllowed.Reason.Should().Be(QualityProfileFieldReason.Unmanaged);
-        AssertQualityProfileOutcomes(pipeline.Outcomes, "qualityProfileQualityDefinitionIgnored");
+        AssertQualityProfileOutcomes(
+            pipeline.Outcomes,
+            "qualityProfileQualityDefinitionIgnored",
+            "qualityProfileLanguageReferenceMismatch"
+        );
+        var languageOutcome = pipeline.Outcomes.Single(x =>
+            x.Code == "qualityProfileLanguageReferenceMismatch"
+        );
+        languageOutcome.Severity.Should().Be(OutcomeSeverity.Error);
+        DataAs<LanguageOutcomeData>(languageOutcome).Language.Should().Be("Englsh");
 
         var update = pipeline.Items[^1];
         update

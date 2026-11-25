@@ -1,3 +1,4 @@
+using FluentValidation.Results;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 
@@ -14,6 +15,8 @@ internal class SonarrV3QualityProfileFields : IQualityProfileServiceFields
         QualityProfileData profile,
         PlannedQualityProfile planned
     ) => profile;
+
+    public IReadOnlyCollection<ValidationFailure> Validate(UpdatedQualityProfile profile) => [];
 
     public bool HasChanges(QualityProfileData current, QualityProfileData desired) => false;
 

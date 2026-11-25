@@ -131,6 +131,7 @@ public static class ConfigYamlExtensions
             Qualities = yaml.Qualities?.Select(x => x.ToQualityProfileQualityConfig()).ToList()
                 ?? [],
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
+            Language = yaml.Language,
         };
     }
 

@@ -1877,6 +1877,18 @@
           }
         }
       },
+      "LanguageOutcomeData": {
+        "required": [
+          "language"
+        ],
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          }
+        },
+        "description": "A configured quality profile `language`."
+      },
       "ListConfigIncludesResponse": {
         "required": [
           "items"
@@ -2262,6 +2274,9 @@
           },
           "qualityProfileAmbiguousMatch": {
             "$ref": "#/components/schemas/ServiceMatchesOutcomeData"
+          },
+          "qualityProfileLanguageReferenceMismatch": {
+            "$ref": "#/components/schemas/LanguageOutcomeData"
           },
           "qualitySizeDefinitionReferenceMismatch": {
             "$ref": "#/components/schemas/QualityDefinitionTypeOutcomeData"

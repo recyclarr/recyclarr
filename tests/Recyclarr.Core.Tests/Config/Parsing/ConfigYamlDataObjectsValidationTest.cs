@@ -62,6 +62,19 @@ internal sealed class ConfigYamlDataObjectsValidationTest
             .WithErrorMessage("'type' is required for 'quality_definition'");
     }
 
+    [TestCase("")]
+    [TestCase("  ")]
+    public void Quality_profile_language_must_not_be_empty(string language)
+    {
+        var data = new QualityProfileConfigYaml { Name = "My QP", Language = language };
+
+        var result = new QualityProfileConfigYamlValidator().TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.Language)
+            .WithErrorMessage("For profile My QP, 'language' must not be empty");
+    }
+
     [Test]
     public void Quality_profile_name_required()
     {

@@ -63,6 +63,9 @@ internal sealed record ResetScoreReferencesOutcomeData(
 /// <summary>The service profile that already has the new name.</summary>
 internal sealed record RenameBlockedOutcomeData(NamedServiceResourceResponse Conflict);
 
+/// <summary>A configured quality profile `language`.</summary>
+internal sealed record LanguageOutcomeData(string Language);
+
 /// <summary>A configured `quality_definition.type`.</summary>
 internal sealed record QualityDefinitionTypeOutcomeData(string Type);
 

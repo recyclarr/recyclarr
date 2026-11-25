@@ -40,16 +40,34 @@ The pipeline has one sync operation for both services. Fields only one service h
 service's types ([ADR-023][adr-023]), and their behavior lives in `IQualityProfileServiceFields`,
 which DI resolves per detected API target ([ADR-028][adr-028]):
 
-- Radarr (`RadarrQualityProfileFields`): profile language. The guide's `language` applies when the
-  instance offers a language with that name; otherwise the profile keeps its current language. A
-  language difference alone makes the profile changed, so drift is restored.
+- Radarr (`RadarrQualityProfileFields`): profile language. A configured `language` wins over the
+  guide's. Without one, the guide's `language` applies when the instance offers a language with that
+  name; otherwise the profile keeps its current language. A language difference alone makes the
+  profile changed, so drift is restored.
 - Sonarr v4 (`SonarrV3QualityProfileFields`, v3 API): no service-owned fields. Sonarr guide JSON
-  that contains a `language` is ignored.
+  that contains a `language` is ignored silently.
 - Sonarr v5 (`SonarrV5QualityProfileFields`): per-profile quality sizes, stored on
   `SonarrV5QualityProfileData` keyed by quality name. The planner chooses each profile's size source
   ([PDR-008][pdr-008]); this component converts the planned sizes to service values and writes them
   to qualities the profile contains. Other qualities keep their sizes. A size difference alone makes
   the profile changed.
+
+Where each service-owned check runs:
+
+- Planning, before Recyclarr contacts the instance: checks that need only the config. Each runs in a
+  planning component that DI selects per API target, so the shared `QualityProfilePlanner` never
+  checks the service. `IQualityProfileLanguagePlanner` reports a configured `language` as ignored
+  where profiles have none (`LanguageIgnoredPlanner`, Sonarr) and does nothing where they do
+  (`LanguageSupportedPlanner`, Radarr). `IQualityProfileSizePlanner` reports a per-profile
+  `quality_definition` as ignored where sizes are global (`GlobalQualitySizeProfilePlanner`). They
+  are separate components because their per-service groupings differ: Sonarr v4 shares global sizes
+  with Radarr but has no profile language.
+- Validation, after the instance data is fetched: checks that need instance data. Each component's
+  `Validate` returns failures that the sync operation combines with the shared validator's
+  (`UpdatedQualityProfileValidator`), so every invalid profile is reported and skipped the same way.
+  Radarr rejects a configured `language` the instance does not offer; it never falls back to the
+  guide or current language. New rejection rules use this path, with a new
+  `QualityProfileValidationConstraint` code mapped to a typed outcome.
 
 [adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
 [adr-028]: ../decisions/architecture/028-api-version-selection-by-server-major.md
@@ -76,7 +94,3 @@ Config is authoritative: if a guide-backed profile is in the user's config and a
 name exists in the service, Recyclarr adopts it automatically. Rename conflicts (where the target
 name is occupied by a different profile) still require manual resolution because the API cannot
 merge two profiles.
-
-## Future Work
-
-**REC-26**: Full language configuration in YAML (currently passthrough only).

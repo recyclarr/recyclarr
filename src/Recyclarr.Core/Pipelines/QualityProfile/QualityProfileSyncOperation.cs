@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.RegularExpressions;
-using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile.Models;
@@ -183,31 +182,42 @@ internal class QualityProfileSyncOperation(
         }
     }
 
-    private static List<UpdatedQualityProfile> FilterValidProfiles(
+    // Shared rules and service-owned rules produce one failure set per profile, so every invalid
+    // profile is reported and skipped the same way.
+    private List<UpdatedQualityProfile> FilterValidProfiles(
         IEnumerable<UpdatedQualityProfile> profiles,
         Collection<InvalidProfileData> invalidProfiles
     )
     {
         var validator = new UpdatedQualityProfileValidator();
+        var valid = new List<UpdatedQualityProfile>();
 
-        return profiles
-            .IsValid(validator, (errors, profile) =>
-                invalidProfiles.Add(new InvalidProfileData(profile, errors))
-            )
-            .ToList();
+        foreach (var profile in profiles)
+        {
+            var errors = validator
+                .Validate(profile)
+                .Errors.Concat(serviceFields.Validate(profile))
+                .ToList();
+
+            if (errors.Count == 0)
+            {
+                valid.Add(profile);
+            }
+            else
+            {
+                invalidProfiles.Add(new InvalidProfileData(profile, errors));
+            }
+        }
+
+        return valid;
     }
 
-    private static void RemoveInvalidProfiles(
+    private void RemoveInvalidProfiles(
         Collection<UpdatedQualityProfile> profiles,
         Collection<InvalidProfileData> invalidProfiles
     )
     {
-        var validator = new UpdatedQualityProfileValidator();
-        var validProfiles = profiles
-            .IsValid(validator, (errors, profile) =>
-                invalidProfiles.Add(new InvalidProfileData(profile, errors))
-            )
-            .ToList();
+        var validProfiles = FilterValidProfiles(profiles, invalidProfiles);
 
         profiles.Clear();
         foreach (var profile in validProfiles)
@@ -353,6 +363,11 @@ internal class QualityProfileSyncOperation(
                 case QualityDefinitionUnusedOutcome:
                     outcomes.Add(new QualityProfileQualityDefinitionUnusedOutcome());
                     break;
+                case ProfileLanguageIgnoredOutcome x:
+                    outcomes.Add(
+                        new QualityProfileLanguageIgnoredOutcome(CreateIdentity(x.Profile))
+                    );
+                    break;
             }
         }
 
@@ -462,6 +477,12 @@ internal class QualityProfileSyncOperation(
                         identity,
                         profile.InvalidExceptCfNames.ToList(),
                         profile.InvalidExceptCfPatterns.ToList()
+                    );
+                    break;
+                case QualityProfileValidationConstraint.LanguageReferenceMismatch:
+                    yield return new QualityProfileLanguageReferenceMismatchOutcome(
+                        identity,
+                        profile.ProfileConfig.Config.Language ?? ""
                     );
                     break;
                 default:

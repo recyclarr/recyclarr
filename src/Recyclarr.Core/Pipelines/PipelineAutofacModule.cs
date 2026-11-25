@@ -122,6 +122,11 @@ public class PipelineAutofacModule : Module
             .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.SonarrV3)
             .For<SonarrV5QualityProfileSizePlanner>(ServiceApiTarget.SonarrV5)
             .For<GlobalQualitySizeProfilePlanner>(ServiceApiTarget.RadarrV3);
+        builder
+            .RegisterServiceGateway<IQualityProfileLanguagePlanner>()
+            .For<LanguageIgnoredPlanner>(ServiceApiTarget.SonarrV3)
+            .For<LanguageIgnoredPlanner>(ServiceApiTarget.SonarrV5)
+            .For<LanguageSupportedPlanner>(ServiceApiTarget.RadarrV3);
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
         builder.RegisterType<QualityProfileStatePersister>().As<IQualityProfileStatePersister>();

@@ -326,11 +326,17 @@ internal static class SyncResultScenarios
                     new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-missing")
                 ),
                 new QualityProfileQualityDefinitionUnusedOutcome(),
+                new QualityProfileLanguageIgnoredOutcome(guide),
             ];
         }
         else
         {
-            outcomes = [.. outcomes, new QualityProfileQualityDefinitionIgnoredOutcome(guide)];
+            outcomes =
+            [
+                .. outcomes,
+                new QualityProfileQualityDefinitionIgnoredOutcome(guide),
+                new QualityProfileLanguageReferenceMismatchOutcome(guide, "Englsh"),
+            ];
         }
         return new QualityProfilePipelineResult(
             completedResources: 1,

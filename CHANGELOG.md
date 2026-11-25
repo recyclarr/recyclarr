@@ -19,6 +19,8 @@ changes you may need to make.
   held-back guide update, after every sync until they are fixed
 - Kubernetes: Official Helm chart
 - Config: `RECYCLARR_STATE_DIR` environment variable
+- Config: `language` setting for Radarr quality profiles, which overrides the guide's language
+  (#851)
 
 ### Changed
 

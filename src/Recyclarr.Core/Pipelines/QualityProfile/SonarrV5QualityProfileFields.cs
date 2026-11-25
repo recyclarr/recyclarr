@@ -1,3 +1,4 @@
+using FluentValidation.Results;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
@@ -59,6 +60,8 @@ internal class SonarrV5QualityProfileFields(IQualityItemLimitFactory limitFactor
             QualitySizes = sizes,
         };
     }
+
+    public IReadOnlyCollection<ValidationFailure> Validate(UpdatedQualityProfile profile) => [];
 
     // Qualities without planned sizes are copied from the current profile, so only the desired
     // sizes can differ.

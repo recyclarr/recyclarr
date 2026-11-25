@@ -80,6 +80,41 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Sonarr_profile_language_is_reported_as_ignored()
+    {
+        var config = NewConfig.Sonarr() with
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfig { Name = "WithLanguage", Language = "Any" },
+                new QualityProfileConfig { Name = "WithoutLanguage" },
+            ],
+        };
+
+        var plan = CreatePlanBuilder(config).Build();
+
+        plan.Outcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<ProfileLanguageIgnoredOutcome>()
+            .Which.Profile.Name.Should()
+            .Be("WithLanguage");
+    }
+
+    [Test]
+    public void Radarr_profile_language_is_not_reported_as_ignored()
+    {
+        var config = NewConfig.Radarr() with
+        {
+            QualityProfiles = [new QualityProfileConfig { Name = "Mine", Language = "Any" }],
+        };
+
+        var plan = CreatePlanBuilder(config).Build();
+
+        plan.Outcomes.Should().BeEmpty();
+    }
+
+    [Test]
     public void Build_with_invalid_quality_profile_trash_id_reports_warning()
     {
         var config = NewConfig.Radarr() with

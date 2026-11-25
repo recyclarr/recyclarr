@@ -74,6 +74,11 @@
         "type": "number",
         "description": "The minimum custom format score required to upgrade an already-downloaded release."
       },
+      "language": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Radarr only. The name of the language to set on the quality profile, such as `Any` or `Original`. Overrides the guide profile's language. Must match a language that the Radarr instance offers (case-insensitive); otherwise the profile is not synced. Ignored with a warning on Sonarr."
+      },
       "quality_sort": {
         "enum": ["bottom", "top"],
         "default": "top"

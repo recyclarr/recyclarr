@@ -6,6 +6,7 @@ namespace Recyclarr.Pipelines.Plan.Components;
 internal class QualityProfilePlanner(
     QualityProfileResourceQuery guide,
     IQualityProfileSizePlanner sizePlanner,
+    IQualityProfileLanguagePlanner languagePlanner,
     IServiceConfiguration config,
     ILogger log
 ) : IPipelinePlanner<PlannedQualityProfiles>
@@ -44,6 +45,7 @@ internal class QualityProfilePlanner(
         // Start with explicitly defined quality profiles.
         // Multiple profiles can share a trash_id as long as they have distinct names.
         var allProfiles = BuildExplicitProfiles(config.QualityProfiles, guideResources, context);
+        languagePlanner.Plan(allProfiles.Values, context);
 
         foreach (var (scoreConfig, cf) in profileAndCfs)
         {

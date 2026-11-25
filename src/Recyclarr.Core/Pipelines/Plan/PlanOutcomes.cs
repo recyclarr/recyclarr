@@ -71,6 +71,12 @@ internal record ProfileQualityDefinitionIgnoredOutcome(PlannedQualityProfile Pro
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
 }
 
+// A managed profile sets `language` on a service whose profiles have no language.
+internal record ProfileLanguageIgnoredOutcome(PlannedQualityProfile Profile) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
+
 public record QualityDefinitionUnusedOutcome : SyncOutcome
 {
     public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;

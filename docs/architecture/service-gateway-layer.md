@@ -143,11 +143,11 @@ involved.
 [ADR-023][adr-023] sets the rule: each field lives on a shared type or on the type of the one
 service that owns it, and each pipeline has one operation with per-service components resolved
 through DI with `RegisterServiceGateway`. Quality profiles (`IQualityProfileServiceFields`,
-`IQualityProfileSizePlanner`), quality sizes (`IInstanceQualitySizePlanner`), and media naming
-(`IMediaNamingPlanner`, `IMediaNamingSync`) follow it. Components are keyed by API target, so a
-field one API generation owns gets its own component (Sonarr v5 per-profile quality sizes in
-`SonarrV5QualityProfileFields`). Shared code never checks which service or version it runs on; that
-behavior belongs in a component.
+`IQualityProfileSizePlanner`, `IQualityProfileLanguagePlanner`), quality sizes
+(`IInstanceQualitySizePlanner`), and media naming (`IMediaNamingPlanner`, `IMediaNamingSync`) follow
+it. Components are keyed by API target, so a field one API generation owns gets its own component
+(Sonarr v5 per-profile quality sizes in `SonarrV5QualityProfileFields`). Shared code never checks
+which service or version it runs on; that behavior belongs in a component.
 
 Shared logic lives in helper classes that both services' components depend on (e.g.
 `NamingFormatLookup`).

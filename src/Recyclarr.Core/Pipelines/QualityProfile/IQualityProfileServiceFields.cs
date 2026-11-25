@@ -1,3 +1,4 @@
+using FluentValidation.Results;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 
@@ -22,6 +23,13 @@ internal interface IQualityProfileServiceFields
     /// Returns the profile with service-owned fields set to their desired values.
     /// </summary>
     QualityProfileData ApplyDesired(QualityProfileData profile, PlannedQualityProfile planned);
+
+    /// <summary>
+    /// Failures for service-owned configuration. The sync operation combines them with the shared
+    /// validator's failures, so a failing profile is reported and skipped like any other invalid
+    /// profile. Each failure's error code names a <see cref="QualityProfileValidationConstraint"/>.
+    /// </summary>
+    IReadOnlyCollection<ValidationFailure> Validate(UpdatedQualityProfile profile);
 
     bool HasChanges(QualityProfileData current, QualityProfileData desired);
 

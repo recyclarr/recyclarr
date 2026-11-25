@@ -271,6 +271,11 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         RuleFor(x => x.QualityDefinition)
             .SetNonNullableValidator(new QualitySizeConfigYamlValidator());
 
+        RuleFor(x => x.Language)
+            .Must(x => !string.IsNullOrWhiteSpace(x))
+            .When(x => x.Language is not null)
+            .WithMessage(x => $"For profile {x.Name}, 'language' must not be empty");
+
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)
             .Custom(ValidateGroupQualityCount!)

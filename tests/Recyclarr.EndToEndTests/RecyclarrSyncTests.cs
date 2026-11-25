@@ -567,6 +567,13 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
         AssertCfGroupGuideDefaultScores(hdProfile);
 
+        // Configured language overrides the guide's "Original"
+        profiles
+            .Should()
+            .ContainSingle(p => p.Name == "HD Bluray + WEB")
+            .Which.Language?.Name.Should()
+            .Be("Any", "configured language should override the guide language");
+
         // Guide-synced quality profile with config overrides
         var guideRadarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-RadarrGuideOverride");
         guideRadarrProfile

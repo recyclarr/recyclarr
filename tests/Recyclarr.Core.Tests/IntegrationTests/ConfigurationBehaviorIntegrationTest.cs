@@ -170,6 +170,25 @@ internal sealed class ConfigurationBehaviorIntegrationTest : CoreIntegrationTest
     }
 
     [Test]
+    public void Quality_profile_language_is_loaded()
+    {
+        var config = LoadRadarrConfig(
+            """
+            radarr:
+              instance1:
+                base_url: http://localhost:7878
+                api_key: asdf
+                quality_profiles:
+                  - name: WithLanguage
+                    language: Any
+                  - name: WithoutLanguage
+            """
+        );
+
+        config.QualityProfiles.Select(x => x.Language).Should().Equal("Any", null);
+    }
+
+    [Test]
     public void Empty_custom_format_groups_add_is_no_op()
     {
         var config = LoadRadarrConfig(

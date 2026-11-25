@@ -893,6 +893,160 @@ internal sealed class QualityProfileSyncOperationTest
             );
     }
 
+    private static readonly ProfileLanguage AnyLanguage = new() { Id = -1, Name = "Any" };
+    private static readonly ProfileLanguage OriginalLanguage = new() { Id = -2, Name = "Original" };
+
+    private static RadarrQualityProfileFields RadarrFields()
+    {
+        var languages = Substitute.For<IRadarrLanguageService>();
+        languages.GetLanguages(default).ReturnsForAnyArgs([AnyLanguage, OriginalLanguage]);
+        return new RadarrQualityProfileFields(languages);
+    }
+
+    private static RadarrQualityProfileData RadarrSchema() =>
+        new() { Name = "Schema", Items = [NewQp.QualityItem(1, "Bluray-1080p", true)] };
+
+    private static PlannedQualityProfile WithLanguage(
+        PlannedQualityProfile planned,
+        string language
+    ) => planned with { Config = planned.Config with { Language = language } };
+
+    [Test]
+    public async Task Radarr_configured_language_overrides_the_guide_language()
+    {
+        var current = new RadarrQualityProfileData
+        {
+            Id = 7,
+            Name = "Movies",
+            UpgradeAllowed = false,
+            MinFormatScore = 0,
+            MinUpgradeFormatScore = 0,
+            CutoffFormatScore = 0,
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            Language = OriginalLanguage,
+        };
+        var resource = new RadarrQualityProfileResource
+        {
+            TrashId = "qp-trash-id",
+            Name = "Movies",
+            Language = "Original",
+        };
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Movies", Language = "any" },
+            resource
+        );
+        var harness = CreateHarness(
+            [planned],
+            [current],
+            Schema(current.Items),
+            [NewSyncState.Mapping("qp-trash-id", "Movies", 7)],
+            RadarrFields()
+        );
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<RadarrPlannedQualityProfileResource>()
+            .Which.Language.Should()
+            .Be(
+                QualityProfileField.Of(
+                    managed: true,
+                    PlannedValue.Compared<string?>("Original", "Any")
+                )
+            );
+        await harness
+            .Service.Received()
+            .UpdateQualityProfile(
+                Arg.Is<RadarrQualityProfileData>(x => x.Language == AnyLanguage),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
+    [Test]
+    public async Task Radarr_configured_language_applies_to_a_user_defined_profile()
+    {
+        var planned = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "Mine",
+                Language = "Original",
+                Qualities = [NewQp.QualityConfig("Bluray-1080p")],
+            }
+        );
+        var harness = CreateHarness([planned], [], RadarrSchema(), serviceFields: RadarrFields());
+
+        var compute = await Compute(harness);
+
+        compute
+            .Resources.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<RadarrPlannedQualityProfileResource>()
+            .Which.Language.Should()
+            .Be(QualityProfileField.Of(managed: true, PlannedValue.Created<string?>("Original")));
+    }
+
+    [Test]
+    public async Task Radarr_unknown_configured_language_skips_only_that_profile()
+    {
+        var unknown = WithLanguage(GuideProfile("Bad", "qp-bad"), "Englsh");
+        var valid = WithLanguage(GuideProfile("Good", "qp-good"), "Any");
+        var harness = CreateHarness(
+            [unknown, valid],
+            [],
+            RadarrSchema(),
+            serviceFields: RadarrFields()
+        );
+        harness
+            .Service.CreateQualityProfile(default!, default)
+            .ReturnsForAnyArgs(call => call.Arg<QualityProfileData>() with { Id = 9 });
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Partial);
+        compute
+            .Outcomes.Should()
+            .Equal(
+                new QualityProfileLanguageReferenceMismatchOutcome(
+                    new GuideBackedQualityProfileIdentity(new MappingKey("qp-bad", "Bad")),
+                    "Englsh"
+                )
+            );
+        compute.Resources.Should().ContainSingle().Which.Name.Desired.Should().Be("Good");
+        await harness
+            .Service.Received(1)
+            .CreateQualityProfile(
+                Arg.Is<QualityProfileData>(x => x.Name == "Good"),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
+    [Test]
+    public async Task Ignored_language_plan_warning_is_attributed_and_the_profile_syncs()
+    {
+        var planned = WithLanguage(GuideProfile("Series", "qp"), "Any");
+        var harness = CreateHarness([planned], [], GuideProfileSchema());
+        harness.PlanOutcomes.Add(new ProfileLanguageIgnoredOutcome(planned));
+
+        var compute = await Compute(harness);
+
+        compute.Status.Should().Be(SyncResultStatus.Succeeded);
+        compute
+            .Outcomes.Should()
+            .Equal(
+                new QualityProfileLanguageIgnoredOutcome(
+                    new GuideBackedQualityProfileIdentity(new MappingKey("qp", "Series"))
+                )
+            );
+        compute.Resources.Should().ContainSingle();
+    }
+
     private static readonly QualityItemSize ServiceSize = new(1, 10, 5);
 
     private static SonarrV5QualityProfileData SonarrV5Profile() =>

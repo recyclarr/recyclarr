@@ -89,6 +89,7 @@ public record QualityProfileConfigYaml
     public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
     public string? ScoreSet { get; init; }
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
+    public string? Language { get; init; }
 }
 
 public record MediaManagementConfigYaml

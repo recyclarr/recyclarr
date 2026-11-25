@@ -225,6 +225,14 @@ internal static class OutcomeCodes
         Warning
     );
 
+    public static readonly OutcomeCode<LanguageOutcomeData> QualityProfileLanguageReferenceMismatch =
+        new("qualityProfileLanguageReferenceMismatch", Error);
+
+    public static readonly OutcomeCode QualityProfileLanguageIgnored = new(
+        "qualityProfileLanguageIgnored",
+        Warning
+    );
+
     public static readonly OutcomeCode QualityProfileQualityDefinitionUnused = new(
         "qualityProfileQualityDefinitionUnused",
         Warning

@@ -244,6 +244,7 @@ public abstract class ServiceConfigMerger<T>
             MinUpgradeFormatScore = b.MinUpgradeFormatScore ?? a.MinUpgradeFormatScore,
             QualitySort = b.QualitySort ?? a.QualitySort,
             ScoreSet = b.ScoreSet ?? a.ScoreSet,
+            Language = b.Language ?? a.Language,
             ResetUnmatchedScores = Combine(
                 a.ResetUnmatchedScores,
                 b.ResetUnmatchedScores,

@@ -284,6 +284,18 @@ internal static class OutcomeResponseMapper
                         + "ignored",
                     ProfileSubject(x.Identity)
                 ),
+            QualityProfileLanguageReferenceMismatchOutcome x =>
+                C.QualityProfileLanguageReferenceMismatch.Create(
+                    $"Quality profile {Profile(x.Identity)} sets `language` to "
+                        + $"'{x.Language}', which the service does not offer",
+                    ProfileSubject(x.Identity),
+                    new LanguageOutcomeData(x.Language)
+                ),
+            QualityProfileLanguageIgnoredOutcome x => C.QualityProfileLanguageIgnored.Create(
+                $"Quality profile {Profile(x.Identity)}: this service's quality profiles have no "
+                    + "language, so the profile's `language` is ignored",
+                ProfileSubject(x.Identity)
+            ),
             QualityProfileQualityDefinitionUnusedOutcome =>
                 C.QualityProfileQualityDefinitionUnused.Create(
                     "This service version stores quality sizes per quality profile. "

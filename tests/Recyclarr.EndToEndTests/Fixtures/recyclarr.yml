@@ -120,7 +120,9 @@ radarr:
           allowed: false
 
       # Guide-synced quality profile (tests implicit CF group inclusion from guide data)
+      # `language` overrides the guide's language
       - trash_id: d1d67249d3890e49bc12e275d989a7e9 # HD Bluray + WEB
+        language: Any
 
     custom_formats:
       - trash_ids:
