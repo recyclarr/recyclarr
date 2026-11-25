@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Check Needed Jobs
+description: >-
+  Fail unless every needed job succeeded, or was skipped and is allowed to skip. Any other result
+  fails, including results GitHub does not document, such as "abandoned" for a job that never got
+  a runner.
+author: Recyclarr
+
+inputs:
+  needs:
+    description: The calling job's needs context, as JSON (toJSON(needs))
+    required: true
+  allowed-skips:
+    description: Whitespace-separated IDs of jobs that may be skipped
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Check needed jobs
+      shell: bash
+      env:
+        NEEDS: ${{ inputs.needs }}
+        ALLOWED_SKIPS: ${{ inputs.allowed-skips }}
+      run: $GITHUB_ACTION_PATH/check-needs.sh

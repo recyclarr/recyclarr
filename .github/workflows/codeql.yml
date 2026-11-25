@@ -77,6 +77,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded
-        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        uses: $/.github/actions/check-needs
         with:
-          jobs: ${{ toJSON(needs) }}
+          needs: ${{ toJSON(needs) }}

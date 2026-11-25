@@ -364,10 +364,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded
-        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        uses: $/.github/actions/check-needs
         with:
+          needs: ${{ toJSON(needs) }}
           # Skipped outside full builds, outside tag builds for release jobs, and on tag builds or
           # fork pull requests for dev jobs
           allowed-skips: >-
-            build-win, build-osx, codesign, docker, docker-release, helm-dev, helm-release, release
-          jobs: ${{ toJSON(needs) }}
+            build-win build-osx codesign docker docker-release helm-dev helm-release release
