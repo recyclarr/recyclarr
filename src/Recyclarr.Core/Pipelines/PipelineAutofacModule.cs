@@ -130,6 +130,11 @@ public class PipelineAutofacModule : Module
     private static void RegisterQualitySizeSupport(ContainerBuilder builder)
     {
         builder.RegisterType<QualitySizeResolver>();
+        builder
+            .RegisterServiceGateway<IInstanceQualitySizePlanner>()
+            .For<GlobalInstanceQualitySizePlanner>(ServiceApiTarget.SonarrV3)
+            .For<PerProfileInstanceQualitySizePlanner>(ServiceApiTarget.SonarrV5)
+            .For<GlobalInstanceQualitySizePlanner>(ServiceApiTarget.RadarrV3);
         builder.RegisterType<QualityItemLimitFactory>().As<IQualityItemLimitFactory>();
         builder
             .RegisterType<RadarrQualityItemLimitFetcher>()

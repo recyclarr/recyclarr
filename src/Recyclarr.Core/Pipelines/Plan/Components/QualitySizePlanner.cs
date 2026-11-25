@@ -1,32 +1,39 @@
-using Recyclarr.Compatibility;
-using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
 /// <summary>
-/// Plans instance-wide quality sizes on services that store sizes globally. On services that
-/// store sizes per quality profile (Sonarr v5) it plans nothing; the quality profile planner
-/// assigns sizes there.
+/// Plans instance-wide quality sizes. Whether the service stores sizes globally or per quality
+/// profile decides the planning, so all of it lives in the
+/// <see cref="IInstanceQualitySizePlanner"/> that DI selects (ADR-023).
 /// </summary>
-internal class QualitySizePlanner(
+internal class QualitySizePlanner(IInstanceQualitySizePlanner planner)
+    : IPipelinePlanner<PlannedQualitySizes>
+{
+    public PlannedQualitySizes? Plan(PlanningContext context) => planner.Plan(context);
+}
+
+/// <summary>
+/// Builds one service version's instance-wide quality sizes. Returns null when the instance has
+/// none to sync.
+/// </summary>
+internal interface IInstanceQualitySizePlanner
+{
+    PlannedQualitySizes? Plan(PlanningContext context);
+}
+
+/// <summary>
+/// Used where quality sizes are global (Sonarr v4, Radarr): resolves the instance
+/// <c>quality_definition</c>.
+/// </summary>
+internal class GlobalInstanceQualitySizePlanner(
     QualitySizeResolver resolver,
     IServiceConfiguration config,
-    DetectedService detectedService,
     ILogger log
-) : IPipelinePlanner<PlannedQualitySizes>
+) : IInstanceQualitySizePlanner
 {
     public PlannedQualitySizes? Plan(PlanningContext context)
     {
-        if (
-            config.ServiceType == SupportedServices.Sonarr
-            && new SonarrCapabilities(detectedService.Version).QualitySizesPerProfile
-        )
-        {
-            return null;
-        }
-
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
         {
@@ -36,4 +43,13 @@ internal class QualitySizePlanner(
 
         return resolver.Resolve(configSizeData, context.Add);
     }
+}
+
+/// <summary>
+/// Used where quality sizes are per quality profile (Sonarr v5): plans no instance-wide sizes. The
+/// quality profile planner assigns sizes to each profile instead (PDR-008).
+/// </summary>
+internal class PerProfileInstanceQualitySizePlanner : IInstanceQualitySizePlanner
+{
+    public PlannedQualitySizes? Plan(PlanningContext context) => null;
 }
