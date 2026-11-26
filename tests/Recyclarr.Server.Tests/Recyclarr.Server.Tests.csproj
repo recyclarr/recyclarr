@@ -6,7 +6,6 @@
     <ProjectReference Include="..\..\src\Recyclarr.Client\Recyclarr.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Remove="AutoFixture" />
     <PackageReference Remove="Serilog.Sinks.NUnit" />
   </ItemGroup>
   <ItemGroup>

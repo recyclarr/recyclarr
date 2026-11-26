@@ -4,8 +4,7 @@ description: >-
   Use before planning or performing work that requires tests, and when
   writing, editing, refactoring, or debugging tests anywhere under `tests/**`
   (unit, integration, or end-to-end); authoring NUnit 4 test
-  classes (`*Test`, `*IntegrationTest`); using NSubstitute mocks,
-  AutoFixture with `[AutoMockData]` / `[InlineAutoMockData]` / `[Frozen]`,
+  classes (`*Test`, `*IntegrationTest`); using NSubstitute mocks
   or AwesomeAssertions (NOT FluentAssertions); working with
   `CliIntegrationFixture`, `IntegrationTestFixture`, `MockFileSystem`,
   `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
@@ -24,7 +23,6 @@ description: >-
 
 - NUnit 4 test framework
 - NSubstitute for mocking
-- AutoFixture for test data generation
 - AwesomeAssertions for fluent assertions (NOT FluentAssertions)
 
 ## Test Pyramid
@@ -57,13 +55,15 @@ internal sealed class MyFeatureIntegrationTest : CliIntegrationFixture
 
 Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`).
 
-## AutoFixture Attributes
+## Unit Test Setup
 
-- `[AutoMockData]`: Basic DI with mocks
-- `[InlineAutoMockData(params)]`: Parameterized tests
-- `[Frozen]` or `[Frozen(Matching.ImplementedInterfaces)]`: Shared mock instances
-- `[CustomizeWith(typeof(T))]`: Custom configuration
-- `[AutoMockData(typeof(TestClass), nameof(Method))]`: DI container integration
+Construct the class under test explicitly. Declare doubles the tests configure or assert on as
+field initializers (`private readonly MockFileSystem _fs = new();`) and build the class under test
+in a `CreateSut()` helper. Every test project sets `LifeCycle.InstancePerTestCase`, so each test
+gets fresh fields.
+
+Test classes that own disposable fields implement `IDisposable`; NUnit1032 expects a
+`[OneTimeTearDown]` because it cannot see the assembly-level life cycle.
 
 ## NSubstitute Patterns
 

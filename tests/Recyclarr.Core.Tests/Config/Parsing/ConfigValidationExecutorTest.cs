@@ -8,13 +8,17 @@ namespace Recyclarr.Core.Tests.Config.Parsing;
 
 internal sealed class ConfigValidationExecutorTest
 {
-    [Test, AutoMockData]
-    public void Return_false_on_validation_failure(
-        [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut
-    )
+    private readonly IRuntimeValidationService _validationService =
+        Substitute.For<IRuntimeValidationService>();
+
+    private ConfigValidationExecutor CreateSut() =>
+        new(new ValidationLogger(Substitute.For<ILogger>()), _validationService);
+
+    [Test]
+    public void Return_false_on_validation_failure()
     {
-        validationService
+        var sut = CreateSut();
+        _validationService
             .Validate(default!)
             .ReturnsForAnyArgs(
                 new ValidationResult([new ValidationFailure("property", "message")])
@@ -25,13 +29,11 @@ internal sealed class ConfigValidationExecutorTest
         result.Should().BeFalse();
     }
 
-    [Test, AutoMockData]
-    public void Return_true_when_severity_is_warning(
-        [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut
-    )
+    [Test]
+    public void Return_true_when_severity_is_warning()
     {
-        validationService
+        var sut = CreateSut();
+        _validationService
             .Validate(default!)
             .ReturnsForAnyArgs(
                 new ValidationResult([
@@ -44,13 +46,11 @@ internal sealed class ConfigValidationExecutorTest
         result.Should().BeTrue();
     }
 
-    [Test, AutoMockData]
-    public void Valid_returns_true(
-        [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut
-    )
+    [Test]
+    public void Valid_returns_true()
     {
-        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult());
+        var sut = CreateSut();
+        _validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult());
 
         var result = sut.Validate(NewConfig.Radarr());
 

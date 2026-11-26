@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.File;
+using Recyclarr.Config.Parsing;
 using Recyclarr.Platform;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -8,12 +9,15 @@ namespace Recyclarr.Core.Tests.Config.File;
 
 internal sealed class FileDeserializerTest
 {
-    [Test, AutoMockData]
-    public void Returns_false_for_non_file_tag_type(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        FileDeserializer sut
-    )
+    private readonly MockFileSystem _fs = new();
+    private readonly IAppPaths _paths = Substitute.For<IAppPaths>();
+
+    private FileDeserializer CreateSut() => new(_fs, _paths, new ConfigInputRecorder());
+
+    [Test]
+    public void Returns_false_for_non_file_tag_type()
     {
+        var sut = CreateSut();
         var result = sut.Deserialize(
             Substitute.For<IParser>(),
             typeof(string),
@@ -26,14 +30,12 @@ internal sealed class FileDeserializerTest
         value.Should().BeNull();
     }
 
-    [Test, AutoMockData]
-    public void Trims_trailing_whitespace_from_file_content(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        FileDeserializer sut
-    )
+    [Test]
+    public void Trims_trailing_whitespace_from_file_content()
     {
+        var sut = CreateSut();
         const string filePath = "/secrets/api_key";
-        fs.AddFile(filePath, "abc123\n");
+        _fs.AddFile(filePath, "abc123\n");
 
         var parser = CreateParser(filePath);
 
@@ -42,13 +44,11 @@ internal sealed class FileDeserializerTest
         value.Should().Be("abc123");
     }
 
-    [Test, AutoMockData]
-    public void Absolute_path_is_used_as_is(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        FileDeserializer sut
-    )
+    [Test]
+    public void Absolute_path_is_used_as_is()
     {
-        fs.AddFile("/absolute/secrets/key", "my-secret");
+        var sut = CreateSut();
+        _fs.AddFile("/absolute/secrets/key", "my-secret");
 
         var parser = CreateParser("/absolute/secrets/key");
 
@@ -57,16 +57,13 @@ internal sealed class FileDeserializerTest
         value.Should().Be("my-secret");
     }
 
-    [Test, AutoMockData]
-    public void Relative_path_resolves_against_config_directory(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths paths,
-        FileDeserializer sut
-    )
+    [Test]
+    public void Relative_path_resolves_against_config_directory()
     {
-        var configDir = fs.CurrentDirectory().SubDirectory("config");
-        paths.ConfigDirectory.Returns(configDir);
-        fs.AddFile(configDir.File("secrets/api_key").FullName, "resolved-secret");
+        var sut = CreateSut();
+        var configDir = _fs.CurrentDirectory().SubDirectory("config");
+        _paths.ConfigDirectory.Returns(configDir);
+        _fs.AddFile(configDir.File("secrets/api_key").FullName, "resolved-secret");
 
         var parser = CreateParser("secrets/api_key");
 

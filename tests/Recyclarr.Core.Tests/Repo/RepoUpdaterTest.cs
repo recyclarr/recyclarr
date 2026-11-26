@@ -6,8 +6,13 @@ using Recyclarr.VersionControl;
 
 namespace Recyclarr.Core.Tests.Repo;
 
-internal sealed class RepoUpdaterTest
+internal sealed class RepoUpdaterTest : IDisposable
 {
+    private readonly IGitRepository _repo = Substitute.For<IGitRepository>();
+    private readonly MockFileSystem _fs = new();
+
+    public void Dispose() => _repo.Dispose();
+
     private static GitRepositorySource NewSource(IDirectoryInfo repoPath, int cacheLimitMb) =>
         new()
         {
@@ -26,124 +31,108 @@ internal sealed class RepoUpdaterTest
                     .Any(a => a?.ToString()?.Contains(fragment, StringComparison.Ordinal) == true)
             );
 
-    [Test, AutoMockData]
-    public async Task Cache_deleted_for_rebuild_when_git_dir_exceeds_cache_limit(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Cache_deleted_for_rebuild_when_git_dir_exceeds_cache_limit()
     {
         // 200MB .git dir with 100MB limit
-        var repoPath = fs.WithGitDir(200 * 1024 * 1024);
+        var repoPath = _fs.WithGitDir(200 * 1024 * 1024);
         var source = NewSource(repoPath, cacheLimitMb: 100);
 
-        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => repo);
+        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => _repo);
         await sut.UpdateRepo(source, CancellationToken.None);
 
         // Mocked git never recreates the directory, so its absence proves the delete happened
-        fs.Directory.Exists(repoPath.FullName)
+        _fs.Directory.Exists(repoPath.FullName)
             .Should()
             .BeFalse("cache exceeded the limit; it should be deleted for rebuild");
-        await repo.Received().Init(Arg.Any<CancellationToken>());
+        await _repo.Received().Init(Arg.Any<CancellationToken>());
     }
 
-    [Test, AutoMockData]
-    public async Task Cache_kept_when_git_dir_is_below_cache_limit(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Cache_kept_when_git_dir_is_below_cache_limit()
     {
         // 10MB .git dir with 100MB limit
-        var repoPath = fs.WithGitDir(10 * 1024 * 1024);
+        var repoPath = _fs.WithGitDir(10 * 1024 * 1024);
         var source = NewSource(repoPath, cacheLimitMb: 100);
 
-        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => repo);
+        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => _repo);
         await sut.UpdateRepo(source, CancellationToken.None);
 
-        fs.Directory.Exists(repoPath.FullName)
+        _fs.Directory.Exists(repoPath.FullName)
             .Should()
             .BeTrue("cache is within the limit; no rebuild expected");
-        await repo.DidNotReceive().Init(Arg.Any<CancellationToken>());
+        await _repo.DidNotReceive().Init(Arg.Any<CancellationToken>());
     }
 
-    [Test, AutoMockData]
-    public async Task Cache_kept_when_cache_limit_is_zero(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Cache_kept_when_cache_limit_is_zero()
     {
         // Large .git dir but limit is 0 (disabled)
-        var repoPath = fs.WithGitDir(500 * 1024 * 1024);
+        var repoPath = _fs.WithGitDir(500 * 1024 * 1024);
         var source = NewSource(repoPath, cacheLimitMb: 0);
 
-        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => repo);
+        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => _repo);
         await sut.UpdateRepo(source, CancellationToken.None);
 
-        fs.Directory.Exists(repoPath.FullName)
+        _fs.Directory.Exists(repoPath.FullName)
             .Should()
             .BeTrue("cache_limit=0 disables the check entirely");
-        await repo.DidNotReceive().Init(Arg.Any<CancellationToken>());
+        await _repo.DidNotReceive().Init(Arg.Any<CancellationToken>());
     }
 
-    [Test, AutoMockData]
-    public async Task Delete_failure_proceeds_with_existing_cache(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Delete_failure_proceeds_with_existing_cache()
     {
         // 200MB .git dir with 100MB limit, but the pack file is locked so deletion fails
-        var repoPath = fs.WithGitDir(200 * 1024 * 1024);
-        var packFile = fs.Path.Combine(repoPath.FullName, ".git/objects/pack/pack-abc.pack");
-        fs.GetFile(packFile).AllowedFileShare = FileShare.None;
+        var repoPath = _fs.WithGitDir(200 * 1024 * 1024);
+        var packFile = _fs.Path.Combine(repoPath.FullName, ".git/objects/pack/pack-abc.pack");
+        _fs.GetFile(packFile).AllowedFileShare = FileShare.None;
 
         var source = NewSource(repoPath, cacheLimitMb: 100);
 
-        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => repo);
+        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => _repo);
         var act = () => sut.UpdateRepo(source, CancellationToken.None);
 
         await act.Should().NotThrowAsync();
-        fs.Directory.Exists(repoPath.FullName)
+        _fs.Directory.Exists(repoPath.FullName)
             .Should()
             .BeTrue("delete failed; sync proceeds with the existing cache");
-        await repo.Received().Status(Arg.Any<CancellationToken>());
+        await _repo.Received().Status(Arg.Any<CancellationToken>());
     }
 
-    [Test, AutoMockData]
-    public async Task Failed_fetch_falls_back_to_cached_data(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Failed_fetch_falls_back_to_cached_data()
     {
-        var repoPath = fs.WithGitDir(10 * 1024 * 1024);
+        var repoPath = _fs.WithGitDir(10 * 1024 * 1024);
         var log = Substitute.For<ILogger>();
         var source = NewSource(repoPath, cacheLimitMb: 0);
 
-        repo.Fetch(default!, default!, default)
+        _repo
+            .Fetch(default!, default!, default)
             .ReturnsForAnyArgs(Task.FromException(new AggregateException("offline")));
-        repo.ResolveCommit("HEAD", default).ReturnsForAnyArgs("abc123");
+        _repo.ResolveCommit("HEAD", default).ReturnsForAnyArgs("abc123");
 
-        var sut = new RepoUpdater(log, _ => repo);
+        var sut = new RepoUpdater(log, _ => _repo);
         var outcome = await sut.UpdateRepo(source, CancellationToken.None);
 
         outcome.Should().Be(RepoUpdateOutcome.FetchFailedUsingCache);
-        fs.Directory.Exists(repoPath.FullName).Should().BeTrue();
+        _fs.Directory.Exists(repoPath.FullName).Should().BeTrue();
         LoggedWarningContaining(log, "will proceed with existing files").Should().BeTrue();
     }
 
-    [Test, AutoMockData]
-    public async Task Warning_logged_when_rebuilt_cache_still_exceeds_limit(
-        [Frozen] IGitRepository repo,
-        [Frozen] MockFileSystem fs
-    )
+    [Test]
+    public async Task Warning_logged_when_rebuilt_cache_still_exceeds_limit()
     {
         // 200MB .git dir with 100MB limit; the "fresh" fetch recreates a 150MB cache
-        var repoPath = fs.WithGitDir(200 * 1024 * 1024);
+        var repoPath = _fs.WithGitDir(200 * 1024 * 1024);
         var log = Substitute.For<ILogger>();
         var source = NewSource(repoPath, cacheLimitMb: 100);
 
-        repo.WhenForAnyArgs(r => r.Fetch(default!, default!, default))
-            .Do(_ => fs.WithGitDir(150 * 1024 * 1024));
+        _repo
+            .WhenForAnyArgs(r => r.Fetch(default!, default!, default))
+            .Do(_ => _fs.WithGitDir(150 * 1024 * 1024));
 
-        var sut = new RepoUpdater(log, _ => repo);
+        var sut = new RepoUpdater(log, _ => _repo);
         await sut.UpdateRepo(source, CancellationToken.None);
 
         LoggedWarningContaining(log, "still exceeds")

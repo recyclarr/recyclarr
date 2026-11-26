@@ -5,12 +5,11 @@ namespace Recyclarr.Core.Tests.Compatibility.Sonarr;
 
 internal sealed class SonarrCapabilityEnforcerTest
 {
-    [Test, AutoMockData]
-    public void Minimum_version_not_met(
-        [Frozen] ISonarrCapabilityFetcher fetcher,
-        SonarrCapabilityEnforcer sut
-    )
+    [Test]
+    public void Minimum_version_not_met()
     {
+        var fetcher = Substitute.For<ISonarrCapabilityFetcher>();
+        var sut = new SonarrCapabilityEnforcer(fetcher);
         var min = SonarrCapabilities.MinimumVersion;
 
         fetcher

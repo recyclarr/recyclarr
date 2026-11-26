@@ -6,6 +6,12 @@ namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
 
 internal sealed class QualityProfileStatCalculatorTest
 {
+    private readonly IQualityProfileServiceFields _serviceFields =
+        Substitute.For<IQualityProfileServiceFields>();
+
+    private QualityProfileStatCalculator CreateSut() =>
+        new(Substitute.For<ILogger>(), _serviceFields);
+
     private static UpdatedQualityProfile CreateProfile(
         QualityProfileData serviceDto,
         QualityProfileConfig? config = null
@@ -19,9 +25,10 @@ internal sealed class QualityProfileStatCalculatorTest
         };
     }
 
-    [Test, AutoMockData]
-    public void Name_change_only_is_detected(QualityProfileStatCalculator sut)
+    [Test]
+    public void Name_change_only_is_detected()
     {
+        var sut = CreateSut();
         var profile = CreateProfile(
             new QualityProfileData { Id = 1, Name = "Old Name" },
             new QualityProfileConfig { Name = "New Name" }
@@ -32,13 +39,11 @@ internal sealed class QualityProfileStatCalculatorTest
         result.ProfileChanged.Should().BeTrue();
     }
 
-    [Test, AutoMockData]
-    public void No_changes_detected_when_all_fields_match(
-        [Frozen] IQualityProfileServiceFields serviceFields,
-        QualityProfileStatCalculator sut
-    )
+    [Test]
+    public void No_changes_detected_when_all_fields_match()
     {
-        serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(false);
+        var sut = CreateSut();
+        _serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(false);
         var profile = CreateProfile(
             new QualityProfileData
             {
@@ -64,9 +69,10 @@ internal sealed class QualityProfileStatCalculatorTest
         result.ProfileChanged.Should().BeFalse();
     }
 
-    [Test, AutoMockData]
-    public void Upgrade_allowed_change_is_detected(QualityProfileStatCalculator sut)
+    [Test]
+    public void Upgrade_allowed_change_is_detected()
     {
+        var sut = CreateSut();
         var profile = CreateProfile(
             new QualityProfileData
             {
@@ -82,13 +88,11 @@ internal sealed class QualityProfileStatCalculatorTest
         result.ProfileChanged.Should().BeTrue();
     }
 
-    [Test, AutoMockData]
-    public void Service_owned_field_change_is_detected(
-        [Frozen] IQualityProfileServiceFields serviceFields,
-        QualityProfileStatCalculator sut
-    )
+    [Test]
+    public void Service_owned_field_change_is_detected()
     {
-        serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(true);
+        var sut = CreateSut();
+        _serviceFields.HasChanges(default!, default!).ReturnsForAnyArgs(true);
         var profile = CreateProfile(new QualityProfileData { Id = 1, Name = "Profile" });
 
         var result = sut.Calculate(profile);

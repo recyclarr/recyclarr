@@ -11,9 +11,6 @@
     <!-- TreatAsUsed: consumed at runtime by AwesomeAssertions, not directly by test code -->
     <PackageReference Include="AgileObjects.ReadableExpressions" TreatAsUsed="true" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
-    <PackageReference Include="AutoFixture" />
-    <PackageReference Include="AutoFixture.AutoNSubstitute" />
-    <PackageReference Include="AutoFixture.NUnit4" />
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="AwesomeAssertions.Analyzers" />
     <PackageReference Include="coverlet.collector" />
@@ -36,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-    <Using Include="AutoFixture.NUnit4" />
     <Using Include="AwesomeAssertions" />
     <Using Include="NSubstitute" />
     <Using Include="NUnit.Framework" />

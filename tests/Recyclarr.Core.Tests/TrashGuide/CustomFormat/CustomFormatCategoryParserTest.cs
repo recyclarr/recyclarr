@@ -1,19 +1,16 @@
 using System.IO.Abstractions;
 using Recyclarr.Common;
-using Recyclarr.Platform;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Core.Tests.TrashGuide.CustomFormat;
 
 internal sealed class CustomFormatCategoryParserTest
 {
-    [Test, AutoMockData]
-    public void It_works(
-        [Frozen] IAppPaths paths,
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        CustomFormatCategoryParser sut
-    )
+    [Test]
+    public void It_works()
     {
+        var fs = new MockFileSystem();
+        var sut = new CustomFormatCategoryParser();
         const string markdownFilename = "Radarr-collection-of-custom-formats.md";
         var resourceReader = new ResourceDataReader(typeof(CustomFormatCategoryParserTest), "Data");
         var markdown = resourceReader.ReadData(markdownFilename);

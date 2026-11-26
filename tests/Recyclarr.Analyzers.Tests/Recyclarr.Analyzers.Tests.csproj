@@ -7,8 +7,6 @@
     <PackageReference Include="Serilog" />
     <!-- Analyzer tests compile source text; the shared mocking and filesystem stack is unused -->
     <PackageReference Remove="AutofacContrib.NSubstitute" />
-    <PackageReference Remove="AutoFixture" />
-    <PackageReference Remove="AutoFixture.AutoNSubstitute" />
     <PackageReference Remove="NSubstitute" />
     <PackageReference Remove="Serilog.Sinks.NUnit" />
     <PackageReference Remove="Spectre.Console.Testing" />

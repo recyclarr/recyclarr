@@ -1,17 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using NSubstitute.ExceptionExtensions;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
 
-// This class exists because AutoFixture does not use NSubstitute's ForPartsOf()
-// See: https://github.com/AutoFixture/AutoFixture/issues/1355
-[SuppressMessage(
-    "Performance",
-    "CA1812:Avoid uninstantiated internal classes",
-    Justification = "Created by AutoFixture"
-)]
 internal sealed class TestSyncStatePersister(ILogger log, ISyncStateStoragePath storagePath)
     : SyncStatePersister(log, storagePath, "test-state")
 {
@@ -20,41 +12,43 @@ internal sealed class TestSyncStatePersister(ILogger log, ISyncStateStoragePath 
 
 internal sealed class SyncStatePersisterTest
 {
-    [Test, AutoMockData]
-    public void Load_returns_empty_when_file_does_not_exist(TestSyncStatePersister sut)
+    private readonly MockFileSystem _fs = new();
+    private readonly ISyncStateStoragePath _storage = Substitute.For<ISyncStateStoragePath>();
+
+    private TestSyncStatePersister CreateSut() => new(Substitute.For<ILogger>(), _storage);
+
+    [Test]
+    public void Load_returns_empty_when_file_does_not_exist()
     {
+        _storage.CalculatePath("test-state").Returns(_fs.FileInfo.New("stateFile.json"));
+        var sut = CreateSut();
+
         var result = sut.Load();
         result.Mappings.Should().BeEmpty();
     }
 
-    [Test, AutoMockData]
-    public void Load_returns_empty_when_json_has_error(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] ISyncStateStoragePath storage,
-        TestSyncStatePersister sut
-    )
+    [Test]
+    public void Load_returns_empty_when_json_has_error()
     {
+        var sut = CreateSut();
         const string stateJson = """
             {\
               mappings: Hello
             }/
             """;
 
-        fs.AddFile("stateFile.json", new MockFileData(stateJson));
-        storage.CalculatePath("test-state").Returns(fs.FileInfo.New("stateFile.json"));
+        _fs.AddFile("stateFile.json", new MockFileData(stateJson));
+        _storage.CalculatePath("test-state").Returns(_fs.FileInfo.New("stateFile.json"));
 
         var result = sut.Load();
 
         result.Mappings.Should().BeEmpty();
     }
 
-    [Test, AutoMockData]
-    public void Load_returns_state_data(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] ISyncStateStoragePath storage,
-        TestSyncStatePersister sut
-    )
+    [Test]
+    public void Load_returns_state_data()
     {
+        var sut = CreateSut();
         const string stateJson = """
             {
               "mappings": [
@@ -63,8 +57,8 @@ internal sealed class SyncStatePersisterTest
             }
             """;
 
-        fs.AddFile("stateFile.json", new MockFileData(stateJson));
-        storage.CalculatePath("test-state").Returns(fs.FileInfo.New("stateFile.json"));
+        _fs.AddFile("stateFile.json", new MockFileData(stateJson));
+        _storage.CalculatePath("test-state").Returns(_fs.FileInfo.New("stateFile.json"));
 
         var result = sut.Load();
 

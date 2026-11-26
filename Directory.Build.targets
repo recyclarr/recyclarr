@@ -7,9 +7,6 @@
   <ItemGroup>
     <PackageReference Update="AgileObjects.ReadableExpressions" PrivateAssets="all" />
     <PackageReference Update="AutofacContrib.NSubstitute" PrivateAssets="all" />
-    <PackageReference Update="AutoFixture" PrivateAssets="all" />
-    <PackageReference Update="AutoFixture.AutoNSubstitute" PrivateAssets="all" />
-    <PackageReference Update="AutoFixture.NUnit4" PrivateAssets="all" />
     <PackageReference Update="AwesomeAssertions" PrivateAssets="all" />
     <PackageReference Update="AwesomeAssertions.Analyzers" PrivateAssets="all" />
     <PackageReference Update="coverlet.collector" PrivateAssets="all" />

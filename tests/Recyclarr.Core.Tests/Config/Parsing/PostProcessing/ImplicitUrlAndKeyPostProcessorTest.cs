@@ -6,12 +6,11 @@ namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing;
 
 internal sealed class ImplicitUrlAndKeyPostProcessorTest
 {
-    [Test, AutoMockData]
-    public void Update_only_base_url_when_absent(
-        [Frozen] ISecretsProvider secrets,
-        ImplicitUrlAndKeyPostProcessor sut
-    )
+    [Test]
+    public void Update_only_base_url_when_absent()
     {
+        var secrets = Substitute.For<ISecretsProvider>();
+        var sut = new ImplicitUrlAndKeyPostProcessor(Substitute.For<ILogger>(), secrets);
         secrets.Secrets.Returns(
             new Dictionary<string, string>
             {
@@ -73,12 +72,11 @@ internal sealed class ImplicitUrlAndKeyPostProcessorTest
             );
     }
 
-    [Test, AutoMockData]
-    public void Update_only_api_key_when_absent(
-        [Frozen] ISecretsProvider secrets,
-        ImplicitUrlAndKeyPostProcessor sut
-    )
+    [Test]
+    public void Update_only_api_key_when_absent()
     {
+        var secrets = Substitute.For<ISecretsProvider>();
+        var sut = new ImplicitUrlAndKeyPostProcessor(Substitute.For<ILogger>(), secrets);
         secrets.Secrets.Returns(
             new Dictionary<string, string>
             {
@@ -140,12 +138,11 @@ internal sealed class ImplicitUrlAndKeyPostProcessorTest
             );
     }
 
-    [Test, AutoMockData]
-    public void Update_base_url_and_api_key_when_absent(
-        [Frozen] ISecretsProvider secrets,
-        ImplicitUrlAndKeyPostProcessor sut
-    )
+    [Test]
+    public void Update_base_url_and_api_key_when_absent()
     {
+        var secrets = Substitute.For<ISecretsProvider>();
+        var sut = new ImplicitUrlAndKeyPostProcessor(Substitute.For<ILogger>(), secrets);
         secrets.Secrets.Returns(
             new Dictionary<string, string>
             {
@@ -201,12 +198,11 @@ internal sealed class ImplicitUrlAndKeyPostProcessorTest
             );
     }
 
-    [Test, AutoMockData]
-    public void Change_nothing_when_all_explicitly_provided(
-        [Frozen] ISecretsProvider secrets,
-        ImplicitUrlAndKeyPostProcessor sut
-    )
+    [Test]
+    public void Change_nothing_when_all_explicitly_provided()
     {
+        var secrets = Substitute.For<ISecretsProvider>();
+        var sut = new ImplicitUrlAndKeyPostProcessor(Substitute.For<ILogger>(), secrets);
         secrets.Secrets.Returns(
             new Dictionary<string, string>
             {

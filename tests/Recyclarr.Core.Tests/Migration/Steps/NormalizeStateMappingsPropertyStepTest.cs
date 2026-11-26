@@ -5,37 +5,30 @@ namespace Recyclarr.Core.Tests.Migration.Steps;
 
 internal sealed class NormalizeStateMappingsPropertyStepTest
 {
-    private static NormalizeStateMappingsPropertyStep CreateSut(
-        MockFileSystem fs,
-        IAppPaths appPaths
-    )
+    private readonly MockFileSystem _fs = new();
+    private readonly ILogger _log = Substitute.For<ILogger>();
+
+    private NormalizeStateMappingsPropertyStep CreateSut()
     {
-        appPaths.ConfigDirectory.Returns(fs.DirectoryInfo.New("/app"));
-        appPaths.StateDirectory.Returns(fs.DirectoryInfo.New("/app/state"));
+        var appPaths = Substitute.For<IAppPaths>();
+        appPaths.ConfigDirectory.Returns(_fs.DirectoryInfo.New("/app"));
+        appPaths.StateDirectory.Returns(_fs.DirectoryInfo.New("/app/state"));
         return new NormalizeStateMappingsPropertyStep(appPaths);
     }
 
-    [Test, AutoMockData]
-    public void Run_does_nothing_when_no_state_directory(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Run_does_nothing_when_no_state_directory()
     {
-        var sut = CreateSut(fs, appPaths);
+        var sut = CreateSut();
 
-        var act = () => sut.Run(log);
+        var act = () => sut.Run(_log);
 
         act.Should().NotThrow();
-        fs.Directory.Exists("/app/state").Should().BeFalse();
+        _fs.Directory.Exists("/app/state").Should().BeFalse();
     }
 
-    [Test, AutoMockData]
-    public void Execute_renames_trash_id_mappings_to_mappings(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Execute_renames_trash_id_mappings_to_mappings()
     {
         const string original = """
             {
@@ -46,27 +39,23 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
             }
             """;
 
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/radarr/abc123/custom-format-mappings.json",
             new MockFileData(original)
         );
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
+        var result = _fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
         result.Should().Contain("\"mappings\"");
         result.Should().NotContain("\"trash_id_mappings\"");
         result.Should().NotContain("\"version\"");
     }
 
-    [Test, AutoMockData]
-    public void Execute_renames_TrashIdMappings_to_mappings(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Execute_renames_TrashIdMappings_to_mappings()
     {
         const string original = """
             {
@@ -76,26 +65,22 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
             }
             """;
 
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/sonarr/def456/quality-profile-mappings.json",
             new MockFileData(original)
         );
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        var result = fs.File.ReadAllText("/app/state/sonarr/def456/quality-profile-mappings.json");
+        var result = _fs.File.ReadAllText("/app/state/sonarr/def456/quality-profile-mappings.json");
 
         result.Should().Contain("\"mappings\"");
         result.Should().NotContain("\"TrashIdMappings\"");
     }
 
-    [Test, AutoMockData]
-    public void Execute_preserves_mapping_data(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Execute_preserves_mapping_data()
     {
         const string original = """
             {
@@ -106,15 +91,15 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
             }
             """;
 
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/radarr/abc123/custom-format-mappings.json",
             new MockFileData(original)
         );
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
+        var result = _fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
         result.Should().Contain("id1");
         result.Should().Contain("CF One");
@@ -124,69 +109,57 @@ internal sealed class NormalizeStateMappingsPropertyStepTest
         result.Should().Contain("20");
     }
 
-    [Test, AutoMockData]
-    public void Execute_skips_already_canonical_files(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Execute_skips_already_canonical_files()
     {
         const string canonical = """{ "mappings": [] }""";
 
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/radarr/abc123/custom-format-mappings.json",
             new MockFileData(canonical)
         );
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        var result = fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
+        var result = _fs.File.ReadAllText("/app/state/radarr/abc123/custom-format-mappings.json");
 
         // File should be unchanged
         result.Should().Contain("\"mappings\"");
     }
 
-    [Test, AutoMockData]
-    public void Execute_handles_multiple_services_and_hashes(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Execute_handles_multiple_services_and_hashes()
     {
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/radarr/hash1/custom-format-mappings.json",
             new MockFileData("""{ "trash_id_mappings": [] }""")
         );
-        fs.AddFile(
+        _fs.AddFile(
             "/app/state/sonarr/hash2/quality-profile-mappings.json",
             new MockFileData("""{ "TrashIdMappings": [] }""")
         );
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        fs.File.ReadAllText("/app/state/radarr/hash1/custom-format-mappings.json")
+        _fs.File.ReadAllText("/app/state/radarr/hash1/custom-format-mappings.json")
             .Should()
             .Contain("\"mappings\"");
-        fs.File.ReadAllText("/app/state/sonarr/hash2/quality-profile-mappings.json")
+        _fs.File.ReadAllText("/app/state/sonarr/hash2/quality-profile-mappings.json")
             .Should()
             .Contain("\"mappings\"");
     }
 
-    [Test, AutoMockData]
-    public void Run_leaves_malformed_json_unchanged(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
-        ILogger log
-    )
+    [Test]
+    public void Run_leaves_malformed_json_unchanged()
     {
         const string path = "/app/state/radarr/abc123/custom-format-mappings.json";
-        fs.AddFile(path, new MockFileData("not valid json {{{"));
+        _fs.AddFile(path, new MockFileData("not valid json {{{"));
 
-        var sut = CreateSut(fs, appPaths);
-        sut.Run(log);
+        var sut = CreateSut();
+        sut.Run(_log);
 
-        fs.File.ReadAllText(path).Should().Be("not valid json {{{");
+        _fs.File.ReadAllText(path).Should().Be("not valid json {{{");
     }
 }

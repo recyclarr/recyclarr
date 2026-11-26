@@ -58,7 +58,7 @@ The CLI MUST NOT reference Core. Solution is SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
-- Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
+- Testing: NUnit 4 + NSubstitute + parallel execution
 - CLI framework: `Spectre.Console`. Dotnet tools in `.config/dotnet-tools.json`.
 
 ## Code Review Comments

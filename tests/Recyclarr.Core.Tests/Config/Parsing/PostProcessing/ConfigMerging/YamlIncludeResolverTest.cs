@@ -15,12 +15,11 @@ internal sealed class YamlIncludeResolverTest
 
     internal abstract class TestYamlInclude3 : IYamlInclude;
 
-    [Test, AutoMockData]
-    public void Find_and_return_processor(
-        [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut
-    )
+    [Test]
+    public void Find_and_return_processor()
     {
+        var index = new StubAutofacIndex<Type, IIncludeProcessor>();
+        var sut = new YamlIncludeResolver(index);
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
@@ -43,12 +42,11 @@ internal sealed class YamlIncludeResolverTest
         result.FullName.Should().Be("the_path");
     }
 
-    [Test, AutoMockData]
-    public void Throw_when_no_matching_processor(
-        [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut
-    )
+    [Test]
+    public void Throw_when_no_matching_processor()
     {
+        var index = new StubAutofacIndex<Type, IIncludeProcessor>();
+        var sut = new YamlIncludeResolver(index);
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
@@ -63,12 +61,11 @@ internal sealed class YamlIncludeResolverTest
         act.Should().Throw<YamlIncludeException>().WithMessage("*type is not supported*");
     }
 
-    [Test, AutoMockData]
-    public void Throw_when_path_does_not_exist(
-        [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut
-    )
+    [Test]
+    public void Throw_when_path_does_not_exist()
     {
+        var index = new StubAutofacIndex<Type, IIncludeProcessor>();
+        var sut = new YamlIncludeResolver(index);
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
