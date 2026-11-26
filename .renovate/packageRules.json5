@@ -28,5 +28,15 @@
       matchUpdateTypes: ["digest"],
       prBodyNotes: ["Changelog: {{{changelogUrl}}}"],
     },
+    {
+      description: [
+        "Roslyn for Recyclarr.Analyzers must not exceed the oldest supported compiler and must",
+        "match the exact version EF Core Design requires. Upgrade by hand when an EF Core Design",
+        "update fails restore on that conflict.",
+      ],
+      matchDatasources: ["nuget"],
+      matchPackageNames: ["Microsoft.CodeAnalysis.CSharp"],
+      enabled: false,
+    },
   ],
 }
