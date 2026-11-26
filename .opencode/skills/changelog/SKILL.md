@@ -27,6 +27,11 @@ user who never ran an unreleased build. Commits are evidence for finding candida
 
 - A feature new in this release gets one entry for the whole feature. Its properties (auth, ports,
   file formats, options) are not separate Added or Changed entries.
+- A breaking change gets one entry, covering everything it removes or changes as a direct result.
+  Give a consequence its own entry only when a user could meet it without the rest of the change.
+- A new capability that replaces released behavior gets one entry under Changed or Removed, not a
+  second one under Added.
+- A breaking commit marks a candidate entry; several breaking commits can form one change.
 - Changed, Deprecated, and Removed apply only to behavior a released version had. Fixed applies only
   to bugs a released version had.
 - Drop changes that cancel out or only refine unreleased work, such as a feature added and reverted,
