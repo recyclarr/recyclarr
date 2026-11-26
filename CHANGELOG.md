@@ -14,7 +14,6 @@ changes you may need to make.
 
 ### Added
 
-- Server: Recyclarr server with an HTTP API, scheduled syncs, and metrics
 - Sync: Notifications and `sync` output list ongoing problems, such as deprecated settings or a
   held-back guide update, after every sync until they are fixed
 - Kubernetes: Official Helm chart
@@ -24,9 +23,8 @@ changes you may need to make.
 
 ### Changed
 
-- **BREAKING**: Recyclarr is now a client and server; CLI commands run through a server
-- **BREAKING**: Docker: The image runs the Recyclarr server instead of a cron job
-- **BREAKING**: Docker: Arguments after the image name no longer run CLI commands
+- **BREAKING**: Recyclarr is now a server with an HTTP API, scheduled syncs, and metrics, and CLI
+  commands run through it. The Docker image runs the server instead of a cron job
 - **BREAKING**: Recyclarr no longer creates the `configs` and `includes` directories or an empty
   `settings.yml`
 - **BREAKING**: Older x86-64 processors without SSE4.2 and POPCNT support can no longer run
@@ -38,17 +36,12 @@ changes you may need to make.
 - CLI: `sync --preview` shows changes for every instance in one consistent tree layout, including
   quality reorders and the old position of each moved quality
 - CLI: `config create --path` also works with a single `--template`
-- CLI: No longer writes log files
 - Logs: Text log lines include the date and time
 
 ### Removed
 
-- **BREAKING**: CLI: The `--config` option of `sync` has been removed
-- **BREAKING**: CLI: The `config list local` command has been removed
 - **BREAKING**: CLI: The deprecated `migrate` command has been removed
 - **BREAKING**: CLI: The deprecated `state repair` command has been removed
-- **BREAKING**: Docker: The `CRON_SCHEDULE`, `RECYCLARR_CREATE_CONFIG`, and `RECYCLARR_LOG_LEVEL`
-  environment variables have been removed
 - Docker: The `edge` image tag has been removed. Use `ghcr.io/recyclarr/recyclarr-dev:master`
   instead
 
