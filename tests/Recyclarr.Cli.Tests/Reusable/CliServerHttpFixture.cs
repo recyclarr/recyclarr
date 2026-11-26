@@ -71,12 +71,11 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected void AddInstanceConfig(params string[] instanceNames)
     {
         var instances = instanceNames.Select(
-            (name, i) =>
-                $"""
-                      {name}:
-                        base_url: http://localhost:{7878 + i}
-                        api_key: asdf
-                    """
+            (name, i) => $"""
+                  {name}:
+                    base_url: http://localhost:{7878 + i}
+                    api_key: asdf
+                """
         );
 
         Fs.AddFile(

@@ -299,13 +299,12 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
     private void WriteConfig(string fileName, string yaml) =>
         Fs.AddFile(Paths.ConfigDirectory.File(fileName), new MockFileData(yaml));
 
-    private static string Instance(string name, string apiKey = "asdf") =>
-        $"""
-            radarr:
-              {name}:
-                base_url: http://{name}:7878
-                api_key: {apiKey}
-            """;
+    private static string Instance(string name, string apiKey = "asdf") => $"""
+        radarr:
+          {name}:
+            base_url: http://{name}:7878
+            api_key: {apiKey}
+        """;
 
     private const string InvalidYaml = "radarr: [unclosed";
 

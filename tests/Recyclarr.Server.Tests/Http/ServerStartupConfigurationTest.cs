@@ -26,49 +26,49 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
 
     [TestCase(
         """
-            radarr:
-              invalid-instance:
-                base_url: http://localhost:7878
-                api_key: ""
-            """,
+        radarr:
+          invalid-instance:
+            base_url: http://localhost:7878
+            api_key: ""
+        """,
         "Invalid instance {Instance}: {Message}",
         TestName = "Invalid instance stops startup"
     )]
     [TestCase(
         """
-            radarr:
-              duplicate-instance:
-                base_url: http://localhost:7878
-                api_key: first
-            sonarr:
-              duplicate-instance:
-                base_url: http://localhost:8989
-                api_key: second
-            """,
+        radarr:
+          duplicate-instance:
+            base_url: http://localhost:7878
+            api_key: first
+        sonarr:
+          duplicate-instance:
+            base_url: http://localhost:8989
+            api_key: second
+        """,
         "Duplicate instance: {Instance}",
         TestName = "Duplicate instance stops startup"
     )]
     [TestCase(
         """
-            radarr:
-              split-one:
-                base_url: http://localhost:7878
-                api_key: first
-              split-two:
-                base_url: http://localhost:7878
-                api_key: second
-            """,
+        radarr:
+          split-one:
+            base_url: http://localhost:7878
+            api_key: first
+          split-two:
+            base_url: http://localhost:7878
+            api_key: second
+        """,
         "Instances {Instances} share the same base URL: {BaseUrl}",
         TestName = "Split instances stop startup"
     )]
     [TestCase(
         """
-            radarr:
-              parse-failure:
-                base_url: http://localhost:7878
-                api_key: asdf
-                unknown_property: invalid
-            """,
+        radarr:
+          parse-failure:
+            base_url: http://localhost:7878
+            api_key: asdf
+            unknown_property: invalid
+        """,
         "Config parsing failed in {File}: {Message}",
         TestName = "Parse failure stops startup"
     )]

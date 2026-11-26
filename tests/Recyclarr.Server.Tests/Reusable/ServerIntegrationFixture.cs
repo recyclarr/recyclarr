@@ -39,12 +39,11 @@ internal abstract class ServerIntegrationFixture : IntegrationTestFixture
     {
         if (instanceNames.Length > 0)
         {
-            var instances = instanceNames.Select(name =>
-                $"""
-                      {name}:
-                        base_url: http://{name}:7878
-                        api_key: asdf
-                    """
+            var instances = instanceNames.Select(name => $"""
+                  {name}:
+                    base_url: http://{name}:7878
+                    api_key: asdf
+                """
             );
             Fs.AddFile(
                 Paths.ConfigDirectory.File("recyclarr.yml"),
