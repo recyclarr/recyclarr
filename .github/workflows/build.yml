@@ -285,6 +285,10 @@ jobs:
       - build-musl
       - codesign # Depends on build-osx, and reuploads artifacts after signing
       - helm-validation
+    permissions:
+      contents: read
+      id-token: write # Sigstore signing certificate for the attestation
+      attestations: write
     env:
       XZ_OPT: "-T0 -9"
     steps:
@@ -307,6 +311,14 @@ jobs:
 
       - name: Create Archive
         run: ci/create-archive.sh publish archive
+
+      # Attests the archives exactly as uploaded; macOS binaries are already signed by this point.
+      - name: Attest Build Provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            archive/**/recyclarr-*.zip
+            archive/**/recyclarr-*.tar.xz
 
       - name: Extract Changelog
         id: changelog
