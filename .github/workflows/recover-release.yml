@@ -37,11 +37,8 @@ jobs:
         id: release
         run: |
           info="$(./ci/prepare-release.py --recovery-info)"
-          echo "version=$(jq -r .version <<<"$info")" >> "$GITHUB_OUTPUT"
-          echo "previous_version=$(jq -r .previous_version <<<"$info")" \
-            >> "$GITHUB_OUTPUT"
-          echo "tag_sha=$(jq -r .tag_sha <<<"$info")" >> "$GITHUB_OUTPUT"
-          echo "head_sha=$(jq -r .head_sha <<<"$info")" >> "$GITHUB_OUTPUT"
+          jq -r '"version=\(.version)", "previous_version=\(.previous_version)",
+            "tag_sha=\(.tag_sha)", "head_sha=\(.head_sha)"' <<<"$info" >> "$GITHUB_OUTPUT"
 
       - name: Validate GitHub releases
         env:

@@ -37,8 +37,9 @@ jobs:
         env:
           RUNTIME: ${{ inputs.runtime }}
           PUBLISH_ARGS: ${{ inputs.publish-args }}
-        # PUBLISH_ARGS is unquoted so it splits into separate flags
-        run: ci/publish.sh "$RUNTIME" $PUBLISH_ARGS
+        run: |
+          read -ra publish_args <<<"$PUBLISH_ARGS"
+          ci/publish.sh "$RUNTIME" "${publish_args[@]}"
 
       - name: Setup uv
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke

@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Check Duplicate Run
+description: >-
+  Decide whether a build should run and whether it is a full build. A push to a feature branch
+  that already has a pull request is skipped, because the pull request run covers it.
+author: Recyclarr
+
+outputs:
+  should_run:
+    description: Whether the calling workflow should run
+    value: ${{ steps.check.outputs.should_run }}
+  full_build:
+    description: Whether to build every platform and run release-only jobs
+    value: ${{ steps.check.outputs.full_build }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check for a pull request run
+      id: check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: $GITHUB_ACTION_PATH/check-duplicate-run.sh
