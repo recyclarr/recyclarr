@@ -42,7 +42,6 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     private RecyclarrTestHarness Harness => session.Harness;
 
     [Test]
-    [NotInParallel(Order = 1)]
     [Timeout(60_000)]
     public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
@@ -71,7 +70,7 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     }
 
     [Test]
-    [NotInParallel(Order = 2)]
+    [DependsOn(nameof(Order1_initial_sync_creates_expected_state))]
     [Timeout(60_000)]
     public async Task Order2_resync_is_idempotent(CancellationToken ct)
     {
@@ -116,7 +115,7 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     }
 
     [Test]
-    [NotInParallel(Order = 3)]
+    [DependsOn(nameof(Order2_resync_is_idempotent))]
     [Timeout(60_000)]
     public async Task Order3_resync_restores_renamed_custom_format(CancellationToken ct)
     {
@@ -155,7 +154,7 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     }
 
     [Test]
-    [NotInParallel(Order = 4)]
+    [DependsOn(nameof(Order3_resync_restores_renamed_custom_format))]
     [Timeout(60_000)]
     public async Task Order4_resync_recreates_deleted_custom_format(CancellationToken ct)
     {
@@ -181,7 +180,7 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     }
 
     [Test]
-    [NotInParallel(Order = 5)]
+    [DependsOn(nameof(Order4_resync_recreates_deleted_custom_format))]
     [Timeout(60_000)]
     public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
     {
@@ -210,7 +209,7 @@ internal abstract class RecyclarrSyncTests(SyncSession session)
     }
 
     [Test]
-    [NotInParallel(Order = 6)]
+    [DependsOn(nameof(Order5_resync_preserves_orphaned_cf_when_delete_disabled))]
     [Timeout(60_000)]
     public async Task Order6_guide_quality_group_rename_is_idempotent(CancellationToken ct)
     {
