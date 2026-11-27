@@ -37,7 +37,7 @@
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="17.0.0" />
     <PackageVersion Include="Refit.Reflection" Version="17.0.0" />
-    <PackageVersion Include="Refitter.MSBuild" Version="2.4.1" />
+    <PackageVersion Include="Refitter.MSBuild" Version="2.4.2" />
     <PackageVersion Include="Quartz" Version="4.7.3" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="3.0.2" />
