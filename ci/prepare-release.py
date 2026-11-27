@@ -233,9 +233,8 @@ def require_mainline_branch(mainline: str) -> None:
         sys.exit(1)
 
 
-def require_workflows_healthy(mainline: str) -> None:
-    """Exit if any workflow runs on the mainline branch are pending or failed."""
-    # Check for in-progress or queued runs
+def list_pending_runs(mainline: str, current_run_id: str | None) -> list[dict]:
+    """Return in-progress or queued mainline runs, excluding the calling workflow run."""
     pending = []
     for status in ("in_progress", "queued"):
         result = run_or_die(
@@ -254,22 +253,32 @@ def require_workflows_healthy(mainline: str) -> None:
         )
         pending += json.loads(result.stdout)
 
+    return [run for run in pending if str(run["databaseId"]) != current_run_id]
+
+
+def require_workflows_healthy(mainline: str) -> None:
+    """Exit if the latest run of any workflow on the mainline branch failed.
+
+    In CI, pending runs are awaited first. Their individual outcome is not checked: a run can be
+    cancelled because a newer push superseded it, and only the newest run of each workflow
+    reflects the state of the mainline. Awaiting can start new runs (pushes landing meanwhile),
+    so pending runs are re-queried until none remain. Locally, pending runs are an error.
+    """
     current_run_id = os.environ.get("GITHUB_RUN_ID")
-    if current_run_id:
-        pending = [run for run in pending if str(run["databaseId"]) != current_run_id]
+    while pending := list_pending_runs(mainline, current_run_id):
+        if not current_run_id:
+            error(f"there are pending workflow runs on {mainline}:")
+            for run in pending:
+                print(
+                    f"  {DIM}- {run['name']} ({run['status']}){RESET}", file=sys.stderr
+                )
+            sys.exit(1)
 
         for run in pending:
             run_or_die(
-                ["gh", "run", "watch", str(run["databaseId"]), "--exit-status"],
-                f"{run['name']} workflow failed",
+                ["gh", "run", "watch", str(run["databaseId"])],
+                f"failed to watch {run['name']} workflow run",
             )
-        pending = []
-
-    if pending:
-        error(f"there are pending workflow runs on {mainline}:")
-        for run in pending:
-            print(f"  {DIM}- {run['name']} ({run['status']}){RESET}", file=sys.stderr)
-        sys.exit(1)
 
     # Check that the latest run for each workflow has not failed
     result = run_or_die(
