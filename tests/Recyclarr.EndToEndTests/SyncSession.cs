@@ -31,8 +31,23 @@ internal abstract class SyncSession(string sonarrImageTag, bool startRadarr)
 
     public async Task InitializeAsync()
     {
-        // Container startup and the server publish have no test timeout, like a one-time setup.
-        var ct = CancellationToken.None;
+        // TUnit gives shared data source initialization no timeout or token, so the session bounds
+        // its own startup. CI startup, image pulls included, normally takes under 40 seconds and
+        // took 76 seconds at worst; the limit leaves room for that while catching a hang early.
+        var limit = TimeSpan.FromMinutes(3);
+        using var timeout = new CancellationTokenSource(limit);
+        try
+        {
+            await StartAsync(timeout.Token);
+        }
+        catch (OperationCanceledException e) when (timeout.IsCancellationRequested)
+        {
+            throw new TimeoutException($"E2E session startup exceeded {limit}", e);
+        }
+    }
+
+    private async Task StartAsync(CancellationToken ct)
+    {
         _harness = await RecyclarrTestHarness.StartAsync(sonarrImageTag, startRadarr, ct);
         await _harness.StartServerAsync(MainConfig, ct);
 
