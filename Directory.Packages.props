@@ -76,6 +76,7 @@
     <PackageVersion Include="Spectre.Console.Testing" Version="0.57.2" />
     <PackageVersion Include="Testcontainers" Version="4.17.0" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="23.0.1" />
+    <PackageVersion Include="TUnit.Core" Version="1.87.12" />
     <PackageVersion Include="TUnit.Engine" Version="1.87.12" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->

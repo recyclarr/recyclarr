@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -9,6 +10,11 @@ namespace Recyclarr.Core.Tests.ServarrApi;
 
 // Resolves gateways with the production Refit clients and serializer settings, backed by canned
 // HTTP responses, so tests observe the JSON a gateway actually sends to Sonarr or Radarr.
+[SuppressMessage(
+    "Design",
+    "CA1001:Types that own disposable fields should be disposable",
+    Justification = "TUnit owns the fixture's lifetime; an [After(Test)] hook disposes the field"
+)]
 internal abstract class ServarrHttpTestFixture : CoreIntegrationTestFixture
 {
     private readonly StubServarrHandler _handler = new();
@@ -24,13 +30,10 @@ internal abstract class ServarrHttpTestFixture : CoreIntegrationTestFixture
         );
     }
 
-    protected override void Dispose(bool disposing)
+    [After(Test)]
+    public void DisposeHandler()
     {
-        base.Dispose(disposing);
-        if (disposing)
-        {
-            _handler.Dispose();
-        }
+        _handler.Dispose();
     }
 
     protected void Respond(HttpMethod method, string path, string json)

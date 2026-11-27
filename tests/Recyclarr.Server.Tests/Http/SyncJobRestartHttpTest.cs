@@ -41,7 +41,7 @@ internal sealed class SyncJobRestartHttpTest
     public async Task Finished_job_and_its_results_survive_a_restart()
     {
         JobId id;
-        await using (var first = new FileDatabaseServer(_databasePath))
+        await using (var first = FileDatabaseServer(_databasePath))
         {
             using var _ = first.CreateClient();
             var store = first.Services.GetRequiredService<ISyncJobStore>();
@@ -57,7 +57,7 @@ internal sealed class SyncJobRestartHttpTest
                 );
         }
 
-        await using var second = new FileDatabaseServer(_databasePath);
+        await using var second = FileDatabaseServer(_databasePath);
         using var client = second.CreateClient();
         var api = RestService.For<ISyncApi>(client);
 
@@ -79,7 +79,7 @@ internal sealed class SyncJobRestartHttpTest
     public async Task Job_active_at_shutdown_is_interrupted_after_restart()
     {
         JobId id;
-        await using (var first = new FileDatabaseServer(_databasePath))
+        await using (var first = FileDatabaseServer(_databasePath))
         {
             using var _ = first.CreateClient();
             var store = first.Services.GetRequiredService<ISyncJobStore>();
@@ -94,7 +94,7 @@ internal sealed class SyncJobRestartHttpTest
             });
         }
 
-        await using var second = new FileDatabaseServer(_databasePath);
+        await using var second = FileDatabaseServer(_databasePath);
         using var client = second.CreateClient();
         var api = RestService.For<ISyncApi>(client);
 
@@ -120,13 +120,13 @@ internal sealed class SyncJobRestartHttpTest
             .Be("finished");
     }
 
-    private sealed class FileDatabaseServer(string path) : ServerHttpFixture
+    private static InProcessServer FileDatabaseServer(string path)
     {
-        protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-        {
-            builder
-                .Register(_ => ServerDatabase.File(new FileSystem().FileInfo.New(path)))
-                .SingleInstance();
-        }
+        var server = new InProcessServer();
+        server.Configure(b =>
+            b.Register(_ => ServerDatabase.File(new FileSystem().FileInfo.New(path)))
+                .SingleInstance()
+        );
+        return server;
     }
 }

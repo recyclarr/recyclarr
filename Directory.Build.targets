@@ -28,6 +28,7 @@
       Update="TestableIO.System.IO.Abstractions.TestingHelpers"
       PrivateAssets="all"
     />
+    <PackageReference Update="TUnit.Core" PrivateAssets="all" />
     <PackageReference Update="TUnit.Engine" PrivateAssets="all" />
   </ItemGroup>
 

@@ -23,9 +23,14 @@ namespace Recyclarr.Cli.Tests.Reusable;
 /// </summary>
 /// <remarks>
 /// Two containers are in play: the server's, built by <see cref="ServerHttpFixture"/>, and the
-/// CLI's, built by <see cref="CliIntegrationFixture"/>. They are deliberately separate, exactly
+/// CLI's, built by <see cref="CliHost"/>. They are deliberately separate, exactly
 /// as they are in production, and share nothing but the HTTP connection between them.
 /// </remarks>
+[SuppressMessage(
+    "Design",
+    "CA1001:Types that own disposable fields should be disposable",
+    Justification = "TUnit owns the fixture's lifetime; an [After(Test)] hook disposes the field"
+)]
 internal abstract class CliServerHttpFixture : ServerHttpFixture
 {
     /// <summary>
@@ -34,21 +39,27 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     private static readonly Uri ServerAddress = new("http://localhost");
 
-    [SuppressMessage(
-        "Usage",
-        "TUnit0023:Member should be disposed within a clean up method",
-        Justification = "Disposed by the Dispose(bool) override, which TUnit calls through Dispose"
-    )]
-    private readonly CliContainer _cli;
+    private readonly CliHost _cli;
+    private readonly TestConsole _cliConsole = new TestConsole().Width(200);
+    private readonly RecordingLogger _cliLog = new();
 
     private readonly Lazy<ServerConnection> _connection;
 
     protected CliServerHttpFixture()
     {
-        // The production traffic handler sits in front of the in-memory server handler, so tests
-        // observe the same request logging as a real run. non-null: the factory runs only after
-        // construction, when a command connects.
-        _cli = new CliContainer(() => CreateDefaultClient(_cli!.Resolve<HttpTrafficLogHandler>()));
+        _cli = new CliHost(RegisterCliStubs);
+        _cli.Env.Set("RECYCLARR_CONFIG_DIR", CliConfigDirectory.FullName);
+
+        // A configured server address selects the centralized mode, so commands connect to the
+        // in-process server instead of launching an ephemeral one.
+        WriteCliSettings(
+            $"""
+            server:
+              base_url: {ServerAddress}
+              api_key: {ApiKey}
+            """
+        );
+
         _connection = new Lazy<ServerConnection>(() =>
         {
             var client = _cli.Resolve<Func<HttpClient>>()();
@@ -108,30 +119,33 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// redirected output, which puts the CLI in log mode and silences markup output, so only raw
     /// list output reaches it; use <see cref="LogOutput"/> for messages.
     /// </summary>
-    protected string ConsoleOutput => _cli.Console.Output;
+    protected string ConsoleOutput => _cliConsole.Output;
 
     /// <summary>
     /// The CLI's console. It starts non-interactive and without ANSI control sequences in its
     /// output, like redirected output; tests that need a terminal reconfigure it.
     /// </summary>
-    protected TestConsole CliConsole => _cli.Console;
+    protected TestConsole CliConsole => _cliConsole;
 
     /// <summary>
     /// Every message the CLI logged, rendered, one per line.
     /// </summary>
-    protected string LogOutput => _cli.Log.Rendered;
+    protected string LogOutput => _cliLog.Rendered;
 
     /// <summary>
     /// Every message the CLI logged, rendered, with the level it was logged at.
     /// </summary>
-    protected IReadOnlyList<(LogEventLevel Level, string Message)> LogEntries => _cli.Log.Entries;
+    protected IReadOnlyList<(LogEventLevel Level, string Message)> LogEntries => _cliLog.Entries;
+
+    private IDirectoryInfo CliConfigDirectory =>
+        _cli.Fs.CurrentDirectory().SubDirectory("cli-config");
 
     /// <summary>
     /// Replaces the CLI's cli.yml. By default it points the CLI at the in-process server.
     /// </summary>
     protected void WriteCliSettings(string yaml)
     {
-        _cli.WriteCliSettings(yaml);
+        _cli.Fs.AddFile(CliConfigDirectory.File("cli.yml"), new MockFileData(yaml));
     }
 
     /// <summary>
@@ -139,7 +153,9 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     protected string AddCliFile(string name, string content)
     {
-        return _cli.AddFile(name, content);
+        var file = _cli.Fs.CurrentDirectory().File(name);
+        _cli.Fs.AddFile(file, new MockFileData(content));
+        return file.FullName;
     }
 
     /// <summary>
@@ -148,7 +164,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     protected void SetCliEnvironmentVariable(string name, string value)
     {
-        _cli.SetEnvironmentVariable(name, value);
+        _cli.Env.Set(name, value);
     }
 
     /// <summary>
@@ -183,70 +199,21 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         client.DefaultRequestHeaders.Authorization = null;
     }
 
-    protected override void Dispose(bool disposing)
+    [After(Test)]
+    public void DisposeCli()
     {
-        if (disposing)
-        {
-            _cli.Dispose();
-        }
-
-        base.Dispose(disposing);
+        _cli.Dispose();
     }
 
-    private sealed class CliContainer : CliIntegrationFixture
+    private void RegisterCliStubs(ContainerBuilder builder)
     {
-        private readonly Func<HttpClient> _createClient;
-
-        public CliContainer(Func<HttpClient> createClient)
-        {
-            _createClient = createClient;
-            Env.Set("RECYCLARR_CONFIG_DIR", ConfigDirectory.FullName);
-
-            // A configured server address selects the centralized mode, so commands connect to
-            // the in-process server instead of launching an ephemeral one.
-            WriteCliSettings(
-                $"""
-                server:
-                  base_url: {ServerAddress}
-                  api_key: {ApiKey}
-                """
-            );
-        }
-
-        public TestConsole Console { get; } = new TestConsole().Width(200);
-        public RecordingLogger Log { get; } = new();
-
-        protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-        {
-            builder.RegisterInstance(_createClient);
-            builder.RegisterInstance(Console).As<IAnsiConsole>();
-            builder.RegisterInstance(Log).As<ILogger>();
-        }
-
-        private IDirectoryInfo ConfigDirectory => Fs.CurrentDirectory().SubDirectory("cli-config");
-
-        public void WriteCliSettings(string yaml)
-        {
-            Fs.AddFile(ConfigDirectory.File("cli.yml"), new MockFileData(yaml));
-        }
-
-        public string AddFile(string name, string content)
-        {
-            var file = Fs.CurrentDirectory().File(name);
-            Fs.AddFile(file, new MockFileData(content));
-            return file.FullName;
-        }
-
-        public void SetEnvironmentVariable(string name, string value)
-        {
-            Env.Set(name, value);
-        }
-
-        public new T Resolve<T>()
-            where T : notnull
-        {
-            return base.Resolve<T>();
-        }
+        // The production traffic handler sits in front of the in-memory server handler, so tests
+        // observe the same request logging as a real run.
+        builder.RegisterInstance<Func<HttpClient>>(() =>
+            CreateDefaultClient(_cli.Resolve<HttpTrafficLogHandler>())
+        );
+        builder.RegisterInstance(_cliConsole).As<IAnsiConsole>();
+        builder.RegisterInstance(_cliLog).As<ILogger>();
     }
 
     private sealed class RecordingLogger : ILogger

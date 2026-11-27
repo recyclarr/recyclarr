@@ -8,5 +8,6 @@
     <PackageReference Include="Serilog" />
     <PackageReference Include="Spectre.Console.Testing" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
+    <PackageReference Include="TUnit.Core" />
   </ItemGroup>
 </Project>

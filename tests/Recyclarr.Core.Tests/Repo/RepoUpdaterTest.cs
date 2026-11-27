@@ -6,12 +6,13 @@ using Recyclarr.VersionControl;
 
 namespace Recyclarr.Core.Tests.Repo;
 
-internal sealed class RepoUpdaterTest : IDisposable
+internal sealed class RepoUpdaterTest
 {
     private readonly IGitRepository _repo = Substitute.For<IGitRepository>();
     private readonly MockFileSystem _fs = new();
 
-    public void Dispose() => _repo.Dispose();
+    [After(Test)]
+    public void DisposeRepo() => _repo.Dispose();
 
     private static GitRepositorySource NewSource(IDirectoryInfo repoPath, int cacheLimitMb) =>
         new()

@@ -13,7 +13,7 @@ using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.TestLibrary;
 
-public abstract class IntegrationTestFixture : IDisposable
+public abstract class IntegrationTestFixture
 {
     private readonly Lazy<ILifetimeScope> _container;
     private readonly TestStubsModule _stubs = new();
@@ -85,19 +85,12 @@ public abstract class IntegrationTestFixture : IDisposable
         return new LifetimeScopeWrapper<T>(childScope);
     }
 
-    protected virtual void Dispose(bool disposing)
+    [After(Test)]
+    public void DisposeContainer()
     {
-        if (!disposing || !_container.IsValueCreated)
+        if (_container.IsValueCreated)
         {
-            return;
+            _container.Value.Dispose();
         }
-
-        _container.Value.Dispose();
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 }

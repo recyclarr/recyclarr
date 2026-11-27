@@ -84,15 +84,13 @@ internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
         await act.Should().ThrowAsync<ApiException>();
     }
 
-    protected override void Dispose(bool disposing)
+    /// <summary>
+    /// A test that failed before releasing the sync would otherwise leave the server's
+    /// background run hanging on this task forever. Runs before the base fixture stops the server.
+    /// </summary>
+    [After(Test)]
+    public void ReleaseSync()
     {
-        if (disposing)
-        {
-            // A test that failed before releasing the sync would otherwise leave the server's
-            // background run hanging on this task forever.
-            _sync.TrySetResult(new SyncRunResult([]));
-        }
-
-        base.Dispose(disposing);
+        _sync.TrySetResult(new SyncRunResult([]));
     }
 }

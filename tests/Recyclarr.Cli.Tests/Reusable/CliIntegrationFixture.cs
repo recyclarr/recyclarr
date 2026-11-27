@@ -1,35 +1,29 @@
-using System.IO.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
 /// <summary>
-/// The CLI's production composition root over an in-memory filesystem and environment. It uses no
-/// Recyclarr.Core test infrastructure, because the CLI does not depend on Core.
+/// Base for tests that run the CLI's composition root; see <see cref="CliHost"/>.
 /// </summary>
-internal abstract class CliIntegrationFixture : IDisposable
+[SuppressMessage(
+    "Design",
+    "CA1001:Types that own disposable fields should be disposable",
+    Justification = "TUnit owns the fixture's lifetime; an [After(Test)] hook disposes the field"
+)]
+internal abstract class CliIntegrationFixture
 {
-    private readonly Lazy<IContainer> _container;
-
-    protected MockFileSystem Fs { get; } =
-        new(new MockFileSystemOptions { CreateDefaultTempDir = false });
-
-    protected TestEnvironment Env { get; } = new();
+    private readonly CliHost _host;
 
     protected CliIntegrationFixture()
     {
-        // Lazy because virtual methods must not run during construction.
-        _container = new Lazy<IContainer>(() =>
-        {
-            var builder = new ContainerBuilder();
-            CompositionRoot.Setup(builder);
-            builder.RegisterInstance(Fs).As<IFileSystem>();
-            builder.RegisterInstance(Env.Configuration);
-            RegisterStubsAndMocks(builder);
-            return builder.Build();
-        });
+        // The host calls back only when it builds the container, after construction.
+        _host = new CliHost(builder => RegisterStubsAndMocks(builder));
     }
+
+    protected MockFileSystem Fs => _host.Fs;
+    protected TestEnvironment Env => _host.Env;
 
     /// <summary>
     /// Overrides production registrations. Runs after the stub filesystem and environment.
@@ -39,16 +33,12 @@ internal abstract class CliIntegrationFixture : IDisposable
     protected T Resolve<T>()
         where T : notnull
     {
-        return _container.Value.Resolve<T>();
+        return _host.Resolve<T>();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public void DisposeHost()
     {
-        if (_container.IsValueCreated)
-        {
-            _container.Value.Dispose();
-        }
-
-        GC.SuppressFinalize(this);
+        _host.Dispose();
     }
 }

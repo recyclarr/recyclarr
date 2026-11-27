@@ -9,5 +9,6 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
+    <PackageReference Include="TUnit.Core" />
   </ItemGroup>
 </Project>
