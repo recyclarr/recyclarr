@@ -17,19 +17,28 @@ from pathlib import Path
 RESULTS_DIR = Path("/tmp/recyclarr-coverage")
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 
+# Without a config file, coverlet.MTP skips every assembly the test process loaded before
+# instrumentation. TUnit loads the assemblies under test at startup, so Recyclarr.Core and
+# recyclarr-server would get no coverage. A config file turns that exclusion off.
+COVERLET_CONFIG = {"platformOptions": {"Coverlet": {"format": "json"}}}
+
 
 def run_coverage() -> int:
     """Run dotnet test with code coverage."""
     if RESULTS_DIR.exists():
         shutil.rmtree(RESULTS_DIR)
 
+    RESULTS_DIR.mkdir(parents=True)
+    config_file = RESULTS_DIR / "coverlet.testconfig.json"
+    config_file.write_text(json.dumps(COVERLET_CONFIG))
+
     result = subprocess.run(
         [
             "dotnet",
             "test",
             "--coverlet",
-            "--coverlet-output-format",
-            "json",
+            "--config-file",
+            str(config_file),
             "--results-directory",
             str(RESULTS_DIR),
         ],
