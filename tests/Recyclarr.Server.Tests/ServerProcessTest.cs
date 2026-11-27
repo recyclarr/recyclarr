@@ -17,19 +17,12 @@ namespace Recyclarr.Server.Tests;
 /// </summary>
 internal sealed class ServerProcessTest
 {
+    private const string ApiKey = "test-server-api-key-0123456789abcdef";
+
     private static readonly TimeSpan ExitTimeout = TimeSpan.FromSeconds(30);
 
     private IDirectoryInfo _root = null!;
-    private string? _apiKey = "test-server-api-key-0123456789abcdef";
-
-    // Null leaves the API endpoint to server.port in settings.yml.
-    private string? _apiUrl = "http://127.0.0.1:0";
-    private string? _dataDirectory;
-    private string? _retiredAppData;
     private int _managementPort;
-    private bool _managementPortFromEnvironment = true;
-    private bool _apiUrlFromEnvironment;
-    private string? _home;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
 
     [Before(Test)]
@@ -166,9 +159,11 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task An_ephemeral_server_without_an_api_key_explains_why_on_stderr()
     {
-        _apiKey = null;
-
-        using var server = Start($"--parent-pid={Environment.ProcessId}", "--ephemeral=true");
+        using var server = Start(
+            new ServerLaunch { ApiKey = null },
+            $"--parent-pid={Environment.ProcessId}",
+            "--ephemeral=true"
+        );
         var output = server.StandardOutput.ReadToEndAsync();
         var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
@@ -206,8 +201,10 @@ internal sealed class ServerProcessTest
         using var first = Start($"--parent-pid={Environment.ProcessId}");
         await WaitForListeningAsync(first);
 
-        _dataDirectory = _root.SubDirectory("other-data").FullName;
-        using var second = Start($"--parent-pid={Environment.ProcessId}");
+        using var second = Start(
+            new ServerLaunch { DataDirectory = _root.SubDirectory("other-data").FullName },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var output = second.StandardOutput.ReadToEndAsync();
         var errors = second.StandardError.ReadToEndAsync();
         await WaitForExitAsync(second);
@@ -265,14 +262,16 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task Management_settings_choose_the_port_and_can_turn_metrics_off()
     {
-        _managementPortFromEnvironment = false;
         ConfigDirectory
             .File("settings.yml")
             .AppendAllText(
                 $"\nserver:\n  management:\n    port: {_managementPort}\n    metrics: false\n"
             );
 
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch { ManagementPortFromEnvironment = false },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         await WaitForListeningAsync(server);
         using var http = new HttpClient();
 
@@ -294,10 +293,14 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task A_persistent_server_starts_with_only_json_log_lines_and_no_warnings()
     {
-        _apiUrlFromEnvironment = true;
-        _home = _root.SubDirectory("home").FullName;
-
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch
+            {
+                ApiUrlFromEnvironment = true,
+                Home = _root.SubDirectory("home").FullName,
+            },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var startupLines = new List<string>();
         await WaitForListeningAsync(server, startupLines.Add);
 
@@ -329,9 +332,10 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task A_management_port_equal_to_the_api_port_stops_startup()
     {
-        _apiUrl = $"http://127.0.0.1:{_managementPort}";
-
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch { ApiUrl = $"http://127.0.0.1:{_managementPort}" },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var output = server.StandardOutput.ReadToEndAsync();
         var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
@@ -345,10 +349,12 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task An_out_of_range_api_port_stops_startup()
     {
-        _apiUrl = null;
         ConfigDirectory.File("settings.yml").AppendAllText("\nserver:\n  port: 70000\n");
 
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch { ApiUrl = null },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var output = server.StandardOutput.ReadToEndAsync();
         var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
@@ -376,9 +382,10 @@ internal sealed class ServerProcessTest
     [Test]
     public async Task Retired_app_data_variable_stops_startup_and_explains_why_on_stderr()
     {
-        _retiredAppData = _root.SubDirectory("old").FullName;
-
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch { RetiredAppData = _root.SubDirectory("old").FullName },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var output = server.StandardOutput.ReadToEndAsync();
         var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
@@ -393,9 +400,10 @@ internal sealed class ServerProcessTest
     [Arguments(70000)]
     public async Task An_out_of_range_management_port_stops_startup(int port)
     {
-        _managementPort = port;
-
-        using var server = Start($"--parent-pid={Environment.ProcessId}");
+        using var server = Start(
+            new ServerLaunch { ManagementPort = port },
+            $"--parent-pid={Environment.ProcessId}"
+        );
         var output = server.StandardOutput.ReadToEndAsync();
         var errors = server.StandardError.ReadToEndAsync();
         await WaitForExitAsync(server);
@@ -426,7 +434,7 @@ internal sealed class ServerProcessTest
         using var server = Start($"--parent-pid={Environment.ProcessId}");
         var apiPort = await WaitForListeningAsync(server);
         using var http = new HttpClient();
-        http.DefaultRequestHeaders.Authorization = new("Bearer", _apiKey);
+        http.DefaultRequestHeaders.Authorization = new("Bearer", ApiKey);
 
         using var body = new StringContent("{}", Encoding.UTF8, "application/json");
         using var created = await http.PostAsync(LocalUri(apiPort, "/api/v1/sync/jobs"), body);
@@ -466,7 +474,9 @@ internal sealed class ServerProcessTest
 
     private IFileInfo StateDatabase => ConfigDirectory.SubDirectory("state").File("server.db");
 
-    private Process Start(params string[] arguments)
+    private Process Start(params string[] arguments) => Start(new ServerLaunch(), arguments);
+
+    private Process Start(ServerLaunch launch, params string[] arguments)
     {
         var binaryName = OperatingSystem.IsWindows() ? "recyclarr-server.exe" : "recyclarr-server";
         var binary = _root.FileSystem.DirectoryInfo.New(AppContext.BaseDirectory).File(binaryName);
@@ -479,31 +489,32 @@ internal sealed class ServerProcessTest
             Environment =
             {
                 ["RECYCLARR_CONFIG_DIR"] = ConfigDirectory.FullName,
-                ["RECYCLARR_API_KEY"] = _apiKey,
-                ["RECYCLARR_DATA_DIR"] = _dataDirectory,
-                ["RECYCLARR_APP_DATA"] = _retiredAppData,
+                ["RECYCLARR_API_KEY"] = launch.ApiKey,
+                ["RECYCLARR_DATA_DIR"] = launch.DataDirectory,
+                ["RECYCLARR_APP_DATA"] = launch.RetiredAppData,
             },
         };
 
-        if (_managementPortFromEnvironment)
+        if (launch.ManagementPortFromEnvironment)
         {
-            startInfo.Environment["ASPNETCORE_MANAGEMENTPORT"] = _managementPort.ToString(
+            var port = launch.ManagementPort ?? _managementPort;
+            startInfo.Environment["ASPNETCORE_MANAGEMENTPORT"] = port.ToString(
                 CultureInfo.InvariantCulture
             );
         }
 
-        if (_home is not null)
+        if (launch.Home is not null)
         {
-            startInfo.Environment["HOME"] = _home;
+            startInfo.Environment["HOME"] = launch.Home;
         }
 
-        if (_apiUrlFromEnvironment)
+        if (launch.ApiUrlFromEnvironment)
         {
-            startInfo.Environment["ASPNETCORE_URLS"] = _apiUrl;
+            startInfo.Environment["ASPNETCORE_URLS"] = launch.ApiUrl;
         }
-        else if (_apiUrl is not null)
+        else if (launch.ApiUrl is not null)
         {
-            startInfo.ArgumentList.Add($"--urls={_apiUrl}");
+            startInfo.ArgumentList.Add($"--urls={launch.ApiUrl}");
         }
 
         foreach (var argument in arguments)
@@ -566,5 +577,35 @@ internal sealed class ServerProcessTest
             server.Kill(entireProcessTree: true);
             AssertionChain.GetOrCreate().FailWith("The server did not exit");
         }
+    }
+
+    /// <summary>
+    /// How a test launches the server. The defaults launch a server that starts normally.
+    /// </summary>
+    private sealed record ServerLaunch
+    {
+        public string? ApiKey { get; init; } = ServerProcessTest.ApiKey;
+
+        /// <summary>
+        /// Null leaves the API endpoint to server.port in settings.yml.
+        /// </summary>
+        public string? ApiUrl { get; init; } = "http://127.0.0.1:0";
+
+        /// <summary>
+        /// Passes the API URL through ASPNETCORE_URLS, the way the Docker image does, instead of
+        /// the --urls argument.
+        /// </summary>
+        public bool ApiUrlFromEnvironment { get; init; }
+
+        public string? DataDirectory { get; init; }
+        public string? RetiredAppData { get; init; }
+
+        /// <summary>
+        /// Null uses the test's free port.
+        /// </summary>
+        public int? ManagementPort { get; init; }
+
+        public bool ManagementPortFromEnvironment { get; init; } = true;
+        public string? Home { get; init; }
     }
 }

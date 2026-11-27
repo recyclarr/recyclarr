@@ -28,15 +28,13 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     private readonly TimerObservingTimeProvider _time = new(Start);
     private readonly ScriptedOrchestrator _orchestrator = new();
     private readonly RecordingLogger _log = new();
-    private ServerMode _mode = ServerMode.Persistent;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterInstance(_log).As<ILogger>();
         builder.RegisterInstance(_time).As<TimeProvider>();
         builder.RegisterInstance(_orchestrator).As<ISyncOrchestrator>();
-        var mode = _mode;
-        builder.Register(_ => mode);
+        builder.Register(_ => ServerMode.Persistent);
     }
 
     private void AddSettings(string schedule)
@@ -206,7 +204,7 @@ internal sealed class ScheduledSyncHttpTest : ServerHttpFixture
     [Test]
     public async Task Ephemeral_server_never_schedules()
     {
-        _mode = ServerMode.Ephemeral;
+        ConfigureServer(b => b.Register(_ => ServerMode.Ephemeral));
         AddInstance();
         using var client = CreateClient();
 

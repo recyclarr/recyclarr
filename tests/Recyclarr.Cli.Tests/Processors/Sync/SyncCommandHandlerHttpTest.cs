@@ -14,7 +14,6 @@ using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Platform;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
-using Recyclarr.TestLibrary.Autofac;
 using Serilog.Events;
 using QualityProfileScoreReason = Recyclarr.Pipelines.QualityProfile.QualityProfileScoreReason;
 using SupportedServices = Recyclarr.TrashGuide.SupportedServices;
@@ -48,23 +47,25 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         failure: new ServiceUnavailableFailure()
     );
 
-    /// <summary>
-    /// Read lazily by the substitute below, so each test decides how the sync "went" before it
-    /// triggers a job.
-    /// </summary>
-    private SyncRunResult _result = new([Succeeded]);
+    private readonly ISyncOrchestrator _orchestrator = Substitute.For<ISyncOrchestrator>();
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
-        builder.RegisterMockFor<ISyncOrchestrator>(m =>
-            m.RunAsync(
-                    Arg.Any<IReadOnlyList<IServiceConfiguration>>(),
-                    Arg.Any<ISyncSettings>(),
-                    Arg.Any<IInstanceSyncProgress>(),
-                    Arg.Any<CancellationToken>()
-                )
-                .Returns(_ => Task.FromResult(_result))
-        );
+        builder.RegisterInstance(_orchestrator);
+    }
+
+    [Before(Test)]
+    public void SyncSucceedsByDefault()
+    {
+        SyncReturns(new SyncRunResult([Succeeded]));
+    }
+
+    /// <summary>
+    /// Decides how the stubbed sync "went"; call before the test triggers a job.
+    /// </summary>
+    private void SyncReturns(SyncRunResult result)
+    {
+        _orchestrator.RunAsync(default!, default!, default!, default).ReturnsForAnyArgs(result);
     }
 
     [Test]
@@ -106,14 +107,16 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         AddInstanceConfig(InstanceName);
         if (syncFails)
         {
-            _result = new SyncRunResult([
-                new SyncInstanceResult(
-                    InstanceName,
-                    SupportedServices.Radarr,
-                    [],
-                    failure: new ServiceUnavailableFailure()
-                ),
-            ]);
+            SyncReturns(
+                new SyncRunResult([
+                    new SyncInstanceResult(
+                        InstanceName,
+                        SupportedServices.Radarr,
+                        [],
+                        failure: new ServiceUnavailableFailure()
+                    ),
+                ])
+            );
         }
 
         var diagnostics = Substitute.For<IDiagnosticsApi>();
@@ -139,7 +142,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task A_sync_that_was_only_partial_still_exits_successfully()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([Succeeded, Failed]);
+        SyncReturns(new SyncRunResult([Succeeded, Failed]));
 
         var result = await RunSync();
 
@@ -151,7 +154,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task A_sync_that_failed_exits_with_failure()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([Failed]);
+        SyncReturns(new SyncRunResult([Failed]));
 
         var result = await RunSync();
 
@@ -228,30 +231,35 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     {
         AddInstanceConfig(InstanceName, Failed.InstanceName);
         var identity = new CustomFormatIdentity("cf-x264", "x264");
-        _result = new SyncRunResult(
-            [
-                new SyncInstanceResult(
-                    InstanceName,
-                    SupportedServices.Radarr,
-                    [
-                        NewPipelineResult.CustomFormats(
-                            [
-                                new CustomFormatAmbiguousMatchOutcome(
-                                    identity,
-                                    [new("x264", 1), new("x264 copy", 2)]
-                                ),
-                                new CustomFormatAdoptedOutcome(identity, 7),
-                                new CustomFormatDuplicateNameOutcome("Shared", ["cf-a", "cf-b"]),
-                            ],
-                            [],
-                            failed: 1
-                        ),
-                    ],
-                    fault: new SyncFault("instance-ref")
-                ),
-                Failed,
-            ],
-            new SyncFault("run-ref")
+        SyncReturns(
+            new SyncRunResult(
+                [
+                    new SyncInstanceResult(
+                        InstanceName,
+                        SupportedServices.Radarr,
+                        [
+                            NewPipelineResult.CustomFormats(
+                                [
+                                    new CustomFormatAmbiguousMatchOutcome(
+                                        identity,
+                                        [new("x264", 1), new("x264 copy", 2)]
+                                    ),
+                                    new CustomFormatAdoptedOutcome(identity, 7),
+                                    new CustomFormatDuplicateNameOutcome(
+                                        "Shared",
+                                        ["cf-a", "cf-b"]
+                                    ),
+                                ],
+                                [],
+                                failed: 1
+                            ),
+                        ],
+                        fault: new SyncFault("instance-ref")
+                    ),
+                    Failed,
+                ],
+                new SyncFault("run-ref")
+            )
         );
 
         var result = await RunSync();
@@ -301,22 +309,24 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task The_final_table_counts_changes_and_marks_blocked_pipelines_as_not_run()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats(
-                        [],
-                        [Create("cf1", "One"), Create("cf2", "Two")]
-                    ),
-                    NewPipelineResult.Blocked(
-                        NewPipelineResult.QualityProfiles([], []),
-                        PipelineType.CustomFormat
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats(
+                            [],
+                            [Create("cf1", "One"), Create("cf2", "Two")]
+                        ),
+                        NewPipelineResult.Blocked(
+                            NewPipelineResult.QualityProfiles([], []),
+                            PipelineType.CustomFormat
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -327,35 +337,37 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Preview_shows_each_change_with_its_current_and_desired_value()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats([], [Create("cf1", "Bad Dual Groups")]),
-                    NewPipelineResult.QualitySizes(
-                        [],
-                        [
-                            Size(
-                                "Bluray-1080p",
-                                new QualitySizeValue.Numeric(50),
-                                new QualitySizeValue.Numeric(50.4m)
-                            ),
-                        ]
-                    ),
-                    NewPipelineResult.RadarrNaming(
-                        new PlannedRadarrNamingResource
-                        {
-                            Action = PlannedAction.Update,
-                            StandardMovieFormat = PlannedValue.Compared<string?>(
-                                "{Movie}",
-                                "{Title}"
-                            ),
-                        }
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats([], [Create("cf1", "Bad Dual Groups")]),
+                        NewPipelineResult.QualitySizes(
+                            [],
+                            [
+                                Size(
+                                    "Bluray-1080p",
+                                    new QualitySizeValue.Numeric(50),
+                                    new QualitySizeValue.Numeric(50.4m)
+                                ),
+                            ]
+                        ),
+                        NewPipelineResult.RadarrNaming(
+                            new PlannedRadarrNamingResource
+                            {
+                                Action = PlannedAction.Update,
+                                StandardMovieFormat = PlannedValue.Compared<string?>(
+                                    "{Movie}",
+                                    "{Title}"
+                                ),
+                            }
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync(new CreateSyncJobRequest { Preview = true });
 
@@ -372,13 +384,15 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task A_normal_run_shows_no_change_sections()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [NewPipelineResult.CustomFormats([], [Create("cf1", "Bad Dual Groups")])]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [NewPipelineResult.CustomFormats([], [Create("cf1", "Bad Dual Groups")])]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -389,31 +403,33 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task The_final_table_marks_each_pipeline_status_and_counts_its_changes()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats([], []),
-                    NewPipelineResult.QualityProfiles(
-                        [new QualityProfileDuplicateNameOutcome("HD")],
-                        [NewProfile("HD")],
-                        failed: 1
-                    ),
-                    NewPipelineResult.QualitySizes([], [], failed: 1),
-                    NewPipelineResult.RadarrNaming(
-                        new PlannedRadarrNamingResource
-                        {
-                            Action = PlannedAction.Update,
-                            RenameMovies = PlannedValue.Compared<bool?>(false, true),
-                            StandardMovieFormat = PlannedValue.Compared<string?>("a", "b"),
-                            MovieFolderFormat = PlannedValue.Compared<string?>("c", "c"),
-                        }
-                    ),
-                    NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats([], []),
+                        NewPipelineResult.QualityProfiles(
+                            [new QualityProfileDuplicateNameOutcome("HD")],
+                            [NewProfile("HD")],
+                            failed: 1
+                        ),
+                        NewPipelineResult.QualitySizes([], [], failed: 1),
+                        NewPipelineResult.RadarrNaming(
+                            new PlannedRadarrNamingResource
+                            {
+                                Action = PlannedAction.Update,
+                                RenameMovies = PlannedValue.Compared<bool?>(false, true),
+                                StandardMovieFormat = PlannedValue.Compared<string?>("a", "b"),
+                                MovieFolderFormat = PlannedValue.Compared<string?>("c", "c"),
+                            }
+                        ),
+                        NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -454,36 +470,38 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             ["HD Bluray"]
         );
 
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats(
-                        [],
-                        [Cf(PlannedAction.Create, "cf-x265", "x265 (HD)", groupSource)]
-                    ),
-                    NewPipelineResult.QualityProfiles([], [NewProfile("HD Bluray")]),
-                    NewPipelineResult.QualitySizes(
-                        [],
-                        [
-                            Size(
-                                "Bluray-2160p",
-                                new QualitySizeValue.Numeric(1),
-                                new QualitySizeValue.Numeric(1),
-                                new QualitySizeValue.Numeric(400),
-                                new QualitySizeValue.Unlimited()
-                            ),
-                        ]
-                    ),
-                    NewPipelineResult.RadarrNaming(null),
-                    NewPipelineResult.Blocked(
-                        NewPipelineResult.MediaManagement(null),
-                        PipelineType.CustomFormat
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats(
+                            [],
+                            [Cf(PlannedAction.Create, "cf-x265", "x265 (HD)", groupSource)]
+                        ),
+                        NewPipelineResult.QualityProfiles([], [NewProfile("HD Bluray")]),
+                        NewPipelineResult.QualitySizes(
+                            [],
+                            [
+                                Size(
+                                    "Bluray-2160p",
+                                    new QualitySizeValue.Numeric(1),
+                                    new QualitySizeValue.Numeric(1),
+                                    new QualitySizeValue.Numeric(400),
+                                    new QualitySizeValue.Unlimited()
+                                ),
+                            ]
+                        ),
+                        NewPipelineResult.RadarrNaming(null),
+                        NewPipelineResult.Blocked(
+                            NewPipelineResult.MediaManagement(null),
+                            PipelineType.CustomFormat
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync(new CreateSyncJobRequest { Preview = true });
 
@@ -517,13 +535,15 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             ),
         };
 
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [NewPipelineResult.QualityProfiles([], [profile])]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [NewPipelineResult.QualityProfiles([], [profile])]
+                ),
+            ])
+        );
 
         await RunSync(new CreateSyncJobRequest { Preview = true });
 
@@ -540,28 +560,30 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Diagnostics_list_by_severity_and_explain_pipelines_without_outcomes()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats(
-                        [new CustomFormatAdoptedOutcome(new("cf-x264", "x264"), 7)],
-                        []
-                    ),
-                    NewPipelineResult.Blocked(
-                        NewPipelineResult.QualityProfiles([], []),
-                        PipelineType.CustomFormat
-                    ),
-                    NewPipelineResult.QualitySizes([], [], failed: 1),
-                ],
-                planningOutcomes:
-                [
-                    new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
-                    new CustomFormatGroupRequiredItemExcludedPlanningOutcome("group", "cf"),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats(
+                            [new CustomFormatAdoptedOutcome(new("cf-x264", "x264"), 7)],
+                            []
+                        ),
+                        NewPipelineResult.Blocked(
+                            NewPipelineResult.QualityProfiles([], []),
+                            PipelineType.CustomFormat
+                        ),
+                        NewPipelineResult.QualitySizes([], [], failed: 1),
+                    ],
+                    planningOutcomes:
+                    [
+                        new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
+                        new CustomFormatGroupRequiredItemExcludedPlanningOutcome("group", "cf"),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -609,13 +631,20 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Each_instance_logs_a_summary_of_its_changes()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [NewPipelineResult.CustomFormats([], [Create("cf1", "One"), Create("cf2", "Two")])]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats(
+                            [],
+                            [Create("cf1", "One"), Create("cf2", "Two")]
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -642,39 +671,41 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             CfInclusionReason.None,
             []
         );
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.CustomFormats(
-                        [],
-                        [
-                            Create("cf1", "One"),
-                            Cf(PlannedAction.Update, "cf2", "Two", source),
-                            Cf(PlannedAction.Unchanged, "cf4", "Four", source),
-                        ],
-                        [new CustomFormatIdentity("cf3", "Three")]
-                    ),
-                    NewPipelineResult.QualityProfiles(
-                        [],
-                        [
-                            NewProfile("HD"),
-                            NewProfileUpdate("UHD"),
-                            NewProfileUpdate("SD", PlannedAction.Unchanged),
-                        ]
-                    ),
-                    NewPipelineResult.QualitySizes(
-                        [],
-                        [
-                            Size("Bluray-1080p", one, two),
-                            Size("WEB", one, two),
-                            Size("HDTV", one, one),
-                        ]
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.CustomFormats(
+                            [],
+                            [
+                                Create("cf1", "One"),
+                                Cf(PlannedAction.Update, "cf2", "Two", source),
+                                Cf(PlannedAction.Unchanged, "cf4", "Four", source),
+                            ],
+                            [new CustomFormatIdentity("cf3", "Three")]
+                        ),
+                        NewPipelineResult.QualityProfiles(
+                            [],
+                            [
+                                NewProfile("HD"),
+                                NewProfileUpdate("UHD"),
+                                NewProfileUpdate("SD", PlannedAction.Unchanged),
+                            ]
+                        ),
+                        NewPipelineResult.QualitySizes(
+                            [],
+                            [
+                                Size("Bluray-1080p", one, two),
+                                Size("WEB", one, two),
+                                Size("HDTV", one, one),
+                            ]
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -685,19 +716,24 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Preview_shows_changed_profiles_and_media_management_as_current_and_new()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.QualityProfiles(
-                        [],
-                        [NewProfileUpdate("UHD"), NewProfileUpdate("SD", PlannedAction.Unchanged)]
-                    ),
-                    NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.QualityProfiles(
+                            [],
+                            [
+                                NewProfileUpdate("UHD"),
+                                NewProfileUpdate("SD", PlannedAction.Unchanged),
+                            ]
+                        ),
+                        NewPipelineResult.MediaManagement(PropersAndRepacks(PlannedAction.Update)),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync(new CreateSyncJobRequest { Preview = true });
 
@@ -732,31 +768,33 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Diagnostics_are_sorted_by_instance_then_message()
     {
         AddInstanceConfig("zeta", "alpha");
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                "zeta",
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.QualitySizes(
-                        [new QualitySizeServiceQualityNotFoundOutcome("B")],
-                        []
-                    ),
-                ]
-            ),
-            new SyncInstanceResult(
-                "alpha",
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.QualitySizes(
-                        [
-                            new QualitySizeServiceQualityNotFoundOutcome("B"),
-                            new QualitySizeServiceQualityNotFoundOutcome("A"),
-                        ],
-                        []
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    "zeta",
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.QualitySizes(
+                            [new QualitySizeServiceQualityNotFoundOutcome("B")],
+                            []
+                        ),
+                    ]
+                ),
+                new SyncInstanceResult(
+                    "alpha",
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.QualitySizes(
+                            [
+                                new QualitySizeServiceQualityNotFoundOutcome("B"),
+                                new QualitySizeServiceQualityNotFoundOutcome("A"),
+                            ],
+                            []
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -778,44 +816,46 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     public async Task Profile_size_and_naming_outcomes_use_their_own_wording()
     {
         AddInstanceConfig(InstanceName);
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Radarr,
-                [
-                    NewPipelineResult.QualityProfiles(
-                        [
-                            new QualityProfileRenameBlockedOutcome(
-                                new UserDefinedQualityProfileIdentity("HD"),
-                                new QualityProfileServiceMatch("HD Old", 4)
-                            ),
-                        ],
-                        [],
-                        failed: 1
-                    ),
-                    NewPipelineResult.QualitySizes(
-                        [
-                            new QualitySizePreferredGreaterThanMaximumOutcome(
-                                "WEB",
-                                new QualitySizeValue.Numeric(90),
-                                new QualitySizeValue.Numeric(80)
-                            ),
-                        ],
-                        [],
-                        failed: 1
-                    ),
-                    NewPipelineResult.RadarrNaming(
-                        null,
-                        [
-                            new RadarrNamingReferenceMismatchOutcome(
-                                RadarrNamingFormatField.StandardMovieFormat,
-                                "bogus"
-                            ),
-                        ]
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Radarr,
+                    [
+                        NewPipelineResult.QualityProfiles(
+                            [
+                                new QualityProfileRenameBlockedOutcome(
+                                    new UserDefinedQualityProfileIdentity("HD"),
+                                    new QualityProfileServiceMatch("HD Old", 4)
+                                ),
+                            ],
+                            [],
+                            failed: 1
+                        ),
+                        NewPipelineResult.QualitySizes(
+                            [
+                                new QualitySizePreferredGreaterThanMaximumOutcome(
+                                    "WEB",
+                                    new QualitySizeValue.Numeric(90),
+                                    new QualitySizeValue.Numeric(80)
+                                ),
+                            ],
+                            [],
+                            failed: 1
+                        ),
+                        NewPipelineResult.RadarrNaming(
+                            null,
+                            [
+                                new RadarrNamingReferenceMismatchOutcome(
+                                    RadarrNamingFormatField.StandardMovieFormat,
+                                    "bogus"
+                                ),
+                            ]
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync();
 
@@ -839,46 +879,48 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     {
         AddInstanceConfig(InstanceName);
         var identity = new UserDefinedQualityProfileIdentity("Series");
-        _result = new SyncRunResult([
-            new SyncInstanceResult(
-                InstanceName,
-                SupportedServices.Sonarr,
-                [
-                    NewPipelineResult.QualityProfiles(
-                        [
-                            new QualityProfileQualitySizeOutcome(
-                                identity,
-                                new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-x")
-                            ),
-                            new QualityProfileQualityDefinitionUnusedOutcome(),
-                        ],
-                        [
-                            new SonarrPlannedQualityProfileResource(
-                                NewProfileUpdate("Series", PlannedAction.Unchanged) with
-                                {
-                                    Action = PlannedAction.Update,
-                                    Identity = identity,
-                                },
-                                [
-                                    Size(
-                                        "HDTV-1080p",
-                                        new QualitySizeValue.Numeric(1),
-                                        new QualitySizeValue.Numeric(5)
-                                    ),
-                                    Size(
-                                        "WEB-1080p",
-                                        new QualitySizeValue.Numeric(1),
-                                        new QualitySizeValue.Numeric(1)
-                                    ),
-                                ],
-                                QualitySizeSource.Instance
-                            ),
-                        ],
-                        failed: 1
-                    ),
-                ]
-            ),
-        ]);
+        SyncReturns(
+            new SyncRunResult([
+                new SyncInstanceResult(
+                    InstanceName,
+                    SupportedServices.Sonarr,
+                    [
+                        NewPipelineResult.QualityProfiles(
+                            [
+                                new QualityProfileQualitySizeOutcome(
+                                    identity,
+                                    new QualitySizeGuideReferenceMismatchOutcome("guide", "qs-x")
+                                ),
+                                new QualityProfileQualityDefinitionUnusedOutcome(),
+                            ],
+                            [
+                                new SonarrPlannedQualityProfileResource(
+                                    NewProfileUpdate("Series", PlannedAction.Unchanged) with
+                                    {
+                                        Action = PlannedAction.Update,
+                                        Identity = identity,
+                                    },
+                                    [
+                                        Size(
+                                            "HDTV-1080p",
+                                            new QualitySizeValue.Numeric(1),
+                                            new QualitySizeValue.Numeric(5)
+                                        ),
+                                        Size(
+                                            "WEB-1080p",
+                                            new QualitySizeValue.Numeric(1),
+                                            new QualitySizeValue.Numeric(1)
+                                        ),
+                                    ],
+                                    QualitySizeSource.Instance
+                                ),
+                            ],
+                            failed: 1
+                        ),
+                    ]
+                ),
+            ])
+        );
 
         await RunSync(new CreateSyncJobRequest { Preview = true });
 

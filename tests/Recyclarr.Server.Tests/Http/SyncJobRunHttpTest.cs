@@ -24,7 +24,7 @@ namespace Recyclarr.Server.Tests.Http;
 internal sealed class SyncJobRunHttpTest : ServerHttpFixture
 {
     private readonly ScriptedOrchestrator _orchestrator = new();
-    private int _throwOnRelease;
+    private readonly ReleaseFault _releaseFault = new();
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
@@ -32,13 +32,7 @@ internal sealed class SyncJobRunHttpTest : ServerHttpFixture
             .Register(_ => _orchestrator)
             .As<ISyncOrchestrator>()
             .InstancePerMatchingLifetimeScope("run")
-            .OnRelease(_ =>
-            {
-                if (Interlocked.Exchange(ref _throwOnRelease, 0) == 1)
-                {
-                    throw new InvalidOperationException("cleanup secret");
-                }
-            });
+            .OnRelease(_ => _releaseFault.ThrowIfArmed());
     }
 
     [Before(Test)]
@@ -108,7 +102,7 @@ internal sealed class SyncJobRunHttpTest : ServerHttpFixture
     [Test]
     public async Task Cleanup_failure_after_the_run_keeps_its_result()
     {
-        _throwOnRelease = 1;
+        _releaseFault.ThrowOnNextRelease();
         using var client = CreateClient();
 
         var id = await CreateJob(client, "first");
@@ -172,4 +166,23 @@ internal sealed class SyncJobRunHttpTest : ServerHttpFixture
     private static async Task<SyncJobResultsResponse> Results(HttpClient client, Guid id) =>
         (await RestService.For<ISyncApi>(client).Results(id)).Content
         ?? throw new InvalidOperationException("Missing results");
+
+    /// <summary>
+    /// Makes the next release of the run's orchestrator throw, as a failing cleanup would. The run
+    /// releases it on the job queue's thread, so arming and firing are atomic.
+    /// </summary>
+    private sealed class ReleaseFault
+    {
+        private int _armed;
+
+        public void ThrowOnNextRelease() => Interlocked.Exchange(ref _armed, 1);
+
+        public void ThrowIfArmed()
+        {
+            if (Interlocked.Exchange(ref _armed, 0) == 1)
+            {
+                throw new InvalidOperationException("cleanup secret");
+            }
+        }
+    }
 }
