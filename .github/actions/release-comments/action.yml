@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Release Comments
+description: >-
+  Comment on each issue a release fixed and each human-authored PR it shipped, linking the
+  release. Skips items labeled no-release-comment and items already commented for this release,
+  so reruns are safe. Requires a checkout with full history and tags.
+author: Recyclarr
+
+inputs:
+  tag:
+    description: Tag of the published release
+    required: true
+  token:
+    description: Token with issues and pull-requests write permission
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup uv
+      uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+
+    - name: Comment on released items
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: $GITHUB_ACTION_PATH/release-comments.py

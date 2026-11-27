@@ -49,10 +49,15 @@ jobs:
 
   release-comments:
     name: Release Comments
-    # The commenter action requires release event context (workflow_dispatch has none)
-    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          filter: tree:0
+          persist-credentials: false
+
       - name: Generate App Token
         id: app-token
         uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
@@ -62,13 +67,11 @@ jobs:
           permission-issues: write
           permission-pull-requests: write
 
-      - name: Comment on Released Issues
-        uses: apexskier/github-release-commenter@e7813a9625eabd79a875b4bc4046cfcae377ab34 # v1.4.1
+      - name: Comment on Released Items
+        uses: $/.github/actions/release-comments
         with:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          comment-template: |
-            🎉 This is included in {release_link}.
-          skip-label: no-release-comment
+          tag: ${{ env.TAG }}
+          token: ${{ steps.app-token.outputs.token }}
 
   notify:
     name: Discord Notification
