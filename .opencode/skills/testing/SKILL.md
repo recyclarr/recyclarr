@@ -61,11 +61,24 @@ Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`
 Construct the class under test explicitly. Declare doubles the tests configure or assert on as
 field initializers (`private readonly MockFileSystem _fs = new();`) and build the class under test
 in a `CreateSut()` helper. TUnit creates a new test class instance for every test, so each test
-gets fresh fields. Test classes that own disposable fields implement `IDisposable`; TUnit disposes
-the instance after its test.
+gets fresh fields.
 
 Parameterized tests need `[Test]` plus one `[Arguments(...)]` per case; data sources use
 `[MethodDataSource]`. Per-test setup and teardown use `[Before(Test)]` and `[After(Test)]`.
+
+## Fixtures, Helpers, and Cleanup
+
+- A fixture is only ever the base class of test classes; MUST NOT construct one directly. Setup that
+  code creates and disposes itself (an in-process server, a composition root) belongs in a plain
+  helper type such as `InProcessServer` or `CliHost`, which fixtures and tests hold as members.
+- Test classes and fixtures MUST NOT implement `IDisposable` or `IAsyncDisposable`. Dispose owned
+  fields in an `[After(Test)]` method: TUnit runs a derived class's hooks before its base's and runs
+  every hook even when one throws.
+- Helpers implement `IDisposable` or `IAsyncDisposable`; their owner disposes them.
+- A test class or fixture that owns a disposable field triggers CA1001. Suppress it with
+  `[SuppressMessage]` on that class, justified by the `[After(Test)]` hook that disposes the field
+  (TUnit0023 enforces the hook). This is the only allowed exception: never suppress CA1001 on
+  helpers, or CA2213 and TUnit0023 anywhere.
 
 ## NSubstitute Patterns
 
