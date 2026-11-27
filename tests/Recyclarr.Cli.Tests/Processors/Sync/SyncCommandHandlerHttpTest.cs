@@ -1031,7 +1031,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 Api,
                 diagnostics ?? Connection.Diagnostics,
                 request ?? new CreateSyncJobRequest(),
-                TestContext.Current!.Execution.CancellationToken
+                Ct
             );
     }
 
@@ -1043,11 +1043,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 
     private async Task<IReadOnlyList<SyncJobSummaryResponse>> ListJobs()
     {
-        using var response = await Api.JobsGet(
-            status: null,
-            trigger: null,
-            TestContext.Current!.Execution.CancellationToken
-        );
+        using var response = await Api.JobsGet(status: null, trigger: null, Ct);
 
         response.IsSuccessful.Should().BeTrue();
 

@@ -70,6 +70,12 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected ISyncApi Api => Connection.Sync;
 
     /// <summary>
+    /// Cancels when the running test times out or the test run is aborted.
+    /// </summary>
+    // non-null: TUnit sets TestContext.Current for the test that is running
+    protected static CancellationToken Ct => TestContext.Current!.Execution.CancellationToken;
+
+    /// <summary>
     /// Writes a config the server can load, so a sync request has something to act on. The server
     /// keeps results only for instances a job selected, so name every instance a stubbed result
     /// reports. Each instance gets its own port because config validation rejects instances that
