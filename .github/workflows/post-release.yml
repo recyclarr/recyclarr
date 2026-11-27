@@ -87,37 +87,24 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Inputs
-        run: |
-          cat >> $GITHUB_ENV <<"EOL"
-          INPUT_TAG="${{ env.TAG }}"
-          INPUT_ORG_REPO="${{ github.repository }}"
-          EOL
-
       - name: Get Release Info
-        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
-        id: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          route: GET /repos/{org_repo}/releases/tags/{tag}
-
-      # Avoid shell processing of characters in the changelog.
-      - name: Get Information from Release
-        env:
-          DATA: ${{ steps.release.outputs.data }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          jq -r '.assets[].browser_download_url' <<<"$DATA" > assets.txt
-          jq -r '.body' <<<"$DATA" > changelog.txt
+          gh api --method GET "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > release.json
+          jq -r '.assets[].browser_download_url' release.json > assets.txt
+          jq -r '.body' release.json > changelog.txt
 
       - name: Setup uv
         uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
 
       - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: >
           ./ci/notify/discord_notify.py
-          --version ${{ env.TAG }}
-          --repo ${{ github.repository }}
-          --webhook-url ${{ secrets.DISCORD_WEBHOOK }}
+          --version "$TAG"
+          --repo "$GITHUB_REPOSITORY"
+          --webhook-url "$DISCORD_WEBHOOK"
           --changelog changelog.txt
           --assets assets.txt
