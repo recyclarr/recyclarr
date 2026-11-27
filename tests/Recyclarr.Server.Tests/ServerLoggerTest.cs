@@ -15,13 +15,13 @@ internal sealed class ServerLoggerTest
 {
     private IDirectoryInfo _root = null!;
 
-    [SetUp]
+    [Before(Test)]
     public void CreateRoot()
     {
         _root = new FileSystem().Directory.CreateTempSubdirectory("recyclarr-server-logger-");
     }
 
-    [TearDown]
+    [After(Test)]
     public void DeleteRoot()
     {
         _root.Delete(recursive: true);
@@ -75,8 +75,9 @@ internal sealed class ServerLoggerTest
             .ContainMatch("[* DBG] next event");
     }
 
-    [TestCase(ServerMode.Persistent)]
-    [TestCase(ServerMode.Ephemeral)]
+    [Test]
+    [Arguments(ServerMode.Persistent)]
+    [Arguments(ServerMode.Ephemeral)]
     public void Log_files_are_written_by_default(ServerMode mode)
     {
         var paths = CreatePaths();

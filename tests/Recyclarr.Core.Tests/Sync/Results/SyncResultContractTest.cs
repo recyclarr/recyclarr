@@ -6,10 +6,11 @@ namespace Recyclarr.Core.Tests.Sync.Results;
 
 internal sealed class SyncResultContractTest
 {
-    [TestCase(SyncResultStatus.Succeeded, true)]
-    [TestCase(SyncResultStatus.Partial, false)]
-    [TestCase(SyncResultStatus.Failed, false)]
-    [TestCase(SyncResultStatus.Blocked, false)]
+    [Test]
+    [Arguments(SyncResultStatus.Succeeded, true)]
+    [Arguments(SyncResultStatus.Partial, false)]
+    [Arguments(SyncResultStatus.Failed, false)]
+    [Arguments(SyncResultStatus.Blocked, false)]
     public void Only_success_satisfies_dependencies(SyncResultStatus status, bool expected) =>
         status.SatisfiesDependency().Should().Be(expected);
 
@@ -30,9 +31,10 @@ internal sealed class SyncResultContractTest
         result.Status.SatisfiesDependency().Should().BeFalse();
     }
 
-    [TestCase(SyncResultStatus.Succeeded)]
-    [TestCase(SyncResultStatus.Partial)]
-    [TestCase(SyncResultStatus.Failed)]
+    [Test]
+    [Arguments(SyncResultStatus.Succeeded)]
+    [Arguments(SyncResultStatus.Partial)]
+    [Arguments(SyncResultStatus.Failed)]
     public void Non_blocked_pipeline_cannot_identify_a_blocking_dependency(SyncResultStatus status)
     {
         var act = () => new TestPipelineResult(status, PipelineType.CustomFormat);
@@ -61,7 +63,8 @@ internal sealed class SyncResultContractTest
         transitive.Status.SatisfiesDependency().Should().BeFalse();
     }
 
-    [TestCaseSource(nameof(InstanceStatusCases))]
+    [Test]
+    [MethodDataSource(nameof(InstanceStatusCases))]
     public void Instance_status_derives_from_pipeline_results(
         IReadOnlyList<SyncResultStatus> pipelineStatuses,
         OperationalFailure? failure,
@@ -87,7 +90,8 @@ internal sealed class SyncResultContractTest
         result.Status.Should().Be(expected);
     }
 
-    [TestCaseSource(nameof(RunStatusCases))]
+    [Test]
+    [MethodDataSource(nameof(RunStatusCases))]
     public void Run_status_derives_from_instance_results(
         IReadOnlyList<SyncResultStatus> instanceStatuses,
         SyncFault? fault,
@@ -260,8 +264,9 @@ internal sealed class SyncResultContractTest
             );
     }
 
-    [TestCase("")]
-    [TestCase(" ")]
+    [Test]
+    [Arguments("")]
+    [Arguments(" ")]
     public void Fault_reference_must_be_opaque_but_nonempty(string reference)
     {
         var act = () => new SyncFault(reference);
@@ -269,7 +274,16 @@ internal sealed class SyncResultContractTest
         act.Should().Throw<ArgumentException>();
     }
 
-    private static IEnumerable<TestCaseData> InstanceStatusCases()
+    public static IEnumerable<
+        TestDataRow<
+            Func<(
+                IReadOnlyList<SyncResultStatus>,
+                OperationalFailure?,
+                SyncFault?,
+                SyncResultStatus
+            )>
+        >
+    > InstanceStatusCases()
     {
         yield return Case([], null, null, SyncResultStatus.Succeeded, "empty success");
         yield return Case(
@@ -330,16 +344,26 @@ internal sealed class SyncResultContractTest
             "partial before fault"
         );
 
-        static TestCaseData Case(
+        static TestDataRow<
+            Func<(
+                IReadOnlyList<SyncResultStatus>,
+                OperationalFailure?,
+                SyncFault?,
+                SyncResultStatus
+            )>
+        > Case(
             IReadOnlyList<SyncResultStatus> statuses,
             OperationalFailure? failure,
             SyncFault? fault,
             SyncResultStatus expected,
             string name
-        ) => new(statuses, failure, fault, expected) { TestName = $"Instance_status_{name}" };
+        ) =>
+            new(() => (statuses, failure, fault, expected), DisplayName: $"Instance_status_{name}");
     }
 
-    private static IEnumerable<TestCaseData> RunStatusCases()
+    public static IEnumerable<
+        TestDataRow<Func<(IReadOnlyList<SyncResultStatus>, SyncFault?, SyncResultStatus)>>
+    > RunStatusCases()
     {
         yield return Case([], null, SyncResultStatus.Succeeded, "empty success");
         yield return Case(
@@ -374,12 +398,14 @@ internal sealed class SyncResultContractTest
             "completion before fault"
         );
 
-        static TestCaseData Case(
+        static TestDataRow<
+            Func<(IReadOnlyList<SyncResultStatus>, SyncFault?, SyncResultStatus)>
+        > Case(
             IReadOnlyList<SyncResultStatus> statuses,
             SyncFault? fault,
             SyncResultStatus expected,
             string name
-        ) => new(statuses, fault, expected) { TestName = $"Run_status_{name}" };
+        ) => new(() => (statuses, fault, expected), DisplayName: $"Run_status_{name}");
     }
 
     private static SyncInstanceResult CreateInstance(SyncResultStatus status)

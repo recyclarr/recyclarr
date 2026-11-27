@@ -12,7 +12,6 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Server.Tests.Sync.Notifications;
 
-[TestFixture]
 internal sealed class NotificationServiceTest
 {
     private IAppriseNotificationApiService _api = null!;

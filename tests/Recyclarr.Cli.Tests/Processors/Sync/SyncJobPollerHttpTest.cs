@@ -23,7 +23,7 @@ internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
     /// </summary>
     private readonly TaskCompletionSource<SyncRunResult> _sync = new();
 
-    private static CancellationToken Ct => TestContext.CurrentContext.CancellationToken;
+    private static CancellationToken Ct => TestContext.Current!.Execution.CancellationToken;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {

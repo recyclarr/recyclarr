@@ -41,7 +41,7 @@ internal sealed class SyncJobRunHttpTest : ServerHttpFixture
             });
     }
 
-    [SetUp]
+    [Before(Test)]
     public void SetUp()
     {
         Fs.AddFile(

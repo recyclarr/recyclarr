@@ -225,8 +225,9 @@ internal sealed class SettingsYamlConfigurationTest
         result.Settings.Should().BeEquivalentTo(new RecyclarrSettings());
     }
 
-    [TestCase("repository")]
-    [TestCase("repositories")]
+    [Test]
+    [Arguments("repository")]
+    [Arguments("repositories")]
     public void Removed_key_is_an_error_with_the_upgrade_message(string key)
     {
         var result = Load($"git_path: /git\n{key}:\n  clone_url: http://x\n");
@@ -316,18 +317,19 @@ internal sealed class SettingsYamlConfigurationTest
             );
     }
 
-    [TestCase("server:\n  port: abc\n", "'server.port' must be a whole number (got 'abc')")]
-    [TestCase(
+    [Test]
+    [Arguments("server:\n  port: abc\n", "'server.port' must be a whole number (got 'abc')")]
+    [Arguments(
         "server:\n  management:\n    metrics: maybe\n",
         "'server.management.metrics' must be true or false (got 'maybe')"
     )]
-    [TestCase(
+    [Arguments(
         "server:\n  logging:\n    format: xml\n",
         "'server.logging.format' must be one of 'json', 'text' (got 'xml')"
     )]
-    [TestCase("server: 5\n", "'server' must be a mapping of settings")]
-    [TestCase("server:\n  port:\n    - 1\n", "'server.port' must be a single value")]
-    [TestCase("resource_providers: x\n", "'resource_providers' must be a list")]
+    [Arguments("server: 5\n", "'server' must be a mapping of settings")]
+    [Arguments("server:\n  port:\n    - 1\n", "'server.port' must be a single value")]
+    [Arguments("resource_providers: x\n", "'resource_providers' must be a list")]
     public void Value_of_the_wrong_type_is_an_error(string yaml, string expected)
     {
         var result = Load(yaml);

@@ -114,9 +114,10 @@ internal sealed class MergeQualityProfilesTest
             );
     }
 
-    [TestCase("Original", null, "Original")]
-    [TestCase(null, "Any", "Any")]
-    [TestCase("Original", "Any", "Any")]
+    [Test]
+    [Arguments("Original", null, "Original")]
+    [Arguments(null, "Any", "Any")]
+    [Arguments("Original", "Any", "Any")]
     public void Profile_language_from_the_right_wins_over_the_left(
         string? left,
         string? right,

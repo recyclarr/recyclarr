@@ -3,11 +3,11 @@ name: testing
 description: >-
   Use before planning or performing work that requires tests, and when
   writing, editing, refactoring, or debugging tests anywhere under `tests/**`
-  (unit, integration, or end-to-end); authoring NUnit 4 test
+  (unit, integration, or end-to-end); authoring TUnit test
   classes (`*Test`, `*IntegrationTest`); using NSubstitute mocks
   or AwesomeAssertions (NOT FluentAssertions); working with
   `CliIntegrationFixture`, `IntegrationTestFixture`, `MockFileSystem`,
-  `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
+  `TestableLogger`, `TestAnsiConsole`, or `New*` factory helpers; adding or
   updating E2E fixtures under `tests/Recyclarr.EndToEndTests/Fixtures/`
   (`recyclarr.yml`, `settings.yml`, `custom-formats-*`,
   `trash-guides-override/`); running `run-e2e-tests.sh` or
@@ -21,7 +21,8 @@ description: >-
 
 ## Technical Stack
 
-- NUnit 4 test framework
+- TUnit test framework, run by Microsoft.Testing.Platform (`global.json`); its assertions are not
+  used
 - NSubstitute for mocking
 - AwesomeAssertions for fluent assertions (NOT FluentAssertions)
 
@@ -59,11 +60,12 @@ Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`
 
 Construct the class under test explicitly. Declare doubles the tests configure or assert on as
 field initializers (`private readonly MockFileSystem _fs = new();`) and build the class under test
-in a `CreateSut()` helper. Every test project sets `LifeCycle.InstancePerTestCase`, so each test
-gets fresh fields.
+in a `CreateSut()` helper. TUnit creates a new test class instance for every test, so each test
+gets fresh fields. Test classes that own disposable fields implement `IDisposable`; TUnit disposes
+the instance after its test.
 
-Test classes that own disposable fields implement `IDisposable`; NUnit1032 expects a
-`[OneTimeTearDown]` because it cannot see the assembly-level life cycle.
+Parameterized tests need `[Test]` plus one `[Arguments(...)]` per case; data sources use
+`[MethodDataSource]`. Per-test setup and teardown use `[Before(Test)]` and `[After(Test)]`.
 
 ## NSubstitute Patterns
 
@@ -123,7 +125,7 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `CliIntegrationFixture`: CLI integration with composition root
 - `Verify.That<T>()`: NSubstitute matcher with assertions
 - `TestableLogger`: Capture log messages
-- `NUnitAnsiConsole`: Console output verification
+- `TestAnsiConsole`: Console output verification
 - `MockFileSystem`: Filesystem testing (avoid absolute paths)
 - Factory classes: `NewCf`, `NewConfig`, `NewQp`, etc.
 
@@ -177,7 +179,7 @@ only to manufacture an exception can hang on one platform. `Recyclarr.Core.Tests
 
 - Unit and integration tests: `dotnet test` at solution level.
 - One project: pass its path, such as `tests/Recyclarr.Cli.Tests/`.
-- One test: `--filter "FullyQualifiedName~TestMethodName"`.
+- One test: `--treenode-filter "/*/*/*/TestMethodName"` (path: assembly/namespace/class/method).
 - E2E tests (requires Docker services): `./scripts/run-e2e-tests.sh`.
 
 ## Coverage Analysis

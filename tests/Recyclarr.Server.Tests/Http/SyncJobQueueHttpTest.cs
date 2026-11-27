@@ -26,7 +26,7 @@ internal sealed class SyncJobQueueHttpTest : ServerHttpFixture
         builder.RegisterInstance(_orchestrator).As<ISyncOrchestrator>();
     }
 
-    [SetUp]
+    [Before(Test)]
     public void SetUp()
     {
         Fs.AddFile(

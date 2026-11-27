@@ -655,10 +655,11 @@ internal sealed class QualityProfileSyncOperationTest
             );
     }
 
-    [TestCase(HttpStatusCode.BadRequest)]
-    [TestCase(HttpStatusCode.NotFound)]
-    [TestCase(HttpStatusCode.Conflict)]
-    [TestCase(HttpStatusCode.UnprocessableEntity)]
+    [Test]
+    [Arguments(HttpStatusCode.BadRequest)]
+    [Arguments(HttpStatusCode.NotFound)]
+    [Arguments(HttpStatusCode.Conflict)]
+    [Arguments(HttpStatusCode.UnprocessableEntity)]
     public async Task Apply_continues_after_create_rejection_and_saves_acknowledged_state(
         HttpStatusCode statusCode
     )

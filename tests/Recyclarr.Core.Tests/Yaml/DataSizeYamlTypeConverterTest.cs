@@ -6,12 +6,11 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Recyclarr.Core.Tests.Yaml;
 
-[TestFixture]
 internal sealed class DataSizeYamlTypeConverterTest
 {
     private IDeserializer _deserializer = null!;
 
-    [SetUp]
+    [Before(Test)]
     public void Setup()
     {
         _deserializer = new DeserializerBuilder()

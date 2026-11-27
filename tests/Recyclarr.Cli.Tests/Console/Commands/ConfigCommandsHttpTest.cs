@@ -202,8 +202,9 @@ internal sealed class ConfigCommandsHttpTest : CliServerHttpFixture
         path.Exists.Should().BeFalse();
     }
 
-    [TestCase("radarr\thd-bluray-web\tHD Bluray + WEB", "radarr-inc")]
-    [TestCase("radarr\tradarr-inc", "hd-bluray-web", "-i")]
+    [Test]
+    [Arguments("radarr\thd-bluray-web\tHD Bluray + WEB", "radarr-inc")]
+    [Arguments("radarr\tradarr-inc", "hd-bluray-web", "-i")]
     public async Task List_templates_raw_prints_service_and_id(
         string expectedLine,
         string unexpected,

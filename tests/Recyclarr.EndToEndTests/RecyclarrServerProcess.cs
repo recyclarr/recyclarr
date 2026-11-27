@@ -1,13 +1,13 @@
 using System.Text.Json;
 using CliWrap;
-using NUnit.Framework;
 
 namespace Recyclarr.EndToEndTests;
 
 /// <summary>
 /// A running published <c>recyclarr-server</c> process. The server loads configuration once at
 /// startup (ADR-019), so a test that needs different configuration stops this process and starts
-/// a new one. Server output is streamed to the test progress log as it arrives.
+/// a new one. Server output goes to the console as it arrives; TUnit attributes it to the test
+/// that started the process.
 /// </summary>
 internal sealed class RecyclarrServerProcess : IAsyncDisposable
 {
@@ -79,7 +79,7 @@ internal sealed class RecyclarrServerProcess : IAsyncDisposable
     // Redirected stdout makes the server log JSON lines; the API address line marks readiness.
     private static void OnOutput(string line, TaskCompletionSource<int> readyPort)
     {
-        TestContext.Progress.WriteLine($"[server] {line}");
+        Console.Out.WriteLine($"[server] {line}");
         if (!line.Contains(ListeningTemplate, StringComparison.Ordinal))
         {
             return;
@@ -92,7 +92,7 @@ internal sealed class RecyclarrServerProcess : IAsyncDisposable
 
     private static void OnErrorOutput(string line)
     {
-        TestContext.Progress.WriteLine($"[server:stderr] {line}");
+        Console.Error.WriteLine($"[server:stderr] {line}");
     }
 
     /// <summary>

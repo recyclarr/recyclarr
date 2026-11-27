@@ -7,9 +7,9 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Core.Tests.ServarrApi.CustomFormat;
 
-[TestFixture("radarr", "/api/v3")]
-[TestFixture("sonarr-v3", "/api/v3")]
-[TestFixture("sonarr-v5", "/api/v5")]
+[Arguments("radarr", "/api/v3")]
+[Arguments("sonarr-v3", "/api/v3")]
+[Arguments("sonarr-v5", "/api/v5")]
 internal sealed class CustomFormatGatewayTest(string api, string apiRoot) : ServarrHttpTestFixture
 {
     private string CustomFormatPath => $"{apiRoot}/customformat";

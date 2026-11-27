@@ -5,10 +5,11 @@ namespace Recyclarr.Core.Tests.Pipelines.CustomFormat;
 
 internal sealed class CustomFormatPipelineResultTest
 {
-    [TestCase(0, 0, SyncResultStatus.Succeeded)]
-    [TestCase(1, 0, SyncResultStatus.Succeeded)]
-    [TestCase(1, 1, SyncResultStatus.Partial)]
-    [TestCase(0, 1, SyncResultStatus.Failed)]
+    [Test]
+    [Arguments(0, 0, SyncResultStatus.Succeeded)]
+    [Arguments(1, 0, SyncResultStatus.Succeeded)]
+    [Arguments(1, 1, SyncResultStatus.Partial)]
+    [Arguments(0, 1, SyncResultStatus.Failed)]
     public void Status_derives_from_resource_completion(
         int completed,
         int incomplete,

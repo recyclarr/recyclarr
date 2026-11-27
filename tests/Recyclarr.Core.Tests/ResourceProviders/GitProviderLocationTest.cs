@@ -19,7 +19,7 @@ internal sealed class GitProviderLocationTest
     private IDirectoryInfo _origin = null!;
     private GitProviderLocation _sut = null!;
 
-    [SetUp]
+    [Before(Test)]
     public void SetUp()
     {
         _root = _fs.DirectoryInfo.New(Directory.CreateTempSubdirectory("recyclarr-git-").FullName);
@@ -49,7 +49,7 @@ internal sealed class GitProviderLocationTest
         );
     }
 
-    [TearDown]
+    [After(Test)]
     public void TearDown()
     {
         _root.DeleteReadOnlyDirectory();

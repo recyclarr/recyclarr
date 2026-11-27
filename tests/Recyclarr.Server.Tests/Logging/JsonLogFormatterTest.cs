@@ -14,10 +14,21 @@ internal sealed class JsonLogFormatterTest
     [Test]
     public void Event_is_one_json_line_with_rendered_message_and_properties()
     {
-        var line = WriteSingleLine(log =>
-            log.ForContext(LogProperty.Scope, "radarr")
-                .Warning("Synced {Count} items to {Instance}", 3, "movies")
-        );
+        // TUnit runs each test inside its own activity; this event must be written outside one.
+        var testActivity = Activity.Current;
+        Activity.Current = null;
+        string line;
+        try
+        {
+            line = WriteSingleLine(log =>
+                log.ForContext(LogProperty.Scope, "radarr")
+                    .Warning("Synced {Count} items to {Instance}", 3, "movies")
+            );
+        }
+        finally
+        {
+            Activity.Current = testActivity;
+        }
 
         using var json = JsonDocument.Parse(line);
         var root = json.RootElement;

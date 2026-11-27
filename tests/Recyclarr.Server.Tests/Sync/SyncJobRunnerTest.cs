@@ -72,9 +72,10 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
             );
     }
 
-    [TestCase(SyncResultStatus.Succeeded, SyncJobStatus.Succeeded)]
-    [TestCase(SyncResultStatus.Partial, SyncJobStatus.Partial)]
-    [TestCase(SyncResultStatus.Failed, SyncJobStatus.Failed)]
+    [Test]
+    [Arguments(SyncResultStatus.Succeeded, SyncJobStatus.Succeeded)]
+    [Arguments(SyncResultStatus.Partial, SyncJobStatus.Partial)]
+    [Arguments(SyncResultStatus.Failed, SyncJobStatus.Failed)]
     public async Task Returned_result_is_retained_and_determines_job_status(
         SyncResultStatus resultStatus,
         SyncJobStatus expected

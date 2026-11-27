@@ -95,8 +95,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             );
     }
 
-    [TestCase(false, ExitStatus.Succeeded)]
-    [TestCase(true, ExitStatus.Failed)]
+    [Test]
+    [Arguments(false, ExitStatus.Succeeded)]
+    [Arguments(true, ExitStatus.Failed)]
     public async Task Unavailable_server_diagnostics_leave_results_and_exit_status_unchanged(
         bool syncFails,
         ExitStatus expected
@@ -1030,7 +1031,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 Api,
                 diagnostics ?? Connection.Diagnostics,
                 request ?? new CreateSyncJobRequest(),
-                TestContext.CurrentContext.CancellationToken
+                TestContext.Current!.Execution.CancellationToken
             );
     }
 
@@ -1045,7 +1046,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         using var response = await Api.JobsGet(
             status: null,
             trigger: null,
-            TestContext.CurrentContext.CancellationToken
+            TestContext.Current!.Execution.CancellationToken
         );
 
         response.IsSuccessful.Should().BeTrue();

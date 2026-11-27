@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Net.Http.Headers;
@@ -33,7 +34,13 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     private static readonly Uri ServerAddress = new("http://localhost");
 
+    [SuppressMessage(
+        "Usage",
+        "TUnit0023:Member should be disposed within a clean up method",
+        Justification = "Disposed by the Dispose(bool) override, which TUnit calls through Dispose"
+    )]
     private readonly CliContainer _cli;
+
     private readonly Lazy<ServerConnection> _connection;
 
     protected CliServerHttpFixture()

@@ -39,7 +39,7 @@ internal sealed class ResourceCoordinatorTest : ServerIntegrationFixture
         builder.RegisterType<FakeGitRemote.Repository>().As<IGitRepository>();
     }
 
-    [SetUp]
+    [Before(Test)]
     public void SetUp()
     {
         // No config-templates provider is added by default, so includes need a configured one.

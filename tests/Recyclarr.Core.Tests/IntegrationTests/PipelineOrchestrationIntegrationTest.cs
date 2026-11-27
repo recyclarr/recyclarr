@@ -138,8 +138,9 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         result.Should().Contain(x => x.Status == SyncResultStatus.Blocked);
     }
 
-    [TestCase(SyncResultStatus.Partial)]
-    [TestCase(SyncResultStatus.Failed)]
+    [Test]
+    [Arguments(SyncResultStatus.Partial)]
+    [Arguments(SyncResultStatus.Failed)]
     public async Task Unsuccessful_structured_result_blocks_dependents(SyncResultStatus status)
     {
         var cfOp = CreateStubOperation(PipelineType.CustomFormat, [], structuredStatus: status);

@@ -8,7 +8,7 @@ internal abstract class GuideHttpFixture : ServerHttpFixture
 {
     private IDirectoryInfo GuideRoot => Fs.CurrentDirectory().SubDirectory("guide");
 
-    [SetUp]
+    [Before(Test)]
     public void AddLocalGuideProvider()
     {
         Fs.AddFile(

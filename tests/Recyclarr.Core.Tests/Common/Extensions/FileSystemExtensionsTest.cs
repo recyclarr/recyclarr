@@ -14,8 +14,9 @@ internal sealed class FileSystemExtensionsTest
         result.Should().BeNull();
     }
 
-    [TestCase("test.yml")]
-    [TestCase("test.yaml")]
+    [Test]
+    [Arguments("test.yml")]
+    [Arguments("test.yaml")]
     public void Return_non_null_when_single_yaml_file_exists(string yamlFilename)
     {
         var fs = new MockFileSystem();

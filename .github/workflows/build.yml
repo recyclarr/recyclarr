@@ -80,9 +80,7 @@ jobs:
         uses: $/.github/actions/setup-dotnet
 
       - name: Test
-        run: >-
-          dotnet test -c Release
-          --filter FullyQualifiedName!~Recyclarr.EndToEndTests
+        run: dotnet test -c Release
 
   #############################################
   build-win:

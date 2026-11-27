@@ -49,11 +49,12 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
         "quality_definition:\n      type: movie\n      qualities:\n        - name: X\n          min: ";
     private const string PropersSection = "media_management:\n      propers_and_repacks: ";
 
-    [TestCase(SizeSection + "big", ExpectedResult = false)]
-    [TestCase(SizeSection + "unlimited", ExpectedResult = true)]
-    [TestCase(PropersSection + "sometimes", ExpectedResult = false)]
-    [TestCase(PropersSection + "do_not_prefer", ExpectedResult = true)]
-    public bool Value_fields_load_only_with_valid_values(string section)
+    [Test]
+    [Arguments(SizeSection + "big", false)]
+    [Arguments(SizeSection + "unlimited", true)]
+    [Arguments(PropersSection + "sometimes", false)]
+    [Arguments(PropersSection + "do_not_prefer", true)]
+    public void Value_fields_load_only_with_valid_values(string section, bool loads)
     {
         Fs.AddFile(
             Paths.ConfigDirectory.File("recyclarr.yml"),
@@ -68,6 +69,8 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
             )
         );
 
-        return Resolve<ServerConfigLoader>().LoadServerConfiguration().Configuration is not null;
+        var configuration = Resolve<ServerConfigLoader>().LoadServerConfiguration().Configuration;
+
+        (configuration is not null).Should().Be(loads);
     }
 }

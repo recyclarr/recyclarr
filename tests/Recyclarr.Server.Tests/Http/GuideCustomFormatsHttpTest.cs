@@ -146,8 +146,9 @@ internal sealed class GuideCustomFormatsHttpTest : GuideHttpFixture
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [TestCase("lidarr")]
-    [TestCase("999")]
+    [Test]
+    [Arguments("lidarr")]
+    [Arguments("999")]
     public async Task Invalid_service_returns_bad_request(string service)
     {
         using var client = CreateClient();

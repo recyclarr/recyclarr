@@ -2,10 +2,12 @@
 # Runs E2E tests and prints the log file path for analysis.
 log_file=/tmp/e2e-tests.log
 
-dotnet test Recyclarr.slnx \
-    --filter "Category=E2E" \
-    --logger "console;verbosity=normal" \
-    -v q >"$log_file" 2>&1
+# `dotnet test` skips the E2E project, so run its test executable directly. The tests are
+# [Explicit]; a filter that selects only them is what lets them run.
+dotnet run --project tests/Recyclarr.EndToEndTests -- \
+    --treenode-filter "/*/*/*/*" \
+    --minimum-expected-tests 1 \
+    --output detailed >"$log_file" 2>&1
 exit_code=$?
 
 if ((exit_code == 0)); then

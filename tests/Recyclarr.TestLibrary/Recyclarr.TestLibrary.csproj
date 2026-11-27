@@ -5,7 +5,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="NSubstitute" />
-    <PackageReference Include="NUnit" />
     <PackageReference Include="Serilog.Sinks.TextWriter" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />

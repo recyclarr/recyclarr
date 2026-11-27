@@ -1,5 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Needs Docker, so `dotnet test` skips it: it is not a testing platform application. It still
+    builds as a runnable test executable; scripts/run-e2e-tests.sh runs it with `dotnet run`.
+  -->
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
+    <GenerateSelfRegisteredExtensions>true</GenerateSelfRegisteredExtensions>
+  </PropertyGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>RecyclarrRepositoryRoot</_Parameter1>
@@ -10,15 +21,12 @@
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="CliWrap" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.Analyzers" />
-    <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Refit.Reflection" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
     <PackageReference Include="Testcontainers" />
+    <PackageReference Include="TUnit.Engine" />
   </ItemGroup>
 
   <ItemGroup>

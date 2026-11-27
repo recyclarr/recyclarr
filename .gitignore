@@ -3,6 +3,9 @@ bin/
 obj/
 publish/
 
+# Test run reports (.html, .json) from `dotnet test`
+TestResults/
+
 # Refitter-generated API clients
 *.g.cs
 

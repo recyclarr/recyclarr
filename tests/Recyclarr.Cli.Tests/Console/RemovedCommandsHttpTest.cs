@@ -8,12 +8,13 @@ namespace Recyclarr.Cli.Tests.Console;
 /// </summary>
 internal sealed class RemovedCommandsHttpTest : CliServerHttpFixture
 {
-    [TestCase("#config-commands-removed", "config", "list", "local")]
-    [TestCase("#migrate-removed", "migrate")]
-    [TestCase("#state-repair-removed", "state", "repair", "--adopt")]
-    [TestCase("#sync-config-removed", "sync", "--config", "a.yml")]
-    [TestCase("#sync-config-removed", "sync", "radarr", "-c", "a.yml")]
-    [TestCase("#sync-config-removed", "sync", "--config=a.yml")]
+    [Test]
+    [Arguments("#config-commands-removed", "config", "list", "local")]
+    [Arguments("#migrate-removed", "migrate")]
+    [Arguments("#state-repair-removed", "state", "repair", "--adopt")]
+    [Arguments("#sync-config-removed", "sync", "--config", "a.yml")]
+    [Arguments("#sync-config-removed", "sync", "radarr", "-c", "a.yml")]
+    [Arguments("#sync-config-removed", "sync", "--config=a.yml")]
     public async Task Removed_command_line_fails_with_guidance(string anchor, params string[] args)
     {
         var exitCode = await RunCliAsync(args);

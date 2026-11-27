@@ -27,11 +27,11 @@ def run_coverage() -> int:
         [
             "dotnet",
             "test",
-            "--collect:XPlat Code Coverage;Format=json",
+            "--coverlet",
+            "--coverlet-output-format",
+            "json",
             "--results-directory",
             str(RESULTS_DIR),
-            "-v",
-            "q",
         ],
         capture_output=True,
         text=True,
@@ -47,7 +47,7 @@ def run_coverage() -> int:
 
 def get_coverage_data() -> dict[str, dict[int, int]]:
     """Load and merge coverage from all JSON files, taking max hit count per line."""
-    json_files = list(RESULTS_DIR.rglob("coverage.json"))
+    json_files = list(RESULTS_DIR.rglob("coverage.*.json"))
     if not json_files:
         print("No coverage files found. Run with --run first.", file=sys.stderr)
         sys.exit(1)

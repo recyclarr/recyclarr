@@ -58,7 +58,7 @@ The CLI MUST NOT reference Core. Solution is SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
-- Testing: NUnit 4 + NSubstitute + parallel execution
+- Testing: TUnit + NSubstitute + parallel execution
 - CLI framework: `Spectre.Console`. Dotnet tools in `.config/dotnet-tools.json`.
 
 ## Code Review Comments
@@ -249,7 +249,8 @@ log.Information(message);
 
 ## Tooling Requirements
 
-- CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
+- CSharpier is the only code formatter; do not format code with `dotnet format` or other tools.
+  `dotnet format analyzers` may apply analyzer code fixes; run CSharpier afterward.
 - MUST run `pre-commit run --files <file1> <file2> ...` for all changes
 - Gitignore: add a pattern only for output this repository's tools produce; OS and editor files
   belong in each developer's global excludes. Ignore by file pattern (`*.pyc`). Use a directory

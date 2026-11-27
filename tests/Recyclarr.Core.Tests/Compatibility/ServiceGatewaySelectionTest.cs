@@ -73,8 +73,9 @@ internal sealed class ServiceGatewaySelectionTest : CoreIntegrationTestFixture
 
     // Sonarr v5 has no quality definition gateway, so building the pipeline executor must not
     // require one.
-    [TestCase(ServiceApiTarget.SonarrV3)]
-    [TestCase(ServiceApiTarget.SonarrV5)]
+    [Test]
+    [Arguments(ServiceApiTarget.SonarrV3)]
+    [Arguments(ServiceApiTarget.SonarrV5)]
     public void Pipeline_executor_resolves_for_every_sonarr_target(ServiceApiTarget target)
     {
         using var instance = ResolveWithConfig<ILifetimeScope>(NewConfig.Sonarr());

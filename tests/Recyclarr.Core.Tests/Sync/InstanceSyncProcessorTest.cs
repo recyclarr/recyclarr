@@ -77,11 +77,12 @@ internal sealed class InstanceSyncProcessorTest
         result.Failure.Should().BeOfType<SyncStateUnavailableFailure>();
     }
 
-    [TestCase(HttpStatusCode.Found, typeof(ServiceRedirectedFailure))]
-    [TestCase(HttpStatusCode.Unauthorized, typeof(ServiceUnauthenticatedFailure))]
-    [TestCase(HttpStatusCode.Forbidden, typeof(ServiceUnauthorizedFailure))]
-    [TestCase(HttpStatusCode.TooManyRequests, typeof(ServiceRateLimitedFailure))]
-    [TestCase(HttpStatusCode.InternalServerError, typeof(ServiceUnavailableFailure))]
+    [Test]
+    [Arguments(HttpStatusCode.Found, typeof(ServiceRedirectedFailure))]
+    [Arguments(HttpStatusCode.Unauthorized, typeof(ServiceUnauthenticatedFailure))]
+    [Arguments(HttpStatusCode.Forbidden, typeof(ServiceUnauthorizedFailure))]
+    [Arguments(HttpStatusCode.TooManyRequests, typeof(ServiceRateLimitedFailure))]
+    [Arguments(HttpStatusCode.InternalServerError, typeof(ServiceUnavailableFailure))]
     public async Task Http_failure_is_classified_without_response_details(
         HttpStatusCode statusCode,
         Type expectedType

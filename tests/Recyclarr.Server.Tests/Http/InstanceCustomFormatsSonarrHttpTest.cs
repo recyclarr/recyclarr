@@ -9,8 +9,8 @@ using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
 namespace Recyclarr.Server.Tests.Http;
 
 // Instance calls detect the Sonarr version first, so each major reaches its own API generation.
-[TestFixture("4.0.20.3012", false)]
-[TestFixture("5.0.0.2569", true)]
+[Arguments("4.0.20.3012", false)]
+[Arguments("5.0.0.2569", true)]
 internal sealed class InstanceCustomFormatsSonarrHttpTest(string version, bool expectV5)
     : ServerHttpFixture
 {

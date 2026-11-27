@@ -13,9 +13,10 @@ internal sealed class TemplateMetadataTest
         return fs;
     }
 
-    [TestCase("hd-bluray-web")]
-    [TestCase("anime_remux_1080p")]
-    [TestCase("my-template-2")]
+    [Test]
+    [Arguments("hd-bluray-web")]
+    [Arguments("anime_remux_1080p")]
+    [Arguments("my-template-2")]
     public void Valid_id_is_accepted(string id)
     {
         var fs = CreateFs();
@@ -27,8 +28,9 @@ internal sealed class TemplateMetadataTest
         result.Id.Should().Be(id);
     }
 
-    [TestCase("templates/valid.yml")]
-    [TestCase("valid.yml")]
+    [Test]
+    [Arguments("templates/valid.yml")]
+    [Arguments("valid.yml")]
     public void Valid_template_path_is_accepted(string template)
     {
         var fs = CreateFs();
@@ -40,9 +42,10 @@ internal sealed class TemplateMetadataTest
         result.TemplateFile.FullName.Should().StartWith(root.FullName);
     }
 
-    [TestCase("../../etc/passwd")]
-    [TestCase("../outside")]
-    [TestCase("templates/../../outside")]
+    [Test]
+    [Arguments("../../etc/passwd")]
+    [Arguments("../outside")]
+    [Arguments("templates/../../outside")]
     public void Template_path_traversal_throws(string template)
     {
         var fs = CreateFs();
@@ -70,11 +73,12 @@ internal sealed class TemplateMetadataTest
             .WithMessage("*absolute or contains path traversal*");
     }
 
-    [TestCase("../escape")]
-    [TestCase("sub/dir")]
-    [TestCase("back\\slash")]
-    [TestCase("has spaces")]
-    [TestCase("has.dots")]
+    [Test]
+    [Arguments("../escape")]
+    [Arguments("sub/dir")]
+    [Arguments("back\\slash")]
+    [Arguments("has spaces")]
+    [Arguments("has.dots")]
     public void Id_with_invalid_characters_throws(string id)
     {
         var fs = CreateFs();

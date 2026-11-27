@@ -8,23 +8,32 @@ namespace Recyclarr.Core.Tests.Sync.Results;
 // Refit exceptions against a loopback listener.
 internal sealed class OperationalFailureClassifierTest
 {
-    private static IEnumerable<TestCaseData> ExpectedFailures()
+    public static IEnumerable<TestDataRow<Func<(Exception, Type)>>> ExpectedFailures()
     {
-        yield return new TestCaseData(
-            new ServiceIncompatibilityException("incompatible"),
-            typeof(ServiceIncompatibleFailure)
-        ).SetName("Incompatible service");
-        yield return new TestCaseData(
-            new SyncStateUnavailableException(new IOException("unavailable")),
-            typeof(SyncStateUnavailableFailure)
-        ).SetName("Sync state unavailable");
-        yield return new TestCaseData(
-            new HttpRequestException("unreachable"),
-            typeof(ServiceUnavailableFailure)
-        ).SetName("Unreachable service");
+        yield return new(
+            () =>
+                (
+                    new ServiceIncompatibilityException("incompatible"),
+                    typeof(ServiceIncompatibleFailure)
+                ),
+            DisplayName: "Incompatible service"
+        );
+        yield return new(
+            () =>
+                (
+                    new SyncStateUnavailableException(new IOException("unavailable")),
+                    typeof(SyncStateUnavailableFailure)
+                ),
+            DisplayName: "Sync state unavailable"
+        );
+        yield return new(
+            () => (new HttpRequestException("unreachable"), typeof(ServiceUnavailableFailure)),
+            DisplayName: "Unreachable service"
+        );
     }
 
-    [TestCaseSource(nameof(ExpectedFailures))]
+    [Test]
+    [MethodDataSource(nameof(ExpectedFailures))]
     public void Expected_failure_is_classified(Exception exception, Type expectedType)
     {
         OperationalFailureClassifier.Classify(exception).Should().BeOfType(expectedType);

@@ -7,12 +7,13 @@ namespace Recyclarr.Server.Tests.OutboundHttp;
 
 internal sealed class HttpLoggingHandlerTest
 {
-    [TestCase(
+    [Test]
+    [Arguments(
         "<h2>Bad Request - Invalid Hostname</h2>",
         "sonarr.example.com",
-        TestName = "Host rejection names the hostname"
+        DisplayName = "Host rejection names the hostname"
     )]
-    [TestCase("""[{"errorMessage":"Must be unique"}]""", null, TestName = "Other 400 does not")]
+    [Arguments("""[{"errorMessage":"Must be unique"}]""", null, DisplayName = "Other 400 does not")]
     public async Task Host_rejection_warning(string body, string? expectedHost)
     {
         var log = new RecordingLogger();

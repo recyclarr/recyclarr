@@ -47,18 +47,19 @@ internal sealed class UnreadPositionalPropertyAnalyzerTest
         flagged.Should().Equal("Min");
     }
 
-    [TestCase("var size = new Size(1, 2); return size.Min + size.Max;")]
-    [TestCase("var (min, max) = new Size(1, 2); return min + max;")]
-    [TestCase("var ((min, max), n) = (new Size(1, 2), 3); return min + max + n;")]
-    [TestCase("new Size(1, 2).Deconstruct(out var min, out var max); return min + max;")]
-    [TestCase(
+    [Test]
+    [Arguments("var size = new Size(1, 2); return size.Min + size.Max;")]
+    [Arguments("var (min, max) = new Size(1, 2); return min + max;")]
+    [Arguments("var ((min, max), n) = (new Size(1, 2), 3); return min + max + n;")]
+    [Arguments("new Size(1, 2).Deconstruct(out var min, out var max); return min + max;")]
+    [Arguments(
         "var t = 0; foreach (var ((min, max), n) in new List<(Size, int)>()) { t += min; } return t;"
     )]
-    [TestCase("return new Size(1, 2) is (1, _);")]
-    [TestCase(
+    [Arguments("return new Size(1, 2) is (1, _);")]
+    [Arguments(
         "var total = 0; foreach (var (min, max) in new List<Size>()) { total += min; } return total;"
     )]
-    [TestCase(
+    [Arguments(
         "return (System.Func<IAsyncEnumerable<Size>, System.Threading.Tasks.Task<int>>)Sum; "
             + "async System.Threading.Tasks.Task<int> Sum(IAsyncEnumerable<Size> xs) { var t = 0; "
             + "await foreach (var (min, max) in xs) { t += min + max; } return t; }"

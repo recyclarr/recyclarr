@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using CliWrap;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using NUnit.Framework;
 using Recyclarr.Client.V1;
 using Refit;
 
@@ -103,13 +102,11 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     /// server. Call <see cref="StartServerAsync"/> before syncing.
     /// </summary>
     public static async Task<RecyclarrTestHarness> StartAsync(
-        TestContext testContext,
         string sonarrImageTag,
-        bool startRadarr
+        bool startRadarr,
+        CancellationToken ct
     )
     {
-        var ct = testContext.CancellationToken;
-
         var guid = Guid.NewGuid();
         var publishPath = FileSystem.DirectoryInfo.New(
             FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), $"recyclarr-e2e-publish-{guid}")
@@ -121,7 +118,7 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         appDataDir.Create();
 
         var fixturesDir = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(testContext.TestDirectory, "Fixtures")
+            FileSystem.Path.Combine(AppContext.BaseDirectory, "Fixtures")
         );
         await SetUpFixtures(appDataDir, fixturesDir, ct);
 

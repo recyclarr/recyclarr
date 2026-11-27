@@ -5,7 +5,6 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Core.Tests.Yaml;
 
-[TestFixture]
 internal sealed class DeprecatedPropertyInspectorTest
 {
     private static readonly Dictionary<string, RemovedPropertyEntry> TestProperties = new(

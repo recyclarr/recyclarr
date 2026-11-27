@@ -24,7 +24,8 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
         Fs.AddFile(Paths.ConfigDirectory.File("recyclarr.yml"), new MockFileData(yaml));
     }
 
-    [TestCase(
+    [Test]
+    [Arguments(
         """
         radarr:
           invalid-instance:
@@ -32,9 +33,9 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             api_key: ""
         """,
         "Invalid instance {Instance}: {Message}",
-        TestName = "Invalid instance stops startup"
+        DisplayName = "Invalid instance stops startup"
     )]
-    [TestCase(
+    [Arguments(
         """
         radarr:
           duplicate-instance:
@@ -46,9 +47,9 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             api_key: second
         """,
         "Duplicate instance: {Instance}",
-        TestName = "Duplicate instance stops startup"
+        DisplayName = "Duplicate instance stops startup"
     )]
-    [TestCase(
+    [Arguments(
         """
         radarr:
           split-one:
@@ -59,9 +60,9 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             api_key: second
         """,
         "Instances {Instances} share the same base URL: {BaseUrl}",
-        TestName = "Split instances stop startup"
+        DisplayName = "Split instances stop startup"
     )]
-    [TestCase(
+    [Arguments(
         """
         radarr:
           parse-failure:
@@ -70,7 +71,7 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             unknown_property: invalid
         """,
         "Config parsing failed in {File}: {Message}",
-        TestName = "Parse failure stops startup"
+        DisplayName = "Parse failure stops startup"
     )]
     public void Invalid_configuration_stops_startup_and_logs_the_problem(
         string yaml,
@@ -106,30 +107,31 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             );
     }
 
-    [TestCase(
+    [Test]
+    [Arguments(
         "server:\n  port: [1\n",
         "settings.yml line 3, column 1: invalid YAML",
-        TestName = "Invalid settings YAML stops startup"
+        DisplayName = "Invalid settings YAML stops startup"
     )]
-    [TestCase(
+    [Arguments(
         "repository:\n  clone_url: http://x\n",
         "settings.yml line 1, column 1: The `repository` setting has been removed",
-        TestName = "Removed setting stops startup"
+        DisplayName = "Removed setting stops startup"
     )]
-    [TestCase(
+    [Arguments(
         "server:\n  prot: 9000\n",
         "settings.yml line 2, column 3: unknown setting 'server.prot'",
-        TestName = "Unknown setting stops startup"
+        DisplayName = "Unknown setting stops startup"
     )]
-    [TestCase(
+    [Arguments(
         "server:\n  schedule:\n    cron: ''\n",
         "settings.yml line 3, column 5: `server.schedule.cron` must not be empty",
-        TestName = "Invalid setting value stops startup"
+        DisplayName = "Invalid setting value stops startup"
     )]
-    [TestCase(
+    [Arguments(
         "server:\n  sync_timeout: 0\n",
         "settings.yml line 2, column 3: `server.sync_timeout` must be at least 1 minute",
-        TestName = "Sync timeout below one minute stops startup"
+        DisplayName = "Sync timeout below one minute stops startup"
     )]
     public void Invalid_settings_stop_startup_with_their_position(string yaml, string expected)
     {
@@ -148,12 +150,13 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
     }
 
     // Fail closed: a server without a valid key would serve its API to anyone (ADR-027).
-    [TestCase(null, null, "RECYCLARR_API_KEY_FILE", TestName = "Missing key stops startup")]
-    [TestCase("", null, "RECYCLARR_API_KEY_FILE", TestName = "Empty variable stops startup")]
-    [TestCase(null, "", "at least 32", TestName = "Empty key file stops startup")]
-    [TestCase("short-key", null, "at least 32", TestName = "Short key stops startup")]
-    [TestCase(null, "short-key", "at least 32", TestName = "Short key file stops startup")]
-    [TestCase(ApiKey, ApiKey, "both set", TestName = "Variable and file together stop startup")]
+    [Test]
+    [Arguments(null, null, "RECYCLARR_API_KEY_FILE", DisplayName = "Missing key stops startup")]
+    [Arguments("", null, "RECYCLARR_API_KEY_FILE", DisplayName = "Empty variable stops startup")]
+    [Arguments(null, "", "at least 32", DisplayName = "Empty key file stops startup")]
+    [Arguments("short-key", null, "at least 32", DisplayName = "Short key stops startup")]
+    [Arguments(null, "short-key", "at least 32", DisplayName = "Short key file stops startup")]
+    [Arguments(ApiKey, ApiKey, "both set", DisplayName = "Variable and file together stop startup")]
     public void Invalid_server_api_key_stops_startup(
         string? key,
         string? fileKey,
@@ -224,9 +227,10 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
             );
     }
 
-    [TestCase("CRON_SCHEDULE", "server.schedule.cron", "#cron-schedule")]
-    [TestCase("RECYCLARR_CREATE_CONFIG", "configuration files", "#docker-env-removed")]
-    [TestCase("RECYCLARR_LOG_LEVEL", "debug logs", "#docker-env-removed")]
+    [Test]
+    [Arguments("CRON_SCHEDULE", "server.schedule.cron", "#cron-schedule")]
+    [Arguments("RECYCLARR_CREATE_CONFIG", "configuration files", "#docker-env-removed")]
+    [Arguments("RECYCLARR_LOG_LEVEL", "debug logs", "#docker-env-removed")]
     public async Task Removed_v8_variable_is_warned_about_and_startup_continues(
         string variable,
         string replacement,

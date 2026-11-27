@@ -135,9 +135,10 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.Content?.SkippedBecause?.JobId.Should().Be(active.Id.Value);
     }
 
-    [TestCase("status=5")]
-    [TestCase("trigger=5")]
-    [TestCase("trigger=bogus")]
+    [Test]
+    [Arguments("status=5")]
+    [Arguments("trigger=5")]
+    [Arguments("trigger=bogus")]
     public async Task Job_list_filters_accept_only_names(string query)
     {
         using var client = CreateClient();
@@ -149,8 +150,9 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [TestCase(SyncJobStatus.Pending)]
-    [TestCase(SyncJobStatus.Running)]
+    [Test]
+    [Arguments(SyncJobStatus.Pending)]
+    [Arguments(SyncJobStatus.Running)]
     public async Task Active_job_answers_ok_with_its_status_and_retry_after(SyncJobStatus status)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();

@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using AwesomeAssertions.Execution;
+using TUnit.Core.Enums;
 
 namespace Recyclarr.Server.Tests;
 
@@ -30,7 +32,7 @@ internal sealed class ServerProcessTest
     private string? _home;
     private IDirectoryInfo ConfigDirectory => _root.SubDirectory("config");
 
-    [SetUp]
+    [Before(Test)]
     public void CreateRoot()
     {
         // A fixed management port would collide with parallel tests and a developer's server.
@@ -74,7 +76,7 @@ internal sealed class ServerProcessTest
             );
     }
 
-    [TearDown]
+    [After(Test)]
     public void DeleteRoot()
     {
         _root.Delete(recursive: true);
@@ -101,7 +103,7 @@ internal sealed class ServerProcessTest
     /// server to report its exit code). The server must not wait out the host shutdown timeout.
     /// </summary>
     [Test]
-    [Platform(Exclude = "Win", Reason = "Sends SIGINT with the kill command")]
+    [ExcludeOn(OS.Windows)] // Sends SIGINT with the kill command
     public async Task A_server_with_an_open_lifeline_stops_promptly_on_interrupt()
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}");
@@ -239,10 +241,11 @@ internal sealed class ServerProcessTest
     /// Probes and metrics are anonymous, so they are served only on the management port, and the
     /// API only on its own port (ADR-029).
     /// </summary>
-    [TestCase("/livez", true)]
-    [TestCase("/readyz", true)]
-    [TestCase("/metrics", true)]
-    [TestCase("/openapi/v1.json", false)]
+    [Test]
+    [Arguments("/livez", true)]
+    [Arguments("/readyz", true)]
+    [Arguments("/metrics", true)]
+    [Arguments("/openapi/v1.json", false)]
     public async Task Each_route_is_served_only_on_its_own_port(string path, bool management)
     {
         using var server = Start($"--parent-pid={Environment.ProcessId}");
@@ -385,8 +388,9 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("RECYCLARR_APP_DATA is no longer supported");
     }
 
-    [TestCase(0)]
-    [TestCase(70000)]
+    [Test]
+    [Arguments(0)]
+    [Arguments(70000)]
     public async Task An_out_of_range_management_port_stops_startup(int port)
     {
         _managementPort = port;
@@ -449,7 +453,7 @@ internal sealed class ServerProcessTest
             }
         }
 
-        Assert.Fail("The server exited before writing the expected line");
+        AssertionChain.GetOrCreate().FailWith("The server exited before writing the expected line");
         return "";
     }
 
@@ -560,7 +564,7 @@ internal sealed class ServerProcessTest
         catch (OperationCanceledException)
         {
             server.Kill(entireProcessTree: true);
-            Assert.Fail("The server did not exit");
+            AssertionChain.GetOrCreate().FailWith("The server did not exit");
         }
     }
 }

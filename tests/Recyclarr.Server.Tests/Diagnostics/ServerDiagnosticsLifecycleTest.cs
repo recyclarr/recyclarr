@@ -36,7 +36,7 @@ internal sealed class ServerDiagnosticsLifecycleTest : ServerIntegrationFixture
         builder.RegisterType<FakeGitRemote.Repository>().As<IGitRepository>();
     }
 
-    [SetUp]
+    [Before(Test)]
     public void SetUp()
     {
         Fs.AddFile(

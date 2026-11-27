@@ -2,24 +2,33 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AwesomeAssertions;
-using NUnit.Framework;
 using Recyclarr.Client.V1;
 using Refit;
 using SizeSnapshot = (double? Min, double? Max, double? Preferred);
 using RadarrApi = Recyclarr.Api.Radarr;
 using SonarrApi = Recyclarr.Api.Sonarr.V3;
 using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
+using TimeoutAttribute = TUnit.Core.TimeoutAttribute;
 
 namespace Recyclarr.EndToEndTests;
 
-// Sonarr `latest` is v4 (API v3); `develop` is v5 (API v5). Radarr runs with one fixture only.
-[TestFixture("latest", true, Category = "E2E")]
-[TestFixture("develop", false, Category = "E2E")]
-[Explicit, NonParallelizable]
-[FixtureLifeCycle(LifeCycle.SingleInstance)] // ordered tests share one harness per fixture
-internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr)
+[InheritsTests]
+[ClassDataSource<SonarrV4WithRadarrSession>(Shared = SharedType.PerClass)]
+internal sealed class SonarrV4SyncTests(SonarrV4WithRadarrSession session)
+    : RecyclarrSyncTests(session);
+
+[InheritsTests]
+[ClassDataSource<SonarrV5Session>(Shared = SharedType.PerClass)]
+internal sealed class SonarrV5SyncTests(SonarrV5Session session) : RecyclarrSyncTests(session);
+
+/// <summary>
+/// Ordered sync scenarios, run once per service variant. Each test continues from the service
+/// state the previous test left in the variant's shared <see cref="SyncSession"/>.
+/// </summary>
+[Explicit]
+[NotInParallel]
+internal abstract class RecyclarrSyncTests(SyncSession session)
 {
-    private const string MainConfig = "recyclarr.yml";
     private const string DeleteDisabledConfig = "recyclarr-delete-disabled.yml";
 
     private static readonly TimeSpan JobPollInterval = TimeSpan.FromMilliseconds(500);
@@ -30,42 +39,21 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
-    private RecyclarrTestHarness _harness = null!;
-    private bool _sonarrV5;
-    private IReadOnlyDictionary<string, SizeSnapshot> _unmanagedProfileSizesBeforeSync =
-        new Dictionary<string, SizeSnapshot>();
+    private RecyclarrTestHarness Harness => session.Harness;
 
-    [OneTimeSetUp]
-    public async Task OneTimeSetUp()
-    {
-        var context = TestContext.CurrentContext;
-        _harness = await RecyclarrTestHarness.StartAsync(context, sonarrImageTag, startRadarr);
-        await _harness.StartServerAsync(MainConfig, context.CancellationToken);
-
-        var status = await _harness
-            .SonarrApi<SonarrApi.ISystemApi>()
-            .Status(context.CancellationToken);
-        _sonarrV5 = new Version(status.Version!).Major >= 5;
-    }
-
-    [OneTimeTearDown]
-    public async Task OneTimeTearDown()
-    {
-        await _harness.DisposeAsync();
-    }
-
-    [Test, Order(1)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 1)]
+    [Timeout(60_000)]
     public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
-        if (_sonarrV5)
+        if (session.SonarrV5)
         {
-            _unmanagedProfileSizesBeforeSync = await GetHdtv1080PSizesByProfile(ct);
+            session.UnmanagedProfileSizesBeforeSync = await GetHdtv1080PSizesByProfile(ct);
         }
 
         await SyncSucceeds(ct);
 
-        if (_sonarrV5)
+        if (session.SonarrV5)
         {
             await VerifySonarrV5ProfileSizes(ct);
         }
@@ -76,20 +64,21 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         }
 
         await VerifySonarrState(ct);
-        if (_harness.HasRadarr)
+        if (Harness.HasRadarr)
         {
             await VerifyRadarrState(ct);
         }
     }
 
-    [Test, Order(2)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 2)]
+    [Timeout(60_000)]
     public async Task Order2_resync_is_idempotent(CancellationToken ct)
     {
         await SyncSucceeds(ct);
 
         var sonarrCfNames = (
-            await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
+            await Harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
         ).Select(cf => cf.Name);
         sonarrCfNames
             .Should()
@@ -98,13 +87,13 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
                 "CFs should be unchanged after re-sync"
             );
 
-        if (!_harness.HasRadarr)
+        if (!Harness.HasRadarr)
         {
             return;
         }
 
         var radarrCfNames = (
-            await _harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
+            await Harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
         )
             .Select(cf => cf.Name)
             .ToList();
@@ -126,17 +115,18 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .NotContain("E2E-GroupCF2", "excluded CF should remain absent after re-sync");
     }
 
-    [Test, Order(3)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 3)]
+    [Timeout(60_000)]
     public async Task Order3_resync_restores_renamed_custom_format(CancellationToken ct)
     {
-        var cfApi = _harness.SonarrApi<SonarrApi.ICustomFormatApi>();
+        var cfApi = Harness.SonarrApi<SonarrApi.ICustomFormatApi>();
 
         // Rename a CF directly in Sonarr (simulates manual edit or service-side change)
         var sonarrCfs = await cfApi.CustomformatGet(ct);
         var obfuscatedId = sonarrCfs.First(cf => cf.Name == "Obfuscated").Id!.Value;
         // Fetch full resource by ID (list endpoint returns minimal data insufficient for PUT)
-        var obfuscatedCf = await _harness
+        var obfuscatedCf = await Harness
             .SonarrApi<ISonarrCustomFormatByIdApi>()
             .CustomformatGet(obfuscatedId, ct);
         obfuscatedCf.Name = "Obfuscated-RENAMED";
@@ -164,11 +154,12 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         restoredCfs.Should().NotContain(cf => cf.Name == "Obfuscated-RENAMED");
     }
 
-    [Test, Order(4)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 4)]
+    [Timeout(60_000)]
     public async Task Order4_resync_recreates_deleted_custom_format(CancellationToken ct)
     {
-        var cfApi = _harness.SonarrApi<SonarrApi.ICustomFormatApi>();
+        var cfApi = Harness.SonarrApi<SonarrApi.ICustomFormatApi>();
 
         // Delete a CF directly in Sonarr (simulates accidental deletion)
         var sonarrCfs = await cfApi.CustomformatGet(ct);
@@ -189,26 +180,27 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Contain(cf => cf.Name == "Bad Dual Groups", "deleted CF should be recreated");
     }
 
-    [Test, Order(5)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 5)]
+    [Timeout(60_000)]
     public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
     {
         // Restart with alternate config that has Obfuscated removed and
         // delete_old_custom_formats: false. Sync state from earlier syncs survives the restart, so
         // the server still knows it owns Obfuscated.
-        await _harness.StartServerAsync(DeleteDisabledConfig, ct);
+        await Harness.StartServerAsync(DeleteDisabledConfig, ct);
         try
         {
             await SyncSucceeds(ct);
         }
         finally
         {
-            await _harness.StartServerAsync(MainConfig, ct);
+            await Harness.StartServerAsync(SyncSession.MainConfig, ct);
         }
 
         // Verify Obfuscated still exists even though it's not in the config
         // This proves the delete toggle prevents deletion of orphaned CFs
-        var sonarrCfs = await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct);
+        var sonarrCfs = await Harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct);
         sonarrCfs
             .Should()
             .Contain(
@@ -217,8 +209,9 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             );
     }
 
-    [Test, Order(6)]
-    [CancelAfter(60_000)]
+    [Test]
+    [NotInParallel(Order = 6)]
+    [Timeout(60_000)]
     public async Task Order6_guide_quality_group_rename_is_idempotent(CancellationToken ct)
     {
         // Replicates the real-world bug: TRaSH Guides renamed a quality group in a guide-synced
@@ -230,7 +223,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         // YAML config (no explicit qualities: section). The quality items come entirely from the
         // guide JSON. We simulate an upstream guide change by modifying the JSON between syncs.
 
-        var profileApi = _harness.SonarrApi<SonarrApi.IQualityProfileApi>();
+        var profileApi = Harness.SonarrApi<SonarrApi.IQualityProfileApi>();
 
         // Verify current state: guide profile has group "Bluray-1080p" from initial sync.
         // This group name collides with the individual quality name "Bluray-1080p" inside it,
@@ -247,7 +240,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         // Simulate upstream guide change: rename group and update cutoff (exactly what
         // TRaSH Guides commit 68b78c23d + c84cdb71b did for the anime profile)
         var guideJsonPath = Path.Combine(
-            _harness.AppDataDir.FullName,
+            Harness.AppDataDir.FullName,
             "trash-guides-override",
             "docs",
             "Sonarr",
@@ -351,9 +344,9 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
     /// </summary>
     private async Task<SyncJobResultsResponse> SyncSucceeds(CancellationToken ct)
     {
-        var sync = _harness.Sync;
+        var sync = Harness.Sync;
 
-        var request = _harness.HasRadarr
+        var request = Harness.HasRadarr
             ? new CreateSyncJobRequest()
             : new CreateSyncJobRequest { Instances = ["sonarr_main"] };
         var created = ContentOf(await sync.JobsPost(request, ct));
@@ -396,7 +389,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         CancellationToken ct
     )
     {
-        var profiles = await _harness
+        var profiles = await Harness
             .SonarrApi<SonarrV5Api.IQualityProfileApi>()
             .QualityprofileGet(ct);
 
@@ -435,7 +428,9 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
         // Sonarr ships a default "HD-1080p" profile, which the config manages
         string[] managed = ["HD-1080p", "E2E-SonarrGuideOverride", "E2E-GuideOnlyProfile"];
-        var unmanaged = _unmanagedProfileSizesBeforeSync.Where(x => !managed.Contains(x.Key));
+        var unmanaged = session.UnmanagedProfileSizesBeforeSync.Where(x =>
+            !managed.Contains(x.Key)
+        );
         foreach (var (name, before) in unmanaged)
         {
             after
@@ -448,7 +443,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
     private async Task VerifySonarrV4QualityDefinitions(CancellationToken ct)
     {
-        var qualityDefs = await _harness
+        var qualityDefs = await Harness
             .SonarrApi<SonarrApi.IQualityDefinitionApi>()
             .QualitydefinitionGet(ct);
         var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
@@ -462,7 +457,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
     private async Task VerifySonarrState(CancellationToken ct)
     {
-        var profiles = await _harness
+        var profiles = await Harness
             .SonarrApi<SonarrApi.IQualityProfileApi>()
             .QualityprofileGet(ct);
 
@@ -492,7 +487,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         guideOnlyProfile.UpgradeAllowed.Should().BeTrue("guide upgradeAllowed should be inherited");
 
         var sonarrCfNames = (
-            await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
+            await Harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
         ).Select(cf => cf.Name);
         string[] expectedSonarrCfs =
         [
@@ -509,7 +504,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         sonarrCfNames.Should().Contain(expectedSonarrCfs);
 
         // Media naming settings
-        var sonarrNaming = await _harness.SonarrApi<SonarrApi.INamingConfigApi>().NamingGet(ct);
+        var sonarrNaming = await Harness.SonarrApi<SonarrApi.INamingConfigApi>().NamingGet(ct);
         sonarrNaming.RenameEpisodes.Should().BeTrue("rename should be enabled");
         sonarrNaming.SeasonFolderFormat.Should().Be("Season {season:00}");
         sonarrNaming.SeriesFolderFormat.Should().Be("{Series TitleYear}");
@@ -524,7 +519,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Contain("{absolute:000}", "anime episode format should be set");
 
         // Media management settings
-        var mediaManagement = await _harness
+        var mediaManagement = await Harness
             .SonarrApi<SonarrApi.IMediaManagementConfigApi>()
             .MediamanagementGet(ct);
         mediaManagement
@@ -534,7 +529,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
     private async Task VerifyRadarrState(CancellationToken ct)
     {
-        var profiles = await _harness
+        var profiles = await Harness
             .RadarrApi<RadarrApi.IQualityProfileApi>()
             .QualityprofileGet(ct);
 
@@ -607,7 +602,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         hdBlurayProfile.UpgradeAllowed.Should().BeTrue("guide value should be inherited");
 
         var radarrCfNames = (
-            await _harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
+            await Harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
         )
             .Select(cf => cf.Name)
             .ToList();
@@ -637,7 +632,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Should()
             .NotContain("E2E-GroupCF2", "excluded default CF should not be synced");
 
-        var qualityDefs = await _harness
+        var qualityDefs = await Harness
             .RadarrApi<RadarrApi.IQualityDefinitionApi>()
             .QualitydefinitionGet(ct);
         var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
@@ -653,7 +648,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         webdl1080P.MinSize.Should().Be(12.5m);
 
         // Media naming settings
-        var radarrNaming = await _harness.RadarrApi<RadarrApi.INamingConfigApi>().NamingGet(ct);
+        var radarrNaming = await Harness.RadarrApi<RadarrApi.INamingConfigApi>().NamingGet(ct);
         radarrNaming.RenameMovies.Should().BeTrue("rename should be enabled");
         radarrNaming
             .MovieFolderFormat.Should()
@@ -666,7 +661,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Contain("{Movie CleanTitle}", "standard movie format should be set from guide");
 
         // Media management settings
-        var mediaManagement = await _harness
+        var mediaManagement = await Harness
             .RadarrApi<RadarrApi.IMediaManagementConfigApi>()
             .MediamanagementGet(ct);
         mediaManagement
@@ -707,7 +702,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
 
         while (DateTime.UtcNow < deadline)
         {
-            var sonarrDefs = await _harness
+            var sonarrDefs = await Harness
                 .SonarrApi<SonarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
             var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");
@@ -719,9 +714,9 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             await Task.Delay(pollInterval, ct);
         }
 
-        while (_harness.HasRadarr && DateTime.UtcNow < deadline)
+        while (Harness.HasRadarr && DateTime.UtcNow < deadline)
         {
-            var radarrDefs = await _harness
+            var radarrDefs = await Harness
                 .RadarrApi<RadarrApi.IQualityDefinitionApi>()
                 .QualitydefinitionGet(ct);
             var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Quality?.Name == "HDTV-1080p");

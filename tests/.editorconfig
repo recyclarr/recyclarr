@@ -5,3 +5,7 @@ dotnet_diagnostic.ca1707.severity = none
 
 # Avoid constant arrays as arguments
 dotnet_diagnostic.ca1861.severity = none
+
+# Test methods should not assign instance data: TUnit creates a new test class instance for
+# every test, so a test that sets a field the fixture reads affects only itself.
+dotnet_diagnostic.TUnit0018.severity = none

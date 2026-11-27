@@ -21,13 +21,13 @@ internal sealed class SyncJobRestartHttpTest
 {
     private string _databasePath = "";
 
-    [SetUp]
+    [Before(Test)]
     public void CreateDatabasePath()
     {
         _databasePath = Path.Combine(Path.GetTempPath(), $"recyclarr-{Guid.NewGuid():N}.db");
     }
 
-    [TearDown]
+    [After(Test)]
     public void DeleteDatabase()
     {
         SqliteConnection.ClearAllPools();

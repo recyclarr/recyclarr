@@ -74,7 +74,7 @@ of piping through a subject.
 ### Which Subject Type
 
 | Type                 | Replays  | Seed | Use when                                            |
-|----------------------|----------|------|-----------------------------------------------------|
+| -------------------- | -------- | ---- | --------------------------------------------------- |
 | `Subject<T>`         | None     | No   | Fire-and-forget events; no history needed           |
 | `BehaviorSubject<T>` | Last (1) | Yes  | Property-change semantics; always has current value |
 | `ReplaySubject<T>`   | N or all | No   | Late subscribers need historical values             |
@@ -139,7 +139,7 @@ subscriber (prevented from GC by the observable's reference to it).
 ### Disposable Types
 
 | Type                           | Behavior                                                   |
-|--------------------------------|------------------------------------------------------------|
+| ------------------------------ | ---------------------------------------------------------- |
 | `CompositeDisposable`          | Groups multiple disposables; disposes all together.        |
 | `SerialDisposable`             | Holds one at a time; setting a new one disposes previous.  |
 | `SingleAssignmentDisposable`   | Assigned once; throws on second assignment.                |
@@ -193,7 +193,7 @@ handler will have the exception thrown on the calling thread.
 ### Operators
 
 | Operator                              | Behavior                                              |
-|---------------------------------------|-------------------------------------------------------|
+| ------------------------------------- | ----------------------------------------------------- |
 | `Catch<TSource, TException>(handler)` | Catches typed exception; returns fallback observable. |
 | `Catch(fallback1, fallback2, ...)`    | On error, moves to next sequence.                     |
 | `Retry()` / `Retry(count)`            | Resubscribes on error. Bound the count.               |
@@ -249,7 +249,7 @@ var results = scheduler.Start(() =>
     Observable.Interval(TimeSpan.FromSeconds(1), scheduler).Take(3)
 );
 
-Assert.That(results.Messages, Has.Count.EqualTo(4)); // 3 OnNext + 1 OnCompleted
+results.Messages.Should().HaveCount(4); // 3 OnNext + 1 OnCompleted
 ```
 
 Key methods:
@@ -282,7 +282,7 @@ For simpler cases, subscribe and collect values into a list:
 var results = new List<int>();
 source.Subscribe(results.Add);
 // ... trigger emissions ...
-Assert.That(results, Is.EqualTo(new[] { 1, 2, 3 }));
+results.Should().Equal(1, 2, 3);
 ```
 
 Use `Subject<T>` in tests as a controllable source to push values imperatively. This is one of the

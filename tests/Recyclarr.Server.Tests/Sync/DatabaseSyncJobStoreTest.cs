@@ -36,8 +36,9 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
         store.Get(scheduled.Id)?.TraceParent.Should().BeNull();
     }
 
-    [TestCase(SyncJobStatus.Pending)]
-    [TestCase(SyncJobStatus.Running)]
+    [Test]
+    [Arguments(SyncJobStatus.Pending)]
+    [Arguments(SyncJobStatus.Running)]
     public void Scheduled_occurrence_during_an_active_job_is_skipped(SyncJobStatus activeStatus)
     {
         var store = Resolve<ISyncJobStore>();
@@ -82,12 +83,13 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
             .AllSatisfy(job => job.Status.Should().Be(SyncJobStatus.Skipped));
     }
 
-    [TestCase(SyncJobStatus.Pending, SyncJobStatus.Running)]
-    [TestCase(SyncJobStatus.Pending, SyncJobStatus.Interrupted)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Succeeded)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Partial)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Failed)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Interrupted)]
+    [Test]
+    [Arguments(SyncJobStatus.Pending, SyncJobStatus.Running)]
+    [Arguments(SyncJobStatus.Pending, SyncJobStatus.Interrupted)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Succeeded)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Partial)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Failed)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Interrupted)]
     public void Allowed_transition_is_persisted(SyncJobStatus from, SyncJobStatus to)
     {
         var store = Resolve<ISyncJobStore>();
@@ -99,11 +101,12 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
         store.Get(job.Id)?.Status.Should().Be(to);
     }
 
-    [TestCase(SyncJobStatus.Pending, SyncJobStatus.Succeeded)]
-    [TestCase(SyncJobStatus.Pending, SyncJobStatus.Failed)]
-    [TestCase(SyncJobStatus.Pending, SyncJobStatus.Skipped)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Pending)]
-    [TestCase(SyncJobStatus.Running, SyncJobStatus.Skipped)]
+    [Test]
+    [Arguments(SyncJobStatus.Pending, SyncJobStatus.Succeeded)]
+    [Arguments(SyncJobStatus.Pending, SyncJobStatus.Failed)]
+    [Arguments(SyncJobStatus.Pending, SyncJobStatus.Skipped)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Pending)]
+    [Arguments(SyncJobStatus.Running, SyncJobStatus.Skipped)]
     public void Rejected_transition_throws_and_persists_nothing(
         SyncJobStatus from,
         SyncJobStatus to
@@ -119,8 +122,9 @@ internal sealed class DatabaseSyncJobStoreTest : ServerIntegrationFixture
         store.Get(job.Id)?.Status.Should().Be(from);
     }
 
-    [TestCase(SyncJobStatus.Succeeded)]
-    [TestCase(SyncJobStatus.Interrupted)]
+    [Test]
+    [Arguments(SyncJobStatus.Succeeded)]
+    [Arguments(SyncJobStatus.Interrupted)]
     public void Terminal_job_is_never_mutated(SyncJobStatus terminal)
     {
         var store = Resolve<ISyncJobStore>();

@@ -24,9 +24,10 @@ internal sealed class CliSettingsHttpTest : CliServerHttpFixture
         LogOutput.Should().Contain("cli.yml").And.Contain("bogus_key");
     }
 
-    [TestCase("server: [", "invalid YAML at line")]
-    [TestCase("server: foo", "'server'")]
-    [TestCase("server: {base_url: [a]}", "'server.base_url'")]
+    [Test]
+    [Arguments("server: [", "invalid YAML at line")]
+    [Arguments("server: foo", "'server'")]
+    [Arguments("server: {base_url: [a]}", "'server.base_url'")]
     public async Task Malformed_or_wrongly_typed_file_names_the_yaml_location(
         string yaml,
         string location

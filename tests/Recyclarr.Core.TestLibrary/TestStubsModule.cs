@@ -53,7 +53,7 @@ public sealed class TestStubsModule : Module
         builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
         builder.RegisterInstance(Paths);
 
-        builder.Register(_ => NUnitAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
+        builder.Register(_ => TestAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
         builder.RegisterType<BlockedHttpClientFactory>().As<IHttpClientFactory>().SingleInstance();

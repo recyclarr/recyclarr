@@ -13,9 +13,10 @@ internal sealed class ApiKeyAuthenticationHttpTest : ServerHttpFixture
 {
     private static readonly Uri ApiRoute = new("/api/v1/guide/radarr/qualities", UriKind.Relative);
 
-    [TestCase(null, TestName = "No Authorization header is rejected")]
-    [TestCase("Bearer wrong-key", TestName = "Wrong key is rejected")]
-    [TestCase("Basic " + ApiKey, TestName = "Key in a scheme other than Bearer is rejected")]
+    [Test]
+    [Arguments(null, DisplayName = "No Authorization header is rejected")]
+    [Arguments("Bearer wrong-key", DisplayName = "Wrong key is rejected")]
+    [Arguments("Basic " + ApiKey, DisplayName = "Key in a scheme other than Bearer is rejected")]
     public async Task Api_request_without_a_valid_key_is_rejected(string? authorization)
     {
         using var client = CreateClient();
@@ -91,8 +92,9 @@ internal sealed class ApiKeyAuthenticationHttpTest : ServerHttpFixture
         return file;
     }
 
-    [TestCase("/openapi/v1.json")]
-    [TestCase("/scalar/")]
+    [Test]
+    [Arguments("/openapi/v1.json")]
+    [Arguments("/scalar/")]
     public async Task Routes_outside_api_need_no_key(string route)
     {
         using var client = CreateClient();

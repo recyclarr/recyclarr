@@ -5,7 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
-    <PackageReference Include="NUnit" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Spectre.Console.Testing" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />

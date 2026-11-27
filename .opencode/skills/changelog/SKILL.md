@@ -90,7 +90,7 @@ filter before being written.
 
 **Never mention any of the following:**
 
-- Library or package names (Spectre.Console, YamlDotNet, Autofac, NUnit, etc.)
+- Library or package names (Spectre.Console, YamlDotNet, Autofac, TUnit, etc.)
 - Class, method, or variable names from source code
 - Internal architecture concepts (pipeline, middleware, DI container, module, etc.)
 - Protocol-level details (HTTP status codes, response bodies, serialization)

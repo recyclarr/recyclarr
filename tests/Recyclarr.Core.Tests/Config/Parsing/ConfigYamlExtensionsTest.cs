@@ -7,9 +7,9 @@ namespace Recyclarr.Core.Tests.Config.Parsing;
 internal sealed class ConfigYamlExtensionsTest
 {
     [Test]
-    [TestCase("prefer_and_upgrade", PropersAndRepacksMode.PreferAndUpgrade)]
-    [TestCase("do_not_upgrade", PropersAndRepacksMode.DoNotUpgrade)]
-    [TestCase("do_not_prefer", PropersAndRepacksMode.DoNotPrefer)]
+    [Arguments("prefer_and_upgrade", PropersAndRepacksMode.PreferAndUpgrade)]
+    [Arguments("do_not_upgrade", PropersAndRepacksMode.DoNotUpgrade)]
+    [Arguments("do_not_prefer", PropersAndRepacksMode.DoNotPrefer)]
     public void Valid_propers_and_repacks_value_parses_correctly(
         string yamlValue,
         PropersAndRepacksMode expected
@@ -24,8 +24,8 @@ internal sealed class ConfigYamlExtensionsTest
     }
 
     [Test]
-    [TestCase("PREFER_AND_UPGRADE")]
-    [TestCase("Prefer_And_Upgrade")]
+    [Arguments("PREFER_AND_UPGRADE")]
+    [Arguments("Prefer_And_Upgrade")]
     public void Propers_and_repacks_value_is_case_insensitive(string yamlValue)
     {
         var yaml = new MediaManagementConfigYaml { PropersAndRepacks = yamlValue };

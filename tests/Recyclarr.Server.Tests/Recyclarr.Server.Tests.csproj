@@ -6,9 +6,6 @@
     <ProjectReference Include="..\..\src\Recyclarr.Client\Recyclarr.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Remove="Serilog.Sinks.NUnit" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Refit.Reflection" />
   </ItemGroup>

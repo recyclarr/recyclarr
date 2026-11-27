@@ -74,8 +74,9 @@ internal sealed class ServerApiKeyHttpTest : CliServerHttpFixture
         LogOutput.Should().Contain(EnvVar).And.Contain(FileEnvVar).And.Contain("both set");
     }
 
-    [TestCase(null, TestName = "Missing key fails the command and names where to set it")]
-    [TestCase("wrong-key", TestName = "Wrong key fails the command and names where to set it")]
+    [Test]
+    [Arguments(null, DisplayName = "Missing key fails the command and names where to set it")]
+    [Arguments("wrong-key", DisplayName = "Wrong key fails the command and names where to set it")]
     public async Task Rejected_key_names_where_to_set_it(string? key)
     {
         WriteKey(key);
