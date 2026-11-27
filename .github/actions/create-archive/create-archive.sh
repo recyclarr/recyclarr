@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Archives each runtime directory under a publish directory: zip for Windows, tar.xz otherwise.
 # Runtimes are archived in parallel; each job's output is printed once all jobs finish.
-# Usage: ci/create-archive.sh <publish-dir> <output-dir> [runtime-dir-name]
+# Inputs (environment): PUBLISH_DIR, OUTPUT_DIR
 set -euo pipefail
 
 # Both executables in a runtime embed much of the same runtime code. Only a single xz block with
@@ -10,17 +10,13 @@ set -euo pipefail
 # archiving runtimes concurrently, each single-threaded (about 674 MiB of memory per job).
 export XZ_OPT="-T1 -9"
 
-publish_dir="${1:?publish directory is required}"
-output_dir="${2:?output directory is required}"
+publish_dir="${PUBLISH_DIR:?PUBLISH_DIR is required}"
+output_dir="${OUTPUT_DIR:?OUTPUT_DIR is required}"
 
-if (($# >= 3)); then
-    targets=("$3")
-else
-    targets=()
-    for dir in "$publish_dir"/*/; do
-        targets+=("$(basename "$dir")")
-    done
-fi
+targets=()
+for dir in "$publish_dir"/*/; do
+    targets+=("$(basename "$dir")")
+done
 
 mkdir -p "$output_dir"
 output_dir="$(cd "$output_dir" && pwd)"

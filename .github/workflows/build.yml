@@ -306,7 +306,10 @@ jobs:
           pattern: "!helm-chart"
 
       - name: Create Archive
-        run: ci/create-archive.sh publish archive
+        uses: $/.github/actions/create-archive
+        with:
+          publish-dir: publish
+          output-dir: archive
 
       # Attests the archives exactly as uploaded; macOS binaries are already signed by this point.
       - name: Attest Build Provenance

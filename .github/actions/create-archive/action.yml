@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Create Release Archives
+description: >-
+  Archive each runtime directory under a publish directory as recyclarr-<runtime>.zip for Windows
+  runtimes and recyclarr-<runtime>.tar.xz otherwise. Runtimes are archived in parallel.
+author: Recyclarr
+
+inputs:
+  publish-dir:
+    description: Directory containing one subdirectory per runtime
+    required: true
+  output-dir:
+    description: Directory that receives the archives
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create archives
+      shell: bash
+      env:
+        PUBLISH_DIR: ${{ inputs.publish-dir }}
+        OUTPUT_DIR: ${{ inputs.output-dir }}
+      run: $GITHUB_ACTION_PATH/create-archive.sh

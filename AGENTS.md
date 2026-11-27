@@ -234,7 +234,8 @@ log.Information(message);
 
 - `src/`: All C# source code
 - `tests/`: All C# unit and integration tests
-- `ci/`: Scripts and utilities for GitHub workflows
+- `ci/`: Scripts and utilities for GitHub workflows; a script serving one composite action lives
+  beside its `action.yml` instead
 - `.github/`: GitHub actions and workflows
 - `scripts/`: Convenience scripts
 - `docs/`: Documentation
