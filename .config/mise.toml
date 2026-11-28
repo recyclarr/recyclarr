@@ -21,3 +21,16 @@ vhs = "latest"
 [tasks.demo]
 description = "Record the README sync demo (.github/assets/sync-preview.webp)"
 file = "scripts/record-demo.sh"
+
+[tasks.http]
+description = "Run http/<file>.http against the running server"
+# Raw keeps the terminal attached so httpyac's service picker and Ctrl+C work
+raw = true
+usage = '''
+arg "<file>" help="Request file name under http/, without the .http extension"
+arg "[service]" help="Service instance to target; omit to pick it interactively"
+'''
+run = '''
+timeout --foreground 120 httpyac send "http/${usage_file?}.http" --all --bail -o body \
+    ${usage_service:+--var "service=$usage_service"}
+'''
