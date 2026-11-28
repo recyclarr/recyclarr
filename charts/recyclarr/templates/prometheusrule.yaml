@@ -1,9 +1,12 @@
 {{- if .Values.prometheusRule.enabled }}
 {{- if not .Values.serviceMonitor.enabled }}
-{{- fail "prometheusRule needs serviceMonitor.enabled: its rules select the ServiceMonitor's scrape job" }}
+{{- fail "prometheusRule needs serviceMonitor.enabled: its rules select the Service that the ServiceMonitor scrapes" }}
 {{- end }}
-{{- /* The ServiceMonitor's scrape job is named after the Service. */}}
-{{- $target := printf "job=%q, namespace=%q" (include "recyclarr.fullname" .) .Release.Namespace }}
+{{- /*
+Prometheus Operator sets the service label to the Service name. The rules do not use job, because
+some pipelines drop it, for example an OpenTelemetry collector that writes over OTLP.
+*/}}
+{{- $target := printf "service=%q, namespace=%q" (include "recyclarr.fullname" .) .Release.Namespace }}
 {{- /*
 A status series first appears at its first sync, already counting it, and increase() ignores a
 series' first sample. Its first value is added separately (relabeled so "or" keeps both sides), so
@@ -36,7 +39,7 @@ spec:
             summary: Recyclarr is down
             description: {{ `Prometheus has not reached the Recyclarr server in {{ $labels.namespace }} for 5 minutes.` | quote }}
         - alert: RecyclarrSyncFailed
-          expr: {{ printf `sum by (namespace, job, recyclarr_sync_job_status) (increase(%[1]s[1h]) or label_replace(min_over_time(%[1]s[1h]) unless last_over_time(%[1]s[1d] offset 1h), "first_sample", "true", "", "")) > 0` $runs | quote }}
+          expr: {{ printf `sum by (namespace, service, recyclarr_sync_job_status) (increase(%[1]s[1h]) or label_replace(min_over_time(%[1]s[1h]) unless last_over_time(%[1]s[1d] offset 1h), "first_sample", "true", "", "")) > 0` $runs | quote }}
           labels:
             severity: warning
           annotations:

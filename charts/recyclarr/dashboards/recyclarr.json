@@ -23,9 +23,9 @@
         "label": "Namespace",
         "type": "query",
         "datasource": { "type": "prometheus", "uid": "${datasource}" },
-        "definition": "label_values(target_info{service_name=\"recyclarr-server\"}, namespace)",
+        "definition": "label_values(recyclarr_sync_job_duration_seconds_count, namespace)",
         "query": {
-          "query": "label_values(target_info{service_name=\"recyclarr-server\"}, namespace)",
+          "query": "label_values(recyclarr_sync_job_duration_seconds_count, namespace)",
           "refId": "namespace"
         },
         "refresh": 2,
@@ -34,14 +34,14 @@
         "hide": 0
       },
       {
-        "name": "job",
-        "label": "Job",
+        "name": "service",
+        "label": "Instance",
         "type": "query",
         "datasource": { "type": "prometheus", "uid": "${datasource}" },
-        "definition": "label_values(target_info{service_name=\"recyclarr-server\", namespace=\"$namespace\"}, job)",
+        "definition": "label_values(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\"}, service)",
         "query": {
-          "query": "label_values(target_info{service_name=\"recyclarr-server\", namespace=\"$namespace\"}, job)",
-          "refId": "job"
+          "query": "label_values(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\"}, service)",
+          "refId": "service"
         },
         "multi": true,
         "includeAll": true,
@@ -65,7 +65,7 @@
         {
           "refId": "A",
           "instant": true,
-          "expr": "max(up{namespace=\"$namespace\", job=~\"$job\"}) or vector(0)"
+          "expr": "max(up{namespace=\"$namespace\", service=~\"$service\"}) or vector(0)"
         }
       ],
       "fieldConfig": {
@@ -104,7 +104,7 @@
         {
           "refId": "A",
           "instant": true,
-          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"succeeded\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
         }
       ],
       "fieldConfig": {
@@ -136,7 +136,7 @@
         {
           "refId": "A",
           "instant": true,
-          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"partial\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"partial\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"partial\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
         }
       ],
       "fieldConfig": {
@@ -175,7 +175,7 @@
         {
           "refId": "A",
           "instant": true,
-          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"failed\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"failed\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\", recyclarr_sync_job_status=\"failed\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
         }
       ],
       "fieldConfig": {
@@ -214,7 +214,7 @@
         {
           "refId": "A",
           "instant": true,
-          "expr": "sum(increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")) / sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\"))"
+          "expr": "sum(increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")) / sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\"))"
         }
       ],
       "fieldConfig": {
@@ -241,11 +241,12 @@
       "description": "Syncs that finished in each interval, by result",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "interval": "6h",
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (recyclarr_sync_job_status) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\"))",
+          "expr": "sum by (recyclarr_sync_job_status) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__interval), \"first_sample\", \"true\", \"\", \"\")) > 0",
           "legendFormat": "{{recyclarr_sync_job_status}}"
         }
       ],
@@ -301,7 +302,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", job=~\"$job\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\")) / sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\"))",
+          "expr": "sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\")) / sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\"))",
           "legendFormat": "{{recyclarr_sync_job_trigger}}"
         }
       ],
@@ -324,11 +325,12 @@
       "description": "Requests by service address and response status, or the error when no response arrived",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "interval": "6h",
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (server_address, http_response_status_code, error_type) (increase(http_client_request_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "sum by (server_address, http_response_status_code, error_type) (increase(http_client_request_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])) > 0",
           "legendFormat": "{{server_address}} {{http_response_status_code}}{{error_type}}"
         }
       ],
@@ -361,7 +363,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "histogram_quantile(0.95, sum by (le, server_address) (rate(http_client_request_duration_seconds_bucket{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le, server_address) (rate(http_client_request_duration_seconds_bucket{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])))",
           "legendFormat": "{{server_address}}"
         }
       ],
@@ -384,17 +386,25 @@
       "description": "Requests to the Recyclarr server API, for example from the CLI",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+      "interval": "6h",
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{namespace=\"$namespace\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "sum by (http_route, http_response_status_code) (increase(http_server_request_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])) > 0",
           "legendFormat": "{{http_route}} {{http_response_status_code}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": { "mode": "normal" }
+          },
+          "unit": "short",
+          "decimals": 0,
           "min": 0
         },
         "overrides": []

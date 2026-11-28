@@ -292,8 +292,8 @@ serviceMonitor:
   labels: {}
 
 # Prometheus Operator PrometheusRule with alerts for a server Prometheus cannot reach and for a
-# sync that fails or succeeds only for some instances. The rules select the ServiceMonitor's scrape
-# job, so this requires serviceMonitor.enabled.
+# sync that fails or succeeds only for some instances. The rules select the series of the Service
+# that the ServiceMonitor scrapes, so this requires serviceMonitor.enabled.
 prometheusRule:
   enabled: false
   # @schema
