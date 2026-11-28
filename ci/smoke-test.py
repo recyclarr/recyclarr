@@ -5,16 +5,30 @@
 """Verify published binaries start: the CLI reports a version and the server logs its address."""
 
 import argparse
+import json
 import os
 import queue
 import stat
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from pathlib import Path
 
 STARTUP_TIMEOUT_SECONDS = 30
+
+# The smallest guide data the server accepts: every resource list is empty.
+GUIDES_METADATA = """\
+{
+  "json_paths": {
+    "radarr": { "custom_formats": [], "qualities": [], "naming": [],
+      "custom_format_groups": [], "quality_profiles": [] },
+    "sonarr": { "custom_formats": [], "qualities": [], "naming": [],
+      "custom_format_groups": [], "quality_profiles": [] }
+  }
+}
+"""
 
 
 def main() -> None:
@@ -36,12 +50,45 @@ def main() -> None:
     ).stdout.strip()
     print(f"Recyclarr CLI started successfully: {version}")
 
-    smoke_server(server)
+    with tempfile.TemporaryDirectory(prefix="recyclarr-smoke-") as config_dir:
+        smoke_server(server, Path(config_dir))
 
 
-def smoke_server(server: Path) -> None:
-    # The server refuses to start without an API key of at least 32 characters.
-    env = os.environ | {"RECYCLARR_API_KEY": "smoke-test-api-key-0123456789abcdef"}
+def write_offline_config(config_dir: Path) -> None:
+    """Replace the default git resource providers with local directories.
+
+    The server fetches every git provider before it listens; on a slow runner the default
+    TRaSH Guides and config templates clones alone can exceed the startup deadline.
+    """
+    guides = config_dir / "guides"
+    templates = config_dir / "templates"
+    guides.mkdir()
+    templates.mkdir()
+    (guides / "metadata.json").write_text(GUIDES_METADATA, encoding="utf-8")
+    # JSON strings are valid YAML scalars and escape Windows path separators.
+    (config_dir / "settings.yml").write_text(
+        f"""\
+resource_providers:
+  - name: guides
+    type: trash-guides
+    path: {json.dumps(str(guides))}
+    replace_default: true
+  - name: templates
+    type: config-templates
+    path: {json.dumps(str(templates))}
+    replace_default: true
+""",
+        encoding="utf-8",
+    )
+
+
+def smoke_server(server: Path, config_dir: Path) -> None:
+    write_offline_config(config_dir)
+    env = os.environ | {
+        # The server refuses to start without an API key of at least 32 characters.
+        "RECYCLARR_API_KEY": "smoke-test-api-key-0123456789abcdef",
+        "RECYCLARR_CONFIG_DIR": str(config_dir),
+    }
     process = subprocess.Popen(
         [server, "--urls=http://127.0.0.1:0"],
         stdout=subprocess.PIPE,
