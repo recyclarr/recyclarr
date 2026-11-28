@@ -44,16 +44,21 @@ user who never ran an unreleased build. Commits are evidence for finding candida
 
 ## Choosing a Section
 
-The `commit-conventions` skill decides whether a commit needs an entry. Pick the section by what
-happened:
+The `commit-conventions` skill decides whether a commit needs an entry. Pick the section by
+comparing the old behavior with what the project intended. Behavior was intended when docs,
+decision records, tests, or earlier changelog entries describe it. Behavior that only happened to
+work was not intended, even when users relied on it.
 
 - **Added**: A capability that did not exist before (e.g. new command, new flag, new config option)
-- **Changed**: Existing behavior now works differently (e.g. enhanced output, modified defaults,
-  adjusted limits, breaking changes, performance improvements)
-- **Fixed**: Something was broken and now it works correctly
+- **Changed**: Intended behavior now works differently (e.g. enhanced output, modified defaults,
+  adjusted limits, performance improvements)
+- **Fixed**: Behavior that differed from what was intended now matches it
+- When no source shows whether the old behavior was intended, use Changed.
 
-`feat` produces either Added or Changed depending on whether the capability is new or an
-enhancement. `fix` almost always produces Fixed. Breaking changes (`!`) produce Changed or Removed.
+Only Changed and Removed entries can be **BREAKING** (`!`, a major version). A Fixed entry that
+stops behavior users relied on says what to use instead.
+
+`feat` produces Added or Changed. `fix` almost always produces Fixed.
 
 ## CHANGELOG Format
 
