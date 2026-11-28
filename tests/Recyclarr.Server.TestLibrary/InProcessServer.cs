@@ -148,21 +148,25 @@ public sealed class InProcessServer : IAsyncDisposable
             return _app;
         }
 
-        var builder = ServerHost.CreateBuilder([], _stubs.Fs, _stubs.Env.Variables);
-        builder.WebHost.UseTestServer();
-        builder.Host.ConfigureContainer<ContainerBuilder>(b =>
-        {
-            b.RegisterModule(_stubs);
-            b.RegisterModule<ServerSyncStubsModule>();
-            b.RegisterType<NoOpReadySignal>().As<IReadySignal>().SingleInstance();
-            foreach (var configure in _configuration)
+        var app = ServerHost.Create(
+            new ServerLaunchOptions(),
+            _stubs.Fs,
+            _stubs.Env.Variables,
+            builder =>
             {
-                configure(b);
+                builder.WebHost.UseTestServer();
+                builder.Host.ConfigureContainer<ContainerBuilder>(b =>
+                {
+                    b.RegisterModule(_stubs);
+                    b.RegisterModule<ServerSyncStubsModule>();
+                    b.RegisterType<NoOpReadySignal>().As<IReadySignal>().SingleInstance();
+                    foreach (var configure in _configuration)
+                    {
+                        configure(b);
+                    }
+                });
             }
-        });
-
-        var app = ServerHost.Build(builder)
-            ?? throw new InvalidOperationException("The in-process server could not be built");
+        ) ?? throw new InvalidOperationException("The in-process server could not be built");
         if (!app.StartServerAsync().GetAwaiter().GetResult())
         {
             app.DisposeAsync().AsTask().GetAwaiter().GetResult();

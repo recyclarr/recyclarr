@@ -7,6 +7,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Server: `--help` and `--version` options
+
+### Fixed
+
+- Server: Command-line arguments could set any setting, including directories and the API key.
+  Unknown arguments now stop startup; set those values with environment variables instead
+
 ## [9.0.0] - 2026-11-27
 
 This release contains **BREAKING CHANGES**. See the [v9.0 Upgrade Guide][breaking9] for required

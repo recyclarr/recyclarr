@@ -18,8 +18,8 @@ namespace Recyclarr.Server.Hosting;
 
 /// <summary>
 /// Assembles the server host. <c>Program</c> passes the real host inputs; tests pass in-memory
-/// ones and add their own container registrations between <see cref="CreateBuilder"/> and
-/// <see cref="Build"/>.
+/// ones and add their own container registrations through the configure callback of
+/// <see cref="Create"/>.
 /// </summary>
 /// <remarks>
 /// Host inputs are parameters, not container registrations, because configuration providers and
@@ -29,8 +29,44 @@ namespace Recyclarr.Server.Hosting;
 /// </remarks>
 internal static class ServerHost
 {
-    public static WebApplicationBuilder CreateBuilder(
-        string[] args,
+    /// <summary>
+    /// Builds the host and its request pipeline. Returns null when the environment is unusable
+    /// (for example, a retired variable); the reason is already on stderr. Building resolves
+    /// services that need the app paths, so this happens before the startup failure path exists.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="hostArgs"/> reach the web host's own configuration. Only build-time document
+    /// generation passes any (its <c>--applicationName</c>); the server's command line is parsed
+    /// into <paramref name="launch"/> instead, so arguments cannot set host configuration.
+    /// </remarks>
+    public static WebApplication? Create(
+        ServerLaunchOptions launch,
+        IFileSystem fileSystem,
+        IReadOnlyDictionary<string, string?> environment,
+        Action<WebApplicationBuilder>? configure = null,
+        string[]? hostArgs = null
+    )
+    {
+        try
+        {
+            var builder = CreateBuilder(launch, hostArgs ?? [], fileSystem, environment);
+            configure?.Invoke(builder);
+            return BuildPipeline(builder);
+        }
+        catch (Exception e)
+            when ((e as EnvironmentException ?? e.FindInnerException<EnvironmentException>())
+                    is { } failure
+            )
+        {
+            using var log = ServerLogger.CreateErrorsToStderr();
+            log.Fatal("Server startup failed: {Message}", failure.Message);
+            return null;
+        }
+    }
+
+    private static WebApplicationBuilder CreateBuilder(
+        ServerLaunchOptions launch,
+        string[] hostArgs,
         IFileSystem fileSystem,
         IReadOnlyDictionary<string, string?> environment
     )
@@ -38,7 +74,7 @@ internal static class ServerHost
         var builder = WebApplication.CreateSlimBuilder(
             new WebApplicationOptions
             {
-                Args = args,
+                Args = hostArgs,
                 // A Windows service starts in C:\Windows\System32, which would otherwise be the
                 // content root.
                 ContentRootPath = WindowsServiceHelpers.IsWindowsService()
@@ -47,9 +83,7 @@ internal static class ServerHost
             }
         );
 
-        AddConfigurationSources(builder.Configuration, args, environment);
-
-        var launch = ServerLaunchOptions.From(builder.Configuration);
+        AddConfigurationSources(builder.Configuration, launch, environment);
 
         builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         builder.Host.ConfigureContainer<ContainerBuilder>(b =>
@@ -102,7 +136,7 @@ internal static class ServerHost
     }
 
     // settings.yml has its own configuration, separate from the host's, so environment variables
-    // and command-line arguments can never set a setting. Settings problems, including a config
+    // and launch options can never set a setting. Settings problems, including a config
     // directory that cannot be located, do not throw here: startup reports them (ServerLifecycle).
     private static (IConfiguration Settings, SettingsLoadReport Report) LoadSettings(
         IConfiguration host,
@@ -136,10 +170,11 @@ internal static class ServerHost
     }
 
     // Replaces the default sources so the environment comes from the given variables, not the
-    // process. Order and prefixes match the web host defaults; later sources win.
+    // process. Order and prefixes match the web host defaults; later sources win, so --urls
+    // overrides ASPNETCORE_URLS as it would on a default host.
     private static void AddConfigurationSources(
         ConfigurationManager configuration,
-        string[] args,
+        ServerLaunchOptions launch,
         IReadOnlyDictionary<string, string?> environment
     )
     {
@@ -147,29 +182,11 @@ internal static class ServerHost
         configuration
             .AddEnvironment(environment, "DOTNET_")
             .AddEnvironment(environment, "ASPNETCORE_")
-            .AddEnvironment(environment)
-            .AddCommandLine(args);
-    }
+            .AddEnvironment(environment);
 
-    /// <summary>
-    /// Builds the host and its request pipeline. Returns null when the environment is unusable
-    /// (for example, a retired variable); the reason is already on stderr. Building resolves
-    /// services that need the app paths, so this happens before the startup failure path exists.
-    /// </summary>
-    public static WebApplication? Build(WebApplicationBuilder builder)
-    {
-        try
+        if (launch.Urls is { } urls)
         {
-            return BuildPipeline(builder);
-        }
-        catch (Exception e)
-            when ((e as EnvironmentException ?? e.FindInnerException<EnvironmentException>())
-                    is { } environment
-            )
-        {
-            using var log = ServerLogger.CreateErrorsToStderr();
-            log.Fatal("Server startup failed: {Message}", environment.Message);
-            return null;
+            configuration.AddInMemoryCollection([new(WebHostDefaults.ServerUrlsKey, urls)]);
         }
     }
 

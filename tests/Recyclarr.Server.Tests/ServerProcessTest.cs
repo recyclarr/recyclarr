@@ -395,6 +395,43 @@ internal sealed class ServerProcessTest
         (await errors).Should().Contain("RECYCLARR_APP_DATA is no longer supported");
     }
 
+    /// <summary>
+    /// The command line carries only launch options; directories and the API key come from the
+    /// environment (ADR-036, ADR-037).
+    /// </summary>
+    [Test]
+    [Arguments("--RECYCLARR_CONFIG_DIR=elsewhere")]
+    [Arguments("--RECYCLARR_API_KEY")]
+    [Arguments("serve")]
+    [Arguments("-e=1")]
+    public async Task An_unknown_argument_stops_startup_and_explains_why_on_stderr(string argument)
+    {
+        using var server = Start($"--parent-pid={Environment.ProcessId}", argument);
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain($"'{argument}'");
+    }
+
+    [Test]
+    public async Task A_response_file_is_rejected_instead_of_read()
+    {
+        var responseFile = _root.File("launch.rsp");
+        responseFile.WriteAllText("--log-level Debug");
+
+        using var server = Start($"--parent-pid={Environment.ProcessId}", $"@{responseFile}");
+        var output = server.StandardOutput.ReadToEndAsync();
+        var errors = server.StandardError.ReadToEndAsync();
+        await WaitForExitAsync(server);
+
+        server.ExitCode.Should().Be(1);
+        (await output).Should().NotContain("READY:");
+        (await errors).Should().Contain($"'@{responseFile}'");
+    }
+
     [Test]
     [Arguments(0)]
     [Arguments(70000)]
