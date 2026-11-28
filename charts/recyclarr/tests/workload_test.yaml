@@ -1,0 +1,163 @@
+suite: workload
+templates:
+  - templates/workload.yaml
+  # workload.yaml includes these two for its checksum annotations
+  - templates/configmap.yaml
+  - templates/secret.yaml
+release:
+  name: t
+set:
+  apiKey.value: 0123456789abcdef0123456789abcdef
+tests:
+  - it: runs a Deployment that recreates its pod
+    template: templates/workload.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+      - notExists:
+          path: spec.podManagementPolicy
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: state
+            persistentVolumeClaim:
+              claimName: t-recyclarr-state
+
+  - it: runs a StatefulSet with Parallel pod management and a state claim template
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: spec.serviceName
+          value: t-recyclarr
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+      - notExists:
+          path: spec.strategy
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: state
+      - notExists:
+          path: spec.template.spec.volumes[?(@.name == "state")]
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
+  - it: sets the pod management policy
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+      controller.podManagementPolicy: OrderedReady
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: OrderedReady
+
+  - it: keeps only stable labels on claim templates so chart upgrades do not change them
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+      persistence.state.labels.backup: daily
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.labels
+          value:
+            app.kubernetes.io/name: recyclarr
+            app.kubernetes.io/instance: t
+            backup: daily
+
+  - it: creates claim templates for state and data with a data source
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+      persistence.data.enabled: true
+      persistence.state.storageClass: fast
+      persistence.state.dataSourceRef:
+        apiGroup: snapshot.storage.k8s.io
+        kind: VolumeSnapshot
+        name: snap
+    asserts:
+      - lengthEqual:
+          path: spec.volumeClaimTemplates
+          count: 2
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec
+          value:
+            accessModes: [ReadWriteOnce]
+            storageClassName: fast
+            resources:
+              requests:
+                storage: 1Gi
+            dataSourceRef:
+              apiGroup: snapshot.storage.k8s.io
+              kind: VolumeSnapshot
+              name: snap
+      - equal:
+          path: spec.volumeClaimTemplates[1].metadata.name
+          value: data
+      - notExists:
+          path: spec.template.spec.volumes[?(@.name == "data")]
+
+  - it: mounts an existing claim instead of a claim template
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+      persistence.state.existingClaim: old
+    asserts:
+      - notExists:
+          path: spec.volumeClaimTemplates
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: state
+            persistentVolumeClaim:
+              claimName: old
+
+  - it: rejects a data claim that is the StatefulSet's state claim
+    template: templates/workload.yaml
+    set:
+      controller.kind: StatefulSet
+      persistence.data.enabled: true
+      persistence.data.existingClaim: state-t-recyclarr-0
+    asserts:
+      - failedTemplate:
+          errorMessage: persistence.state and persistence.data cannot use the same claim
+
+  - it: rejects a data source for a claim the chart does not create
+    template: templates/workload.yaml
+    set:
+      persistence.state.existingClaim: old
+      persistence.state.dataSourceRef:
+        apiGroup: snapshot.storage.k8s.io
+        kind: VolumeSnapshot
+        name: snap
+    asserts:
+      - failedTemplate:
+          errorMessage: "persistence.state.dataSourceRef needs a claim the chart creates: set enabled and unset existingClaim"
+
+  - it: rejects a data source kind outside the core API group without apiGroup
+    template: templates/workload.yaml
+    set:
+      persistence.state.dataSourceRef:
+        kind: VolumeSnapshot
+        name: snap
+    asserts:
+      - failedTemplate:
+          errorPattern: "dataSourceRef/kind.*PersistentVolumeClaim"
+
+  - it: rejects an unknown controller kind
+    template: templates/workload.yaml
+    set:
+      controller.kind: DaemonSet
+    asserts:
+      - failedTemplate:
+          errorPattern: "/controller/kind"

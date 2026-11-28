@@ -1,0 +1,20 @@
+suite: notes
+templates:
+  - templates/NOTES.txt
+release:
+  name: t
+  namespace: media
+set:
+  apiKey.value: 0123456789abcdef0123456789abcdef
+tests:
+  - it: runs the CLI through the Deployment
+    asserts:
+      - matchRegexRaw:
+          pattern: exec deploy/t-recyclarr -- recyclarr sync --preview
+
+  - it: runs the CLI through the StatefulSet
+    set:
+      controller.kind: StatefulSet
+    asserts:
+      - matchRegexRaw:
+          pattern: exec statefulset/t-recyclarr -- recyclarr sync --preview

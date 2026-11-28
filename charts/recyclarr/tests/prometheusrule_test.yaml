@@ -1,0 +1,47 @@
+suite: prometheusrule
+templates:
+  - templates/prometheusrule.yaml
+release:
+  name: t
+  namespace: media
+set:
+  apiKey.value: 0123456789abcdef0123456789abcdef
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: requires the ServiceMonitor whose scrape job the rules select
+    set:
+      prometheusRule.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: "prometheusRule needs serviceMonitor.enabled: its rules select the ServiceMonitor's scrape job"
+
+  - it: selects the release's scrape job
+    set:
+      serviceMonitor.enabled: true
+      prometheusRule.enabled: true
+      prometheusRule.labels.release: prometheus
+    asserts:
+      - isKind:
+          of: PrometheusRule
+      - equal:
+          path: metadata.labels.release
+          value: prometheus
+      - equal:
+          path: spec.groups[0].rules[0].alert
+          value: RecyclarrDown
+      - equal:
+          path: spec.groups[0].rules[0].expr
+          value: up{job="t-recyclarr", namespace="media"} == 0 or absent(up{job="t-recyclarr", namespace="media"})
+      - equal:
+          path: spec.groups[0].rules[1].alert
+          value: RecyclarrSyncFailed
+      - matchRegex:
+          path: spec.groups[0].rules[1].expr
+          pattern: 'recyclarr_sync_job_duration_seconds_count\{job="t-recyclarr", namespace="media", recyclarr_sync_job_status=~"failed\|partial"\}'
+      - equal:
+          path: spec.groups[0].rules[1].annotations.description
+          value: "A sync in {{ $labels.namespace }} ended with status {{ $labels.recyclarr_sync_job_status }}. The server log names the instances and errors."

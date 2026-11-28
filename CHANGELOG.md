@@ -10,6 +10,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Server: `--help` and `--version` options
+- Kubernetes: Helm chart alert rules and a Grafana dashboard
+- Kubernetes: Helm chart option to run the server as a StatefulSet
+- Kubernetes: Helm chart option to fill new storage from a volume snapshot or a backup restore
 
 ### Fixed
 

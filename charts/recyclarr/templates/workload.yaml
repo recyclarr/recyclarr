@@ -1,5 +1,9 @@
+{{- $statefulSet := include "recyclarr.statefulSet" . }}
+{{- $createsClaim := dict
+  "state" (include "recyclarr.createsClaim" (dict "root" . "volume" "state"))
+  "data" (include "recyclarr.createsClaim" (dict "root" . "volume" "data")) }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.controller.kind }}
 metadata:
   name: {{ include "recyclarr.fullname" . }}
   labels:
@@ -13,10 +17,15 @@ metadata:
 {{- $settings := include "recyclarr.configMapName" (dict "root" . "source" "settings") }}
 spec:
   # One server owns the state and data volumes; Recreate stops the old pod before the new one
-  # mounts them.
+  # mounts them, and a StatefulSet replaces its single pod the same way.
   replicas: 1
+  {{- if $statefulSet }}
+  serviceName: {{ include "recyclarr.fullname" . }}
+  podManagementPolicy: {{ .Values.controller.podManagementPolicy }}
+  {{- else }}
   strategy:
     type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       {{- include "recyclarr.selectorLabels" . | nindent 6 }}
@@ -146,10 +155,13 @@ spec:
             items:
               - key: {{ .Values.apiKey.existingSecretKey }}
                 path: api-key
-        - name: data
-          {{- include "recyclarr.volumeSource" (dict "root" . "volume" "data") | trim | nindent 10 }}
-        - name: state
-          {{- include "recyclarr.volumeSource" (dict "root" . "volume" "state") | trim | nindent 10 }}
+        {{- range $volume := list "data" "state" }}
+        {{- /* The StatefulSet's claim templates provide the volumes for the claims it creates. */}}
+        {{- if not (and $statefulSet (index $createsClaim $volume)) }}
+        - name: {{ $volume }}
+          {{- include "recyclarr.volumeSource" (dict "root" $ "volume" $volume) | trim | nindent 10 }}
+        {{- end }}
+        {{- end }}
         - name: tmp
           emptyDir: {}
         {{- if $configs }}
@@ -182,3 +194,24 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- if and $statefulSet (or $createsClaim.state $createsClaim.data) }}
+  # Kubernetes rejects changes to claim templates, so they carry only the stable selector labels
+  # rather than the chart labels, which change with every release.
+  volumeClaimTemplates:
+    {{- range $volume := list "state" "data" }}
+    {{- if index $createsClaim $volume }}
+    {{- with index $.Values.persistence $volume }}
+    - metadata:
+        name: {{ $volume }}
+        labels:
+          {{- merge (include "recyclarr.selectorLabels" $ | fromYaml) .labels | toYaml | nindent 10 }}
+        {{- with .annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        {{- include "recyclarr.claimSpec" . | nindent 8 }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}

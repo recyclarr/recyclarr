@@ -1,0 +1,45 @@
+{{- if .Values.prometheusRule.enabled }}
+{{- if not .Values.serviceMonitor.enabled }}
+{{- fail "prometheusRule needs serviceMonitor.enabled: its rules select the ServiceMonitor's scrape job" }}
+{{- end }}
+{{- /* The ServiceMonitor's scrape job is named after the Service. */}}
+{{- $target := printf "job=%q, namespace=%q" (include "recyclarr.fullname" .) .Release.Namespace }}
+{{- /*
+A status series first appears at its first sync, already counting it, and increase() ignores a
+series' first sample. Its first value is added separately (relabeled so "or" keeps both sides), so
+the first failure after a server start still alerts. A series counts as new only when it has no
+sample in the day before the window, so a scrape gap does not make an old count look new. A
+container restart inside the same pod that ends at the count it had before still goes unseen,
+because the counter shows no change.
+*/}}
+{{- $runs := printf `recyclarr_sync_job_duration_seconds_count{%s, recyclarr_sync_job_status=~"failed|partial"}` $target }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "recyclarr.fullname" . }}
+  labels:
+    {{- include "recyclarr.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: recyclarr
+      rules:
+        - alert: RecyclarrDown
+          {{- /* absent() covers a target that is gone, for example while the pod is Pending. */}}
+          expr: {{ printf "up{%[1]s} == 0 or absent(up{%[1]s})" $target | quote }}
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Recyclarr is down
+            description: {{ `Prometheus has not reached the Recyclarr server in {{ $labels.namespace }} for 5 minutes.` | quote }}
+        - alert: RecyclarrSyncFailed
+          expr: {{ printf `sum by (namespace, job, recyclarr_sync_job_status) (increase(%[1]s[1h]) or label_replace(min_over_time(%[1]s[1h]) unless last_over_time(%[1]s[1d] offset 1h), "first_sample", "true", "", "")) > 0` $runs | quote }}
+          labels:
+            severity: warning
+          annotations:
+            summary: A Recyclarr sync did not finish
+            description: {{ `A sync in {{ $labels.namespace }} ended with status {{ $labels.recyclarr_sync_job_status }}. The server log names the instances and errors.` | quote }}
+{{- end }}

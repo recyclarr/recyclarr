@@ -6,10 +6,14 @@ DOTNET_WATCH_RESTART_ON_RUDE_EDIT = "true"
 RECYCLARR_API_KEY = "dev-server-api-key-0123456789abcdef"
 
 [tools]
+# The Helm chart's values.schema.json is generated, so a helm-schema update can change it
+"aqua:dadav/helm-schema" = "0.24.0"
 cloudflare-cf = "latest"
 dotnet = "11"
 ffmpeg = "latest"
+"github:grafana/dashboard-linter" = "v0.5.2"
 "github:santhosh-tekuri/jsonschema" = "latest"
+helm = "4.3.2"
 "npm:@microsoft/learn-cli" = "latest"
 "npm:httpyac" = "latest"
 pre-commit = "latest"
@@ -34,3 +38,16 @@ run = '''
 timeout --foreground 120 httpyac send "http/${usage_file?}.http" --all --bail -o body \
     ${usage_service:+--var "service=$usage_service"}
 '''
+
+# CI runs the same command with --check (reusable-helm.yml)
+[tasks.helm-schema]
+description = "Regenerate the Helm chart's values.schema.json from the @schema annotations in values.yaml"
+run = "helm-schema --chart-search-root charts/recyclarr --no-dependencies --skip-auto-generation title,description,required,default --append-newline"
+
+[tasks.helm-unittest]
+description = "Run the Helm chart's unit tests (needs the helm-unittest plugin)"
+run = "helm unittest --strict charts/recyclarr"
+
+[tasks.dashboard-lint]
+description = "Lint the Helm chart's Grafana dashboard; exclusions live in charts/recyclarr/dashboards/.lint"
+run = "dashboard-linter lint --strict charts/recyclarr/dashboards/recyclarr.json"

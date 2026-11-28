@@ -99,13 +99,53 @@ source is unset. Call with (dict "root" $ "source" "configs").
 
 {{/*
 Name of the PersistentVolumeClaim for one volume (state or data), or empty when its persistence
-is disabled. Call with (dict "root" $ "volume" "state").
+is disabled. A StatefulSet names the claim it creates from a claim template
+<template>-<statefulset>-<ordinal>. Call with (dict "root" $ "volume" "state").
 */}}
 {{- define "recyclarr.claimName" -}}
 {{- $values := index .root.Values.persistence .volume }}
+{{- $fullname := include "recyclarr.fullname" .root }}
 {{- if $values.enabled }}
-{{- $values.existingClaim | default (printf "%s-%s" (include "recyclarr.fullname" .root) .volume) }}
+{{- $created := ternary (printf "%s-%s-0" .volume $fullname) (printf "%s-%s" $fullname .volume) (eq .root.Values.controller.kind "StatefulSet") }}
+{{- $values.existingClaim | default $created }}
 {{- end }}
+{{- end }}
+
+{{/*
+"true" when the chart creates the claim for one volume (state or data), or empty when the volume
+uses an existingClaim or an emptyDir. Fails when dataSourceRef is set for a volume the chart does
+not create a claim for, which would ignore it. Call with (dict "root" $ "volume" "state").
+*/}}
+{{- define "recyclarr.createsClaim" -}}
+{{- $values := index .root.Values.persistence .volume }}
+{{- $creates := and $values.enabled (not $values.existingClaim) }}
+{{- if and $values.dataSourceRef (not $creates) }}
+{{- fail (printf "persistence.%s.dataSourceRef needs a claim the chart creates: set enabled and unset existingClaim" .volume) }}
+{{- end }}
+{{- if $creates }}true{{ end }}
+{{- end }}
+
+{{/*
+Spec of a claim the chart creates, shared by the standalone claims and the StatefulSet's claim
+templates. Call with the volume's values.
+*/}}
+{{- define "recyclarr.claimSpec" -}}
+accessModes:
+  - {{ .accessMode }}
+{{- with .storageClass }}
+storageClassName: {{ . }}
+{{- end }}
+resources:
+  requests:
+    storage: {{ .size }}
+{{- with .dataSourceRef }}
+dataSourceRef:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "recyclarr.statefulSet" -}}
+{{- if eq .Values.controller.kind "StatefulSet" }}true{{ end }}
 {{- end }}
 
 {{/*

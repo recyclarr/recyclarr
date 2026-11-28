@@ -1,0 +1,70 @@
+suite: grafana dashboard
+templates:
+  - templates/grafana-dashboard.yaml
+release:
+  name: t
+set:
+  apiKey.value: 0123456789abcdef0123456789abcdef
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: labels the ConfigMap for the Grafana sidecar
+    set:
+      grafanaDashboard.enabled: true
+      grafanaDashboard.labels.team: media
+      grafanaDashboard.annotations.grafana_folder: Media
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.labels.grafana_dashboard
+          value: "1"
+      - equal:
+          path: metadata.labels.team
+          value: media
+      - equal:
+          path: metadata.annotations.grafana_folder
+          value: Media
+      - exists:
+          path: data["recyclarr.json"]
+
+  - it: imports the ConfigMap through grafana-operator instead of the sidecar
+    set:
+      grafanaDashboard.enabled: true
+      grafanaDashboard.grafanaOperator.enabled: true
+      grafanaDashboard.grafanaOperator.matchLabels.dashboards: grafana
+      grafanaDashboard.grafanaOperator.folder: Media
+    asserts:
+      - hasDocuments:
+          count: 2
+      - notExists:
+          path: metadata.labels.grafana_dashboard
+        documentIndex: 0
+      - isKind:
+          of: GrafanaDashboard
+        documentIndex: 1
+      - equal:
+          path: spec
+          value:
+            allowCrossNamespaceImport: true
+            folder: Media
+            instanceSelector:
+              matchLabels:
+                dashboards: grafana
+            configMapRef:
+              name: t-recyclarr-dashboard
+              key: recyclarr.json
+        documentIndex: 1
+
+  - it: requires the Grafana instances to select
+    set:
+      grafanaDashboard.enabled: true
+      grafanaDashboard.grafanaOperator.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: grafanaDashboard.grafanaOperator.matchLabels must select the Grafana instances that import the dashboard

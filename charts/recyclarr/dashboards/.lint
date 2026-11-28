@@ -1,0 +1,6 @@
+# grafana/dashboard-linter configuration, read by `mise run dashboard-lint`.
+exclusions:
+  target-instance-rule:
+    reason: The dashboard selects the server by namespace and job, like the chart's alert rules. One server runs per release, and an instance is a pod IP and port that changes with every restart.
+  template-instance-rule:
+    reason: The dashboard selects the server by namespace and job, like the chart's alert rules. One server runs per release, and an instance is a pod IP and port that changes with every restart.

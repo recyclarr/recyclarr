@@ -41,8 +41,8 @@ repos:
         language_version: system
         args: [--write]
         types_or: [json, json5, xml, html, yaml, javascript, markdown]
-        # Helm templates are Go templates, not YAML
-        exclude: ^(\.pre-commit-hooks\.yaml|\.config/|\.claude/|charts/[^/]+/templates/)
+        # Helm templates are Go templates, not YAML, and helm-schema generates values.schema.json
+        exclude: ^(\.pre-commit-hooks\.yaml|\.config/|\.claude/|charts/[^/]+/templates/|charts/[^/]+/values\.schema\.json$)
 
   - repo: local
     hooks:
