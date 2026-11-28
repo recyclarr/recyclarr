@@ -1,148 +1,670 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
-  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
-  "definitions": {
-    "nullableString": { "type": ["string", "null"] },
-    "stringMap": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
-    },
-    "fileSource": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "existingConfigMap": { "$ref": "#/definitions/nullableString" },
-        "files": {
-          "type": "object",
-          "additionalProperties": { "type": "string" }
-        }
-      }
-    },
-    "volume": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": { "type": "boolean" },
-        "existingClaim": { "$ref": "#/definitions/nullableString" },
-        "storageClass": { "$ref": "#/definitions/nullableString" },
-        "accessMode": {
-          "enum": ["ReadWriteOnce", "ReadWriteOncePod", "ReadWriteMany"]
-        },
-        "size": { "type": "string", "minLength": 1 },
-        "labels": { "$ref": "#/definitions/stringMap" },
-        "annotations": { "$ref": "#/definitions/stringMap" },
-        "emptyDir": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "sizeLimit": { "$ref": "#/definitions/nullableString" },
-            "medium": { "enum": [null, "Memory"] }
-          }
-        }
-      }
-    }
-  },
   "properties": {
-    "global": { "type": "object" },
-    "image": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "repository": { "type": "string", "minLength": 1 },
-        "tag": { "$ref": "#/definitions/nullableString" },
-        "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] }
-      }
+    "affinity": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
     },
-    "imagePullSecrets": { "type": "array" },
-    "nameOverride": { "$ref": "#/definitions/nullableString" },
-    "fullnameOverride": { "$ref": "#/definitions/nullableString" },
     "apiKey": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "existingSecret": { "$ref": "#/definitions/nullableString" },
-        "existingSecretKey": { "type": "string", "minLength": 1 },
-        "value": { "type": ["string", "null"], "minLength": 32 }
-      }
+        "existingSecret": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "existingSecretKey": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "minLength": 32,
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [],
+      "type": "object"
     },
     "configs": {
-      "allOf": [
-        { "$ref": "#/definitions/fileSource" },
-        {
-          "properties": {
-            "files": { "propertyNames": { "pattern": "\\.ya?ml$" } }
-          }
+      "additionalProperties": false,
+      "properties": {
+        "existingConfigMap": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "files": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "pattern": "\\.ya?ml$",
+            "required": []
+          },
+          "required": [],
+          "type": "object"
         }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "controller": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "Deployment",
+            "StatefulSet"
+          ],
+          "required": []
+        },
+        "podManagementPolicy": {
+          "enum": [
+            "OrderedReady",
+            "Parallel"
+          ],
+          "required": []
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "deploymentAnnotations": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "required": [],
+      "type": "object"
+    },
+    "deploymentLabels": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "required": [],
+      "type": "object"
+    },
+    "env": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "envFrom": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "extraContainers": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "extraVolumeMounts": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "extraVolumes": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "fullnameOverride": {
+      "required": [],
+      "type": [
+        "string",
+        "null"
       ]
     },
-    "includes": { "$ref": "#/definitions/fileSource" },
-    "settings": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "existingConfigMap": { "$ref": "#/definitions/nullableString" },
-        "content": { "$ref": "#/definitions/nullableString" }
-      }
+    "global": {
+      "required": [],
+      "type": "object"
     },
-    "env": { "type": "array" },
-    "envFrom": { "type": "array" },
-    "persistence": {
-      "type": "object",
+    "grafanaDashboard": {
       "additionalProperties": false,
       "properties": {
-        "state": { "$ref": "#/definitions/volume" },
-        "data": { "$ref": "#/definitions/volume" }
-      }
+        "annotations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [],
+          "type": "object"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "grafanaOperator": {
+          "additionalProperties": false,
+          "properties": {
+            "allowCrossNamespaceImport": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "folder": {
+              "required": [],
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "matchLabels": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [],
+              "type": "object"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "properties": {
+        "pullPolicy": {
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ],
+          "required": []
+        },
+        "repository": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tag": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "imagePullSecrets": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "includes": {
+      "additionalProperties": false,
+      "properties": {
+        "existingConfigMap": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "files": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "initContainers": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    },
+    "nameOverride": {
+      "required": [],
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "nodeSelector": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
+    },
+    "persistence": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "accessMode": {
+              "enum": [
+                "ReadWriteOnce",
+                "ReadWriteOncePod",
+                "ReadWriteMany"
+              ],
+              "required": []
+            },
+            "annotations": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [],
+              "type": "object"
+            },
+            "dataSourceRef": {
+              "additionalProperties": false,
+              "description": "Kubernetes accepts only PersistentVolumeClaim from the core API group, so other kinds need apiGroup.",
+              "if": {
+                "not": {
+                  "properties": {
+                    "apiGroup": {
+                      "minLength": 1,
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "apiGroup"
+                  ]
+                },
+                "required": []
+              },
+              "properties": {
+                "apiGroup": {
+                  "type": "string"
+                },
+                "kind": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "then": {
+                "properties": {
+                  "kind": {
+                    "const": "PersistentVolumeClaim",
+                    "required": []
+                  }
+                },
+                "required": []
+              },
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "emptyDir": {
+              "additionalProperties": false,
+              "properties": {
+                "medium": {
+                  "enum": [
+                    null,
+                    "Memory"
+                  ],
+                  "required": []
+                },
+                "sizeLimit": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [],
+              "type": "object"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "existingClaim": {
+              "required": [],
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "labels": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [],
+              "type": "object"
+            },
+            "size": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "storageClass": {
+              "required": [],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "state": {
+          "additionalProperties": false,
+          "properties": {
+            "accessMode": {
+              "enum": [
+                "ReadWriteOnce",
+                "ReadWriteOncePod",
+                "ReadWriteMany"
+              ],
+              "required": []
+            },
+            "annotations": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [],
+              "type": "object"
+            },
+            "dataSourceRef": {
+              "additionalProperties": false,
+              "description": "Kubernetes accepts only PersistentVolumeClaim from the core API group, so other kinds need apiGroup.",
+              "if": {
+                "not": {
+                  "properties": {
+                    "apiGroup": {
+                      "minLength": 1,
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "apiGroup"
+                  ]
+                },
+                "required": []
+              },
+              "properties": {
+                "apiGroup": {
+                  "type": "string"
+                },
+                "kind": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "then": {
+                "properties": {
+                  "kind": {
+                    "const": "PersistentVolumeClaim",
+                    "required": []
+                  }
+                },
+                "required": []
+              },
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "emptyDir": {
+              "additionalProperties": false,
+              "properties": {
+                "medium": {
+                  "enum": [
+                    null,
+                    "Memory"
+                  ],
+                  "required": []
+                },
+                "sizeLimit": {
+                  "required": [],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [],
+              "type": "object"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "existingClaim": {
+              "required": [],
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "labels": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": [],
+              "type": "object"
+            },
+            "size": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "storageClass": {
+              "required": [],
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "podAnnotations": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
+    },
+    "podLabels": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
+    },
+    "priorityClassName": {
+      "required": [],
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prometheusRule": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "resources": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
+    },
+    "securityContext": {
+      "additionalProperties": true,
+      "required": [],
+      "type": "object"
     },
     "service": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "type": { "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
-        "port": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 65535,
-          "not": { "const": 7983 },
-          "description": "7983 is reserved for the management port."
+        "annotations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [],
+          "type": "object"
         },
-        "annotations": { "$ref": "#/definitions/stringMap" }
-      }
-    },
-    "serviceMonitor": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "enabled": { "type": "boolean" },
-        "interval": { "$ref": "#/definitions/nullableString" },
-        "labels": { "type": "object" }
-      }
+        "port": {
+          "description": "7983 is reserved for the management port.",
+          "maximum": 65535,
+          "minimum": 1,
+          "not": {
+            "const": 7983,
+            "required": []
+          },
+          "type": "integer"
+        },
+        "type": {
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer"
+          ],
+          "required": []
+        }
+      },
+      "required": [],
+      "type": "object"
     },
     "serviceAccount": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "create": { "type": "boolean" },
-        "automount": { "type": "boolean" },
-        "annotations": { "type": "object" },
-        "name": { "$ref": "#/definitions/nullableString" }
-      }
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "type": "object"
+        },
+        "automount": {
+          "type": "boolean"
+        },
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [],
+      "type": "object"
     },
-    "extraVolumes": { "type": "array" },
-    "extraVolumeMounts": { "type": "array" },
-    "deploymentAnnotations": { "$ref": "#/definitions/stringMap" },
-    "deploymentLabels": { "$ref": "#/definitions/stringMap" },
-    "podAnnotations": { "type": "object" },
-    "podLabels": { "type": "object" },
-    "priorityClassName": { "$ref": "#/definitions/nullableString" },
-    "initContainers": { "type": "array" },
-    "extraContainers": { "type": "array" },
-    "podSecurityContext": { "type": "object" },
-    "securityContext": { "type": "object" },
-    "resources": { "type": "object" },
-    "nodeSelector": { "type": "object" },
-    "tolerations": { "type": "array" },
-    "affinity": { "type": "object" }
-  }
+    "serviceMonitor": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "interval": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "existingConfigMap": {
+          "required": [],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "tolerations": {
+      "items": {
+        "required": []
+      },
+      "type": "array"
+    }
+  },
+  "required": [],
+  "type": "object"
 }

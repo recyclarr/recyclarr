@@ -1,6 +1,8 @@
+{{- /* A StatefulSet creates its claims from volumeClaimTemplates instead. */}}
+{{- if not (include "recyclarr.statefulSet" .) }}
 {{- range $volume := list "state" "data" }}
+{{- if include "recyclarr.createsClaim" (dict "root" $ "volume" $volume) }}
 {{- with index $.Values.persistence $volume }}
-{{- if and .enabled (not .existingClaim) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -15,14 +17,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  accessModes:
-    - {{ .accessMode }}
-  {{- with .storageClass }}
-  storageClassName: {{ . }}
-  {{- end }}
-  resources:
-    requests:
-      storage: {{ .size }}
+  {{- include "recyclarr.claimSpec" . | nindent 2 }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

@@ -1,0 +1,40 @@
+suite: pvc
+templates:
+  - templates/pvc.yaml
+release:
+  name: t
+set:
+  apiKey.value: 0123456789abcdef0123456789abcdef
+tests:
+  - it: creates a state claim that uninstall keeps
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: t-recyclarr-state
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: fills the claim from a data source
+    set:
+      persistence.state.dataSourceRef:
+        apiGroup: snapshot.storage.k8s.io
+        kind: VolumeSnapshot
+        name: snap
+    asserts:
+      - equal:
+          path: spec.dataSourceRef
+          value:
+            apiGroup: snapshot.storage.k8s.io
+            kind: VolumeSnapshot
+            name: snap
+
+  - it: creates no claims for a StatefulSet
+    set:
+      controller.kind: StatefulSet
+      persistence.data.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

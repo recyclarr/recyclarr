@@ -1,0 +1,418 @@
+{
+  "title": "Recyclarr",
+  "uid": "recyclarr",
+  "description": "Sync results and requests to Sonarr and Radarr from the Recyclarr server",
+  "tags": ["recyclarr"],
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "time": { "from": "now-7d", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Data source",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "label": "Namespace",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(recyclarr_sync_job_duration_seconds_count, namespace)",
+        "query": {
+          "query": "label_values(recyclarr_sync_job_duration_seconds_count, namespace)",
+          "refId": "namespace"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "service",
+        "label": "Instance",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\"}, service)",
+        "query": {
+          "query": "label_values(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\"}, service)",
+          "refId": "service"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "refresh": 2,
+        "sort": 1,
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Server",
+      "description": "Whether Prometheus reaches the Recyclarr server",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "expr": "max(up{namespace=\"$namespace\", service=~\"$service\"}) or vector(0)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Down", "color": "red" },
+                "1": { "text": "Up", "color": "green" }
+              }
+            }
+          ],
+          "color": { "mode": "fixed", "fixedColor": "text" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Successful syncs",
+      "description": "Syncs in the selected time range in which every instance succeeded",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 5, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"succeeded\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Partial syncs",
+      "description": "Syncs in the selected time range in which some instances failed",
+      "type": "stat",
+      "gridPos": { "x": 9, "y": 0, "w": 5, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"partial\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Failed syncs",
+      "description": "Syncs in the selected time range that failed",
+      "type": "stat",
+      "gridPos": { "x": 14, "y": 0, "w": 5, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "expr": "round(sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\", recyclarr_sync_job_status=\"failed\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Average sync duration",
+      "description": "Average duration of the syncs in the selected time range",
+      "type": "stat",
+      "gridPos": { "x": 19, "y": 0, "w": 5, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "expr": "sum(increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\")) / sum(increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__range]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__range]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__range), \"first_sample\", \"true\", \"\", \"\"))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "color": { "mode": "fixed", "fixedColor": "text" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Syncs by result",
+      "description": "Syncs that finished in each interval, by result",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "interval": "6h",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (recyclarr_sync_job_status) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__interval), \"first_sample\", \"true\", \"\", \"\")) > 0",
+          "legendFormat": "{{recyclarr_sync_job_status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1 },
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "succeeded" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "mode": "fixed", "fixedColor": "green" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "partial" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "mode": "fixed", "fixedColor": "orange" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "failed" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "mode": "fixed", "fixedColor": "red" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Sync duration",
+      "description": "Average duration of the syncs that finished in each interval, by what started them",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_sum{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\")) / sum by (recyclarr_sync_job_trigger) (increase(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) or label_replace(min_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval]) unless last_over_time(recyclarr_sync_job_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[1d] offset $__rate_interval), \"first_sample\", \"true\", \"\", \"\"))",
+          "legendFormat": "{{recyclarr_sync_job_trigger}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "custom": { "drawStyle": "points", "pointSize": 8 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Requests to Sonarr and Radarr",
+      "description": "Requests by service address and response status, or the error when no response arrived",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "interval": "6h",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (server_address, http_response_status_code, error_type) (increase(http_client_request_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])) > 0",
+          "legendFormat": "{{server_address}} {{http_response_status_code}}{{error_type}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": { "mode": "normal" }
+          },
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Response time from Sonarr and Radarr (p95)",
+      "description": "Time until Sonarr and Radarr answer, for 95% of requests",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, server_address) (rate(http_client_request_duration_seconds_bucket{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])))",
+          "legendFormat": "{{server_address}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "custom": { "drawStyle": "points", "pointSize": 6 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 10,
+      "title": "API requests",
+      "description": "Requests to the Recyclarr server API, for example from the CLI",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+      "interval": "6h",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (http_route, http_response_status_code) (increase(http_server_request_duration_seconds_count{namespace=\"$namespace\", service=~\"$service\"}[$__rate_interval])) > 0",
+          "legendFormat": "{{http_route}} {{http_response_status_code}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": { "mode": "normal" }
+          },
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    }
+  ]
+}

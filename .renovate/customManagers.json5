@@ -10,6 +10,14 @@
       ],
     },
     {
+      description: "Update tool versions in GitHub Actions workflow environment variables",
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*[A-Z_]+_VERSION:\\s*(?<currentValue>\\S+)",
+      ],
+    },
+    {
       description: "Update TargetFramework in MSBuild props files",
       customType: "regex",
       managerFilePatterns: ["/\\.props$/"],

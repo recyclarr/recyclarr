@@ -1,11 +1,27 @@
 image:
+  # @schema
+  # type: string
+  # minLength: 1
+  # @schema
   repository: ghcr.io/recyclarr/recyclarr
   # Defaults to the chart appVersion.
+  # @schema
+  # type: [string, "null"]
+  # @schema
   tag: ~
+  # @schema
+  # enum: [Always, IfNotPresent, Never]
+  # @schema
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
+# @schema
+# type: [string, "null"]
+# @schema
 nameOverride: ~
+# @schema
+# type: [string, "null"]
+# @schema
 fullnameOverride: ~
 
 # API key clients send to the server. The chart mounts it as a file and points
@@ -14,8 +30,19 @@ fullnameOverride: ~
 # (which the server treats as unset). That overrides a RECYCLARR_API_KEY entry in a Secret or
 # ConfigMap loaded through envFrom. Setting either variable in env fails rendering.
 apiKey:
+  # @schema
+  # type: [string, "null"]
+  # @schema
   existingSecret: ~
+  # @schema
+  # type: string
+  # minLength: 1
+  # @schema
   existingSecretKey: api-key
+  # @schema
+  # type: [string, "null"]
+  # minLength: 32
+  # @schema
   value: ~
 
 # Files loaded from the configs/ directory; each key is a file name ending in .yml or .yaml.
@@ -27,7 +54,15 @@ configs:
   # Deployment after editing it (or let a tool such as Reloader do it; see
   # deploymentAnnotations). The same applies to includes.existingConfigMap and
   # settings.existingConfigMap.
+  # @schema
+  # type: [string, "null"]
+  # @schema
   existingConfigMap: ~
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # propertyNames: { pattern: '\.ya?ml$' }
+  # @schema
   files: {}
   # recyclarr.yml: |
   #   sonarr:
@@ -37,13 +72,26 @@ configs:
 
 # Files for the includes/ directory, referenced by include directives in configs.
 includes:
+  # @schema
+  # type: [string, "null"]
+  # @schema
   existingConfigMap: ~
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # @schema
   files: {}
 
 # Content of settings.yml. Without it, the server uses default settings.
 settings:
   # Name of an existing ConfigMap with a settings.yml key. Takes the place of content.
+  # @schema
+  # type: [string, "null"]
+  # @schema
   existingConfigMap: ~
+  # @schema
+  # type: [string, "null"]
+  # @schema
   content: ~
 
 # Environment variables for the server, for example Sonarr and Radarr API keys used by
@@ -70,71 +118,289 @@ extraVolumeMounts: []
 # enabled (existingClaim, or a claim the chart creates), otherwise an emptyDir that lives only as
 # long as the pod. state and data cannot use the same existingClaim: both would mount the
 # claim's root, and the server would refuse to start because it locks each directory.
+# With controller.kind StatefulSet, the StatefulSet creates the claims from claim templates instead,
+# named state-<fullname>-0 and data-<fullname>-0. Kubernetes rejects changes to a claim template,
+# so its storageClass, accessMode, size, labels, annotations, and dataSourceRef are fixed after
+# install.
 persistence:
   # Durable state: sync state and the server database (RECYCLARR_STATE_DIR). Losing it loses
   # the mapping between Sonarr/Radarr IDs and TRaSH IDs. Uninstalling the chart keeps the claim
   # it created.
   state:
     enabled: true
+    # @schema
+    # type: [string, "null"]
+    # @schema
     existingClaim: ~
     # Null uses the cluster default StorageClass.
+    # @schema
+    # type: [string, "null"]
+    # @schema
     storageClass: ~
+    # @schema
+    # enum: [ReadWriteOnce, ReadWriteOncePod, ReadWriteMany]
+    # @schema
     accessMode: ReadWriteOnce
+    # @schema
+    # type: string
+    # minLength: 1
+    # @schema
     size: 1Gi
     # Labels and annotations for the claim the chart creates, for example for backup tools.
     # The chart's helm.sh/resource-policy annotation on the state claim cannot be overridden.
+    # @schema
+    # type: object
+    # additionalProperties: { type: string }
+    # @schema
     labels: {}
+    # @schema
+    # type: object
+    # additionalProperties: { type: string }
+    # @schema
     annotations: {}
+    # Fills a new claim from a source, such as a VolumeSnapshot or a backup tool's volume
+    # populator. Kubernetes uses it only when it creates the claim. Applies only to a claim the
+    # chart creates, so setting it with existingClaim or with enabled false fails rendering.
+    # dataSourceRef:
+    #   apiGroup: snapshot.storage.k8s.io
+    #   kind: VolumeSnapshot
+    #   name: recyclarr-state
+    # @schema
+    # type: [object, "null"]
+    # additionalProperties: false
+    # required: [kind, name]
+    # properties:
+    #   apiGroup: { type: string }
+    #   kind: { type: string, minLength: 1 }
+    #   name: { type: string, minLength: 1 }
+    #   namespace: { type: string, minLength: 1 }
+    # if:
+    #   not:
+    #     required: [apiGroup]
+    #     properties:
+    #       apiGroup: { minLength: 1 }
+    # then:
+    #   properties:
+    #     kind: { const: PersistentVolumeClaim }
+    # description: Kubernetes accepts only PersistentVolumeClaim from the core API group, so other kinds need apiGroup.
+    # @schema
+    dataSourceRef: ~
     # Used only when enabled is false.
     emptyDir:
+      # @schema
+      # type: [string, "null"]
+      # @schema
       sizeLimit: ~
       # Memory uses a tmpfs, which counts against the container memory limit.
+      # @schema
+      # enum: [null, Memory]
+      # @schema
       medium: ~
   # Downloaded data: resource provider git clones, caches, and logs (RECYCLARR_DATA_DIR).
   # Losing it costs only a re-download on the next start, so an emptyDir is the default.
   data:
     enabled: false
+    # @schema
+    # type: [string, "null"]
+    # @schema
     existingClaim: ~
+    # @schema
+    # type: [string, "null"]
+    # @schema
     storageClass: ~
+    # @schema
+    # enum: [ReadWriteOnce, ReadWriteOncePod, ReadWriteMany]
+    # @schema
     accessMode: ReadWriteOnce
+    # @schema
+    # type: string
+    # minLength: 1
+    # @schema
     size: 2Gi
+    # @schema
+    # type: object
+    # additionalProperties: { type: string }
+    # @schema
     labels: {}
+    # @schema
+    # type: object
+    # additionalProperties: { type: string }
+    # @schema
     annotations: {}
+    # @schema
+    # type: [object, "null"]
+    # additionalProperties: false
+    # required: [kind, name]
+    # properties:
+    #   apiGroup: { type: string }
+    #   kind: { type: string, minLength: 1 }
+    #   name: { type: string, minLength: 1 }
+    #   namespace: { type: string, minLength: 1 }
+    # if:
+    #   not:
+    #     required: [apiGroup]
+    #     properties:
+    #       apiGroup: { minLength: 1 }
+    # then:
+    #   properties:
+    #     kind: { const: PersistentVolumeClaim }
+    # description: Kubernetes accepts only PersistentVolumeClaim from the core API group, so other kinds need apiGroup.
+    # @schema
+    dataSourceRef: ~
     emptyDir:
+      # @schema
+      # type: [string, "null"]
+      # @schema
       sizeLimit: ~
+      # @schema
+      # enum: [null, Memory]
+      # @schema
       medium: ~
 
 service:
+  # @schema
+  # enum: [ClusterIP, NodePort, LoadBalancer]
+  # @schema
   type: ClusterIP
+  # @schema
+  # type: integer
+  # minimum: 1
+  # maximum: 65535
+  # not: { const: 7983 }
+  # description: 7983 is reserved for the management port.
+  # @schema
   port: 7982
   # Annotations for the Service, for example for a LoadBalancer implementation.
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # @schema
   annotations: {}
 
 # Prometheus Operator ServiceMonitor for /metrics on the management port.
 serviceMonitor:
   enabled: false
+  # @schema
+  # type: [string, "null"]
+  # @schema
   interval: ~
+  # @schema
+  # type: object
+  # properties: {}
+  # additionalProperties: true
+  # @schema
   labels: {}
+
+# Prometheus Operator PrometheusRule with alerts for a server Prometheus cannot reach and for a
+# sync that fails or succeeds only for some instances. The rules select the series of the Service
+# that the ServiceMonitor scrapes, so this requires serviceMonitor.enabled.
+prometheusRule:
+  enabled: false
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # @schema
+  labels: {}
+
+# ConfigMap with a Grafana dashboard for sync results and requests to Sonarr and Radarr. It carries
+# the grafana_dashboard: "1" label that the Grafana sidecar watches, for example in
+# kube-prometheus-stack, unless grafanaOperator is enabled. Labels and annotations are added to
+# the ConfigMap; annotations can set sidecar options such as the dashboard folder.
+grafanaDashboard:
+  enabled: false
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # @schema
+  labels: {}
+  # @schema
+  # type: object
+  # additionalProperties: { type: string }
+  # @schema
+  annotations: {}
+  # grafana-operator: a GrafanaDashboard that imports the dashboard from the ConfigMap, in place of
+  # the sidecar label.
+  grafanaOperator:
+    enabled: false
+    # Labels of the Grafana instances that import the dashboard. Required when enabled.
+    # @schema
+    # type: object
+    # additionalProperties: { type: string }
+    # @schema
+    matchLabels: {}
+    # Lets a Grafana instance in another namespace import the dashboard.
+    allowCrossNamespaceImport: true
+    # Grafana folder for the dashboard; null uses the instance's default.
+    # @schema
+    # type: [string, "null"]
+    # @schema
+    folder: ~
 
 serviceAccount:
   create: true
   # Recyclarr does not call the Kubernetes API. Applies to the pod, so it also holds for an
   # existing service account.
   automount: false
+  # @schema
+  # type: object
+  # properties: {}
+  # additionalProperties: true
+  # @schema
   annotations: {}
+  # @schema
+  # type: [string, "null"]
+  # @schema
   name: ~
 
-# Annotations and labels for the Deployment itself, for example
+controller:
+  # Workload that runs the server: Deployment or StatefulSet. A StatefulSet creates the state and
+  # data claims from claim templates (see persistence). Changing the kind of an installed release
+  # also changes the claim names. The old claims stay, except a data claim the chart created for a
+  # Deployment, which Helm deletes; set persistence.state.existingClaim to the old state claim to
+  # keep its sync state.
+  # @schema
+  # enum: [Deployment, StatefulSet]
+  # @schema
+  kind: Deployment
+  # StatefulSet only: Parallel creates and deletes the pod without waiting on the ordering that
+  # OrderedReady enforces. Kubernetes rejects changing it after install.
+  # @schema
+  # enum: [OrderedReady, Parallel]
+  # @schema
+  podManagementPolicy: Parallel
+
+# Annotations and labels for the Deployment or StatefulSet itself, for example
 # reloader.stakater.com/auto: "true" so Reloader restarts the pod when a ConfigMap or Secret it
 # uses changes. Chart labels take precedence over deploymentLabels.
+# @schema
+# type: object
+# additionalProperties: { type: string }
+# @schema
 deploymentAnnotations: {}
+# @schema
+# type: object
+# additionalProperties: { type: string }
+# @schema
 deploymentLabels: {}
 
 # Annotations and labels for the pod. Chart labels take precedence over podLabels.
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 podAnnotations: {}
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 podLabels: {}
 
 # PriorityClass for the pod; null uses the cluster default.
+# @schema
+# type: [string, "null"]
+# @schema
 priorityClassName: ~
 
 # Init containers that run before the server, and extra containers (sidecars) that run beside it.
@@ -144,6 +410,11 @@ priorityClassName: ~
 initContainers: []
 extraContainers: []
 
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
@@ -153,6 +424,11 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -170,7 +446,22 @@ securityContext:
 #     memory: 256Mi
 #   limits:
 #     memory: 512Mi
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 resources: {}
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 nodeSelector: {}
 tolerations: []
+# @schema
+# type: object
+# properties: {}
+# additionalProperties: true
+# @schema
 affinity: {}

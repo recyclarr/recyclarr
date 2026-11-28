@@ -9,3 +9,5 @@ ci/
 *~
 .idea/
 .vscode/
+/tests/
+dashboards/.lint

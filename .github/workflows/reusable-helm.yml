@@ -6,6 +6,8 @@ on:
 
 env:
   CHART_DIR: charts/recyclarr
+  # renovate: datasource=github-releases depName=helm-unittest/helm-unittest
+  HELM_UNITTEST_VERSION: v1.3.0
 
 jobs:
   helm:
@@ -33,18 +35,49 @@ jobs:
       - name: Lint
         run: ct lint --config .github/ct.yaml
 
-      # Paths the install test cannot reach: existing objects and a CRD-backed resource render,
-      # and invalid values fail.
+      # Installs only the chart tools from .config/mise.toml. No cache: the release publishes the
+      # chart this job packages.
+      - name: Setup Chart Tools
+        uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
+        with:
+          install_args: aqua:dadav/helm-schema github:grafana/dashboard-linter
+          cache: false
+
+      # Same command as the helm-schema mise task, checking instead of writing
+      - name: Schema Check
+        run: >-
+          helm-schema --chart-search-root "$CHART_DIR" --no-dependencies
+          --skip-auto-generation title,description,required,default --append-newline --check
+
+      - name: Dashboard Lint
+        run: dashboard-linter lint --strict "$CHART_DIR/dashboards/recyclarr.json"
+
+      - name: Unit Tests
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest \
+            --version "$HELM_UNITTEST_VERSION" --verify=false
+          helm unittest --strict "$CHART_DIR"
+
+      # Paths the install test cannot reach: existing objects, claim data sources, and CRD-backed
+      # resources render, and invalid values fail.
       - name: Render Checks
         run: |
           key=--set=apiKey.value=0123456789abcdef0123456789abcdef
+          source=(--set=persistence.state.dataSourceRef.apiGroup=snapshot.storage.k8s.io
+            --set=persistence.state.dataSourceRef.kind=VolumeSnapshot
+            --set=persistence.state.dataSourceRef.name=s)
           helm template t "$CHART_DIR" "$key" > /dev/null
+          helm template t "$CHART_DIR" "$key" "${source[@]}" > /dev/null
+          helm template t "$CHART_DIR" "$key" "${source[@]}" --set=controller.kind=StatefulSet \
+            --set=persistence.data.enabled=true > /dev/null
           helm template t "$CHART_DIR" --set=apiKey.existingSecret=s \
             --set=configs.existingConfigMap=c --set=includes.existingConfigMap=i \
             --set=settings.existingConfigMap=st --set=persistence.state.existingClaim=pvc \
             --set=persistence.data.enabled=true --set=persistence.data.existingClaim=data \
-            --set=serviceMonitor.enabled=true --set=priorityClassName=p \
-            --set=imagePullSecrets[0].name=reg > /dev/null
+            --set=serviceMonitor.enabled=true --set=prometheusRule.enabled=true \
+            --set=grafanaDashboard.enabled=true --set=grafanaDashboard.grafanaOperator.enabled=true \
+            --set=grafanaDashboard.grafanaOperator.matchLabels.dashboards=grafana \
+            --set=priorityClassName=p --set=imagePullSecrets[0].name=reg > /dev/null
           # errexit ignores commands negated with !, so each rejection is checked explicitly
           reject() {
             if helm template t "$CHART_DIR" "$@" > /dev/null 2>&1; then
@@ -63,6 +96,14 @@ jobs:
           reject "$key" --set=service.port=7983
           reject "$key" --set=env[0].name=RECYCLARR_API_KEY --set=env[0].value=k
           reject "$key" --set=env[0].name=RECYCLARR_API_KEY_FILE --set=env[0].value=/k
+          reject "$key" --set=controller.kind=DaemonSet
+          reject "$key" "${source[@]}" --set=persistence.state.existingClaim=pvc
+          reject "$key" "${source[@]}" --set=persistence.state.enabled=false
+          reject "$key" --set=persistence.state.dataSourceRef.kind=VolumeSnapshot \
+            --set=persistence.state.dataSourceRef.name=s
+          reject "$key" --set=prometheusRule.enabled=true
+          reject "$key" --set=grafanaDashboard.enabled=true \
+            --set=grafanaDashboard.grafanaOperator.enabled=true
 
       - name: Package Chart
         env:

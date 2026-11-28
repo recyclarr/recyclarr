@@ -1,0 +1,43 @@
+{{- if .Values.grafanaDashboard.enabled }}
+{{- $operator := .Values.grafanaDashboard.grafanaOperator }}
+{{- $name := printf "%s-dashboard" (include "recyclarr.fullname" .) }}
+{{- $labels := include "recyclarr.labels" . | fromYaml }}
+{{- if not $operator.enabled }}
+{{- $_ := set $labels "grafana_dashboard" "1" }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- merge $labels .Values.grafanaDashboard.labels | toYaml | nindent 4 }}
+  {{- with .Values.grafanaDashboard.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  recyclarr.json: {{ .Files.Get "dashboards/recyclarr.json" | quote }}
+{{- if $operator.enabled }}
+{{- if not $operator.matchLabels }}
+{{- fail "grafanaDashboard.grafanaOperator.matchLabels must select the Grafana instances that import the dashboard" }}
+{{- end }}
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: {{ include "recyclarr.fullname" . }}
+  labels:
+    {{- include "recyclarr.labels" . | nindent 4 }}
+spec:
+  allowCrossNamespaceImport: {{ $operator.allowCrossNamespaceImport }}
+  {{- with $operator.folder }}
+  folder: {{ . | quote }}
+  {{- end }}
+  instanceSelector:
+    matchLabels:
+      {{- toYaml $operator.matchLabels | nindent 6 }}
+  configMapRef:
+    name: {{ $name }}
+    key: recyclarr.json
+{{- end }}
+{{- end }}

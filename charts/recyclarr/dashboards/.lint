@@ -1,0 +1,10 @@
+# grafana/dashboard-linter configuration, read by `mise run dashboard-lint`.
+exclusions:
+  target-instance-rule:
+    reason: The dashboard selects the server by namespace and service, like the chart's alert rules. One server runs per release, and an instance is a pod IP and port that changes with every restart.
+  template-instance-rule:
+    reason: The dashboard selects the server by namespace and service, like the chart's alert rules. One server runs per release, and an instance is a pod IP and port that changes with every restart.
+  target-job-rule:
+    reason: The dashboard selects the server by namespace and service, like the chart's alert rules. Some pipelines drop the job label, for example an OpenTelemetry collector that writes over OTLP. Prometheus Operator sets service to the Service name.
+  template-job-rule:
+    reason: The dashboard selects the server by namespace and service, like the chart's alert rules. Some pipelines drop the job label, for example an OpenTelemetry collector that writes over OTLP. Prometheus Operator sets service to the Service name.

@@ -1,0 +1,14 @@
+apiKey:
+  value: ci-api-key-0123456789abcdef0123456789
+controller:
+  kind: StatefulSet
+persistence:
+  state:
+    labels:
+      backup: daily
+  data:
+    enabled: true
+grafanaDashboard:
+  enabled: true
+  annotations:
+    grafana_folder: Recyclarr
