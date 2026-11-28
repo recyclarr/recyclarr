@@ -23,12 +23,29 @@ reviews:
         Conventional Commits: type(scope): subject. Types: feat, fix, perf, refactor, test,
         ci, build, docs, chore; append ! for breaking. Scope is optional; if present, one of
         deps, sync, config, yaml, cli, servarr, docker, agents.
+    custom_checks:
+      - name: Decision record compliance
+        instructions: >-
+          Every decision record under docs/decisions/architecture/ (ADRs) and
+          docs/decisions/product/ (PDRs), except TEMPLATE.md, is in force. Fail if any change
+          contradicts a record's decision or its stated consequences and constraints, unless the
+          same PR edits or replaces that record to reflect the new decision. For each failure,
+          name the record file and the conflicting change. Pass otherwise.
+      - name: Agent instruction compliance
+        instructions: >-
+          Contributors may use coding agents that never load this repository's OpenCode
+          instructions, so enforce them retroactively. The instructions are every AGENTS.md file
+          (each governs its own directory tree) and every .opencode/skills/*/SKILL.md file plus
+          the files it references; a skill applies when its description matches the change.
+          Fail if any change violates a rule in an applicable instruction, including required
+          companion changes such as CHANGELOG.md entries or JSON schema updates in schemas/. For
+          each failure, name the instruction file and the violated rule. Ignore rules about
+          agent workflow that leaves no trace in the diff, such as which tools to run or when to
+          ask the user. Pass otherwise.
 knowledge_base:
   code_guidelines:
     filePatterns:
-      - files: .opencode/skills/testing/SKILL.md
-        applyTo: tests/**
-      - files: .opencode/skills/mapperly/SKILL.md
-        applyTo: "**/*Mapper.cs"
-      - files: .opencode/skills/changelog/SKILL.md
-        applyTo: CHANGELOG.md
+      - files: .opencode/skills/*/SKILL.md
+        applyTo: "**"
+      - files: docs/decisions/*/[0-9]*.md
+        applyTo: "**"
