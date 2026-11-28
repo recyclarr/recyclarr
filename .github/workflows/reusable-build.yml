@@ -41,12 +41,14 @@ jobs:
           read -ra publish_args <<<"$PUBLISH_ARGS"
           ci/publish.sh "$RUNTIME" "${publish_args[@]}"
 
+      # Smoke only the runtime the runner executes natively; others would run emulated or not at
+      # all. RID suffixes (x64, arm64, ...) match runner.arch, and endsWith ignores case.
       - name: Setup uv
-        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
+        if: endsWith(inputs.runtime, format('-{0}', runner.arch)) && !inputs.skip-smoke
         uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
 
       - name: Smoke
-        if: endsWith(inputs.runtime, 'x64') && !inputs.skip-smoke
+        if: endsWith(inputs.runtime, format('-{0}', runner.arch)) && !inputs.skip-smoke
         shell: bash
         env:
           RUNTIME: ${{ inputs.runtime }}
