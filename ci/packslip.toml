@@ -1,0 +1,33 @@
+# Describes the release archives for the packslip step in build.yml. packslip infers each archive's
+# platform from its file name, but it does not read "osx" or "win", and it reads a plain "arm" as
+# ARMv6 while .NET's linux-arm runtime targets ARMv7. These entries override those archives;
+# packslip infers the rest. Platform values use packslip's vocabulary (darwin, x86_64, aarch64).
+bin = ["recyclarr", "recyclarr-server"]
+
+[[artifact]]
+path = "archive/recyclarr-linux-arm.tar.xz"
+arch = "armv7"
+
+[[artifact]]
+path = "archive/recyclarr-linux-musl-arm.tar.xz"
+arch = "armv7"
+
+[[artifact]]
+path = "archive/recyclarr-osx-x64.tar.xz"
+os = "darwin"
+arch = "x86_64"
+
+[[artifact]]
+path = "archive/recyclarr-osx-arm64.tar.xz"
+os = "darwin"
+arch = "aarch64"
+
+[[artifact]]
+path = "archive/recyclarr-win-x64.zip"
+os = "windows"
+arch = "x86_64"
+
+[[artifact]]
+path = "archive/recyclarr-win-arm64.zip"
+os = "windows"
+arch = "aarch64"

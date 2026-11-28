@@ -319,6 +319,18 @@ jobs:
             archive/**/recyclarr-*.zip
             archive/**/recyclarr-*.tar.xz
 
+      # Signs a manifest of each archive's platform and executables for installers such as mise.
+      # Every release must be signed from this workflow file, or installers that pinned the
+      # signer refuse it.
+      - name: Sign Release Manifest
+        id: packslip
+        uses: jdx/packslip@9d5b1c469ba90d26b6dbd0a0162e84a95da524d5 # v1.11.5
+        with:
+          manifest: ci/packslip.toml
+          artifacts: archive/**/recyclarr-*.zip archive/**/recyclarr-*.tar.xz
+          attest: link
+          upload: false
+
       - name: Extract Changelog
         id: changelog
         uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d # v3.1.0
@@ -339,6 +351,7 @@ jobs:
           files: |
             archive/**/recyclarr-*.zip
             archive/**/recyclarr-*.tar.xz
+            ${{ steps.packslip.outputs.bundle }}
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: true
           prerelease: ${{ steps.gitversion.outputs.preReleaseLabel != '' }}
